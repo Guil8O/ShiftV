@@ -1,13 +1,12 @@
-:root {
-    /* Slightly lighter background */
+:root { /* Default: Dark Mode */
     --bg-dark: #1E1E48;
-    --bg-card: #2A2A62; /* Adjusted card background slightly */
+    --bg-card: #2A2A62;
     --primary: #FF90BD;
-	--primary2: #7A0BC0;
+    --primary2: #7A0BC0;
     --accent: #FA58B6;
     --text-light: #FFCAD4;
-    --text-dim: #b8aecf; /* Adjusted dim text slightly */
-    --border-color: #5040a0; /* Adjusted border color */
+    --text-dim: #b8aecf;
+    --border-color: #5040a0;
     --focus-glow: rgba(250, 88, 182, 0.4);
     --danger-bg: #e04f9e;
     --danger-text: #FFCAD4;
@@ -15,11 +14,26 @@
     --warning-border: rgba(250, 88, 182, 0.3);
     --warning-text: #FFCAD4;
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
     --border-radius-xl: 30px;
     --border-radius-large: 20px;
-    --border-radius-medium: 15px; /* Slightly reduced medium radius */
+    --border-radius-medium: 15px;
     --border-radius-small: 8px;
+
+    /* Define Light Mode Colors */
+    --lm-bg: #FFF0F5; /* LavenderBlush */
+    --lm-bg-card: #FFFFFF;
+    --lm-primary: #FF6F91;
+    --lm-primary2: #FF8FAB;
+    --lm-accent: #FF6F91;
+    --lm-text-main: #333333;
+    --lm-text-dim: #777777;
+    --lm-border-color: #FFDAB9; /* PeachPuff */
+    --lm-focus-glow: rgba(255, 111, 145, 0.4);
+    --lm-danger-bg: #DC143C; /* Crimson */
+    --lm-danger-text: #FFFFFF;
+    --lm-warning-bg: rgba(255, 111, 145, 0.1);
+    --lm-warning-border: rgba(255, 111, 145, 0.3);
+    --lm-warning-text: #8B0000; /* DarkRed */
 }
 
 body {
@@ -29,7 +43,103 @@ body {
     padding: 20px;
     background-color: var(--bg-dark);
     color: var(--text-light);
+    overscroll-behavior-y: contain; /* *** 수정 3: 당겨서 새로고침 방지 *** */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Optional: theme transition */
 }
+
+/* *** 수정 4: 라이트 모드 스타일 *** */
+body.light-mode {
+    --bg-dark: var(--lm-bg);
+    --bg-card: var(--lm-bg-card);
+    --primary: var(--lm-primary);
+    --primary2: var(--lm-primary2);
+    --accent: var(--lm-accent);
+    --text-light: var(--lm-text-main);
+    --text-dim: var(--lm-text-dim);
+    --border-color: var(--lm-border-color);
+    --focus-glow: var(--lm-focus-glow);
+    --danger-bg: var(--lm-danger-bg);
+    --danger-text: var(--lm-danger-text);
+    --warning-bg: var(--lm-warning-bg);
+    --warning-border: var(--lm-warning-border);
+    --warning-text: var(--lm-warning-text);
+
+    color: var(--lm-text-main);
+    background-color: var(--lm-bg);
+
+    .tab-button {
+        color: var(--lm-text-dim);
+    }
+    .tab-button.active {
+        background-color: var(--lm-accent);
+        color: var(--lm-bg-card);
+    }
+    input, textarea, select {
+         background-color: var(--lm-bg-card);
+         color: var(--lm-text-main);
+         border: 1px solid var(--lm-border-color);
+    }
+    #history-table-container th {
+        background-color: rgba(255, 143, 171, 0.4); /* Use primary2 color */
+        color: var(--lm-text-main);
+    }
+    #history-table-container tbody tr:nth-child(even) {
+         background-color: rgba(0,0,0,0.03);
+    }
+     #history-table-container tbody tr:hover { background-color: rgba(255, 111, 145, 0.15); }
+
+     #history-table-container th.sticky-col,
+     #history-table-container td.sticky-col {
+         background-color: var(--lm-bg-card);
+         border-left: 2px solid var(--lm-primary2);
+     }
+    .chart-container {
+        background-color: #fff7f9;
+    }
+     .chart-controls button {
+         background-color: var(--lm-border-color);
+         color: var(--lm-text-dim);
+     }
+     .chart-controls button:hover { background-color: var(--lm-primary); color: var(--lm-bg-card); }
+     .chart-controls button.active {
+         background-color: var(--lm-accent);
+         color: var(--lm-bg-card);
+     }
+     .select-all-button { background-color: #98FB98; color: #333; }
+     .deselect-all-button { background-color: #FFA07A; color: #333; }
+
+     .notes-grid .note-card {
+         border-color: var(--lm-border-color);
+     }
+     .popup {
+        background-color: var(--lm-primary);
+        color: var(--lm-bg-card);
+     }
+     .warning {
+        background-color: var(--lm-warning-bg);
+        border-color: var(--lm-warning-border);
+        color: var(--lm-warning-text);
+     }
+     .warning strong { color: var(--lm-danger-bg); }
+     .modal-content {
+        background-color: var(--lm-bg-card);
+        border-color: var(--lm-border-color);
+     }
+     button.danger-button { background-color: var(--lm-danger-bg); color: var(--lm-danger-text); }
+     button.danger-button:hover { background-color: #B22222; /* Darker Crimson */ }
+
+     .next-measurement-info {
+        background-color: rgba(255, 111, 145, 0.1);
+        border: 1px solid var(--lm-accent);
+        color: var(--lm-text-main);
+     }
+     .next-measurement-info strong {
+         color: var(--lm-accent);
+     }
+
+}
+/* --- 라이트 모드 끝 --- */
+
 
 .container {
     max-width: 1000px;
@@ -107,12 +217,12 @@ hr.divider { border: none; height: 1px; background-color: var(--border-color); m
     font-weight: bold;
     font-size: 1.1em;
     padding: 0 10px;
-    margin-left: 10px; /* Adjust as needed */
+    margin-left: 10px;
 }
 
 /* Next Measurement Info Area */
 .next-measurement-info {
-    background-color: rgba(var(--accent), 0.1);
+    background-color: rgba(250, 88, 182, 0.1); /* Use accent color with alpha */
     border: 1px solid var(--accent);
     color: var(--text-light);
     padding: 10px 15px;
@@ -131,9 +241,9 @@ hr.divider { border: none; height: 1px; background-color: var(--border-color); m
     margin-bottom: 30px;
     flex-wrap: wrap;
     background-color: var(--bg-card);
-    border: 1px solid var(--border-color); /* Reduced border */
-    border-radius: var(--border-radius-xl); /* Rounded corners */
-    padding: 6px; /* Reduced padding */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-xl);
+    padding: 6px;
     position: sticky;
     top: 15px;
     z-index: 10;
@@ -141,7 +251,6 @@ hr.divider { border: none; height: 1px; background-color: var(--border-color); m
     transition: padding 0.3s ease, gap 0.3s ease;
     gap: 4px;
     top: env(safe-area-inset-top);
-
 }
 
 .tab-button {
@@ -165,7 +274,7 @@ hr.divider { border: none; height: 1px; background-color: var(--border-color); m
 
 .tab-button.active {
     background-color: var(--accent);
-    color: var(--bg-dark);
+    color: var(--bg-dark); /* Adjust for light mode contrast */
     box-shadow: 0 2px 5px rgba(250, 88, 182, 0.3);
 }
 
@@ -176,9 +285,8 @@ hr.divider { border: none; height: 1px; background-color: var(--border-color); m
 
 .input-grid, .target-grid {
     display: grid;
-    /* Adjust column count for more fields */
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 15px 20px; /* Slightly reduced gap */
+    gap: 15px 20px;
     margin-bottom: 25px;
 }
 .form-group { display: flex; flex-direction: column; }
@@ -195,15 +303,15 @@ input[type="number"],
 input[type="file"],
 textarea,
 select {
-    padding: 10px 12px; /* Reduced padding */
+    padding: 10px 12px;
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-small); /* Smaller radius */
+    border-radius: var(--border-radius-small);
     font-size: 0.95em;
-    background-color: var(--bg-dark);
-    color: var(--text-light);
+    background-color: var(--bg-dark); /* Will be overridden in light mode */
+    color: var(--text-light); /* Will be overridden in light mode */
     width: 100%;
     box-sizing: border-box;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
@@ -222,30 +330,31 @@ textarea { resize: vertical; min-height: 100px; }
 /* Input validation style */
 input.invalid-input, textarea.invalid-input, select.invalid-input {
     border-color: var(--danger-bg) !important;
-    box-shadow: 0 0 0 2px rgba(224, 79, 158, 0.5) !important;
+    box-shadow: 0 0 0 2px var(--focus-glow) !important; /* Use focus-glow for consistency, or a red glow */
 }
 
 
 .button-group { text-align: center; margin-top: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 
-button, .button { /* Added .button class for consistency */
-    padding: 12px 25px; /* Adjusted padding */
+button, .button {
+    padding: 12px 25px;
     cursor: pointer;
     border: none;
     border-radius: var(--border-radius-xl);
     background-color: var(--accent);
-    color: var(--bg-dark);
+    color: var(--bg-card); /* Use card background for text color on accent */
     font-size: 1em;
     font-weight: 600;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    margin: 0; /* Use gap in button-group */
+    transition: background-color 0.3s ease, transform 0.1s ease, color 0.3s ease;
+    margin: 0;
 }
-button:hover, .button:hover { background-color: #FFCAD4; transform: translateY(-2px); }
+button:hover, .button:hover { background-color: var(--primary); color: var(--bg-card); transform: translateY(-2px); }
 button:active, .button:active { transform: translateY(0); }
 button:disabled, .button:disabled { background-color: #555; color: #999; cursor: not-allowed; transform: none; }
 
 #cancel-edit-button, #cancel-edit-note-button {
-    background-color: var(--text-dim); color: var(--bg-dark);
+    background-color: var(--text-dim);
+    color: var(--bg-dark); /* High contrast needed */
 }
 #cancel-edit-button:hover, #cancel-edit-note-button:hover { background-color: #948aad; }
 
@@ -256,25 +365,25 @@ button:disabled, .button:disabled { background-color: #555; color: #999; cursor:
 #history-table-container {
   overflow-x: auto;
   max-width: 100%;
-  border: 1px solid var(--primary2); /* Changed border color */
-  border-radius: var(--border-radius-medium); /* Use medium radius */
+  border: 1px solid var(--primary2);
+  border-radius: var(--border-radius-medium);
   margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Added shadow */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 #history-table-container table {
   width: 100%;
-  border-collapse: collapse; /* Keep collapsed for this table */
+  border-collapse: collapse;
   white-space: nowrap;
 }
 
 #history-table-container th,
 #history-table-container td {
-  padding: 8px 10px; /* Reduced padding slightly */
-  border: 1px solid var(--border-color); /* Adjusted border color */
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
   text-align: center;
   vertical-align: middle;
-  font-size: 0.85em; /* Reduced font size */
+  font-size: 0.85em;
 }
 /* Add unit display within header */
 #history-table-container th span.unit {
@@ -285,7 +394,7 @@ button:disabled, .button:disabled { background-color: #555; color: #999; cursor:
 }
 
 #history-table-container th {
-  background-color: rgba(122, 11, 192, 0.4); /* Use primary2 color */
+  background-color: rgba(122, 11, 192, 0.4);
   color: var(--text-light);
   position: sticky;
   top: 0;
@@ -296,37 +405,37 @@ button:disabled, .button:disabled { background-color: #555; color: #999; cursor:
 #history-table-container td.sticky-col {
   position: sticky;
   right: 0;
-  background-color: var(--bg-card); /* Match card background */
-  z-index: 2; /* Ensure it's above rows */
-  border-left: 2px solid var(--primary2); /* Highlight sticky column */
+  background-color: var(--bg-card); /* Updated in light mode */
+  z-index: 2;
+  border-left: 2px solid var(--primary2);
 }
-#history-table-container th.sticky-col { z-index: 3; } /* Header above all */
+#history-table-container th.sticky-col { z-index: 3; }
 
 
 #history-table-container tbody tr { background-color: transparent; transition: background-color 0.2s; }
-#history-table-container tbody tr:nth-child(even) { background-color: rgba(0,0,0,0.1); } /* Subtle striping */
-#history-table-container tbody tr:hover { background-color: rgba(122, 11, 192, 0.3); }
+#history-table-container tbody tr:nth-child(even) { background-color: rgba(0,0,0,0.1); /* Updated in light mode */ }
+#history-table-container tbody tr:hover { background-color: rgba(122, 11, 192, 0.3); /* Updated in light mode */ }
 
 .action-buttons {
     white-space: normal;
-    min-width: 110px; /* Reduced min-width */
-    display: flex; /* Use flex for better button control */
+    min-width: 110px;
+    display: flex;
     gap: 5px;
     justify-content: center;
-    padding: 5px 0; /* Add some vertical padding */
+    padding: 5px 0;
 }
 
-.action-buttons .btn { /* Style all buttons within action-buttons */
-    padding: 4px 8px; /* Small buttons */
+.action-buttons .btn {
+    padding: 4px 8px;
     font-size: 0.8em;
     border-radius: var(--border-radius-small);
-    flex-grow: 1; /* Allow buttons to take space */
-    max-width: 60px; /* Limit max width */
+    flex-grow: 1;
+    max-width: 60px;
 }
 
-.action-buttons .btn-edit { background-color: #7A0BC0; color: var(--text-light); }
+.action-buttons .btn-edit { background-color: var(--primary2); color: var(--text-light); }
 .action-buttons .btn-edit:hover { background-color: #9a3bcd; }
-.action-buttons .btn-delete { background-color: #FA58B6; color: var(--bg-dark); }
+.action-buttons .btn-delete { background-color: var(--accent); color: var(--bg-dark); } /* Match tab active */
 .action-buttons .btn-delete:hover { background-color: #fb78c6; }
 
 
@@ -359,7 +468,7 @@ table:not(#history-table-container table) th {
     background-color: rgba(122, 11, 192, 0.3);
     color: var(--accent);
     font-weight: 600;
-    position: sticky; top: 0; /* Stick header */
+    position: sticky; top: 0;
     z-index: 1;
 }
 
@@ -376,48 +485,47 @@ table:not(#history-table-container table) tbody tr:hover { background-color: rgb
 #target-comparison-container th { background-color: rgba(65, 79, 199, 0.3); color: #a7afff; }
 
 /* Change Indicators */
-.positive-change { color: #87CEFA; }
-.negative-change { color: #F08080; }
-.target-achieved { color: #90EE90; font-weight: bold; }
-.target-close { color: #FFD700; }
+.positive-change { color: #87CEFA; /* Light Sky Blue */ }
+.negative-change { color: #F08080; /* Light Coral */ }
+.target-achieved { color: #90EE90; font-weight: bold; /* Light Green */ }
+.target-close { color: #FFD700; /* Gold */ }
 
 
 /* Chart Controls (Mobile Grid Layout) */
 .chart-controls-container {
     display: flex;
-    flex-direction: column; /* Stack controls and bulk actions vertically on all screens */
-    gap: 15px; /* Space between selector and bulk actions */
+    flex-direction: column;
+    gap: 15px;
     margin-bottom: 20px;
 }
 
 .chart-controls {
     display: grid;
-    /* Responsive grid: 3 columns on small screens, 4 on larger */
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px; /* Space between buttons */
-    justify-items: stretch; /* Make buttons fill cell width */
-    width: 100%; /* Take full width */
+    gap: 8px;
+    justify-items: stretch;
+    width: 100%;
 }
 
 .chart-controls button {
-    padding: 6px 10px; /* Smaller padding */
-    font-size: 0.8em; /* Smaller font */
+    padding: 6px 10px;
+    font-size: 0.8em;
     background-color: var(--border-color);
     color: var(--text-dim);
     border: none;
-    border-radius: var(--border-radius-small); /* Smaller radius */
+    border-radius: var(--border-radius-small);
     transition: all 0.3s ease;
     cursor: pointer;
-    text-align: center; /* Center text */
-    white-space: nowrap; /* Prevent wrapping */
-    overflow: hidden; /* Hide overflow */
-    text-overflow: ellipsis; /* Add ellipsis */
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.chart-controls button:hover { background-color: var(--primary); color: var(--bg-dark); } /* Darker text on hover */
+.chart-controls button:hover { background-color: var(--primary); color: var(--bg-dark); }
 .chart-controls button.active {
     background-color: var(--accent);
-    color: var(--bg-dark);
+    color: var(--bg-card); /* Use bg-card for text on active */
     font-weight: bold;
     box-shadow: 0 0 8px rgba(250, 88, 182, 0.3);
 }
@@ -425,13 +533,13 @@ table:not(#history-table-container table) tbody tr:hover { background-color: rgb
 .chart-bulk-actions {
     display: flex;
     gap: 10px;
-    justify-content: center; /* Center bulk buttons */
+    justify-content: center;
     width: 100%;
 }
 .chart-bulk-actions button {
-    width: auto; /* Let button size naturally */
+    width: auto;
     flex-grow: 0;
-    padding: 6px 15px; /* Slightly more horizontal padding */
+    padding: 6px 15px;
     font-size: 0.85em;
 }
 .select-all-button { background-color: #90EE90; color: var(--bg-dark); }
@@ -441,29 +549,28 @@ table:not(#history-table-container table) tbody tr:hover { background-color: rgb
 /* Chart Container & Centering */
 .chart-container {
     position: relative;
-    /* Use aspect-ratio for responsive height, with min/max */
     aspect-ratio: 16 / 9;
-    max-height: 60vh; /* Max height relative to viewport */
-    min-height: 300px; /* Min height */
-    width: 100%; /* 명시적으로 100% 설정 */
-    max-width: 100%; /* 부모 요소를 넘어가지 않도록 설정 */
-    margin: 15px auto; /* Center the container */
-    background-color: #262658; /* Slightly transparent background */
+    max-height: 60vh;
+    min-height: 300px;
+    width: 100%;
+    max-width: 100%;
+    margin: 15px auto;
+    background-color: rgba(38, 38, 88, 0.7); /* Slightly adjusted alpha */
     padding: 15px;
     border-radius: var(--border-radius-medium);
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    display: flex; /* Use flex to help center canvas parent */
+    display: flex;
     justify-content: center;
     align-items: center;
-    box-sizing: border-box; /* 추가: padding, border 포함하여 너비 계산 */
+    box-sizing: border-box;
 }
 
 /* Ensure Chart.js canvas itself resizes correctly */
 #measurement-chart {
     max-width: 100%;
     max-height: 100%;
-    display: block; /* 추가: canvas가 inline 요소처럼 동작하는 것 방지 */
-    box-sizing: border-box; /* 추가: 일관성을 위해 */
+    display: block;
+    box-sizing: border-box;
 }
 
 
@@ -477,23 +584,7 @@ table:not(#history-table-container table) tbody tr:hover { background-color: rgb
 .danger-button { background-color: var(--danger-bg); color: var(--danger-text); }
 .danger-button:hover { background-color: #d6429a; }
 
-/* Radio Button Group Styling */
-.radio-group {
-    display: flex;
-    flex-direction: column; /* Stack vertically */
-    gap: 10px;
-}
-.radio-group label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 0.95em;
-    color: var(--text-light);
-}
-.radio-group input[type="radio"] {
-    margin-right: 8px;
-    accent-color: var(--accent); /* Style the radio button itself */
-}
+/* Radio Button Group Styling (Removed - Using select dropdown now) */
 
 
 /* Notes Section */
@@ -502,32 +593,47 @@ table:not(#history-table-container table) tbody tr:hover { background-color: rgb
 .notes-controls label { margin: 0; font-size: 0.9em; color: var(--text-dim); }
 #note-sort-order { width: auto; border-radius: var(--border-radius-small); }
 
-#notes-list-container .note-item {
-    background-color: rgba(122, 11, 192, 0.1); /* More subtle background */
+/* Notes Grid Layout */
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Responsive grid */
+    gap: 20px;
+}
+
+.note-card { /* Styling individual note cards */
+    background-color: var(--bg-card); /* Use card background */
     border: 1px solid var(--border-color);
     padding: 15px 20px;
-    margin-bottom: 15px;
     border-radius: var(--border-radius-medium);
     position: relative;
-    transition: box-shadow 0.3s;
+    transition: box-shadow 0.3s, transform 0.3s;
+    display: flex; /* Use flex for better internal layout */
+    flex-direction: column;
 }
-#notes-list-container .note-item:hover { box-shadow: 0 0 10px var(--focus-glow); }
-#notes-list-container .note-item h4 { margin-top: 0; margin-bottom: 5px; color: var(--text-light); font-size: 1.1em; }
-#notes-list-container .note-item .note-date { font-size: 0.8em; color: var(--text-dim); margin-bottom: 10px; }
-#notes-list-container .note-item .note-content-preview {
-    font-size: 0.95em; white-space: pre-wrap; word-break: break-word;
-    max-height: 150px; overflow-y: auto;
-    padding-right: 5px;
-    color: var(--text-light); /* Ensure content is light */
+.note-card:hover { box-shadow: 0 0 12px var(--focus-glow); transform: translateY(-3px); }
+.note-card h4 { margin-top: 0; margin-bottom: 8px; color: var(--text-light); font-size: 1.1em; }
+.note-card .note-timestamp { font-size: 0.75em; color: var(--text-dim); margin-bottom: 10px; }
+.note-card .note-content-preview {
+    font-size: 0.9em;
+    white-space: pre-wrap; word-break: break-word;
+    max-height: 150px; /* Limit preview height */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    padding-right: 5px; /* Space for scrollbar */
+    color: var(--text-light);
+    margin-bottom: 15px; /* Space before actions */
+    flex-grow: 1; /* Allow content to take available space */
 }
-.note-actions { margin-top: 10px; text-align: right; }
+.note-actions { margin-top: auto; /* Push actions to bottom */ text-align: right; }
 .note-actions button { /* Style note action buttons */
     padding: 5px 10px;
     font-size: 0.85em;
     margin-left: 5px;
 }
-.btn-note-edit { background-color: var(--primary2); color: var(--text-light); }
-.btn-note-delete { background-color: var(--text-dim); color: var(--bg-dark); }
+/* Inherit general button styles, specific overrides not needed if using .btn classes */
+.btn-outline { background-color: transparent; border: 1px solid var(--primary2); color: var(--primary2); }
+.btn-outline:hover { background-color: rgba(122, 11, 192, 0.2); }
+.btn-danger { background-color: transparent; border: 1px solid var(--danger-bg); color: var(--danger-bg); }
+.btn-danger:hover { background-color: rgba(224, 79, 158, 0.1); }
 
 
 /* Popup Message */
@@ -539,7 +645,7 @@ table:not(#history-table-container table) tbody tr:hover { background-color: rgb
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4); z-index: 1000; opacity: 0;
     transition: opacity 0.4s ease-out, bottom 0.4s ease-out;
     font-weight: bold; text-align: center;
-    min-width: 200px; /* Ensure minimum width */
+    min-width: 200px;
 }
 .popup.show { opacity: 1; bottom: 40px; }
 
@@ -551,7 +657,8 @@ table:not(#history-table-container table) tbody tr:hover { background-color: rgb
 
 /* Warning Box */
 .warning {
-    color: var(--warning-text); font-weight: normal; border: 1px solid var(--warning-border);
+    color: var(--warning-text);
+    font-weight: normal; border: 1px solid var(--warning-border);
     background-color: var(--warning-bg); padding: 15px; border-radius: var(--border-radius-medium);
     margin-top: 10px; font-size: 0.9em;
 }
@@ -561,7 +668,7 @@ table:not(#history-table-container table) tbody tr:hover { background-color: rgb
 /* Mode-Specific Visibility */
 .mtf-only,
 .ftm-only {
-    display: block; /* Default: show */
+    display: block;
 }
 /* Hide elements based on body class */
 body.mode-ftm .mtf-only { display: none; }
@@ -602,37 +709,37 @@ body.mode-mtf .ftm-only { display: none; }
     .tab-bar { padding: 5px; top: 5px; gap: 2px; }
     .tab-button { padding: 8px 10px; font-size: 0.85em; }
     .card { padding: 20px; border-radius: var(--border-radius-medium); }
-    .input-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); } /* Adjust minmax */
-    button, .button { padding: 11px 18px; font-size: 0.95em; } /* Slightly smaller buttons */
+    .input-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    button, .button { padding: 11px 18px; font-size: 0.95em; }
 
     /* Tables on Mobile */
     th, td {
-        padding: 6px 8px; /* Further reduce padding */
-        font-size: 0.8em; /* Further reduce font size */
+        padding: 6px 8px;
+        font-size: 0.8em;
     }
     #history-table-container th,
     #history-table-container td {
-        font-size: 0.75em; /* Even smaller for history table */
+        font-size: 0.75em;
         padding: 5px 6px;
     }
-    .action-buttons { min-width: 90px; } /* Adjust sticky width */
+    .action-buttons { min-width: 90px; }
     .action-buttons .btn { padding: 3px 6px; font-size: 0.75em; max-width: 50px; }
 
-    /* Chart Controls Grid - Adjust columns if needed */
+    /* Chart Controls Grid */
     .chart-controls { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 5px; }
     .chart-controls button { font-size: 0.75em; padding: 5px 8px; }
     .chart-bulk-actions button { font-size: 0.8em; padding: 5px 12px;}
 
-    /* Collapsed Tab Bar (Copied & Adjusted from original) */
+    /* Collapsed Tab Bar (Optional Feature) */
     .tab-bar.collapsed {
-        padding-top: 30px; padding-bottom: 4px;
-        padding-top: calc(env(safe-area-inset-top) + 60px);
+        padding-top: calc(env(safe-area-inset-top) + 30px); /* Adjust based on actual safe area */
+        padding-bottom: 4px;
         justify-content: center; gap: 1px;
     }
     .tab-bar.collapsed .tab-button:not(.active) {
-        font-size: 0.6em !important; /* Keep small */
+        font-size: 0.6em !important;
         opacity: 0.8;
-        padding: 4px 6px; /* Small padding */
+        padding: 4px 6px;
         margin: 1px;
         max-width: none;
         overflow: visible;
@@ -640,7 +747,7 @@ body.mode-mtf .ftm-only { display: none; }
         border: none;
     }
     .tab-bar.collapsed .tab-button.active {
-        font-size: 0.85em; /* Maintain active size */
+        font-size: 0.85em;
         opacity: 1;
         padding: 8px 10px;
         margin: 2px;
@@ -650,52 +757,67 @@ body.mode-mtf .ftm-only { display: none; }
 /* Small Screens (Phones) */
 @media (max-width: 480px) {
     .tab-button { padding: 6px 8px; font-size: 0.8em; max-width: 90px; }
-    .input-grid { grid-template-columns: 1fr 1fr; } /* 2 columns on small phones */
+    .input-grid { grid-template-columns: 1fr 1fr; }
     .compound-input { flex-direction: column; }
     .compound-input input[type="number"] { width: 100%; margin-bottom: 10px; }
-    .button-group { flex-direction: column; } /* Stack buttons */
-    button, .button { width: 100%; margin: 5px 0; } /* Full width buttons */
-    .settings-section .button-group { flex-direction: row; } /* Keep settings buttons inline if possible */
-    .settings-section button { width: auto; margin: 5px; } /* Auto width settings buttons */
-    .settings-section .button-group button { flex-grow: 1; } /* Allow settings buttons to grow */
+    .button-group { flex-direction: column; }
+    button, .button { width: 100%; margin: 5px 0; }
+    .settings-section .button-group { flex-direction: row; }
+    .settings-section button { width: auto; margin: 5px; }
+    .settings-section .button-group button { flex-grow: 1; }
 
     #history-table-container th.sticky-col,
     #history-table-container td.sticky-col { min-width: 80px; }
     .action-buttons .btn { padding: 3px 5px; }
 
-    .note-actions { text-align: center; } /* Center note actions */
+    .note-actions { text-align: center; }
     .note-actions button { font-size: 0.8em; padding: 4px 8px; }
 
      /* Chart Controls Grid */
-    .chart-controls { grid-template-columns: repeat(3, 1fr); gap: 4px; } /* Force 3 columns */
+    .chart-controls { grid-template-columns: repeat(3, 1fr); gap: 4px; }
     .chart-controls button { font-size: 0.7em; padding: 4px 6px; }
 
-    /* Collapsed Tab Bar on Small Screens */
+    /* Collapsed Tab Bar */
      .tab-bar.collapsed .tab-button:not(.active) {
-        font-size: 0.55em !important; /* Even smaller */
+        font-size: 0.55em !important;
         padding: 2px 4px;
         opacity: 0.9;
         margin: 1px;
-    }
+     }
      .tab-bar.collapsed .tab-button.active {
-        font-size: 0.8em; /* Ensure active matches base */
+        font-size: 0.8em;
         padding: 6px 8px;
-    }
+     }
 
-    .modal-content { padding: 20px; } /* Less padding in modal */
+    .modal-content { padding: 20px; }
 }
 
 /* Fix for grid layout for chart controls specifically */
 @media (min-width: 600px) {
     .chart-controls {
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* More columns on wider screens */
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     }
-@supports not (padding-top: env(safe-area-inset-top)) {
+}
+
+/* Safe Area for iOS (if needed) */
+@supports (padding-top: env(safe-area-inset-top)) {
   body {
-    padding-top: 60px; /* 탭바 높이만큼 */
+    /* Add padding only if tab bar is truly fixed at top */
+    /* padding-top: env(safe-area-inset-top); */
   }
   .tab-bar {
-    top: 0;
+    /* Adjust sticky top position */
+     top: calc(env(safe-area-inset-top) + 15px); /* 15px original offset + safe area */
+  }
+  .popup {
+     bottom: calc(env(safe-area-inset-bottom) + 40px); /* Adjust popup bottom */
   }
 }
+
+/* Placeholder Text Style */
+.placeholder-text {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 20px;
+    font-style: italic;
 }

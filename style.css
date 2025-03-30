@@ -80,7 +80,7 @@ body.light-mode {
          border: 1px solid var(--lm-border-color);
     }
     #history-table-container th {
-        background-color: rgba(255, 143, 171, 0.4); /* Use primary2 color */
+        background-color: rgba(255, 143, 171, 0.4); 
         color: var(--lm-text-main);
     }
     #history-table-container tbody tr:nth-child(even) {
@@ -126,7 +126,7 @@ body.light-mode {
         border-color: var(--lm-border-color);
      }
      button.danger-button { background-color: var(--lm-danger-bg); color: var(--lm-danger-text); }
-     button.danger-button:hover { background-color: #B22222; /* Darker Crimson */ }
+     button.danger-button:hover { background-color: #B22222;  }
 
      .next-measurement-info {
         background-color: rgba(255, 111, 145, 0.1);
@@ -802,8 +802,14 @@ body.mode-mtf .ftm-only { display: none; }
 /* Safe Area for iOS (if needed) */
 @supports (padding-top: env(safe-area-inset-top)) {
   body {
-    /* Add padding only if tab bar is truly fixed at top */
-    /* padding-top: env(safe-area-inset-top); */
+    font-family: var(--font-family);
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background-color: var(--bg-dark); /* 기본 배경색 (JS에서 클래스로 변경됨) */
+     color: var(--text-light); /* 기본 글자색 (JS에서 클래스로 변경됨) */
+     overscroll-behavior-y: contain;
+     transition: background-color 0.3s ease, color 0.3s ease;
   }
   .tab-bar {
     /* Adjust sticky top position */

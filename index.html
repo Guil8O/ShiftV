@@ -2,7 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light dark">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
     <title>ShiftV - 당신의 변화를 기록하세요</title>
 
     <link rel="manifest" href="manifest.json">
@@ -11,7 +12,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ShiftV">
-    <meta name="theme-color" content="#1E1E48"> <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="theme-color" content="#1E1E48">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -19,7 +21,7 @@
         <div class="modal-content card">
 
  <h2 data-lang-key="initialSetupTitle">초기 설정</h2>
-            <p data-lang-key="initialSetupDesc">ShiftV 사용을 시작하기 전에 언어와 목표 방향을 선택해주세요.</p>
+            <p data-lang-key="initialSetupDesc">ShiftV 사용을 시작하기 전에 언어와  성적적 지향을 선택해주세요.</p>
             <div class="form-group">
                 <label for="initial-language-select" data-lang-key="language">언어</label>
                 <select id="initial-language-select">
@@ -30,7 +32,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="initial-mode-select" data-lang-key="mode">모드</label>
+                <label for="initial-mode-select" data-lang-key="mode">성적지향</label>
 
  <select id="initial-mode-select">
                     <option value="mtf" data-lang-key="modeMtf">여성화</option>
@@ -62,7 +64,7 @@
         <div class="tab-contents">
 
              <div id="tab-input" class="tab-content active card">
-                <h2 id="form-title" data-lang-key="formTitleNew">측정 시작하기📏 (현재 <span id="current-week">0</span>주차)</h2>
+                <h2 id="form-title" data-lang-key="formTitleNew">측정 시작하기 📏 (현재 <span id="current-week">0</span>주차)</h2>
                 <div id="next-measurement-info" class="next-measurement-info">
                     <p data-lang-key="nextMeasurementInfoNoData">마지막 측정일을 기준으로 다음 예정일을 계산해요.</p>
 
@@ -179,7 +181,7 @@
 
                     <fieldset class="input-category">
 
- <legend data-lang-key="categoryMedication">마법법</legend>
+ <legend data-lang-key="categoryMedication">마법</legend>
                         <div class="input-grid">
                              <div class="form-group mtf-only">
 
@@ -202,6 +204,15 @@
                                 <input type="number" id="testosterone" name="testosterone" step="1" min="0" placeholder="mg">
                             </div>
                         </div>
+<div class="form-group">
+                        <label for="medicationOtherName" data-lang-key="medicationOtherName">기타 약물 이름</label>
+                        <input type="text" id="medicationOtherName" name="medicationOtherName" placeholder="(기타)" data-lang-key="medicationOtherNamePlaceholder">
+                    </div>
+                    <div class="form-group">
+                        <label for="medicationOtherDose" data-lang-key="medicationOtherDose">기타 약물 용량 (mg)</label>
+                        <input type="number" id="medicationOtherDose" name="medicationOtherDose" step="0.1" min="0" placeholder="mg" data-lang-key="unitMgPlaceholder">
+                    </div>
+
 
  </fieldset>
 

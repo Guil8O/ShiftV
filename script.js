@@ -1187,79 +1187,102 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // *** 수정 2: 달성률 계산 수정 (100% 상한 적용) ***
-    function calculateTargetComparison() {
-        const headers = [translate('comparisonItem'), translate('comparisonProgress')];
-        const relevantTargetKeys = targetSettingKeys.filter(k => targets[k] !== null && targets[k] !== undefined && targets[k] !== '');
-        if (measurements.length === 0 || relevantTargetKeys.length === 0) return { data: [], headers };
+// *** 수정: 새로운 달성률 공식 적용 ***
+function calculateTargetComparison() {
+    const headers = [translate('comparisonItem'), translate('comparisonProgress')];
+    // Use targetSettingKeys which filters for numeric, non-text body/health keys
+    const relevantTargetKeys = targetSettingKeys.filter(k => targets[k] !== null && targets[k] !== undefined && targets[k] !== '');
 
-        const latestMeasurement = measurements[measurements.length - 1];
-        const firstMeasurement = measurements.length > 0 ? measurements[0] : null;
-        const data = [];
-        relevantTargetKeys.forEach(key => {
-            const targetValue = parseFloat(targets[key]);
-            const currentValue = parseFloat(latestMeasurement[key]);
-            const initialValue = firstMeasurement ? parseFloat(firstMeasurement[key]) : NaN;
-            // --- ▼▼▼ 새로운 달성률 계산 로직 시작 ▼▼▼ ---
-            let achievementRate = '-';
-            let rateClass = '';
-            let displayRate = 0; // 최종 표시될 비율 (0-100)
-            const zeroThreshold = 0.0001; // 0에 매우 가까운 값 처리용 임계값
-
-            // 모든 값이 유효한 숫자인지 확인
-            if (!isNaN(targetValue) && !isNaN(currentValue) && !isNaN(initialValue)) {
-                let rate = NaN; // 계산 성공 여부 확인용 (초기값 NaN)
-
-                // Case 1: 초기값 > 목표값 (값 감소 목표, 예: 체중 감량)
-                if (initialValue > targetValue) {
-                    // 현재값이 0 또는 0에 가까우면 나누기 오류 방지
-                    if (Math.abs(currentValue) > zeroThreshold) {
-                        rate = (targetValue / currentValue) * 100;
-                    } else if (Math.abs(targetValue) <= zeroThreshold) {
-                        // 목표와 현재값이 모두 0(에 가까우면)이면 100% 달성으로 간주
-                        rate = 100;
-                    }
-                // Case 2: 초기값 <= 목표값 (값 증가 또는 유지 목표, 예: 근육량 증가)
-                } else {
-                    // 목표값이 0 또는 0에 가까우면 나누기 오류 방지
-                    if (Math.abs(targetValue) > zeroThreshold) {
-                        rate = (currentValue / targetValue) * 100;
-                    } else if (Math.abs(currentValue) <= zeroThreshold) {
-                         // 목표와 현재값이 모두 0(에 가까우면)이면 100% 달성으로 간주
-                         rate = 100;
-                    }
-                }
-
-                // rate 계산이 성공했을 경우 (NaN이 아닐 경우)
-                if (!isNaN(rate)) {
-                     // 결과를 0% ~ 100% 사이로 제한 (음수 방지, 100 초과 방지)
-                     displayRate = Math.max(0, Math.min(100, rate));
-                     achievementRate = `${displayRate.toFixed(0)}%`; // 정수로 표시
-
-                     // 스타일에 적용할 클래스 결정 (0-100 사이로 제한된 값 기준)
-                     if (displayRate >= 100) {
-                         rateClass = 'target-achieved'; // 목표 달성 또는 초과
-                     } else if (displayRate >= 80) {
-                         rateClass = 'positive-change'; // 목표에 근접
-                     } else {
-                         rateClass = 'negative-change'; // 목표와 거리가 있음
-                     }
-                 } else {
-                     // 계산 실패 (division by zero 등)
-                     achievementRate = '-';
-                     rateClass = '';
-                 }
-
-                 data.push([ translate(key).split('(')[0].trim(), { value: achievementRate, class: rateClass } ]);
-
-            } else if (!isNaN(targetValue)) {
-                 // 목표값은 있지만 초기값 또는 현재값이 유효하지 않은 경우
-                 data.push([ translate(key).split('(')[0].trim(), { value: '-', class: '' } ]);
-            }
-             // --- ▲▲▲ 새로운 달성률 계산 로직 끝 ▲▲▲ ---
-        });
-        return { data, headers };
+    // Need at least one measurement and one relevant target set
+    if (measurements.length === 0 || relevantTargetKeys.length === 0) {
+        // console.log("DEBUG: Target comparison skipped - no measurements or relevant targets."); // 디버깅 로그 필요시 주석 해제
+        return { data: [], headers };
     }
 
+    const latestMeasurement = measurements[measurements.length - 1];
+    const data = [];
+    const zeroThreshold = 0.0001; // 부동 소수점 0 비교를 위한 임계값
+
+    // console.log("DEBUG: Calculating target comparison for keys:", relevantTargetKeys); // 디버깅 로그 필요시 주석 해제
+
+    relevantTargetKeys.forEach(key => {
+        const targetValue = parseFloat(targets[key]);
+        const currentValue = parseFloat(latestMeasurement[key]);
+
+        let achievementRateNum = NaN; // 계산 실패 시 NaN 유지
+        let achievementRateStr = '-';
+        let rateClass = '';
+
+        // 목표치(targetValue)와 현재기록치(currentValue)가 유효한 숫자인지 확인
+        if (!isNaN(targetValue) && !isNaN(currentValue)) {
+            // console.log(`DEBUG: Comparing Key: ${key}, Current: ${currentValue}, Target: ${targetValue}`); // 디버깅 로그 필요시 주석 해제
+
+            // --- ▼▼▼ 요청하신 새로운 달성률 계산 로직 적용 ▼▼▼ ---
+            if (Math.abs(targetValue) < zeroThreshold) { // 만약 목표치 == 0 이라면:
+                if (Math.abs(currentValue) < zeroThreshold) { // 현재기록치 == 0 이면:
+                    achievementRateNum = 100; // 100%
+                } else { // 현재기록치 != 0 이면:
+                    achievementRateNum = 0; // 0%
+                }
+            } else { // 만약 목표치 != 0 이라면:
+                // 근접도 (%) = MAX(0, (1 - |현재기록치 - 목표치| / |목표치|) * 100)
+                const absoluteDifference = Math.abs(currentValue - targetValue);
+                const absoluteTarget = Math.abs(targetValue); // 여기서 targetValue는 0이 아님
+                // 0으로 나누는 경우 방지 (이론상 발생 안 함)
+                if (absoluteTarget > zeroThreshold) {
+                     achievementRateNum = Math.max(0, (1 - (absoluteDifference / absoluteTarget)) * 100);
+                } else {
+                    // 혹시 모를 극단적인 경우 처리 (목표치가 0에 매우 가깝지만 0은 아닐 때)
+                    achievementRateNum = (Math.abs(currentValue) < zeroThreshold) ? 100 : 0;
+                }
+            }
+            // --- ▲▲▲ 새로운 달성률 계산 로직 끝 ▲▲▲ ---
+
+            // 계산이 성공했는지 확인 (결과가 NaN이 아닌지)
+            if (!isNaN(achievementRateNum)) {
+                achievementRateStr = `${achievementRateNum.toFixed(0)}%`; // 정수로 표시
+
+                // 계산된 비율에 따라 CSS 클래스 결정
+                if (achievementRateNum >= 100) { // 100% 이상 달성 (정확히 100 포함)
+                    rateClass = 'target-achieved';
+                } else if (achievementRateNum >= 80) { // 80% 이상
+                    rateClass = 'positive-change'; // 목표 근접 (긍정적)
+                } else if (achievementRateNum > 50) { // 50% 초과
+                   rateClass = ''; // 중간 정도는 특별 클래스 없음
+                } else { // 50% 이하
+                    rateClass = 'negative-change'; // 목표와 거리 있음 (부정적)
+                }
+                // console.log(`DEBUG: Key ${key} - Final Rate Str: ${achievementRateStr}, Class: ${rateClass}`); // 디버깅 로그 필요시 주석 해제
+            } else {
+                // console.log(`DEBUG: Key ${key} - Calculation failed (NaN).`); // 디버깅 로그 필요시 주석 해제
+                achievementRateStr = '-';
+                rateClass = '';
+            }
+
+             // 테이블 렌더링을 위한 데이터 배열에 추가
+            data.push([
+                translate(key).split('(')[0].trim(), // 항목 이름
+                { value: achievementRateStr, class: rateClass } // 진행률 값 및 클래스
+            ]);
+
+        } else {
+            // 목표값 또는 현재값이 유효한 숫자가 아니지만, 목표 자체는 설정된 경우
+            if (!isNaN(targetValue)) {
+                // console.log(`DEBUG: Key ${key} - Current value is invalid, cannot compare.`); // 디버깅 로그 필요시 주석 해제
+                data.push([
+                    translate(key).split('(')[0].trim(),
+                    { value: '-', class: '' }
+                ]);
+            } else {
+               // console.log(`DEBUG: Key ${key} - Target value is invalid.`); // 디버깅 로그 필요시 주석 해제
+               // 목표값 자체가 유효하지 않으면 행을 추가하지 않을 수도 있음 (선택사항)
+            }
+        }
+    }); // End forEach loop
+
+    // console.log("DEBUG: Target comparison data generated:", data); // 디버깅 로그 필요시 주석 해제
+    return { data, headers };
+}
 
     function renderAllComparisonTables() {
         renderComparisonTable(prevWeekComparisonContainer, 'reportPrevWeekTitle', calculatePrevWeekComparison);

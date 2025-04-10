@@ -82,6 +82,10 @@ const languages = {
         skinCondition: '피부 상태',
         estradiol: '에스트라디올 (mg)', progesterone: '프로게스테론 (mg)',
         antiAndrogen: '항안드로겐 (mg)', testosterone: '테스토스테론 (mg)',
+        medicationOtherName: '기타 마법 이름',
+        medicationOtherDose: '기타 마법 용량 (mg)',
+        medicationOtherNamePlaceholder: '(기타)', 
+        unitMgPlaceholder: 'mg',
         // Placeholders
         cupSizePlaceholder: '예: 75A', skinConditionPlaceholder: '예: 부드러워짐', libidoPlaceholder: '회/주',
         scorePlaceholder: "점수", notesPlaceholder: "특이사항",
@@ -193,6 +197,10 @@ const languages = {
         skinCondition: 'Skin Condition',
         estradiol: 'Estradiol (mg)', progesterone: 'Progesterone (mg)',
         antiAndrogen: 'Anti-androgen (mg)', testosterone: 'Testosterone (mg)',
+        medicationOtherName: 'Other Magic Name',
+        medicationOtherDose: 'Other Magic Dose (mg)',
+        medicationOtherNamePlaceholder: '(Other)',
+        unitMgPlaceholder: 'mg',
         // Placeholders
         cupSizePlaceholder: 'e.g., 34A', skinConditionPlaceholder: 'e.g., Softer', libidoPlaceholder: 'freq/week',
         scorePlaceholder: "Score", notesPlaceholder: "Notes",
@@ -295,6 +303,10 @@ const languages = {
         skinCondition: '肌の状態',
         estradiol: 'エストラジオール (mg)', progesterone: 'プロゲステロン (mg)',
         antiAndrogen: '抗アンドロゲン (mg)', testosterone: 'テストステロン (mg)',
+        medicationOtherName: 'その他の魔法名',
+        medicationOtherDose: 'その他の魔法用量 (mg)',
+        medicationOtherNamePlaceholder: '（その他）',
+        unitMgPlaceholder: 'mg',
         // Placeholders
         cupSizePlaceholder: '例: C70', skinConditionPlaceholder: '例: 柔らかくなった', libidoPlaceholder: '回/週',
         scorePlaceholder: "点数", notesPlaceholder: "特記事項",
@@ -453,15 +465,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const baseNumericKeys = [
         'height', 'weight', 'shoulder', 'neck', 'chest', 'waist', 'hips', 'thigh', 'calf', 'arm',
         'muscleMass', 'bodyFatPercentage', 'libido', 'semenScore', 'healthScore',
-        'estradiol', 'progesterone', 'antiAndrogen', 'testosterone'
+        'estradiol', 'progesterone', 'antiAndrogen', 'testosterone',
+        'medicationOtherDose' 
     ];
-    const textKeys = ['cupSize', 'semenNotes', 'healthNotes', 'skinCondition'];
+    const textKeys = ['cupSize', 'semenNotes', 'healthNotes', 'skinCondition', 'medicationOtherName'];
     const displayKeysInOrder = [
         'week', 'date',
         'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm',
         'muscleMass', 'bodyFatPercentage', 'libido', 'skinCondition', 'healthScore', 'healthNotes',
         'semenScore', 'semenNotes',
         'estradiol', 'progesterone', 'antiAndrogen', 'testosterone',
+        'medicationOtherName', 'medicationOtherDose', 
         'timestamp'
     ];
     const chartSelectableKeys = baseNumericKeys.filter(k => !k.includes('Score'));
@@ -1185,37 +1199,63 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetValue = parseFloat(targets[key]);
             const currentValue = parseFloat(latestMeasurement[key]);
             const initialValue = firstMeasurement ? parseFloat(firstMeasurement[key]) : NaN;
-
+            // --- ▼▼▼ 새로운 달성률 계산 로직 시작 ▼▼▼ ---
             let achievementRate = '-';
             let rateClass = '';
-            const threshold = 0.05;
+            let displayRate = 0; // 최종 표시될 비율 (0-100)
+            const zeroThreshold = 0.0001; // 0에 매우 가까운 값 처리용 임계값
 
+            // 모든 값이 유효한 숫자인지 확인
             if (!isNaN(targetValue) && !isNaN(currentValue) && !isNaN(initialValue)) {
-                const totalChangeNeeded = targetValue - initialValue;
-                const currentChangeMade = currentValue - initialValue;
-                let rate = 0; // Initialize rate
+                let rate = NaN; // 계산 성공 여부 확인용 (초기값 NaN)
 
-                if (Math.abs(totalChangeNeeded) > threshold) {
-                    rate = (currentChangeMade / totalChangeNeeded) * 100;
-                } else if (Math.abs(currentValue - targetValue) <= threshold) {
-                    rate = 100; // Already at target if initial = target
+                // Case 1: 초기값 > 목표값 (값 감소 목표, 예: 체중 감량)
+                if (initialValue > targetValue) {
+                    // 현재값이 0 또는 0에 가까우면 나누기 오류 방지
+                    if (Math.abs(currentValue) > zeroThreshold) {
+                        rate = (targetValue / currentValue) * 100;
+                    } else if (Math.abs(targetValue) <= zeroThreshold) {
+                        // 목표와 현재값이 모두 0(에 가까우면)이면 100% 달성으로 간주
+                        rate = 100;
+                    }
+                // Case 2: 초기값 <= 목표값 (값 증가 또는 유지 목표, 예: 근육량 증가)
+                } else {
+                    // 목표값이 0 또는 0에 가까우면 나누기 오류 방지
+                    if (Math.abs(targetValue) > zeroThreshold) {
+                        rate = (currentValue / targetValue) * 100;
+                    } else if (Math.abs(currentValue) <= zeroThreshold) {
+                         // 목표와 현재값이 모두 0(에 가까우면)이면 100% 달성으로 간주
+                         rate = 100;
+                    }
                 }
 
-                // *** 여기 수정: displayRate 계산 시 100% 상한 적용 ***
-                const displayRate = Math.max(0, Math.min(100, rate)); // Cap rate between 0 and 100
-                achievementRate = `${displayRate.toFixed(0)}%`; // Show integer percentage
+                // rate 계산이 성공했을 경우 (NaN이 아닐 경우)
+                if (!isNaN(rate)) {
+                     // 결과를 0% ~ 100% 사이로 제한 (음수 방지, 100 초과 방지)
+                     displayRate = Math.max(0, Math.min(100, rate));
+                     achievementRate = `${displayRate.toFixed(0)}%`; // 정수로 표시
 
-                // Determine rate class based on the *original* rate (before capping)
-                if (rate >= 100) rateClass = 'target-achieved'; // Target met or exceeded
-                else if (displayRate >= 80) rateClass = 'positive-change'; // Close to target
-                else rateClass = 'negative-change'; // Far from target
+                     // 스타일에 적용할 클래스 결정 (0-100 사이로 제한된 값 기준)
+                     if (displayRate >= 100) {
+                         rateClass = 'target-achieved'; // 목표 달성 또는 초과
+                     } else if (displayRate >= 80) {
+                         rateClass = 'positive-change'; // 목표에 근접
+                     } else {
+                         rateClass = 'negative-change'; // 목표와 거리가 있음
+                     }
+                 } else {
+                     // 계산 실패 (division by zero 등)
+                     achievementRate = '-';
+                     rateClass = '';
+                 }
 
                  data.push([ translate(key).split('(')[0].trim(), { value: achievementRate, class: rateClass } ]);
 
             } else if (!isNaN(targetValue)) {
-                 // If target exists but rate can't be calculated
+                 // 목표값은 있지만 초기값 또는 현재값이 유효하지 않은 경우
                  data.push([ translate(key).split('(')[0].trim(), { value: '-', class: '' } ]);
             }
+             // --- ▲▲▲ 새로운 달성률 계산 로직 끝 ▲▲▲ ---
         });
         return { data, headers };
     }
@@ -1293,7 +1333,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
             ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
             ctx.textAlign = 'center';
-            ctx.fillStyle = 'var(--text-dim, #888)'; // Use CSS variable
+            ctx.fillStyle = '#5e5ebf'; // Use CSS variable
             ctx.font = '16px sans-serif';
             ctx.fillText(translate('noDataForChart'), chartCanvas.width / 2, chartCanvas.height / 2);
             return;
@@ -1325,17 +1365,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 responsive: true, maintainAspectRatio: false,
                 scales: {
                     x: {
-                        type: 'linear', title: { display: true, text: translate('chartAxisLabel') },
+                        type: 'linear', title: { display: true, text: translate('chartAxisLabel'), color: '#5e5ebf' },
                         ticks: {
                              stepSize: 1,
-                             callback: function(value) { if (Number.isInteger(value) && value >= 0) { return value; } return null; }
+                             callback: function(value) { if (Number.isInteger(value) && value >= 0) { return value; } return null; },
+                             color: '#5e5ebf'
                         },
-                        grid: { display: false }
+                        border:{
+                            display:true,
+                            color: '#5e5ebf'
+                        },
+                        grid: { display: true , color: '#5e5ebf'}
                     },
                      y: {
                         beginAtZero: false, title: { display: false },
-                        grid: { color: 'var(--border-color, rgba(128, 128, 128, 0.2))' }, // Use CSS var
-                        ticks: { color: 'var(--text-dim, #888)' } // Use CSS var for tick color
+                        border:{
+                            display:true,
+                            color: '#5e5ebf'
+                        },
+
+                        grid: { color: '#5e5ebf' }, // Use CSS var
+                        ticks: { color: '#5e5ebf' } // Use CSS var for tick color
                     }
                 },
                 plugins: {
@@ -1468,13 +1518,16 @@ document.addEventListener('DOMContentLoaded', () => {
      // --- Event Handlers ---
 
     // Form submission
-     function handleFormSubmit(event) {
-        event.preventDefault(); if (!form) return;
+    function handleFormSubmit(event) {
+        event.preventDefault();
+        if (!form) return;
         form.querySelectorAll('.invalid-input').forEach(el => el.classList.remove('invalid-input'));
         let isValid = true; let firstInvalidField = null;
         const formData = new FormData(form);
-        const measurementData = { timestamp: Date.now() };
+        // measurementData 객체는 여기서 초기화하지 않습니다. edit 여부에 따라 다르게 처리합니다.
+
         // *** 수정 1 확인: HTML의 name이 카멜케이스로 변경되었으므로, JS 키와 일치함 ***
+        const collectedData = {}; // 폼에서 읽어온 데이터만 임시 저장
         [...baseNumericKeys, ...textKeys].forEach(key => { // Process all keys
              let value = formData.get(key); // Get value using the camelCase key
              const inputElement = form.querySelector(`[name="${key}"]`); // Find element by camelCase name
@@ -1483,42 +1536,42 @@ document.addEventListener('DOMContentLoaded', () => {
                  if (baseNumericKeys.includes(key) && value !== '') {
                     const numValue = parseFloat(value);
                     if (isNaN(numValue) || numValue < 0) {
-                        measurementData[key] = null; // Store invalid as null
+                        collectedData[key] = null; // Store invalid as null
                         if (inputElement) {
                              inputElement.classList.add('invalid-input'); isValid = false;
                              if (!firstInvalidField) firstInvalidField = inputElement;
-                        }
-                    } else { measurementData[key] = numValue; }
+                         }
+                    } else { collectedData[key] = numValue; }
                  } else if (textKeys.includes(key)) {
-                     measurementData[key] = value.trim() || null; // Trim text, store empty as null
+                     collectedData[key] = value.trim() || null; // Trim text, store empty as null
                  } else {
-                      measurementData[key] = value || null;
+                      collectedData[key] = value || null;
                  }
-             } else { measurementData[key] = null; } // Ensure key exists even if not in form
+             } else { collectedData[key] = null; } // Ensure key exists even if not in form
         });
 
         if (!isValid) {
              showPopup('alertValidationError', 4000);
-             if (firstInvalidField) firstInvalidField.focus(); return;
+             if (firstInvalidField) firstInvalidField.focus();
+             return;
         }
-        const todayStr = new Date().toISOString().split('T')[0];
-        measurementData.date = todayStr; // Default to today
 
-        const editIndex = editIndexInput.value;
-        if (editIndex !== '') {
-            const indexToUpdate = parseInt(editIndex, 10);
+        const editIndexValue = editIndexInput.value;
+
+        if (editIndexValue !== '') { // --- 수정 모드 ---
+            const indexToUpdate = parseInt(editIndexValue, 10);
             if (indexToUpdate >= 0 && indexToUpdate < measurements.length) {
-                 measurementData.week = measurements[indexToUpdate].week; // Preserve original week
-                 measurementData.date = measurements[indexToUpdate].date; // Preserve original date
-                 measurementData.timestamp = Date.now(); // Update timestamp
-                 measurements[indexToUpdate] = { ...measurements[indexToUpdate], ...measurementData };
+                 measurements[indexToUpdate] = { ...measurements[indexToUpdate], ...collectedData };
                  console.log("DEBUG: Measurement updated at index", indexToUpdate);
                  showPopup('popupUpdateSuccess');
             } else {
                  console.error("Invalid index for editing:", editIndex); showPopup('savingError'); return;
             }
         } else {
-            measurementData.week = measurements.length;
+            const measurementData = { ...collectedData }; // 폼 데이터 복사
+            measurementData.timestamp = Date.now(); // 새 레코드에만 현재 타임스탬프 추가
+            measurementData.date = new Date(measurementData.timestamp).toISOString().split('T')[0]; // 오늘 날짜 추가
+            measurementData.week = measurements.length; // 새 주차 번호 할당 (저장 전)
             const fullMeasurementData = {};
             [...baseNumericKeys, ...textKeys, 'date', 'week', 'timestamp'].forEach(key => {
                 fullMeasurementData[key] = measurementData.hasOwnProperty(key) ? measurementData[key] : null;
@@ -1526,9 +1579,12 @@ document.addEventListener('DOMContentLoaded', () => {
             measurements.push(fullMeasurementData);
             console.log("DEBUG: New measurement added with week", measurementData.week);
              showPopup('popupSaveSuccess');
-        }
-        measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-        calculateAndAddWeekNumbers(); // Recalculate weeks based on new order/count
+
+             measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+             calculateAndAddWeekNumbers(); // Recalculate weeks after adding and sorting
+         }
+        
+
         savePrimaryDataToStorage();
         resetFormState();
         renderAll();
@@ -1543,10 +1599,9 @@ document.addEventListener('DOMContentLoaded', () => {
              if (confirm(translate('confirmDeleteRecord', { week: weekNum, date: formatTimestamp(entry.timestamp || entry.date, false) }))) { // Use updated confirm key
                 measurements.splice(index, 1);
                 console.log("DEBUG: Measurement deleted at index", index);
-                 calculateAndAddWeekNumbers();
-                 savePrimaryDataToStorage();
-                 renderAll();
-                 showPopup('popupDeleteSuccess');
+                savePrimaryDataToStorage();
+                renderAll();
+                showPopup('popupDeleteSuccess');
              }
          } else { console.error("Invalid index for deletion:", index); showPopup('alertCannotFindRecordDelete'); }
     }
@@ -1950,7 +2005,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initial Setup Save Button
         if (initialSetupSaveBtn) initialSetupSaveBtn.addEventListener('click', handleInitialSetupSave);
         // Swipe Listeners
-        document.body.addEventListener('touchstart', handleTouchStart, { passive: true });
+        document.body.addEventListener('touchstart', function(e) {
+            if ( (e.touches.length > 1) || e.targetTouches.length > 1) {
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+            }
+          }, {passive: false});
         document.body.addEventListener('touchmove', handleTouchMove, { passive: false });
         document.body.addEventListener('touchend', handleTouchEnd);
         console.log("DEBUG: Swipe listeners attached to body.");

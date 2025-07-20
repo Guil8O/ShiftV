@@ -84,7 +84,7 @@ const languages = {
         antiAndrogen: '항안드로겐 (mg)', testosterone: '테스토스테론 (mg)',
         medicationOtherName: '기타 마법 이름',
         medicationOtherDose: '기타 마법 용량 (mg)',
-        medicationOtherNamePlaceholder: '(기타)', 
+        medicationOtherNamePlaceholder: '(기타)',
         unitMgPlaceholder: 'mg',
         // Placeholders
         cupSizePlaceholder: '예: 75A', skinConditionPlaceholder: '예: 부드러워짐', libidoPlaceholder: '회/주',
@@ -369,6 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastScrollY = window.scrollY;
     let isTabBarCollapsed = false;
     let currentTheme = 'system'; // *** 수정 4: 테마 상태 변수 추가 ***
+    let resizeDebounceTimer;
 
     // --- DOM Element References ---
     const mainTitle = document.querySelector('#main-title');
@@ -394,7 +395,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextMeasurementInfoDiv = document.getElementById('next-measurement-info');
     const inputDescriptionP = document.querySelector('#tab-input .description');
     // History Tab
-    const historyContainer = document.getElementById('history-table-container');
+    const historyTabContent = document.getElementById('tab-history'); // ** NEW ** For event delegation
+    const historyCardsContainer = document.getElementById('history-cards-container'); // ** NEW **
+    const historyTableContainer = document.getElementById('history-table-container'); // ** RENAMED from historyContainer **
     const historyDescriptionP = document.querySelector('#tab-history .description');
     const historyTitleH2 = document.querySelector('#tab-history h2');
     // Report Tab
@@ -452,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const importFileInput = document.getElementById('import-file-input');
     const languageSelect = document.getElementById('language-select');
     const modeSelect = document.getElementById('mode-select');
-    const themeSelect = document.getElementById('theme-select'); // *** 수정 4: 테마 선택 요소 참조 ***
+    const themeSelect = document.getElementById('theme-select');
     const langLabel = document.querySelector('label[for="language-select"]');
     const modeLabel = document.querySelector('label[for="mode-select"]');
 
@@ -466,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'height', 'weight', 'shoulder', 'neck', 'chest', 'waist', 'hips', 'thigh', 'calf', 'arm',
         'muscleMass', 'bodyFatPercentage', 'libido', 'semenScore', 'healthScore',
         'estradiol', 'progesterone', 'antiAndrogen', 'testosterone',
-        'medicationOtherDose' 
+        'medicationOtherDose'
     ];
     const textKeys = ['cupSize', 'semenNotes', 'healthNotes', 'skinCondition', 'medicationOtherName'];
     const displayKeysInOrder = [
@@ -475,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'muscleMass', 'bodyFatPercentage', 'libido', 'skinCondition', 'healthScore', 'healthNotes',
         'semenScore', 'semenNotes',
         'estradiol', 'progesterone', 'antiAndrogen', 'testosterone',
-        'medicationOtherName', 'medicationOtherDose', 
+        'medicationOtherName', 'medicationOtherDose',
         'timestamp'
     ];
     const chartSelectableKeys = baseNumericKeys.filter(k => !k.includes('Score'));
@@ -496,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'iPad Simulator', 'iPhone Simulator', 'iPod Simulator',
             'iPad', 'iPhone', 'iPod'
         ].includes(navigator.platform)
-        || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+            || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
     }
 
     function translate(key, params = {}) {
@@ -525,33 +528,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 translation = translate(key, params);
 
+                if (el.classList.contains('tab-button')) {
+                    const span = el.querySelector('span');
+                    if (span) span.textContent = translation;
+                    return; // Skip to the next element once handled
+                }
+
                 if ((el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && el.placeholder !== undefined) {
-                    // Placeholder 처리 로직
                     const placeholderKey = key + 'Placeholder';
                     let placeholderText = translate(placeholderKey);
-                    // If specific placeholder key doesn't exist, fallback to main key? Or default?
-                    if (placeholderText === placeholderKey) { // Translation not found for specific key
-                        if (el.type === 'number') placeholderText = translate('unit' + key.charAt(0).toUpperCase() + key.slice(1)) || translate(key).split('(')[1]?.replace(')', '') || 'Value'; // Try unit or number
-                        else if (el.type === 'text') placeholderText = translate('notesPlaceholder') || 'Text';
-                        else placeholderText = translate(key) || 'Input'; // Fallback to main key or generic 'Input'
-                    }
-                     el.placeholder = placeholderText;
 
+                    // ** MODIFIED ** to handle specific placeholder fallbacks
+                    if (placeholderText === placeholderKey) { // 번역이 없을 경우
+                        switch (key) {
+                            case 'semenScore':
+                            case 'healthScore':
+                                placeholderText = translate('scorePlaceholder') || 'Number';
+                                break;
+                            case 'medicationOtherDose':
+                                placeholderText = translate('unitMgPlaceholder') || 'mg';
+                                break;
+                            default:
+                                if (el.type === 'number') {
+                                    placeholderText = translate(key).split('(')[1]?.replace(')', '') || 'Number';
+                                } else {
+                                    placeholderText = translate('notesPlaceholder') || 'Text';
+                                }
+                                break;
+                        }
+                    }
+                    el.placeholder = placeholderText;
                 } else if (el.tagName === 'BUTTON' || el.tagName === 'OPTION' || el.tagName === 'LEGEND' || el.tagName === 'LABEL' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'P' || el.tagName === 'SPAN' || el.tagName === 'STRONG' || el.tagName === 'TD' || el.tagName === 'TH') {
-                     // 단순 텍스트 요소 업데이트
-                      if (el.childElementCount === 0 || el.classList.contains('description') || el.classList.contains('table-title') || el.classList.contains('tab-button') || el.tagName === 'BUTTON' || el.tagName === 'OPTION' || el.tagName === 'LEGEND' || el.tagName === 'LABEL' || el.classList.contains('version-info') || el.classList.contains('form-title') || el.classList.contains('warning') || el.classList.contains('placeholder-text')) {
-                          // Check if it's the specific span for version number to avoid overwriting
-                          if (!el.id?.includes('app-version-display')) {
-                               // Handle special cases like warning messages with strong tags
-                              if (el.classList.contains('warning') && key === 'importWarning') {
-                                  el.innerHTML = `<strong data-lang-key="warning">${translate('warning')}</strong> <span>${translation}</span>`;
-                              } else if (el.classList.contains('warning') && key === 'resetWarning') {
-                                   el.innerHTML = `<strong data-lang-key="severeWarning">${translate('severeWarning')}</strong> <span>${translation}</span>`;
-                               } else {
-                                  el.textContent = translation;
-                              }
-                          }
-                     }
+                    // 단순 텍스트 요소 업데이트
+                    if (el.childElementCount === 0 || el.classList.contains('description') || el.classList.contains('table-title') || el.classList.contains('tab-button') || el.tagName === 'BUTTON' || el.tagName === 'OPTION' || el.tagName === 'LEGEND' || el.tagName === 'LABEL' || el.classList.contains('version-info') || el.classList.contains('form-title') || el.classList.contains('warning') || el.classList.contains('placeholder-text')) {
+                        // Check if it's the specific span for version number to avoid overwriting
+                        if (!el.id?.includes('app-version-display')) {
+                            // Handle special cases like warning messages with strong tags
+                            if (el.classList.contains('warning') && key === 'importWarning') {
+                                el.innerHTML = `<strong data-lang-key="warning">${translate('warning')}</strong> <span>${translation}</span>`;
+                            } else if (el.classList.contains('warning') && key === 'resetWarning') {
+                                el.innerHTML = `<strong data-lang-key="severeWarning">${translate('severeWarning')}</strong> <span>${translation}</span>`;
+                            } else {
+                                el.textContent = translation;
+                            }
+                        }
+                    }
                 } else if (el.tagName === 'IMG' && el.alt !== undefined) {
                     el.alt = translation;
                 }
@@ -587,26 +608,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (option.value === 'ja') option.textContent = '日本語';
                 });
                 if (select.id === 'language-select') select.value = currentLanguage;
-             }
+            }
         });
         [modeSelect, initialModeSelect].forEach(select => {
-             if (select) {
+            if (select) {
                 Array.from(select.options).forEach(option => {
                     const key = option.value === 'mtf' ? 'modeMtf' : 'modeFtm';
                     option.textContent = translate(key);
                 });
-                 if (select.id === 'mode-select') select.value = currentMode;
+                if (select.id === 'mode-select') select.value = currentMode;
             }
         });
         if (noteSortOrderSelect) {
-             Array.from(noteSortOrderSelect.options).forEach(option => {
+            Array.from(noteSortOrderSelect.options).forEach(option => {
                 const key = option.value === 'newest' ? 'sortNewest' : 'sortOldest';
                 option.textContent = translate(key);
             });
             noteSortOrderSelect.value = currentNoteSortOrder;
         }
-         // *** 수정 4: 테마 선택 옵션 번역 ***
-         if (themeSelect) {
+        // *** 수정 4: 테마 선택 옵션 번역 ***
+        if (themeSelect) {
             Array.from(themeSelect.options).forEach(option => {
                 let key = '';
                 if (option.value === 'system') key = 'themeSystem';
@@ -622,15 +643,15 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("DEBUG: Re-rendering components after translation...");
         renderChartSelector();
         setupTargetInputs(true);
-        renderHistoryTable();
+        renderHistoryView();
         renderAllComparisonTables();
         renderNotesList();
         renderNextMeasurementInfo();
         if (chartInstance && chartInstance.options) {
-             if (chartInstance.options.scales?.x?.title) {
+            if (chartInstance.options.scales?.x?.title) {
                 chartInstance.options.scales.x.title.text = translate('chartAxisLabel');
-             }
-             chartInstance.update();
+            }
+            chartInstance.update();
             console.log("DEBUG: Chart updated for language change.");
         }
 
@@ -715,7 +736,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const settings = JSON.parse(storedSettings);
             currentTheme = settings.theme || 'system';
         } else {
-             currentTheme = 'system'; // 기본값
+            currentTheme = 'system'; // 기본값
         }
         if (themeSelect) {
             themeSelect.value = currentTheme;
@@ -723,40 +744,114 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("DEBUG: Theme setting loaded:", currentTheme);
     }
 
-     function applyTheme() {
-         let themeToApply = currentTheme;
-         const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    // ** NEW ** Debounce function for performance on resize events
+    function debounce(func, delay) {
+        clearTimeout(resizeDebounceTimer);
+        resizeDebounceTimer = setTimeout(func, delay);
+    }
 
-         if (themeToApply === 'system') {
-             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-             themeToApply = prefersDark ? 'dark' : 'light';
-         }
+    // ** NEW ** Master function to decide which history view to render
+    function renderHistoryView() {
+        // This function will be called on load and on resize
+        const isMobileView = window.innerWidth < 768;
 
-         console.log("DEBUG: Applying theme:", themeToApply);
-         document.body.classList.remove('light-mode', 'dark-mode');
+        if (isMobileView) {
+            if (historyCardsContainer) historyCardsContainer.style.display = 'grid';
+            if (historyTableContainer) historyTableContainer.style.display = 'none';
+            renderHistoryCards();
+        } else {
+            if (historyCardsContainer) historyCardsContainer.style.display = 'none';
+            if (historyTableContainer) historyTableContainer.style.display = 'block';
+            renderHistoryTable();
+        }
+    }
 
-         if (themeToApply === 'light') {
-             document.body.classList.add('light-mode');
-             if(themeColorMeta) themeColorMeta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--lm-bg').trim() || '#FFF0F5'); // 라이트 모드 배경색
-         } else {
-             document.body.classList.add('dark-mode');
-             if(themeColorMeta) themeColorMeta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg-dark').trim() || '#1E1E48'); // 다크 모드 배경색
-         }
-         // Update chart colors if chart exists
-         if(chartInstance) {
-             // Force chart redraw which should pick up new CSS variable colors
-             renderChart(); // Re-rendering might be necessary if colors don't update automatically
-         }
-     }
+    // ** NEW ** Function to render history records as cards (for mobile)
+    // ** NEW ** Function to render history records as cards (for mobile)
+    // ** NEW ** Function to render history records as cards (for mobile)
+    // ** FINAL FIX ** Function to render history records as cards with an inner table for scrolling
+    // ** FINAL FIX ** Function to render history records as cards with an inner table for scrolling
+    // ** FINAL FIX ** Function to render history records with a dedicated scroll wrapper
+    // ** FINAL FIX ** Function to render history records with a dedicated scroll wrapper
+    function renderHistoryCards() {
+        if (!historyCardsContainer) return;
+        if (!measurements || measurements.length === 0) {
+            clearElement(historyCardsContainer, "noDataYet");
+            return;
+        }
 
-     function handleThemeChange(event) {
-         currentTheme = event.target.value;
-         console.log("DEBUG: Theme changed to", currentTheme);
-         saveThemeSetting();
-         applyTheme();
-         showPopup('popupSettingsSaved');
-     }
-     // --- 끝: 테마 설정 함수 ---
+        let html = '';
+        const reversedMeasurements = [...measurements].reverse();
+        reversedMeasurements.forEach((m, revIndex) => {
+            const index = measurements.length - 1 - revIndex;
+            const displayKeys = getFilteredDisplayKeys().filter(key =>
+                !['week', 'date', 'timestamp'].includes(key) && (m[key] !== null && m[key] !== undefined && m[key] !== '')
+            );
+
+            const labelsRow = displayKeys.map(key => `<th class="label">${translate(key).split('(')[0].trim()}</th>`).join('');
+            const valuesRow = displayKeys.map(key => `<td class="value">${formatValue(m[key], key)}</td>`).join('');
+
+            html += `
+            <div class="history-card glass-card">
+                <div class="history-card-header">
+                    <h4>${translate('week')} ${m.week ?? index}</h4>
+                    <span class="date">${formatTimestamp(m.timestamp, false)}</span>
+                </div>
+                <div class="history-card-body">
+                    <div class="inner-table-wrapper">
+                        <table class="inner-history-table">
+                            <thead>
+                                <tr>${labelsRow}</tr>
+                            </thead>
+                            <tbody>
+                                <tr>${valuesRow}</tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="history-card-actions">
+                    <button class="glass-button btn-edit" data-index="${index}">${translate('edit')}</button>
+                    <button class="glass-button danger btn-delete" data-index="${index}">${translate('delete')}</button>
+                </div>
+            </div>`;
+        });
+        historyCardsContainer.innerHTML = html;
+    }
+
+    function applyTheme() {
+        let themeToApply = currentTheme;
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
+        if (themeToApply === 'system') {
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            themeToApply = prefersDark ? 'dark' : 'light';
+        }
+
+        console.log("DEBUG: Applying theme:", themeToApply);
+        document.body.classList.remove('light-mode', 'dark-mode');
+
+        if (themeToApply === 'light') {
+            document.body.classList.add('light-mode');
+            if (themeColorMeta) themeColorMeta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--lm-bg').trim() || '#FFF0F5'); // 라이트 모드 배경색
+        } else {
+            document.body.classList.add('dark-mode');
+            if (themeColorMeta) themeColorMeta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg-dark').trim() || '#1E1E48'); // 다크 모드 배경색
+        }
+        // Update chart colors if chart exists
+        if (chartInstance) {
+            // Force chart redraw which should pick up new CSS variable colors
+            renderChart(); // Re-rendering might be necessary if colors don't update automatically
+        }
+    }
+
+    function handleThemeChange(event) {
+        currentTheme = event.target.value;
+        console.log("DEBUG: Theme changed to", currentTheme);
+        saveThemeSetting();
+        applyTheme();
+        showPopup('popupSettingsSaved');
+    }
+    // --- 끝: 테마 설정 함수 ---
 
     function saveSettingsToStorage() {
         const settings = {
@@ -794,19 +889,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 isInitialSetupDone = false;
                 selectedMetrics = ['weight'];
             }
-             // Update UI elements after loading settings
-             if (languageSelect) languageSelect.value = currentLanguage;
-             if (modeSelect) modeSelect.value = currentMode;
-             if (themeSelect) themeSelect.value = currentTheme; // *** 수정 4: 테마 드롭다운 업데이트 ***
+            // Update UI elements after loading settings
+            if (languageSelect) languageSelect.value = currentLanguage;
+            if (modeSelect) modeSelect.value = currentMode;
+            if (themeSelect) themeSelect.value = currentTheme; // *** 수정 4: 테마 드롭다운 업데이트 ***
         } catch (e) {
             console.error("Error loading settings:", e);
             showPopup('loadingError');
-             // Fallback to defaults
-             currentLanguage = 'ko';
-             currentMode = 'mtf';
-             currentTheme = 'system';
-             isInitialSetupDone = false;
-             selectedMetrics = ['weight'];
+            // Fallback to defaults
+            currentLanguage = 'ko';
+            currentMode = 'mtf';
+            currentTheme = 'system';
+            isInitialSetupDone = false;
+            selectedMetrics = ['weight'];
         }
     }
 
@@ -826,7 +921,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadPrimaryDataFromStorage() {
-         try {
+        try {
             const storedData = localStorage.getItem(PRIMARY_DATA_KEY);
             if (storedData) {
                 const data = JSON.parse(storedData);
@@ -834,23 +929,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 targets = (typeof data.targets === 'object' && data.targets !== null) ? data.targets : {};
                 notes = Array.isArray(data.notes) ? data.notes : [];
 
-                 measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-                 let needsSave = false;
-                 measurements.forEach((m, index) => {
-                     if (m.week !== index) { m.week = index; needsSave = true; }
-                     if (!m.timestamp) {
-                         m.timestamp = m.date ? new Date(m.date).getTime() : Date.now() - (measurements.length - 1 - index) * 86400000;
-                         needsSave = true;
-                     }
-                 });
-                 notes.forEach(note => {
-                     if (!note.id) { note.id = 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9); needsSave = true; }
-                     if (!note.timestamp) { note.timestamp = note.createdAt || note.id || Date.now(); needsSave = true; }
-                 });
-                 if (needsSave) {
-                     console.log("DEBUG: Data migration applied (week numbers/timestamps/note IDs). Saving updated data.");
-                     savePrimaryDataToStorage();
-                 }
+                measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                let needsSave = false;
+                measurements.forEach((m, index) => {
+                    if (m.week !== index) { m.week = index; needsSave = true; }
+                    if (!m.timestamp) {
+                        m.timestamp = m.date ? new Date(m.date).getTime() : Date.now() - (measurements.length - 1 - index) * 86400000;
+                        needsSave = true;
+                    }
+                });
+                notes.forEach(note => {
+                    if (!note.id) { note.id = 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9); needsSave = true; }
+                    if (!note.timestamp) { note.timestamp = note.createdAt || note.id || Date.now(); needsSave = true; }
+                });
+                if (needsSave) {
+                    console.log("DEBUG: Data migration applied (week numbers/timestamps/note IDs). Saving updated data.");
+                    savePrimaryDataToStorage();
+                }
                 console.log("DEBUG: Primary data loaded.", { measurements: measurements.length, targets: Object.keys(targets).length, notes: notes.length });
             } else {
                 console.log("DEBUG: No primary data found in storage.");
@@ -859,7 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error("Error loading or parsing primary data:", e);
             showPopup('loadingError');
-             measurements = []; targets = {}; notes = [];
+            measurements = []; targets = {}; notes = [];
         }
     }
 
@@ -878,7 +973,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initial Setup Popup Logic ---
     function showInitialSetupPopup() {
         if (!initialSetupPopup || !initialLanguageSelect || !initialModeSelect || !initialSetupSaveBtn) {
-             console.error("DEBUG: Initial setup popup elements missing!"); return;
+            console.error("DEBUG: Initial setup popup elements missing!"); return;
         }
         console.log("DEBUG: Showing initial setup popup.");
         initialLanguageSelect.value = currentLanguage;
@@ -886,12 +981,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Translate popup content
         try {
-             initialSetupPopup.querySelector('h2')?.setAttribute('data-lang-key', 'initialSetupTitle');
-             initialSetupPopup.querySelector('p')?.setAttribute('data-lang-key', 'initialSetupDesc');
-             initialSetupPopup.querySelector('label[for="initial-language-select"]')?.setAttribute('data-lang-key', 'language');
-             initialSetupPopup.querySelector('label[for="initial-mode-select"]')?.setAttribute('data-lang-key', 'mode');
-             initialSetupPopup.querySelector('#initial-setup-save')?.setAttribute('data-lang-key', 'saveSettings');
-             translateUI(); // Translate the whole UI temporarily to get popup text
+            initialSetupPopup.querySelector('h2')?.setAttribute('data-lang-key', 'initialSetupTitle');
+            initialSetupPopup.querySelector('p')?.setAttribute('data-lang-key', 'initialSetupDesc');
+            initialSetupPopup.querySelector('label[for="initial-language-select"]')?.setAttribute('data-lang-key', 'language');
+            initialSetupPopup.querySelector('label[for="initial-mode-select"]')?.setAttribute('data-lang-key', 'mode');
+            initialSetupPopup.querySelector('#initial-setup-save')?.setAttribute('data-lang-key', 'saveSettings');
+            translateUI(); // Translate the whole UI temporarily to get popup text
         } catch (e) { console.error("Error translating initial setup popup:", e); }
 
         initialSetupPopup.style.display = 'flex';
@@ -905,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleInitialSetupSave() {
         if (!initialLanguageSelect || !initialModeSelect) {
-             console.error("Initial setup select elements missing during save."); return;
+            console.error("Initial setup select elements missing during save."); return;
         }
         currentLanguage = initialLanguageSelect.value;
         currentMode = initialModeSelect.value;
@@ -935,19 +1030,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.mtf-only').forEach(el => el.style.display = currentMode === 'mtf' ? '' : 'none');
         document.querySelectorAll('.ftm-only').forEach(el => el.style.display = currentMode === 'ftm' ? '' : 'none');
 
-        if(modeSelect) modeSelect.value = currentMode;
+        if (modeSelect) modeSelect.value = currentMode;
         setupTargetInputs(true); // Update target inputs visibility/labels
 
-         if (isInitialSetupDone){ // Avoid unnecessary renders during initial setup
-             renderHistoryTable();
-             renderAllComparisonTables();
-             renderChartSelector();
-             renderChart();
-         }
+        if (isInitialSetupDone) { // Avoid unnecessary renders during initial setup
+            renderHistoryTable();
+            renderAllComparisonTables();
+            renderChartSelector();
+            renderChart();
+        }
     }
 
     function applyLanguageToUI() {
-        if(languageSelect) languageSelect.value = currentLanguage;
+        if (languageSelect) languageSelect.value = currentLanguage;
         translateUI(); // Translates UI and triggers re-renders
     }
 
@@ -969,7 +1064,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateCurrentWeekDisplay() {
         if (currentWeekSpan) {
-             currentWeekSpan.textContent = getCurrentWeekNumber();
+            currentWeekSpan.textContent = getCurrentWeekNumber();
         }
     }
 
@@ -978,10 +1073,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let week = 0;
         const editIndexVal = editIndexInput.value;
         if (editIndexVal !== '' && !isNaN(editIndexVal)) {
-             const index = parseInt(editIndexVal, 10);
-             if (index >= 0 && index < measurements.length && measurements[index].week !== undefined) {
-                 week = measurements[index].week;
-             } else { week = getCurrentWeekNumber(); }
+            const index = parseInt(editIndexVal, 10);
+            if (index >= 0 && index < measurements.length && measurements[index].week !== undefined) {
+                week = measurements[index].week;
+            } else { week = getCurrentWeekNumber(); }
         } else { week = measurements.length; }
         const titleKey = editIndexVal === '' ? 'formTitleNew' : 'formTitleEdit';
         formTitle.innerHTML = translate(titleKey, { week: week });
@@ -997,8 +1092,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const lastMeasurement = measurements[measurements.length - 1];
         const lastTimestamp = lastMeasurement.timestamp || (lastMeasurement.date ? new Date(lastMeasurement.date).getTime() : 0);
         if (!lastTimestamp || isNaN(lastTimestamp)) {
-             nextMeasurementInfoDiv.innerHTML = `<p>${translate('nextMeasurementInfoNoData')}</p>`;
-             console.warn("DEBUG: Last measurement has invalid date/timestamp."); return;
+            nextMeasurementInfoDiv.innerHTML = `<p>${translate('nextMeasurementInfoNoData')}</p>`;
+            console.warn("DEBUG: Last measurement has invalid date/timestamp."); return;
         }
         const lastDate = new Date(lastTimestamp);
         const today = new Date();
@@ -1047,60 +1142,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getFilteredChartKeys() {
-         let keys = [...chartSelectableKeys];
-         if (currentMode === 'mtf') {
+        let keys = [...chartSelectableKeys];
+        if (currentMode === 'mtf') {
             keys = keys.filter(k => !medicationKeys_FtM.includes(k));
-         } else if (currentMode === 'ftm') {
+        } else if (currentMode === 'ftm') {
             keys = keys.filter(k => !medicationKeys_MtF.includes(k));
-         }
-         return keys;
+        }
+        return keys;
     }
 
 
     // --- History Tab Rendering ---
     function renderHistoryTable() {
         console.log("DEBUG: -> renderHistoryTable");
-        if (!historyContainer) return;
+        if (!historyTableContainer) return;
         if (!measurements || measurements.length === 0) {
-            clearElement(historyContainer, "noDataYet"); return;
+            clearElement(historyTableContainer, "noDataYet"); return;
         }
         try {
-             measurements.sort((a, b) => (a.week || 0) - (b.week || 0));
-             const currentDisplayKeys = getFilteredDisplayKeys();
-             let tableHTML = '<table><thead><tr>';
-             currentDisplayKeys.forEach(key => {
-                 if (key === 'timestamp') return;
-                 const labelData = translate(key).match(/^(.*?) *(\((.*?)\))?$/);
-                 const labelText = labelData ? labelData[1].trim() : translate(key);
-                 const unitText = labelData && labelData[3] ? `<span class="unit">(${labelData[3]})</span>` : '';
-                 tableHTML += `<th>${labelText}${unitText}</th>`;
-             });
-             tableHTML += `<th class="sticky-col">${translate('manageColumn')}</th>`;
-             tableHTML += `</tr></thead><tbody>`;
-             for (let i = 0; i < measurements.length; i++) {
-                 const m = measurements[i];
-                 const displayDate = formatTimestamp(m.timestamp || m.date, false);
-                 tableHTML += '<tr>';
-                 currentDisplayKeys.forEach(key => {
-                      if (key === 'timestamp') return;
-                      let value = '-';
-                      if (key === 'week') { value = m.week ?? i; }
-                      else if (key === 'date') { value = displayDate; }
-                      else { value = formatValue(m[key], key); }
-                      tableHTML += `<td>${value}</td>`;
-                 });
-                 tableHTML += `<td class="action-buttons sticky-col">`;
-                 tableHTML += `<button class="btn btn-edit" data-index="${i}">${translate('edit')}</button>`;
-                 tableHTML += `<button class="btn btn-delete" data-index="${i}">${translate('delete')}</button>`;
-                 tableHTML += `</td>`;
-                 tableHTML += '</tr>';
-             }
-             tableHTML += '</tbody></table>';
-             historyContainer.innerHTML = tableHTML;
-             console.log("DEBUG: <- renderHistoryTable complete");
+            measurements.sort((a, b) => (a.week || 0) - (b.week || 0));
+            const currentDisplayKeys = getFilteredDisplayKeys();
+            let tableHTML = '<table><thead><tr>';
+            currentDisplayKeys.forEach(key => {
+                if (key === 'timestamp') return;
+                const labelData = translate(key).match(/^(.*?) *(\((.*?)\))?$/);
+                const labelText = labelData ? labelData[1].trim() : translate(key);
+                const unitText = labelData && labelData[3] ? `<span class="unit">(${labelData[3]})</span>` : '';
+                tableHTML += `<th>${labelText}${unitText}</th>`;
+            });
+            tableHTML += `<th class="sticky-col">${translate('manageColumn')}</th>`;
+            tableHTML += `</tr></thead><tbody>`;
+            for (let i = 0; i < measurements.length; i++) {
+                const m = measurements[i];
+                const displayDate = formatTimestamp(m.timestamp || m.date, false);
+                tableHTML += '<tr>';
+                currentDisplayKeys.forEach(key => {
+                    if (key === 'timestamp') return;
+                    let value = '-';
+                    if (key === 'week') { value = m.week ?? i; }
+                    else if (key === 'date') { value = displayDate; }
+                    else { value = formatValue(m[key], key); }
+                    tableHTML += `<td>${value}</td>`;
+                });
+                tableHTML += `<td class="action-buttons sticky-col">`;
+                // ** MODIFIED to use new glass button classes **
+                tableHTML += `<button class="glass-button btn-edit" data-index="${i}">${translate('edit')}</button>`;
+                tableHTML += `<button class="glass-button danger btn-delete" data-index="${i}">${translate('delete')}</button>`;
+                tableHTML += `</td>`;
+                tableHTML += '</tr>';
+            }
+            tableHTML += '</tbody></table>';
+            historyTableContainer.innerHTML = tableHTML;
+            console.log("DEBUG: <- renderHistoryTable complete");
         } catch (e) {
             console.error(" Error rendering history table:", e);
-            historyContainer.innerHTML = `<p style="color: red;">${translate('alertGenericError')}</p>`;
+            historyTableContainer.innerHTML = `<p style="color: red;">${translate('alertGenericError')}</p>`;
         }
     }
 
@@ -1111,13 +1207,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = dataResult.data;
         const headers = dataResult.headers;
         const titleElement = document.getElementById(container.id.replace('-container', '-title'));
-        if(titleElement) titleElement.textContent = translate(titleKey);
+        if (titleElement) titleElement.textContent = translate(titleKey);
 
         if (!data || data.length === 0) {
-             if (titleKey === 'reportTargetTitle' && Object.keys(targets).length === 0) clearElement(container, 'reportNeedTarget');
-             else if (measurements.length < 2 && (titleKey === 'reportPrevWeekTitle' || titleKey === 'reportInitialTitle')) clearElement(container, 'reportNeedTwoRecords');
-             else if (measurements.length === 0) clearElement(container, 'noDataYet');
-             else clearElement(container, 'noDataForChart');
+            if (titleKey === 'reportTargetTitle' && Object.keys(targets).length === 0) clearElement(container, 'reportNeedTarget');
+            else if (measurements.length < 2 && (titleKey === 'reportPrevWeekTitle' || titleKey === 'reportInitialTitle')) clearElement(container, 'reportNeedTwoRecords');
+            else if (measurements.length === 0) clearElement(container, 'noDataYet');
+            else clearElement(container, 'noDataForChart');
             return;
         }
         let tableHTML = `<table class="comparison-table"><thead><tr>`;
@@ -1126,14 +1222,14 @@ document.addEventListener('DOMContentLoaded', () => {
         data.forEach(item => {
             tableHTML += `<tr>`;
             if (Array.isArray(item)) {
-                 item.forEach(cellData => {
-                     let value = cellData;
-                     let className = '';
-                     if (typeof cellData === 'object' && cellData !== null) {
-                         value = cellData.value; className = cellData.class || '';
-                     }
-                     tableHTML += `<td ${className ? `class="${className}"` : ''}>${value}</td>`;
-                 });
+                item.forEach(cellData => {
+                    let value = cellData;
+                    let className = '';
+                    if (typeof cellData === 'object' && cellData !== null) {
+                        value = cellData.value; className = cellData.class || '';
+                    }
+                    tableHTML += `<td ${className ? `class="${className}"` : ''}>${value}</td>`;
+                });
             }
             tableHTML += `</tr>`;
         });
@@ -1157,7 +1253,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const threshold = 0.05;
                 if (diff > threshold) { change = `+${change}`; changeClass = 'positive-change'; }
                 else if (diff < -threshold) { changeClass = 'negative-change'; }
-                 data.push([ translate(key).split('(')[0].trim(), { value: change, class: changeClass } ]);
+                data.push([translate(key).split('(')[0].trim(), { value: change, class: changeClass }]);
             }
         });
         return { data, headers };
@@ -1175,114 +1271,114 @@ document.addEventListener('DOMContentLoaded', () => {
             const latestValue = parseFloat(latest[key]);
             let change = '-'; let changeClass = '';
             if (!isOnlyOneRecord && !isNaN(initialValue) && !isNaN(latestValue)) {
-                 const diff = latestValue - initialValue;
-                 change = formatValue(diff, key);
-                 const threshold = 0.05;
-                 if (diff > threshold) { change = `+${change}`; changeClass = 'positive-change'; }
-                 else if (diff < -threshold) { changeClass = 'negative-change'; }
-                 data.push([ translate(key).split('(')[0].trim(), { value: change, class: changeClass } ]);
+                const diff = latestValue - initialValue;
+                change = formatValue(diff, key);
+                const threshold = 0.05;
+                if (diff > threshold) { change = `+${change}`; changeClass = 'positive-change'; }
+                else if (diff < -threshold) { changeClass = 'negative-change'; }
+                data.push([translate(key).split('(')[0].trim(), { value: change, class: changeClass }]);
             }
         });
         return { data, headers };
     }
 
     // *** 수정 2: 달성률 계산 수정 (100% 상한 적용) ***
-// *** 수정: 새로운 달성률 공식 적용 ***
-function calculateTargetComparison() {
-    const headers = [translate('comparisonItem'), translate('comparisonProgress')];
-    // Use targetSettingKeys which filters for numeric, non-text body/health keys
-    const relevantTargetKeys = targetSettingKeys.filter(k => targets[k] !== null && targets[k] !== undefined && targets[k] !== '');
+    // *** 수정: 새로운 달성률 공식 적용 ***
+    function calculateTargetComparison() {
+        const headers = [translate('comparisonItem'), translate('comparisonProgress')];
+        // Use targetSettingKeys which filters for numeric, non-text body/health keys
+        const relevantTargetKeys = targetSettingKeys.filter(k => targets[k] !== null && targets[k] !== undefined && targets[k] !== '');
 
-    // Need at least one measurement and one relevant target set
-    if (measurements.length === 0 || relevantTargetKeys.length === 0) {
-        // console.log("DEBUG: Target comparison skipped - no measurements or relevant targets."); // 디버깅 로그 필요시 주석 해제
-        return { data: [], headers };
-    }
-
-    const latestMeasurement = measurements[measurements.length - 1];
-    const data = [];
-    const zeroThreshold = 0.0001; // 부동 소수점 0 비교를 위한 임계값
-
-    // console.log("DEBUG: Calculating target comparison for keys:", relevantTargetKeys); // 디버깅 로그 필요시 주석 해제
-
-    relevantTargetKeys.forEach(key => {
-        const targetValue = parseFloat(targets[key]);
-        const currentValue = parseFloat(latestMeasurement[key]);
-
-        let achievementRateNum = NaN; // 계산 실패 시 NaN 유지
-        let achievementRateStr = '-';
-        let rateClass = '';
-
-        // 목표치(targetValue)와 현재기록치(currentValue)가 유효한 숫자인지 확인
-        if (!isNaN(targetValue) && !isNaN(currentValue)) {
-            // console.log(`DEBUG: Comparing Key: ${key}, Current: ${currentValue}, Target: ${targetValue}`); // 디버깅 로그 필요시 주석 해제
-
-            // --- ▼▼▼ 요청하신 새로운 달성률 계산 로직 적용 ▼▼▼ ---
-            if (Math.abs(targetValue) < zeroThreshold) { // 만약 목표치 == 0 이라면:
-                if (Math.abs(currentValue) < zeroThreshold) { // 현재기록치 == 0 이면:
-                    achievementRateNum = 100; // 100%
-                } else { // 현재기록치 != 0 이면:
-                    achievementRateNum = 0; // 0%
-                }
-            } else { // 만약 목표치 != 0 이라면:
-                // 근접도 (%) = MAX(0, (1 - |현재기록치 - 목표치| / |목표치|) * 100)
-                const absoluteDifference = Math.abs(currentValue - targetValue);
-                const absoluteTarget = Math.abs(targetValue); // 여기서 targetValue는 0이 아님
-                // 0으로 나누는 경우 방지 (이론상 발생 안 함)
-                if (absoluteTarget > zeroThreshold) {
-                     achievementRateNum = Math.max(0, (1 - (absoluteDifference / absoluteTarget)) * 100);
-                } else {
-                    // 혹시 모를 극단적인 경우 처리 (목표치가 0에 매우 가깝지만 0은 아닐 때)
-                    achievementRateNum = (Math.abs(currentValue) < zeroThreshold) ? 100 : 0;
-                }
-            }
-            // --- ▲▲▲ 새로운 달성률 계산 로직 끝 ▲▲▲ ---
-
-            // 계산이 성공했는지 확인 (결과가 NaN이 아닌지)
-            if (!isNaN(achievementRateNum)) {
-                achievementRateStr = `${achievementRateNum.toFixed(0)}%`; // 정수로 표시
-
-                // 계산된 비율에 따라 CSS 클래스 결정
-                if (achievementRateNum >= 100) { // 100% 이상 달성 (정확히 100 포함)
-                    rateClass = 'target-achieved';
-                } else if (achievementRateNum >= 80) { // 80% 이상
-                    rateClass = 'positive-change'; // 목표 근접 (긍정적)
-                } else if (achievementRateNum > 50) { // 50% 초과
-                   rateClass = ''; // 중간 정도는 특별 클래스 없음
-                } else { // 50% 이하
-                    rateClass = 'negative-change'; // 목표와 거리 있음 (부정적)
-                }
-                // console.log(`DEBUG: Key ${key} - Final Rate Str: ${achievementRateStr}, Class: ${rateClass}`); // 디버깅 로그 필요시 주석 해제
-            } else {
-                // console.log(`DEBUG: Key ${key} - Calculation failed (NaN).`); // 디버깅 로그 필요시 주석 해제
-                achievementRateStr = '-';
-                rateClass = '';
-            }
-
-             // 테이블 렌더링을 위한 데이터 배열에 추가
-            data.push([
-                translate(key).split('(')[0].trim(), // 항목 이름
-                { value: achievementRateStr, class: rateClass } // 진행률 값 및 클래스
-            ]);
-
-        } else {
-            // 목표값 또는 현재값이 유효한 숫자가 아니지만, 목표 자체는 설정된 경우
-            if (!isNaN(targetValue)) {
-                // console.log(`DEBUG: Key ${key} - Current value is invalid, cannot compare.`); // 디버깅 로그 필요시 주석 해제
-                data.push([
-                    translate(key).split('(')[0].trim(),
-                    { value: '-', class: '' }
-                ]);
-            } else {
-               // console.log(`DEBUG: Key ${key} - Target value is invalid.`); // 디버깅 로그 필요시 주석 해제
-               // 목표값 자체가 유효하지 않으면 행을 추가하지 않을 수도 있음 (선택사항)
-            }
+        // Need at least one measurement and one relevant target set
+        if (measurements.length === 0 || relevantTargetKeys.length === 0) {
+            // console.log("DEBUG: Target comparison skipped - no measurements or relevant targets."); // 디버깅 로그 필요시 주석 해제
+            return { data: [], headers };
         }
-    }); // End forEach loop
 
-    // console.log("DEBUG: Target comparison data generated:", data); // 디버깅 로그 필요시 주석 해제
-    return { data, headers };
-}
+        const latestMeasurement = measurements[measurements.length - 1];
+        const data = [];
+        const zeroThreshold = 0.0001; // 부동 소수점 0 비교를 위한 임계값
+
+        // console.log("DEBUG: Calculating target comparison for keys:", relevantTargetKeys); // 디버깅 로그 필요시 주석 해제
+
+        relevantTargetKeys.forEach(key => {
+            const targetValue = parseFloat(targets[key]);
+            const currentValue = parseFloat(latestMeasurement[key]);
+
+            let achievementRateNum = NaN; // 계산 실패 시 NaN 유지
+            let achievementRateStr = '-';
+            let rateClass = '';
+
+            // 목표치(targetValue)와 현재기록치(currentValue)가 유효한 숫자인지 확인
+            if (!isNaN(targetValue) && !isNaN(currentValue)) {
+                // console.log(`DEBUG: Comparing Key: ${key}, Current: ${currentValue}, Target: ${targetValue}`); // 디버깅 로그 필요시 주석 해제
+
+                // --- ▼▼▼ 요청하신 새로운 달성률 계산 로직 적용 ▼▼▼ ---
+                if (Math.abs(targetValue) < zeroThreshold) { // 만약 목표치 == 0 이라면:
+                    if (Math.abs(currentValue) < zeroThreshold) { // 현재기록치 == 0 이면:
+                        achievementRateNum = 100; // 100%
+                    } else { // 현재기록치 != 0 이면:
+                        achievementRateNum = 0; // 0%
+                    }
+                } else { // 만약 목표치 != 0 이라면:
+                    // 근접도 (%) = MAX(0, (1 - |현재기록치 - 목표치| / |목표치|) * 100)
+                    const absoluteDifference = Math.abs(currentValue - targetValue);
+                    const absoluteTarget = Math.abs(targetValue); // 여기서 targetValue는 0이 아님
+                    // 0으로 나누는 경우 방지 (이론상 발생 안 함)
+                    if (absoluteTarget > zeroThreshold) {
+                        achievementRateNum = Math.max(0, (1 - (absoluteDifference / absoluteTarget)) * 100);
+                    } else {
+                        // 혹시 모를 극단적인 경우 처리 (목표치가 0에 매우 가깝지만 0은 아닐 때)
+                        achievementRateNum = (Math.abs(currentValue) < zeroThreshold) ? 100 : 0;
+                    }
+                }
+                // --- ▲▲▲ 새로운 달성률 계산 로직 끝 ▲▲▲ ---
+
+                // 계산이 성공했는지 확인 (결과가 NaN이 아닌지)
+                if (!isNaN(achievementRateNum)) {
+                    achievementRateStr = `${achievementRateNum.toFixed(0)}%`; // 정수로 표시
+
+                    // 계산된 비율에 따라 CSS 클래스 결정
+                    if (achievementRateNum >= 100) { // 100% 이상 달성 (정확히 100 포함)
+                        rateClass = 'target-achieved';
+                    } else if (achievementRateNum >= 80) { // 80% 이상
+                        rateClass = 'positive-change'; // 목표 근접 (긍정적)
+                    } else if (achievementRateNum > 50) { // 50% 초과
+                        rateClass = ''; // 중간 정도는 특별 클래스 없음
+                    } else { // 50% 이하
+                        rateClass = 'negative-change'; // 목표와 거리 있음 (부정적)
+                    }
+                    // console.log(`DEBUG: Key ${key} - Final Rate Str: ${achievementRateStr}, Class: ${rateClass}`); // 디버깅 로그 필요시 주석 해제
+                } else {
+                    // console.log(`DEBUG: Key ${key} - Calculation failed (NaN).`); // 디버깅 로그 필요시 주석 해제
+                    achievementRateStr = '-';
+                    rateClass = '';
+                }
+
+                // 테이블 렌더링을 위한 데이터 배열에 추가
+                data.push([
+                    translate(key).split('(')[0].trim(), // 항목 이름
+                    { value: achievementRateStr, class: rateClass } // 진행률 값 및 클래스
+                ]);
+
+            } else {
+                // 목표값 또는 현재값이 유효한 숫자가 아니지만, 목표 자체는 설정된 경우
+                if (!isNaN(targetValue)) {
+                    // console.log(`DEBUG: Key ${key} - Current value is invalid, cannot compare.`); // 디버깅 로그 필요시 주석 해제
+                    data.push([
+                        translate(key).split('(')[0].trim(),
+                        { value: '-', class: '' }
+                    ]);
+                } else {
+                    // console.log(`DEBUG: Key ${key} - Target value is invalid.`); // 디버깅 로그 필요시 주석 해제
+                    // 목표값 자체가 유효하지 않으면 행을 추가하지 않을 수도 있음 (선택사항)
+                }
+            }
+        }); // End forEach loop
+
+        // console.log("DEBUG: Target comparison data generated:", data); // 디버깅 로그 필요시 주석 해제
+        return { data, headers };
+    }
 
     function renderAllComparisonTables() {
         renderComparisonTable(prevWeekComparisonContainer, 'reportPrevWeekTitle', calculatePrevWeekComparison);
@@ -1304,14 +1400,18 @@ function calculateTargetComparison() {
             const color = `hsl(${hue}, 70%, 55%)`;
             button.style.borderColor = color;
             metricButtonColors[key] = color;
+            // ** FINAL FIX for Button Styling **
+            // ** FINAL FIX for Button Styling **
+            button.style.borderColor = color; // 테두리 색상은 계속 JS로 제어
+
             if (selectedMetrics.includes(key)) {
-                 button.classList.add('active');
-                 button.style.color = 'var(--lm-bg-card, #fff)'; // Use CSS var for text color
-                 button.style.backgroundColor = color;
+                button.classList.add('active');
+                button.style.backgroundColor = color; // 활성 배경색은 JS로 제어
+                button.style.color = '#ffffff'; // 활성 텍스트 색상
             } else {
-                 button.classList.remove('active');
-                 button.style.color = color;
-                 button.style.backgroundColor = 'var(--bg-dark, #1d1d45)'; // Use CSS var for background
+                button.classList.remove('active');
+                button.style.backgroundColor = ''; // 비활성 시 인라인 배경색 제거 -> CSS가 제어하도록 함
+                button.style.color = color;      // 비활성 텍스트 색상
             }
             chartSelector.appendChild(button);
         });
@@ -1322,11 +1422,12 @@ function calculateTargetComparison() {
         const metric = event.target.dataset.metric; if (!metric) return;
         const button = event.target;
         const color = metricButtonColors[metric];
+        // ** FINAL FIX for Button Click Handler **
         if (selectedMetrics.includes(metric)) {
             selectedMetrics = selectedMetrics.filter(m => m !== metric);
             button.classList.remove('active');
             button.style.color = color;
-            button.style.backgroundColor = 'var(--bg-dark, #1d1d45)';
+            button.style.backgroundColor = ''; // 인라인 스타일 제거
         } else {
             selectedMetrics.push(metric);
             button.classList.add('active');
@@ -1355,24 +1456,57 @@ function calculateTargetComparison() {
         if (measurements.length < 1 || metricsToRender.length === 0) {
             if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
             ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+
+            // ** MODIFIED for Text Wrapping **
+            const text = translate('noDataForChart');
+            const x = chartCanvas.width / 2;
+            let y = chartCanvas.height / 2;
+            const lineHeight = 20;
+            const padding = 20;
+            const maxWidth = chartCanvas.width - (padding * 2);
+
             ctx.textAlign = 'center';
-            ctx.fillStyle = '#5e5ebf'; // Use CSS variable
-            ctx.font = '16px sans-serif';
-            ctx.fillText(translate('noDataForChart'), chartCanvas.width / 2, chartCanvas.height / 2);
+            ctx.fillStyle = getComputedStyle(bodyElement).getPropertyValue('--text-dim').trim();
+            ctx.font = '16px ' + getComputedStyle(bodyElement).getPropertyValue('--font-family');
+
+            const words = text.split(' ');
+            let line = '';
+            let lines = [];
+
+            for (let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = ctx.measureText(testLine);
+                let testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    lines.push(line);
+                    line = words[n] + ' ';
+                } else {
+                    line = testLine;
+                }
+            }
+            lines.push(line);
+
+            // Adjust starting y position to center the whole text block
+            y -= (lines.length - 1) * lineHeight / 2;
+
+            for (let i = 0; i < lines.length; i++) {
+                ctx.fillText(lines[i].trim(), x, y);
+                y += lineHeight;
+            }
             return;
         }
         const labels = measurements.map(m => m.week ?? '-');
         const datasets = metricsToRender.map(metric => {
-             const color = metricButtonColors[metric] || '#007bff';
-             const translatedLabel = translate(metric).split('(')[0].trim();
-             return {
-                 label: translatedLabel,
-                 data: measurements.map(m => m[metric] !== undefined && m[metric] !== null && m[metric] !== '' ? parseFloat(m[metric]) : NaN),
-                 borderColor: color,
-                 backgroundColor: color + '33',
-                 fill: false, tension: 0.1, pointRadius: 3, pointHoverRadius: 5, spanGaps: true, borderWidth: 2,
-                 parsing: { xAxisKey: 'x', yAxisKey: 'y' }
-             };
+            const color = metricButtonColors[metric] || '#007bff';
+            const translatedLabel = translate(metric).split('(')[0].trim();
+            return {
+                label: translatedLabel,
+                data: measurements.map(m => m[metric] !== undefined && m[metric] !== null && m[metric] !== '' ? parseFloat(m[metric]) : NaN),
+                borderColor: color,
+                backgroundColor: color + '33',
+                fill: false, tension: 0.1, pointRadius: 3, pointHoverRadius: 5, spanGaps: true, borderWidth: 2,
+                parsing: { xAxisKey: 'x', yAxisKey: 'y' }
+            };
         });
         if (chartInstance) { chartInstance.destroy(); }
 
@@ -1390,20 +1524,20 @@ function calculateTargetComparison() {
                     x: {
                         type: 'linear', title: { display: true, text: translate('chartAxisLabel'), color: '#5e5ebf' },
                         ticks: {
-                             stepSize: 1,
-                             callback: function(value) { if (Number.isInteger(value) && value >= 0) { return value; } return null; },
-                             color: '#5e5ebf'
-                        },
-                        border:{
-                            display:true,
+                            stepSize: 1,
+                            callback: function (value) { if (Number.isInteger(value) && value >= 0) { return value; } return null; },
                             color: '#5e5ebf'
                         },
-                        grid: { display: true , color: '#5e5ebf'}
+                        border: {
+                            display: true,
+                            color: '#5e5ebf'
+                        },
+                        grid: { display: true, color: '#5e5ebf' }
                     },
-                     y: {
+                    y: {
                         beginAtZero: false, title: { display: false },
-                        border:{
-                            display:true,
+                        border: {
+                            display: true,
                             color: '#5e5ebf'
                         },
 
@@ -1416,8 +1550,8 @@ function calculateTargetComparison() {
                     tooltip: {
                         mode: 'index', intersect: false,
                         callbacks: {
-                            title: function(tooltipItems) { return tooltipItems.length > 0 ? `${translate('week')} ${tooltipItems[0].parsed.x}` : ''; },
-                            label: function(context) {
+                            title: function (tooltipItems) { return tooltipItems.length > 0 ? `${translate('week')} ${tooltipItems[0].parsed.x}` : ''; },
+                            label: function (context) {
                                 let label = context.dataset.label || ''; let value = context.parsed.y;
                                 if (label) { label += ': '; }
                                 if (value !== null && !isNaN(value)) {
@@ -1457,25 +1591,24 @@ function calculateTargetComparison() {
         if (!notesListContainer) return;
         if (notes.length === 0) { clearElement(notesListContainer, "noNotesYet"); return; }
         const sortedNotes = sortNotes(notes, currentNoteSortOrder);
-        let notesHTML = '<div class="notes-grid">';
+        let notesHTML = ''; // Was '<div class="notes-grid">'
         sortedNotes.forEach(note => {
             const title = note.title || translate('noteTitleUntitled');
             const previewLength = 100;
             const previewContent = note.content ? (note.content.length > previewLength ? note.content.substring(0, previewLength).replace(/\n/g, ' ') + '...' : note.content.replace(/\n/g, ' ')) : translate('notePreviewEmpty');
             const createdStr = formatTimestamp(note.timestamp || note.createdAt || note.id, true);
             notesHTML += `
-             <div class="note-card card" data-note-id="${note.id}">
-                    <h4>${escapeHTML(title)}</h4>
-                     <p class="note-content-preview">${escapeHTML(previewContent)}</p>
-                    <p class="note-timestamp">${translate('noteDateCreated')} ${createdStr}</p>
-                     <div class="note-actions">
-                        <button class="edit-note-button btn btn-sm btn-outline" data-id="${note.id}">${translate('edit')}</button>
-                        <button class="delete-note-button btn btn-sm btn-danger" data-id="${note.id}" data-title="${escapeHTML(title)}">${translate('delete')}</button>
-                    </div>
+         <div class="note-card glass-card" data-note-id="${note.id}">
+                <h4>${escapeHTML(title)}</h4>
+                 <p class="note-timestamp">${translate('noteDateCreated')} ${createdStr}</p>
+                 <p class="note-content-preview">${escapeHTML(previewContent)}</p>
+                 <div class="note-actions">
+                    <button class="glass-button edit-note-button" data-id="${note.id}">${translate('edit')}</button>
+                    <button class="glass-button danger delete-note-button" data-id="${note.id}" data-title="${escapeHTML(title)}">${translate('delete')}</button>
                 </div>
-            `;
+            </div>
+        `;
         });
-        notesHTML += '</div>';
         notesListContainer.innerHTML = notesHTML;
     }
 
@@ -1485,11 +1618,11 @@ function calculateTargetComparison() {
     }
 
     // --- Targets Tab ---
-     function setupTargetInputs(updateOnly = false) {
+    function setupTargetInputs(updateOnly = false) {
         if (!targetGrid) {
-             targetGrid = targetForm ? targetForm.querySelector('.target-grid') : null;
-             if (!targetGrid) { console.error("Target grid container not found."); return; }
-         }
+            targetGrid = targetForm ? targetForm.querySelector('.target-grid') : null;
+            if (!targetGrid) { console.error("Target grid container not found."); return; }
+        }
         const keysForMode = targetSettingKeys.filter(key => {
             if (currentMode === 'mtf') return !medicationKeys_FtM.includes(key);
             else return !medicationKeys_MtF.includes(key) && key !== 'cupSize' && !key.startsWith('semen');
@@ -1512,20 +1645,20 @@ function calculateTargetComparison() {
                 targetGrid.appendChild(formGroup);
             });
         } else {
-             targetGrid.querySelectorAll('.form-group').forEach(group => {
-                 const label = group.querySelector('label'); const input = group.querySelector('input');
-                 if (label && input) {
-                     const key = input.name;
-                     label.textContent = translate(key);
-                     let placeholderUnit = '';
-                     if (key.includes('Percentage')) placeholderUnit = translate('unitPercent');
-                     else if (key === 'weight' || key === 'muscleMass') placeholderUnit = translate('unitKg');
-                     else if (bodySizeKeys.includes(key) && key !== 'cupSize') placeholderUnit = translate('unitCm');
-                     input.setAttribute('placeholder', placeholderUnit);
-                     const keyShouldBeVisible = keysForMode.includes(key);
-                     group.style.display = keyShouldBeVisible ? '' : 'none';
-                 }
-             });
+            targetGrid.querySelectorAll('.form-group').forEach(group => {
+                const label = group.querySelector('label'); const input = group.querySelector('input');
+                if (label && input) {
+                    const key = input.name;
+                    label.textContent = translate(key);
+                    let placeholderUnit = '';
+                    if (key.includes('Percentage')) placeholderUnit = translate('unitPercent');
+                    else if (key === 'weight' || key === 'muscleMass') placeholderUnit = translate('unitKg');
+                    else if (bodySizeKeys.includes(key) && key !== 'cupSize') placeholderUnit = translate('unitCm');
+                    input.setAttribute('placeholder', placeholderUnit);
+                    const keyShouldBeVisible = keysForMode.includes(key);
+                    group.style.display = keyShouldBeVisible ? '' : 'none';
+                }
+            });
         }
         populateTargetInputs();
     }
@@ -1538,7 +1671,7 @@ function calculateTargetComparison() {
         });
     }
 
-     // --- Event Handlers ---
+    // --- Event Handlers ---
 
     // Form submission
     function handleFormSubmit(event) {
@@ -1552,31 +1685,31 @@ function calculateTargetComparison() {
         // *** 수정 1 확인: HTML의 name이 카멜케이스로 변경되었으므로, JS 키와 일치함 ***
         const collectedData = {}; // 폼에서 읽어온 데이터만 임시 저장
         [...baseNumericKeys, ...textKeys].forEach(key => { // Process all keys
-             let value = formData.get(key); // Get value using the camelCase key
-             const inputElement = form.querySelector(`[name="${key}"]`); // Find element by camelCase name
+            let value = formData.get(key); // Get value using the camelCase key
+            const inputElement = form.querySelector(`[name="${key}"]`); // Find element by camelCase name
 
-             if (value !== null && value !== undefined) {
-                 if (baseNumericKeys.includes(key) && value !== '') {
+            if (value !== null && value !== undefined) {
+                if (baseNumericKeys.includes(key) && value !== '') {
                     const numValue = parseFloat(value);
                     if (isNaN(numValue) || numValue < 0) {
                         collectedData[key] = null; // Store invalid as null
                         if (inputElement) {
-                             inputElement.classList.add('invalid-input'); isValid = false;
-                             if (!firstInvalidField) firstInvalidField = inputElement;
-                         }
+                            inputElement.classList.add('invalid-input'); isValid = false;
+                            if (!firstInvalidField) firstInvalidField = inputElement;
+                        }
                     } else { collectedData[key] = numValue; }
-                 } else if (textKeys.includes(key)) {
-                     collectedData[key] = value.trim() || null; // Trim text, store empty as null
-                 } else {
-                      collectedData[key] = value || null;
-                 }
-             } else { collectedData[key] = null; } // Ensure key exists even if not in form
+                } else if (textKeys.includes(key)) {
+                    collectedData[key] = value.trim() || null; // Trim text, store empty as null
+                } else {
+                    collectedData[key] = value || null;
+                }
+            } else { collectedData[key] = null; } // Ensure key exists even if not in form
         });
 
         if (!isValid) {
-             showPopup('alertValidationError', 4000);
-             if (firstInvalidField) firstInvalidField.focus();
-             return;
+            showPopup('alertValidationError', 4000);
+            if (firstInvalidField) firstInvalidField.focus();
+            return;
         }
 
         const editIndexValue = editIndexInput.value;
@@ -1584,11 +1717,11 @@ function calculateTargetComparison() {
         if (editIndexValue !== '') { // --- 수정 모드 ---
             const indexToUpdate = parseInt(editIndexValue, 10);
             if (indexToUpdate >= 0 && indexToUpdate < measurements.length) {
-                 measurements[indexToUpdate] = { ...measurements[indexToUpdate], ...collectedData };
-                 console.log("DEBUG: Measurement updated at index", indexToUpdate);
-                 showPopup('popupUpdateSuccess');
+                measurements[indexToUpdate] = { ...measurements[indexToUpdate], ...collectedData };
+                console.log("DEBUG: Measurement updated at index", indexToUpdate);
+                showPopup('popupUpdateSuccess');
             } else {
-                 console.error("Invalid index for editing:", editIndex); showPopup('savingError'); return;
+                console.error("Invalid index for editing:", editIndex); showPopup('savingError'); return;
             }
         } else {
             const measurementData = { ...collectedData }; // 폼 데이터 복사
@@ -1601,12 +1734,12 @@ function calculateTargetComparison() {
             });
             measurements.push(fullMeasurementData);
             console.log("DEBUG: New measurement added with week", measurementData.week);
-             showPopup('popupSaveSuccess');
+            showPopup('popupSaveSuccess');
 
-             measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-             calculateAndAddWeekNumbers(); // Recalculate weeks after adding and sorting
-         }
-        
+            measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+            calculateAndAddWeekNumbers(); // Recalculate weeks after adding and sorting
+        }
+
 
         savePrimaryDataToStorage();
         resetFormState();
@@ -1615,18 +1748,18 @@ function calculateTargetComparison() {
     }
 
     // Delete Measurement
-     function handleDeleteMeasurement(index) {
+    function handleDeleteMeasurement(index) {
         if (index >= 0 && index < measurements.length) {
             const entry = measurements[index];
             const weekNum = entry.week ?? index;
-             if (confirm(translate('confirmDeleteRecord', { week: weekNum, date: formatTimestamp(entry.timestamp || entry.date, false) }))) { // Use updated confirm key
+            if (confirm(translate('confirmDeleteRecord', { week: weekNum, date: formatTimestamp(entry.timestamp || entry.date, false) }))) { // Use updated confirm key
                 measurements.splice(index, 1);
                 console.log("DEBUG: Measurement deleted at index", index);
                 savePrimaryDataToStorage();
                 renderAll();
                 showPopup('popupDeleteSuccess');
-             }
-         } else { console.error("Invalid index for deletion:", index); showPopup('alertCannotFindRecordDelete'); }
+            }
+        } else { console.error("Invalid index for deletion:", index); showPopup('alertCannotFindRecordDelete'); }
     }
 
     // Edit Measurement
@@ -1639,7 +1772,7 @@ function calculateTargetComparison() {
                 const input = form.querySelector(`[name="${key}"]`); // Find by camelCase name
                 if (input) {
                     if (measurementToEdit.hasOwnProperty(key)) {
-                        if(key === 'date' && measurementToEdit[key]) {
+                        if (key === 'date' && measurementToEdit[key]) {
                             input.value = formatTimestamp(measurementToEdit[key], false); // YYYY-MM-DD format for date input
                         } else {
                             input.value = measurementToEdit[key] !== null ? measurementToEdit[key] : '';
@@ -1656,22 +1789,22 @@ function calculateTargetComparison() {
             setTimeout(() => {
                 form.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 const firstVisibleInput = form.querySelector('fieldset:not([style*="display: none"]) input, fieldset:not([style*="display: none"]) textarea');
-                if(firstVisibleInput) firstVisibleInput.focus();
+                if (firstVisibleInput) firstVisibleInput.focus();
             }, 150);
         } else { console.error("Invalid index for editing:", index); showPopup('alertCannotFindRecordEdit'); }
     }
 
     // Cancel Edit
-     function cancelEdit() { resetFormState(); console.log("DEBUG: Edit cancelled."); }
+    function cancelEdit() { resetFormState(); console.log("DEBUG: Edit cancelled."); }
 
     // Reset form
     function resetFormState() {
-         if (form) form.reset();
-         form.querySelectorAll('.invalid-input').forEach(el => el.classList.remove('invalid-input'));
-         editIndexInput.value = '';
-         updateFormTitle();
-         if (saveUpdateBtn) saveUpdateBtn.textContent = translate('saveRecord');
-         if (cancelEditBtn) cancelEditBtn.style.display = 'none';
+        if (form) form.reset();
+        form.querySelectorAll('.invalid-input').forEach(el => el.classList.remove('invalid-input'));
+        editIndexInput.value = '';
+        updateFormTitle();
+        if (saveUpdateBtn) saveUpdateBtn.textContent = translate('saveRecord');
+        if (cancelEditBtn) cancelEditBtn.style.display = 'none';
     }
 
     // Save Targets
@@ -1684,24 +1817,24 @@ function calculateTargetComparison() {
         targetGrid.querySelectorAll('input[type="number"]').forEach(input => {
             const key = input.name; const value = formData.get(key);
             if (value !== null && value !== '') {
-                 const numValue = parseFloat(value);
-                 if (isNaN(numValue) || numValue < 0) {
-                     newTargets[key] = null; // Invalid treated as cleared
-                     input.classList.add('invalid-input'); isValid = false;
-                     if (!firstInvalidField) firstInvalidField = input;
-                 } else { newTargets[key] = numValue; }
-             } else { newTargets[key] = null; } // Empty treated as cleared
+                const numValue = parseFloat(value);
+                if (isNaN(numValue) || numValue < 0) {
+                    newTargets[key] = null; // Invalid treated as cleared
+                    input.classList.add('invalid-input'); isValid = false;
+                    if (!firstInvalidField) firstInvalidField = input;
+                } else { newTargets[key] = numValue; }
+            } else { newTargets[key] = null; } // Empty treated as cleared
         });
         if (!isValid) {
-             showPopup('alertValidationError', 4000); if (firstInvalidField) firstInvalidField.focus(); return;
+            showPopup('alertValidationError', 4000); if (firstInvalidField) firstInvalidField.focus(); return;
         }
         const updatedTargets = { ...targets };
         targetSettingKeys.forEach(key => {
-             const inputElement = targetGrid.querySelector(`input[name="${key}"]`);
-             const isVisible = inputElement && inputElement.closest('.form-group').style.display !== 'none';
-             if (isVisible) { // Only update visible targets
+            const inputElement = targetGrid.querySelector(`input[name="${key}"]`);
+            const isVisible = inputElement && inputElement.closest('.form-group').style.display !== 'none';
+            if (isVisible) { // Only update visible targets
                 if (newTargets.hasOwnProperty(key)) { updatedTargets[key] = newTargets[key]; }
-             }
+            }
         });
         Object.keys(updatedTargets).forEach(key => { if (updatedTargets[key] === null) delete updatedTargets[key]; }); // Clean nulls
         targets = updatedTargets;
@@ -1713,152 +1846,152 @@ function calculateTargetComparison() {
 
     // Save/Update Note
     function handleSaveNote() {
-         const title = noteTitleInput.value.trim();
-         const content = noteContentInput.value.trim();
-         const noteId = editNoteIdInput.value;
-         if (!content && !title) { showPopup('alertNoteContentMissing'); noteContentInput.focus(); return; }
-         if (noteId) {
-             const noteIndex = notes.findIndex(n => n.id === noteId);
-             if (noteIndex !== -1) {
-                 notes[noteIndex].title = title; notes[noteIndex].content = content;
-                 notes[noteIndex].timestamp = Date.now();
-                 console.log("DEBUG: Note (Keeps) updated", notes[noteIndex]);
-                 showPopup('popupNoteUpdateSuccess');
-             } else { console.error("Cannot find note to update:", noteId); showPopup('alertCannotFindNoteEdit'); handleCancelEditNote(); return; }
-         } else {
-             const newNote = {
-                 id: 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
-                 title: title, content: content, timestamp: Date.now()
-             };
-             notes.push(newNote); console.log("DEBUG: New note (Keeps) added", newNote); showPopup('popupNoteSaveSuccess');
-         }
-         savePrimaryDataToStorage(); handleCancelEditNote(); renderNotesList();
-     }
+        const title = noteTitleInput.value.trim();
+        const content = noteContentInput.value.trim();
+        const noteId = editNoteIdInput.value;
+        if (!content && !title) { showPopup('alertNoteContentMissing'); noteContentInput.focus(); return; }
+        if (noteId) {
+            const noteIndex = notes.findIndex(n => n.id === noteId);
+            if (noteIndex !== -1) {
+                notes[noteIndex].title = title; notes[noteIndex].content = content;
+                notes[noteIndex].timestamp = Date.now();
+                console.log("DEBUG: Note (Keeps) updated", notes[noteIndex]);
+                showPopup('popupNoteUpdateSuccess');
+            } else { console.error("Cannot find note to update:", noteId); showPopup('alertCannotFindNoteEdit'); handleCancelEditNote(); return; }
+        } else {
+            const newNote = {
+                id: 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
+                title: title, content: content, timestamp: Date.now()
+            };
+            notes.push(newNote); console.log("DEBUG: New note (Keeps) added", newNote); showPopup('popupNoteSaveSuccess');
+        }
+        savePrimaryDataToStorage(); handleCancelEditNote(); renderNotesList();
+    }
 
-     // Start Edit Note
-     function handleEditNoteStart(noteId) {
-         const noteToEdit = notes.find(n => n.id === noteId);
-         if (noteToEdit) {
-             editNoteIdInput.value = noteId; noteTitleInput.value = noteToEdit.title || ''; noteContentInput.value = noteToEdit.content || '';
-             if (noteFormTitle) noteFormTitle.textContent = translate('noteEditTitle');
-             if (saveNoteButton) saveNoteButton.textContent = translate('edit');
-             if (cancelEditNoteBtn) cancelEditNoteBtn.style.display = 'inline-block';
-             noteTitleInput.focus();
-             if (noteFormArea) noteFormArea.scrollIntoView({ behavior: 'smooth' });
-         } else { console.error("Cannot find note to edit:", noteId); showPopup('alertCannotFindNoteEdit'); }
-     }
+    // Start Edit Note
+    function handleEditNoteStart(noteId) {
+        const noteToEdit = notes.find(n => n.id === noteId);
+        if (noteToEdit) {
+            editNoteIdInput.value = noteId; noteTitleInput.value = noteToEdit.title || ''; noteContentInput.value = noteToEdit.content || '';
+            if (noteFormTitle) noteFormTitle.textContent = translate('noteEditTitle');
+            if (saveNoteButton) saveNoteButton.textContent = translate('edit');
+            if (cancelEditNoteBtn) cancelEditNoteBtn.style.display = 'inline-block';
+            noteTitleInput.focus();
+            if (noteFormArea) noteFormArea.scrollIntoView({ behavior: 'smooth' });
+        } else { console.error("Cannot find note to edit:", noteId); showPopup('alertCannotFindNoteEdit'); }
+    }
 
-     // Cancel Edit Note
-     function handleCancelEditNote() {
-         editNoteIdInput.value = ''; noteTitleInput.value = ''; noteContentInput.value = '';
-         if (noteFormTitle) noteFormTitle.textContent = translate('noteNewTitle');
-         if (saveNoteButton) saveNoteButton.textContent = translate('saveNote');
-         if (cancelEditNoteBtn) cancelEditNoteBtn.style.display = 'none';
-     }
+    // Cancel Edit Note
+    function handleCancelEditNote() {
+        editNoteIdInput.value = ''; noteTitleInput.value = ''; noteContentInput.value = '';
+        if (noteFormTitle) noteFormTitle.textContent = translate('noteNewTitle');
+        if (saveNoteButton) saveNoteButton.textContent = translate('saveNote');
+        if (cancelEditNoteBtn) cancelEditNoteBtn.style.display = 'none';
+    }
 
-     // Delete Note
-     function handleDeleteNote(noteId, noteTitle) {
+    // Delete Note
+    function handleDeleteNote(noteId, noteTitle) {
         const titleToShow = noteTitle || translate('noteTitleUntitled');
         if (confirm(translate('confirmDeleteNote', { title: titleToShow }))) {
             notes = notes.filter(n => n.id !== noteId);
             savePrimaryDataToStorage(); renderNotesList(); showPopup('popupNoteDeleteSuccess');
-             if (editNoteIdInput.value === noteId) { handleCancelEditNote(); }
+            if (editNoteIdInput.value === noteId) { handleCancelEditNote(); }
         }
     }
 
     // Handle Language Change
-     function handleLanguageChange(event) {
+    function handleLanguageChange(event) {
         currentLanguage = event.target.value; console.log("DEBUG: Language changed to", currentLanguage);
         saveSettingsToStorage(); applyLanguageToUI(); showPopup('popupSettingsSaved');
     }
 
     // Handle Mode Change
-     function handleModeChange(event) {
+    function handleModeChange(event) {
         currentMode = event.target.value; console.log("DEBUG: Mode changed to", currentMode);
         saveSettingsToStorage(); applyModeToUI(); showPopup('popupSettingsSaved');
     }
 
     // Reset All Data
-     function handleResetData() {
+    function handleResetData() {
         if (confirm(translate('confirmReset'))) {
-             console.log("DEBUG: Resetting all data.");
-             localStorage.removeItem(PRIMARY_DATA_KEY);
-             measurements = []; targets = {}; notes = [];
-             selectedMetrics = ['weight'];
-             isInitialSetupDone = false;
-             saveSettingsToStorage();
+            console.log("DEBUG: Resetting all data.");
+            localStorage.removeItem(PRIMARY_DATA_KEY);
+            measurements = []; targets = {}; notes = [];
+            selectedMetrics = ['weight'];
+            isInitialSetupDone = false;
+            saveSettingsToStorage();
 
-             clearElement(historyContainer, "noDataYet");
-             clearElement(prevWeekComparisonContainer, "noDataYet");
-             clearElement(initialComparisonContainer, "noDataYet");
-             clearElement(targetComparisonContainer, "noDataYet");
-             clearElement(notesListContainer, "noNotesYet");
-             if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
-             renderChartSelector();
-             setupTargetInputs(true);
-             resetFormState(); handleCancelEditNote();
-             updateCurrentWeekDisplay(); renderNextMeasurementInfo(); renderChart();
-             showPopup('popupDataResetSuccess', 3000);
-             setTimeout(() => window.location.reload(), 1000);
-         }
+            clearElement(historyContainer, "noDataYet");
+            clearElement(prevWeekComparisonContainer, "noDataYet");
+            clearElement(initialComparisonContainer, "noDataYet");
+            clearElement(targetComparisonContainer, "noDataYet");
+            clearElement(notesListContainer, "noNotesYet");
+            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+            renderChartSelector();
+            setupTargetInputs(true);
+            resetFormState(); handleCancelEditNote();
+            updateCurrentWeekDisplay(); renderNextMeasurementInfo(); renderChart();
+            showPopup('popupDataResetSuccess', 3000);
+            setTimeout(() => window.location.reload(), 1000);
+        }
     }
 
     // Export Data
-     function exportMeasurementData() {
-         try {
-             const dataToExport = {
-                 app: "ShiftV", version: APP_VERSION, exportDate: new Date().toISOString(),
-                 settings: { language: currentLanguage, mode: currentMode, theme: currentTheme, selectedMetrics: selectedMetrics },
-                 data: { measurements: measurements, targets: targets, notes: notes }
-             };
-             const dataStr = JSON.stringify(dataToExport, null, 2);
-             const blob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(blob);
-             const a = document.createElement('a'); const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-             a.href = url; a.download = `ShiftV_Backup_${timestamp}.json`;
-             document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-             console.log("DEBUG: Data exported."); showPopup('popupDataExportSuccess');
-         } catch (e) { console.error("Error exporting data:", e); showPopup('alertExportError'); }
-     }
+    function exportMeasurementData() {
+        try {
+            const dataToExport = {
+                app: "ShiftV", version: APP_VERSION, exportDate: new Date().toISOString(),
+                settings: { language: currentLanguage, mode: currentMode, theme: currentTheme, selectedMetrics: selectedMetrics },
+                data: { measurements: measurements, targets: targets, notes: notes }
+            };
+            const dataStr = JSON.stringify(dataToExport, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            a.href = url; a.download = `ShiftV_Backup_${timestamp}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+            console.log("DEBUG: Data exported."); showPopup('popupDataExportSuccess');
+        } catch (e) { console.error("Error exporting data:", e); showPopup('alertExportError'); }
+    }
 
-     // Import Data
-     function importMeasurementData(event) {
-         const file = event.target.files[0]; if (!file) return;
-         const reader = new FileReader();
-         reader.onload = function(e) {
-             try {
-                 const imported = JSON.parse(e.target.result);
-                 const isValidShiftV = imported?.app === "ShiftV" && imported?.data && Array.isArray(imported.data.measurements) && typeof imported.data.targets === 'object' && Array.isArray(imported.data.notes);
-                 // Legacy format check removed for simplicity
+    // Import Data
+    function importMeasurementData(event) {
+        const file = event.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                const isValidShiftV = imported?.app === "ShiftV" && imported?.data && Array.isArray(imported.data.measurements) && typeof imported.data.targets === 'object' && Array.isArray(imported.data.notes);
+                // Legacy format check removed for simplicity
 
-                 if (isValidShiftV) {
-                     if (!confirm(translate('alertImportConfirm'))) {
-                         if (importFileInput) importFileInput.value = ''; return;
-                     }
-                     measurements = imported.data.measurements; targets = imported.data.targets; notes = imported.data.notes;
-                     if (imported.settings) {
-                         currentLanguage = imported.settings.language || currentLanguage;
-                         currentMode = imported.settings.mode || currentMode;
-                         currentTheme = imported.settings.theme || currentTheme; // *** 수정 4: 테마 설정 복원 ***
-                         selectedMetrics = Array.isArray(imported.settings.selectedMetrics) ? imported.settings.selectedMetrics : selectedMetrics;
-                     }
-                     isInitialSetupDone = true;
-                     measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-                     calculateAndAddWeekNumbers();
-                     notes.forEach(note => {
-                         if (!note.id) note.id = 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
-                         if (!note.timestamp) note.timestamp = note.createdAt || note.id || Date.now();
-                      });
-                     savePrimaryDataToStorage(); saveSettingsToStorage();
-                     console.log("DEBUG: Data imported successfully."); showPopup('popupDataImportSuccess');
-                     applyModeToUI(); applyLanguageToUI(); applyTheme();
-                     setupTargetInputs(); renderAll(); activateTab('tab-history');
-                 } else { console.error("Import failed: Invalid file structure."); showPopup('alertImportInvalidFile', 4000); }
-             } catch (err) { console.error("Error parsing imported file:", err); showPopup('alertImportReadError', 4000); }
-             finally { if (importFileInput) importFileInput.value = ''; }
-         };
-         reader.onerror = function(e) { console.error("Error reading file:", e); showPopup('alertImportFileReadError', 4000); if (importFileInput) importFileInput.value = ''; };
-         reader.readAsText(file);
-     }
+                if (isValidShiftV) {
+                    if (!confirm(translate('alertImportConfirm'))) {
+                        if (importFileInput) importFileInput.value = ''; return;
+                    }
+                    measurements = imported.data.measurements; targets = imported.data.targets; notes = imported.data.notes;
+                    if (imported.settings) {
+                        currentLanguage = imported.settings.language || currentLanguage;
+                        currentMode = imported.settings.mode || currentMode;
+                        currentTheme = imported.settings.theme || currentTheme; // *** 수정 4: 테마 설정 복원 ***
+                        selectedMetrics = Array.isArray(imported.settings.selectedMetrics) ? imported.settings.selectedMetrics : selectedMetrics;
+                    }
+                    isInitialSetupDone = true;
+                    measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                    calculateAndAddWeekNumbers();
+                    notes.forEach(note => {
+                        if (!note.id) note.id = 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+                        if (!note.timestamp) note.timestamp = note.createdAt || note.id || Date.now();
+                    });
+                    savePrimaryDataToStorage(); saveSettingsToStorage();
+                    console.log("DEBUG: Data imported successfully."); showPopup('popupDataImportSuccess');
+                    applyModeToUI(); applyLanguageToUI(); applyTheme();
+                    setupTargetInputs(); renderAll(); activateTab('tab-history');
+                } else { console.error("Import failed: Invalid file structure."); showPopup('alertImportInvalidFile', 4000); }
+            } catch (err) { console.error("Error parsing imported file:", err); showPopup('alertImportReadError', 4000); }
+            finally { if (importFileInput) importFileInput.value = ''; }
+        };
+        reader.onerror = function (e) { console.error("Error reading file:", e); showPopup('alertImportFileReadError', 4000); if (importFileInput) importFileInput.value = ''; };
+        reader.readAsText(file);
+    }
 
     // --- Swipe Navigation ---
     let touchStartX = 0; let touchEndX = 0; let touchStartY = 0;
@@ -1902,37 +2035,51 @@ function calculateTargetComparison() {
     function activateTab(targetTabId) {
         if (!tabBar) return; console.log("DEBUG: Activating tab:", targetTabId);
         tabButtons.forEach(button => button.classList.remove('active'));
-        tabContents.forEach(content => content.style.display = 'none');
+        tabContents.forEach(content => {
+            content.classList.remove('active'); // For animation
+            content.style.display = 'none';
+        });
         const targetButton = tabBar.querySelector(`[data-tab="${targetTabId}"]`);
         const targetContent = document.getElementById(targetTabId);
         if (targetButton) { targetButton.classList.add('active'); }
         if (targetContent) {
             targetContent.style.display = 'block';
-             if (targetTabId === 'tab-history') { renderHistoryTable(); }
-             else if (targetTabId === 'tab-change-report') { renderChart(); renderAllComparisonTables(); }
-             else if (targetTabId === 'tab-overview') { renderNotesList(); }
-             else if (targetTabId === 'tab-targets') { populateTargetInputs(); setupTargetInputs(true); }
-             else if (targetTabId === 'tab-input') { renderNextMeasurementInfo(); }
+
+            // ** MODIFIED **
+            if (targetTabId === 'tab-history') {
+                renderHistoryView();
+            }
+            else if (targetTabId === 'tab-change-report') { renderChart(); renderAllComparisonTables(); }
+            else if (targetTabId === 'tab-overview') { renderNotesList(); }
+            else if (targetTabId === 'tab-targets') { populateTargetInputs(); setupTargetInputs(true); }
+            else if (targetTabId === 'tab-input') { renderNextMeasurementInfo(); }
+
+            // Add active class after a short delay to trigger animation correctly
+            setTimeout(() => {
+                targetContent.classList.add('active');
+            }, 10);
+
         } else {
-             console.error("Target tab content not found:", targetTabId);
-             const firstTabButton = tabBar.querySelector('.tab-button');
-             if(firstTabButton) activateTab(firstTabButton.dataset.tab);
+            console.error("Target tab content not found:", targetTabId);
+            const firstTabButton = tabBar.querySelector('.tab-button');
+            if (firstTabButton) activateTab(firstTabButton.dataset.tab);
         }
     }
 
     // --- Global Render Function ---
-     function renderAll() {
-         console.log("DEBUG: === renderAll triggered ===");
-         try {
-             updateCurrentWeekDisplay(); renderNextMeasurementInfo(); renderHistoryTable();
-             renderAllComparisonTables(); renderChartSelector(); renderNotesList();
-             populateTargetInputs(); setupTargetInputs(true);
-             const activeTabContent = document.querySelector('.tab-content[style*="display: block"]');
-             const activeTabId = activeTabContent ? activeTabContent.id : null;
-             if (activeTabId === 'tab-change-report') { renderChart(); }
-             console.log("DEBUG: === renderAll complete ===");
-         } catch (e) { console.error(`renderAll error: ${e.message}`, e.stack); showPopup('unexpectedError', 5000, { message: e.message }); }
-     }
+    function renderAll() {
+        console.log("DEBUG: === renderAll triggered ===");
+        try {
+            updateCurrentWeekDisplay(); renderNextMeasurementInfo();
+            renderHistoryView(); // ** MODIFIED **
+            renderAllComparisonTables(); renderChartSelector(); renderNotesList();
+            populateTargetInputs(); setupTargetInputs(true);
+            const activeTabContent = document.querySelector('.tab-content[style*="display: block"]');
+            const activeTabId = activeTabContent ? activeTabContent.id : null;
+            if (activeTabId === 'tab-change-report') { renderChart(); }
+            console.log("DEBUG: === renderAll complete ===");
+        } catch (e) { console.error(`renderAll error: ${e.message}`, e.stack); showPopup('unexpectedError', 5000, { message: e.message }); }
+    }
 
     // ===============================================
     // Initialization
@@ -1946,14 +2093,14 @@ function calculateTargetComparison() {
         if (!isInitialSetupDone) {
             showInitialSetupPopup(); console.log("DEBUG: Initial setup required.");
         } else {
-             console.log("DEBUG: Initial setup already done.");
-             applyModeToUI();
-             applyLanguageToUI();
-             loadPrimaryDataFromStorage();
-             applyTheme(); // Apply theme after loading settings
-             setupTargetInputs();
-             renderAll();
-             activateTab('tab-input');
+            console.log("DEBUG: Initial setup already done.");
+            applyModeToUI();
+            applyLanguageToUI();
+            loadPrimaryDataFromStorage();
+            applyTheme(); // Apply theme after loading settings
+            setupTargetInputs();
+            renderAll();
+            activateTab('tab-input');
         }
 
         // *** 수정 4: 시스템 테마 변경 감지 리스너 추가 ***
@@ -1961,9 +2108,9 @@ function calculateTargetComparison() {
         try {
             mediaQuery.addEventListener('change', () => { if (currentTheme === 'system') { applyTheme(); } });
         } catch (e1) {
-             try { // Fallback for older browsers
-                 mediaQuery.addListener(() => { if (currentTheme === 'system') { applyTheme(); } });
-             } catch (e2) { console.error("Error adding listener for system theme changes:", e2); }
+            try { // Fallback for older browsers
+                mediaQuery.addListener(() => { if (currentTheme === 'system') { applyTheme(); } });
+            } catch (e2) { console.error("Error adding listener for system theme changes:", e2); }
         }
 
         console.log("DEBUG: App Initialization Sequence Complete");
@@ -1990,35 +2137,35 @@ function calculateTargetComparison() {
         if (resetDataButton) resetDataButton.addEventListener('click', handleResetData);
         if (exportDataButton) exportDataButton.addEventListener('click', exportMeasurementData);
         if (importDataButton && importFileInput) {
-             importDataButton.addEventListener('click', () => importFileInput.click());
-             importFileInput.addEventListener('click', (e) => { e.target.value = null; });
+            importDataButton.addEventListener('click', () => importFileInput.click());
+            importFileInput.addEventListener('click', (e) => { e.target.value = null; });
         }
         if (importFileInput) importFileInput.addEventListener('change', importMeasurementData);
         if (languageSelect) languageSelect.addEventListener('change', handleLanguageChange);
         if (modeSelect) modeSelect.addEventListener('change', handleModeChange);
         if (themeSelect) themeSelect.addEventListener('change', handleThemeChange); // *** 수정 4: 테마 변경 리스너 ***
         // Button Clicks - History Table (Event Delegation)
-         if (historyContainer) {
-             historyContainer.addEventListener('click', (e) => {
-                 const editBtn = e.target.closest('.btn-edit');
-                 const deleteBtn = e.target.closest('.btn-delete');
-                 if (editBtn?.dataset.index !== undefined) handleEditClick(parseInt(editBtn.dataset.index, 10));
-                 else if (deleteBtn?.dataset.index !== undefined) handleDeleteMeasurement(parseInt(deleteBtn.dataset.index, 10));
-             });
-         }
+        if (historyTabContent) {
+            historyTabContent.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.btn-edit');
+                const deleteBtn = e.target.closest('.btn-delete');
+                if (editBtn?.dataset.index !== undefined) handleEditClick(parseInt(editBtn.dataset.index, 10));
+                else if (deleteBtn?.dataset.index !== undefined) handleDeleteMeasurement(parseInt(deleteBtn.dataset.index, 10));
+            });
+        }
         // Button Clicks - Notes (Keeps) Tab
         if (saveNoteButton) saveNoteButton.addEventListener('click', handleSaveNote);
         if (cancelEditNoteBtn) cancelEditNoteBtn.addEventListener('click', handleCancelEditNote);
         if (noteSortOrderSelect) {
-             noteSortOrderSelect.addEventListener('change', (e) => { currentNoteSortOrder = e.target.value; renderNotesList(); });
+            noteSortOrderSelect.addEventListener('change', (e) => { currentNoteSortOrder = e.target.value; renderNotesList(); });
         }
         // Button Clicks - Notes (Keeps) List (Event Delegation)
         if (notesListContainer) {
             notesListContainer.addEventListener('click', (e) => {
-                 const editBtn = e.target.closest('.edit-note-button');
-                 const deleteBtn = e.target.closest('.delete-note-button');
-                 if (editBtn?.dataset.id) handleEditNoteStart(editBtn.dataset.id);
-                 else if (deleteBtn?.dataset.id) handleDeleteNote(deleteBtn.dataset.id, deleteBtn.dataset.title);
+                const editBtn = e.target.closest('.edit-note-button');
+                const deleteBtn = e.target.closest('.delete-note-button');
+                if (editBtn?.dataset.id) handleEditNoteStart(editBtn.dataset.id);
+                else if (deleteBtn?.dataset.id) handleDeleteNote(deleteBtn.dataset.id, deleteBtn.dataset.title);
             });
         }
         // Button Clicks - Chart Controls
@@ -2027,14 +2174,15 @@ function calculateTargetComparison() {
         if (deselectAllChartsBtn) deselectAllChartsBtn.addEventListener('click', handleDeselectAllCharts);
         // Initial Setup Save Button
         if (initialSetupSaveBtn) initialSetupSaveBtn.addEventListener('click', handleInitialSetupSave);
+        window.addEventListener('resize', () => debounce(renderHistoryView, 150));
         // Swipe Listeners
-        document.body.addEventListener('touchstart', function(e) {
-            if ( (e.touches.length > 1) || e.targetTouches.length > 1) {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
+        document.body.addEventListener('touchstart', function (e) {
+            if ((e.touches.length > 1) || e.targetTouches.length > 1) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
             }
-          }, {passive: false});
+        }, { passive: false });
         document.body.addEventListener('touchmove', handleTouchMove, { passive: false });
         document.body.addEventListener('touchend', handleTouchEnd);
         console.log("DEBUG: Swipe listeners attached to body.");

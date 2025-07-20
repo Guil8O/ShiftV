@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="color-scheme" content="light dark">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ShiftV - 당신의 변화를 기록하세요</title>
 
     <link rel="manifest" href="manifest.json">
@@ -12,361 +12,267 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ShiftV">
-    <meta name="theme-color" content="#1E1E48">
+    <meta name="theme-color" content="#1a1a3a">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="dark-mode"> <div id="initial-setup-popup" class="modal-overlay" style="display: none;">
-        <div class="modal-content card">
+<body class="dark-mode">
 
- <h2 data-lang-key="initialSetupTitle">초기 설정</h2>
-            <p data-lang-key="initialSetupDesc">ShiftV 사용을 시작하기 전에 언어와  성적적 지향을 선택해주세요.</p>
+    <!-- 초기 설정 모달 -->
+    <div id="initial-setup-popup" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-card">
+            <h2 data-lang-key="initialSetupTitle">초기 설정</h2>
+            <p data-lang-key="initialSetupDesc">ShiftV 사용을 시작하기 전에 언어와 성적 지향을 선택해주세요.</p>
             <div class="form-group">
                 <label for="initial-language-select" data-lang-key="language">언어</label>
                 <select id="initial-language-select">
                     <option value="ko">한국어</option>
-
- <option value="en">English</option>
+                    <option value="en">English</option>
                     <option value="ja">日本語</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="initial-mode-select" data-lang-key="mode">성적지향</label>
-
- <select id="initial-mode-select">
+                <select id="initial-mode-select">
                     <option value="mtf" data-lang-key="modeMtf">여성화</option>
                     <option value="ftm" data-lang-key="modeFtm">남성화</option>
                 </select>
             </div>
             <div class="button-group">
-
- <button id="initial-setup-save" data-lang-key="saveSettings">설정 저장</button>
-                 </div>
+                <button id="initial-setup-save" class="glass-button primary" data-lang-key="saveSettings">설정 저장</button>
+            </div>
         </div>
     </div>
 
     <div class="container">
         <div class="title-container">
-            <img src="./assets/title.svg" alt="ShiftV" id="main-title">
+            <img src="./assets/title1.png" alt="ShiftV" id="main-title">
         </div>
-        <p class="version-info" id="app-version-display">v1.4</p> <div class="tab-bar">
+        <p class="version-info" id="app-version-display">v1.4</p>
 
- <button class="tab-button active" data-tab="tab-input" data-lang-key="tabInput">측정 입력</button>
-            <button class="tab-button" data-tab="tab-history" data-lang-key="tabHistory">측정 기록</button>
-            <button class="tab-button" data-tab="tab-change-report" data-lang-key="tabReport">변화 보고서</button>
-            <button class="tab-button" data-tab="tab-targets" data-lang-key="tabTargets">목표 설정</button>
-            <button class="tab-button" data-tab="tab-overview" data-lang-key="tabOverview">메모</button>
-            <button class="tab-button" data-tab="tab-settings" data-lang-key="tabSettings">설정</button>
-
- </div>
+        <!-- 탭 바 -->
+        <div class="tab-bar">
+            <button class="tab-button active" data-tab="tab-input" data-lang-key="tabInput">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.41 2.59l-1.83-1.83A2 2 0 0018.17 0H5a2 2 0 00-2 2v16a2 2 0 002 2h14a2 2 0 002-2V4.83a2 2 0 00-.59-1.41zM18 18H6V4h11v4h4v10zM8 12h8v2H8z"/></svg>
+                <span>측정 입력</span>
+            </button>
+            <button class="tab-button" data-tab="tab-history" data-lang-key="tabHistory">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 3a9 9 0 00-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 017-7 7 7 0 017 7 7 7 0 01-7 7v2a9 9 0 009-9 9 9 0 00-9-9z"/></svg>
+                <span>측정 기록</span>
+            </button>
+            <button class="tab-button" data-tab="tab-change-report" data-lang-key="tabReport">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L1 18.59 2.41 20l6-6 4 4 6.3-6.29L22 12V6h-6z"/></svg>
+                <span>변화 보고서</span>
+            </button>
+            <button class="tab-button" data-tab="tab-targets" data-lang-key="tabTargets">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l1.41 1.41L12 16.83l4.09 4.08 1.41-1.41L13.41 15.4l4.08-4.09-1.41-1.41L12 12.59 7.91 8.5 6.5 9.91 10.59 14l-4.09 4.5z"/></svg>
+                <span>목표 설정</span>
+            </button>
+            <button class="tab-button" data-tab="tab-overview" data-lang-key="tabOverview">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 17H4v2h10v-2zm6-8H4v2h16V9zM4 15h16v-2H4v2zM4 5v2h16V5H4z"/></svg>
+                <span>메모</span>
+            </button>
+            <button class="tab-button" data-tab="tab-settings" data-lang-key="tabSettings">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                <span>설정</span>
+            </button>
+        </div>
 
         <div class="tab-contents">
 
-             <div id="tab-input" class="tab-content active card">
-                <h2 id="form-title" data-lang-key="formTitleNew">측정 시작하기 📏 (현재 <span id="current-week">0</span>주차)</h2>
-                <div id="next-measurement-info" class="next-measurement-info">
-                    <p data-lang-key="nextMeasurementInfoNoData">마지막 측정일을 기준으로 다음 예정일을 계산해요.</p>
-
- </div>
-
-                <form id="measurement-form">
-                    <input type="hidden" id="edit-index" value="">
-                    <p class="description" data-lang-key="inputDescription">모든 항목은 선택 사항이에요!
- 기록하고 싶은 것만 편하게 입력해주세요 😉</p>
-
-                    <fieldset class="input-category">
-                        <legend data-lang-key="categoryBodySize">신체 사이즈</legend>
-                        <div class="input-grid">
-
- <div class="form-group">
-                                <label for="height" data-lang-key="height">신장 (cm)</label>
-                                <input type="number" id="height" name="height" step="0.1" min="0" placeholder="cm">
-
- </div>
-                            <div class="form-group">
-                                <label for="weight" data-lang-key="weight">체중 (kg)</label>
-
- <input type="number" id="weight" name="weight" step="0.1" min="0" placeholder="kg">
-                            </div>
-                            <div class="form-group">
-                                <label for="shoulder"
- data-lang-key="shoulder">어깨너비 (cm)</label>
-                                <input type="number" id="shoulder" name="shoulder" step="0.1" min="0" placeholder="cm">
-                            </div>
-                            <div class="form-group">
-
- <label for="neck" data-lang-key="neck">목둘레 (cm)</label>
-                                <input type="number" id="neck" name="neck" step="0.1" min="0" placeholder="cm">
-                            </div>
-
- <div class="form-group">
-                                <label for="chest" data-lang-key="chest">가슴둘레 (cm)</label>
-                                <input type="number" id="chest" name="chest" step="0.1" min="0" placeholder="cm">
-
- </div>
-                            <div class="form-group mtf-only">
-                                <label for="cupSize" data-lang-key="cupSize">컵 사이즈</label>
-                                <input type="text" id="cupSize" name="cupSize" placeholder="EX: 75A">
-                            </div>
-                            <div class="form-group">
-
- <label for="waist" data-lang-key="waist">허리둘레 (cm)</label>
-                                <input type="number" id="waist" name="waist" step="0.1" min="0" placeholder="cm">
-                            </div>
-
- <div class="form-group">
-                                <label for="hips" data-lang-key="hips">엉덩이둘레 (cm)</label>
-                                <input type="number" id="hips" name="hips" step="0.1" min="0" placeholder="cm">
-
- </div>
-                            <div class="form-group">
-                                <label for="thigh" data-lang-key="thigh">허벅지둘레 (cm)</label>
-
- <input type="number" id="thigh" name="thigh" step="0.1" min="0" placeholder="cm">
-                            </div>
-                            <div class="form-group">
-
- <label for="calf" data-lang-key="calf">종아리둘레 (cm)</label>
-                                <input type="number" id="calf" name="calf" step="0.1" min="0" placeholder="cm">
-                            </div>
-
- <div class="form-group">
-                                <label for="arm" data-lang-key="arm">팔뚝둘레 (cm)</label>
-                                <input type="number" id="arm" name="arm" step="0.1" min="0" placeholder="cm">
-
- </div>
-                        </div>
-                    </fieldset>
-
-                    <fieldset class="input-category">
-                        <legend data-lang-key="categoryHealth">건강</legend>
-
- <div class="input-grid">
-                             <div class="form-group">
-                                <label for="muscleMass" data-lang-key="muscleMass">근육량 (kg)</label>
-                                <input type="number" id="muscleMass" name="muscleMass" step="0.1" min="0" placeholder="kg">
-                            </div>
-                             <div class="form-group">
-                                <label for="bodyFatPercentage" data-lang-key="bodyFatPercentage">체지방률 (%)</label>
-                                <input type="number" id="bodyFatPercentage" name="bodyFatPercentage" step="0.1" min="0" placeholder="%">
-                            </div>
-
- <div class="form-group">
-                                <label for="libido" data-lang-key="libido">성욕 (회/주)</label>
-                                <input type="number" id="libido" name="libido" step="1" min="0" placeholder="number">
-
- </div>
-                            <div class="form-group form-group-compound mtf-only">
-                                <label data-lang-key="semenStatus">정액 상태</label>
-                                <div class="compound-input">
-                                    <input type="number" id="semenScore" name="semenScore" step="0.5" min="0" data-lang-key="scorePlaceholder" placeholder="Score">
-                                    <input type="text" id="semenNotes" name="semenNotes" data-lang-key="notesPlaceholder" placeholder="Text">
-                                </div>
-                            </div>
-                             <div class="form-group form-group-compound">
-                                <label data-lang-key="healthStatus">건강 상태</label>
-                                <div class="compound-input">
-                                    <input type="number" id="healthScore" name="healthScore" step="0.5" min="0" data-lang-key="scorePlaceholder" placeholder="Score">
-                                    <input type="text" id="healthNotes" name="healthNotes" data-lang-key="notesPlaceholder" placeholder="Text">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                 <label for="skinCondition" data-lang-key="skinCondition">피부 상태</label>
-                                 <input type="text" id="skinCondition" name="skinCondition"
- data-lang-key="skinConditionPlaceholder" placeholder="Text">
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    <fieldset class="input-category">
-
- <legend data-lang-key="categoryMedication">마법</legend>
-                        <div class="input-grid">
-                             <div class="form-group mtf-only">
-
- <label for="estradiol" data-lang-key="estradiol">에스트라디올 (mg)</label>
-                                <input type="number" id="estradiol" name="estradiol" step="0.1" min="0" placeholder="mg">
-                            </div>
-
- <div class="form-group mtf-only">
-                                <label for="progesterone" data-lang-key="progesterone">프로게스테론 (mg)</label>
-                                <input type="number" id="progesterone" name="progesterone" step="1" min="0" placeholder="mg">
-
- </div>
-                            <div class="form-group mtf-only">
-                                <label for="antiAndrogen" data-lang-key="antiAndrogen">항안드로겐 (mg)</label>
-                                <input type="number" id="antiAndrogen" name="antiAndrogen" step="1" min="0" placeholder="mg">
-                             </div>
-                             <div class="form-group ftm-only">
-
- <label for="testosterone" data-lang-key="testosterone">테스토스테론 (mg)</label>
-                                <input type="number" id="testosterone" name="testosterone" step="1" min="0" placeholder="mg">
-                            </div>
-                        </div>
-<div class="form-group">
-                        <label for="medicationOtherName" data-lang-key="medicationOtherName">기타 약물 이름</label>
-                        <input type="text" id="medicationOtherName" name="medicationOtherName" placeholder="(기타)" data-lang-key="medicationOtherNamePlaceholder">
-                    </div>
-                    <div class="form-group">
-                        <label for="medicationOtherDose" data-lang-key="medicationOtherDose">기타 약물 용량 (mg)</label>
-                        <input type="number" id="medicationOtherDose" name="medicationOtherDose" step="0.1" min="0" placeholder="mg" data-lang-key="unitMgPlaceholder">
+            <!-- 측정 입력 탭 -->
+            <div id="tab-input" class="tab-content active">
+                <div class="glass-card">
+                    <h2 id="form-title" data-lang-key="formTitleNew">측정 시작하기 (현재 <span id="current-week">0</span>주차)</h2>
+                    <div id="next-measurement-info" class="next-measurement-info">
+                        <p data-lang-key="nextMeasurementInfoNoData">마지막 측정일을 기준으로 다음 예정일을 계산해요.</p>
                     </div>
 
+                    <form id="measurement-form">
+                        <input type="hidden" id="edit-index" value="">
+                        <p class="description" data-lang-key="inputDescription">모든 항목은 선택 사항이에요! 기록하고 싶은 것만 편하게 입력해주세요 😉</p>
 
- </fieldset>
+                        <fieldset class="input-category glass-section">
+                            <legend data-lang-key="categoryBodySize">신체 사이즈</legend>
+                            <div class="input-grid">
+                                <div class="form-group"><label for="height" data-lang-key="height">신장 (cm)</label><input type="number" id="height" name="height" step="0.1" min="0" placeholder="cm"></div>
+                                <div class="form-group"><label for="weight" data-lang-key="weight">체중 (kg)</label><input type="number" id="weight" name="weight" step="0.1" min="0" placeholder="kg"></div>
+                                <div class="form-group"><label for="shoulder" data-lang-key="shoulder">어깨너비 (cm)</label><input type="number" id="shoulder" name="shoulder" step="0.1" min="0" placeholder="cm"></div>
+                                <div class="form-group"><label for="neck" data-lang-key="neck">목둘레 (cm)</label><input type="number" id="neck" name="neck" step="0.1" min="0" placeholder="cm"></div>
+                                <div class="form-group"><label for="chest" data-lang-key="chest">가슴둘레 (cm)</label><input type="number" id="chest" name="chest" step="0.1" min="0" placeholder="cm"></div>
+                                <div class="form-group mtf-only"><label for="cupSize" data-lang-key="cupSize">컵 사이즈</label><input type="text" id="cupSize" name="cupSize" placeholder="EX: 75A"></div>
+                                <div class="form-group"><label for="waist" data-lang-key="waist">허리둘레 (cm)</label><input type="number" id="waist" name="waist" step="0.1" min="0" placeholder="cm"></div>
+                                <div class="form-group"><label for="hips" data-lang-key="hips">엉덩이둘레 (cm)</label><input type="number" id="hips" name="hips" step="0.1" min="0" placeholder="cm"></div>
+                                <div class="form-group"><label for="thigh" data-lang-key="thigh">허벅지둘레 (cm)</label><input type="number" id="thigh" name="thigh" step="0.1" min="0" placeholder="cm"></div>
+                                <div class="form-group"><label for="calf" data-lang-key="calf">종아리둘레 (cm)</label><input type="number" id="calf" name="calf" step="0.1" min="0" placeholder="cm"></div>
+                                <div class="form-group"><label for="arm" data-lang-key="arm">팔뚝둘레 (cm)</label><input type="number" id="arm" name="arm" step="0.1" min="0" placeholder="cm"></div>
+                            </div>
+                        </fieldset>
 
-                    <div class="button-group">
-                        <button type="submit" id="save-update-button" data-lang-key="saveRecord">기록하기 ✨</button>
-                        <button type="button" id="cancel-edit-button" style="display: none;"
- data-lang-key="cancelEdit">수정 취소</button>
-                    </div>
-                </form>
-            </div>
+                        <fieldset class="input-category glass-section">
+                            <legend data-lang-key="categoryHealth">건강</legend>
+                            <div class="input-grid">
+                                <div class="form-group"><label for="muscleMass" data-lang-key="muscleMass">근육량 (kg)</label><input type="number" id="muscleMass" name="muscleMass" step="0.1" min="0" placeholder="kg"></div>
+                                <div class="form-group"><label for="bodyFatPercentage" data-lang-key="bodyFatPercentage">체지방률 (%)</label><input type="number" id="bodyFatPercentage" name="bodyFatPercentage" step="0.1" min="0" placeholder="%"></div>
+                                <div class="form-group"><label for="libido" data-lang-key="libido">성욕 (회/주)</label><input type="number" id="libido" name="libido" step="1" min="0" placeholder="number"></div>
+                                <div class="form-group form-group-compound mtf-only"><label data-lang-key="semenStatus">정액 상태</label><div class="compound-input"><input type="number" id="semenScore" name="semenScore" step="0.5" min="0" data-lang-key="scorePlaceholder" placeholder="Score"><input type="text" id="semenNotes" name="semenNotes" data-lang-key="notesPlaceholder" placeholder="Text"></div></div>
+                                <div class="form-group form-group-compound"><label data-lang-key="healthStatus">건강 상태</label><div class="compound-input"><input type="number" id="healthScore" name="healthScore" step="0.5" min="0" data-lang-key="scorePlaceholder" placeholder="Score"><input type="text" id="healthNotes" name="healthNotes" data-lang-key="notesPlaceholder" placeholder="Text"></div></div>
+                                <div class="form-group"><label for="skinCondition" data-lang-key="skinCondition">피부 상태</label><input type="text" id="skinCondition" name="skinCondition" data-lang-key="skinConditionPlaceholder" placeholder="Text"></div>
+                            </div>
+                        </fieldset>
 
-            <div id="tab-history" class="tab-content card">
-                <h2 data-lang-key="historyTitle" id="history-title-h2">측정 기록 꼼꼼히 보기 🧐</h2>
+                        <fieldset class="input-category glass-section">
+                            <legend data-lang-key="categoryMedication">마법</legend>
+                            <div class="input-grid">
+                                <div class="form-group mtf-only"><label for="estradiol" data-lang-key="estradiol">에스트라디올 (mg)</label><input type="number" id="estradiol" name="estradiol" step="0.1" min="0" placeholder="mg"></div>
+                                <div class="form-group mtf-only"><label for="progesterone" data-lang-key="progesterone">프로게스테론 (mg)</label><input type="number" id="progesterone" name="progesterone" step="1" min="0" placeholder="mg"></div>
+                                <div class="form-group mtf-only"><label for="antiAndrogen" data-lang-key="antiAndrogen">항안드로겐 (mg)</label><input type="number" id="antiAndrogen" name="antiAndrogen" step="1" min="0" placeholder="mg"></div>
+                                <div class="form-group ftm-only"><label for="testosterone" data-lang-key="testosterone">테스토스테론 (mg)</label><input type="number" id="testosterone" name="testosterone" step="1" min="0" placeholder="mg"></div>
+                            </div>
+                            <div class="form-group"><label for="medicationOtherName" data-lang-key="medicationOtherName">기타 약물 이름</label><input type="text" id="medicationOtherName" name="medicationOtherName" placeholder="(기타)" data-lang-key="medicationOtherNamePlaceholder"></div>
+                            <div class="form-group"><label for="medicationOtherDose" data-lang-key="medicationOtherDose">기타 약물 용량 (mg)</label><input type="number" id="medicationOtherDose" name="medicationOtherDose" step="0.1" min="0" placeholder="mg" data-lang-key="unitMgPlaceholder"></div>
+                        </fieldset>
 
- <p class="description" data-lang-key="historyDescription" id="history-description-p">(표가 화면보다 넓으면 좌우로 스크롤해보세요!)</p>
-                 <div id="history-table-container" class="table-responsive horizontal-scroll">
-                    <p data-lang-key="noDataYet" ></p style="text-align: center; color: white;">아직 기록된 데이터가 없어요.
- 첫 기록을 남겨볼까요?</p>
+                        <div class="button-group">
+                            <button type="submit" id="save-update-button" class="glass-button primary" data-lang-key="saveRecord">기록하기 ✨</button>
+                            <button type="button" id="cancel-edit-button" class="glass-button" style="display: none;" data-lang-key="cancelEdit">수정 취소</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <div id="tab-change-report" class="tab-content card">
-                <h2 data-lang-key="reportTitle" id="report-title-h2">나의 변화 보고서 📈</h2>
-                <div class="report-section">
-
- <h3 data-lang-key="reportGraphTitle" id="report-graph-title">주차별 변화 그래프</h3>
-                    <p class="description" data-lang-key="reportGraphDesc" id="report-graph-description">보고 싶은 항목 버튼을 눌러 선택(활성)하거나 해제할 수 있어요.
- 여러 항목을 겹쳐 볼 수도 있답니다!</p>
-                    <div class="chart-controls-container">
-                        <div id="chart-selector" class="chart-controls"></div>
-                        <div class="chart-bulk-actions">
-
- <button id="select-all-charts" class="select-all-button" data-lang-key="selectAll">전체 선택</button>
-                             <button id="deselect-all-charts" class="deselect-all-button" data-lang-key="deselectAll">전체 해제</button>
+            <!-- 측정 기록 탭 -->
+            <div id="tab-history" class="tab-content">
+                <div class="glass-card">
+                    <h2 data-lang-key="historyTitle" id="history-title-h2">측정 기록 꼼꼼히 보기 🧐</h2>
+                    <p class="description" data-lang-key="historyDescription" id="history-description-p">(표가 화면보다 넓으면 좌우로 스크롤해보세요!)</p>
+                    <!-- JS에 의해 카드 뷰 또는 테이블 뷰가 채워짐 -->
+                    <div id="history-cards-container" class="history-view"></div>
+                    <div id="history-table-container" class="history-view table-responsive horizontal-scroll"></div>
+                </div>
+            </div>
+            
+            <!-- 변화 보고서 탭 -->
+            <div id="tab-change-report" class="tab-content">
+                <div class="glass-card">
+                     <h2 data-lang-key="reportTitle" id="report-title-h2">나의 변화 보고서 📈</h2>
+                    
+                    <div class="report-section glass-section">
+                        <h3 data-lang-key="reportGraphTitle" id="report-graph-title">주차별 변화 그래프</h3>
+                        <p class="description" data-lang-key="reportGraphDesc" id="report-graph-description">보고 싶은 항목 버튼을 눌러 선택하거나 해제할 수 있어요. 여러 항목을 겹쳐 볼 수도 있답니다!</p>
+                        <div class="chart-controls-container">
+                            <div id="chart-selector" class="chart-controls"></div>
+                            <div class="chart-bulk-actions">
+                                <button id="select-all-charts" class="glass-button" data-lang-key="selectAll">전체 선택</button>
+                                <button id="deselect-all-charts" class="glass-button" data-lang-key="deselectAll">전체 해제</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="measurement-chart"></canvas>
                         </div>
                     </div>
 
- <div class="chart-container">
-                        <canvas id="measurement-chart"></canvas>
-                    </div>
-                </div>
-                <div class="report-section">
-
- <h3 class="table-title" data-lang-key="reportPrevWeekTitle" id="prev-week-comparison-title">지난주와 비교하면?
- 🤔</h3>
-                    <div id="prev-week-comparison-container" class="table-responsive">
-                        <p data-lang-key="reportNeedTwoRecords">데이터가 2개 이상 기록되어야 비교할 수 있어요.</p>
-                    </div>
-                </div>
-
- <div class="report-section">
-                    <h3 class="table-title" data-lang-key="reportInitialTitle" id="initial-comparison-title">처음과 비교하면?
- 🌱➡️🌳</h3>
-                    <div id="initial-comparison-container" class="table-responsive">
-                         <p data-lang-key="reportNeedTwoRecords">데이터가 2개 이상 기록되어야 비교할 수 있어요.</p>
-                    </div>
-                </div>
-
- <div class="report-section">
-                    <h3 class="table-title" data-lang-key="reportTargetTitle" id="target-comparison-title">목표까지 얼마나 왔을까?
- 🎯</h3>
-                    <div id="target-comparison-container" class="table-responsive">
-                        <p data-lang-key="reportNeedTarget">먼저 '목표 설정' 탭에서 목표를 입력해주세요!</p>
-                    </div>
-                 </div>
-
- </div>
-
-            <div id="tab-targets" class="tab-content card">
-                <h2 data-lang-key="targetTitle">나만의 목표 설정 💖</h2>
-                <form id="target-form">
-                    <p class="description" data-lang-key="targetDescription">원하는 목표 수치를 입력해주세요.
- 보고서 탭에서 달성률을 확인할 수 있어요.</p>
-                    <div class="target-grid">
+                    <div class="report-comparison-grid">
+                        <div class="report-section glass-card">
+                            <h3 class="table-title" data-lang-key="reportPrevWeekTitle" id="prev-week-comparison-title">지난주와 비교하면? 🤔</h3>
+                            <div id="prev-week-comparison-container" class="table-responsive">
+                                <p data-lang-key="reportNeedTwoRecords">데이터가 2개 이상 기록되어야 비교할 수 있어요.</p>
+                            </div>
                         </div>
-                    <button type="submit" id="save-targets-button" data-lang-key="saveTarget">목표 저장!
- 💪</button>
-                </form>
-            </div>
-
-            <div id="tab-overview" class="tab-content card">
-                <h2 data-lang-key="overviewTitle">메모 📝</h2>
-                <div id="note-form-area">
-                     <input
- type="hidden" id="edit-note-id" value="">
-                    <h3 id="note-form-title" data-lang-key="noteNewTitle">새 메모 작성</h3>
-                    <div class="form-group">
-                        <label for="note-title" data-lang-key="noteTitleLabel">제목</label>
-                        <input type="text" id="note-title"
- data-lang-key="noteTitlePlaceholder" placeholder="Text">
+                        <div class="report-section glass-card">
+                            <h3 class="table-title" data-lang-key="reportInitialTitle" id="initial-comparison-title">처음과 비교하면? 🌱➡️🌳</h3>
+                            <div id="initial-comparison-container" class="table-responsive">
+                                <p data-lang-key="reportNeedTwoRecords">데이터가 2개 이상 기록되어야 비교할 수 있어요.</p>
+                            </div>
+                        </div>
+                        <div class="report-section glass-card">
+                            <h3 class="table-title" data-lang-key="reportTargetTitle" id="target-comparison-title">목표까지 얼마나 왔을까? 🎯</h3>
+                            <div id="target-comparison-container" class="table-responsive">
+                                <p data-lang-key="reportNeedTarget">먼저 '목표 설정' 탭에서 목표를 입력해주세요!</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="note-content" data-lang-key="noteContentLabel">내용</label>
-                        <textarea id="note-content" rows="5" data-lang-key="noteContentPlaceholder" placeholder="Text"></textarea>
-
- </div>
-                    <div class="button-group">
-                        <button id="save-note-button" data-lang-key="saveNote">메모 저장 🖋️</button>
-                        <button id="cancel-edit-note-button" style="display: none;"
- data-lang-key="cancelEdit">수정 취소</button>
-                     </div>
-                </div>
-
-                <hr class="divider">
-
-                <h3 data-lang-key="noteListTitle" id="note-list-title">작성된 메모 목록 ✨</h3>
-                <div class="notes-controls">
-
- <label for="note-sort-order" data-lang-key="sortBy">정렬:</label>
-                    <select id="note-sort-order">
-                        <option value="newest" data-lang-key="sortNewest">최신 순</option>
-                        <option value="oldest" data-lang-key="sortOldest">오래된 순</option>
-
- </select>
-                 </div>
-                <div id="notes-list-container">
-                    <p data-lang-key="noNotesYet">아직 작성된 메모가 없네요.
- 첫 메모를 남겨보세요!</p>
                 </div>
             </div>
 
-            <div id="tab-settings" class="tab-content card">
-               <h2 data-lang-key="settingsTitle">설정 ⚙️</h2>
+            <!-- 목표 설정 탭 -->
+            <div id="tab-targets" class="tab-content">
+                <div class="glass-card">
+                    <h2 data-lang-key="targetTitle">나만의 목표 설정 💖</h2>
+                    <form id="target-form">
+                        <p class="description" data-lang-key="targetDescription">원하는 목표 수치를 입력해주세요. 보고서 탭에서 달성률을 확인할 수 있어요.</p>
+                        <div class="target-grid"></div>
+                        <button type="submit" id="save-targets-button" class="glass-button primary" data-lang-key="saveTarget">목표 저장! 💪</button>
+                    </form>
+                </div>
+            </div>
 
-                 <div class="settings-section">
+            <!-- 메모 탭 -->
+            <div id="tab-overview" class="tab-content">
+                <div class="glass-card">
+                    <h2 data-lang-key="overviewTitle">메모 📝</h2>
+                    <div id="note-form-area" class="glass-section">
+                        <input type="hidden" id="edit-note-id" value="">
+                        <h3 id="note-form-title" data-lang-key="noteNewTitle">새 메모 작성</h3>
+                        <div class="form-group">
+                            <label for="note-title" data-lang-key="noteTitleLabel">제목</label>
+                            <input type="text" id="note-title" data-lang-key="noteTitlePlaceholder" placeholder="Text">
+                        </div>
+                        <div class="form-group">
+                            <label for="note-content" data-lang-key="noteContentLabel">내용</label>
+                            <textarea id="note-content" rows="5" data-lang-key="noteContentPlaceholder" placeholder="Text"></textarea>
+                        </div>
+                        <div class="button-group">
+                            <button id="save-note-button" class="glass-button primary" data-lang-key="saveNote">메모 저장 🖋️</button>
+                            <button id="cancel-edit-note-button" class="glass-button" style="display: none;" data-lang-key="cancelEdit">수정 취소</button>
+                        </div>
+                    </div>
 
- <h3 data-lang-key="languageSettingsTitle" id="language-settings-title">언어 설정</h3>
+                    <hr class="divider">
+
+                    <h3 data-lang-key="noteListTitle" id="note-list-title">작성된 메모 목록 ✨</h3>
+                    <div class="notes-controls">
+                        <select id="note-sort-order">
+                            <option value="newest" data-lang-key="sortNewest">최신 순</option>
+                            <option value="oldest" data-lang-key="sortOldest">오래된 순</option>
+                        </select>
+                    </div>
+                    <div id="notes-list-container">
+                        <p data-lang-key="noNotesYet">아직 작성된 메모가 없네요. 첫 메모를 남겨보세요!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 설정 탭 -->
+            <div id="tab-settings" class="tab-content">
+                <h2 data-lang-key="settingsTitle">설정 ⚙️</h2>
+                
+                <div class="settings-section glass-card">
+                    <h3 data-lang-key="languageSettingsTitle" id="language-settings-title">언어 설정</h3>
                     <div class="form-group">
                         <label for="language-select" data-lang-key="language">언어</label>
                         <select id="language-select">
-
- <option value="ko">한국어</option>
+                            <option value="ko">한국어</option>
                             <option value="en">English</option>
                             <option value="ja">日本語</option>
                         </select>
+                    </div>
+                </div>
 
- </div>
-                 </div>
-
-                 <div class="settings-section">
+                <div class="settings-section glass-card">
                     <h3 data-lang-key="modeSettingsTitle" id="mode-settings-title">모드 설정</h3>
-                     <p class="description" data-lang-key="modeSettingsDesc" id="mode-settings-description">목표하는 신체 변화 방향을 선택해주세요.</p>
+                    <p class="description" data-lang-key="modeSettingsDesc" id="mode-settings-description">목표하는 신체 변화 방향을 선택해주세요.</p>
+                    <div class="form-group">
+                        <label for="mode-select" data-lang-key="mode" id="mode-label">모드</label>
+                        <select id="mode-select">
+                            <option value="mtf" data-lang-key="modeMtf">여성화</option>
+                            <option value="ftm" data-lang-key="modeFtm">남성화</option>
+                        </select>
+                    </div>
+                </div>
 
- <div class="form-group">
-                         <label for="mode-select" data-lang-key="mode" id="mode-label">모드</label>
-                         <select id="mode-select">
-                             <option value="mtf"
- data-lang-key="modeMtf">여성화</option>
-                             <option value="ftm" data-lang-key="modeFtm">남성화</option>
-                         </select>
-                     </div>
-                 </div>
-
-                 <div class="settings-section">
+                <div class="settings-section glass-card">
                     <h3 data-lang-key="themeSettingsTitle">테마 설정</h3>
                     <div class="form-group">
                         <label for="theme-select" data-lang-key="theme">테마</label>
@@ -376,64 +282,52 @@
                             <option value="dark" data-lang-key="themeDark">다크 모드</option>
                         </select>
                     </div>
-                 </div>
-                 <div class="settings-section">
+                </div>
+
+                <div class="settings-section glass-card">
                     <h3 data-lang-key="dataManagementTitle" id="data-management-title">데이터 백업 & 복원</h3>
-                     <p class="description" data-lang-key="dataManagementDesc" id="data-management-description">모든 기록(측정, 목표, 메모)을 파일 하나로 저장하거나 복원할 수 있어요.
- 가끔 백업해두면 안심이에요! 😊</p>
-                     <div class="button-group">
-                        <button type="button" id="export-data-button" data-lang-key="exportData">파일 저장하기</button>
-                        <button type="button" id="import-data-button" data-lang-key="importData">파일 불러오기</button>
+                    <p class="description" data-lang-key="dataManagementDesc" id="data-management-description">모든 기록을 파일 하나로 저장하거나 복원할 수 있어요. 가끔 백업해두면 안심이에요! 😊</p>
+                    <div class="button-group">
+                        <button type="button" id="export-data-button" class="glass-button" data-lang-key="exportData">파일 저장하기</button>
+                        <button type="button" id="import-data-button" class="glass-button" data-lang-key="importData">파일 불러오기</button>
+                    </div>
+                    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+                    <p class="warning"><strong data-lang-key="warning">주의!</strong> <span data-lang-key="importWarning">복원하면 지금 브라우저에 있는 모든 데이터가 파일 내용으로 완전히 대체돼요!</span></p>
+                </div>
 
- </div>
-                     <input type="file" id="import-file-input" accept=".json" style="display: none;">
-                     <p class="warning"><strong data-lang-key="warning">주의!</strong> <span data-lang-key="importWarning">복원하면 지금 브라우저에 있는 모든 데이터가 파일 내용으로 완전히 대체돼요!</span></p>
-                 </div>
+                <div class="settings-section glass-card">
+                    <h3 data-lang-key="resetDataTitle" id="reset-data-title">데이터 초기화</h3>
+                    <p class="warning" id="reset-data-warning"><strong data-lang-key="severeWarning">정말정말 주의!</strong> <span data-lang-key="resetWarning">😱 모든 데이터가 영구적으로 삭제됩니다! 초기화 전에 꼭! 데이터를 파일로 백업해주세요.</span></p>
+                    <div class="button-group">
+                        <button type="button" id="reset-data-button" class="glass-button danger" data-lang-key="resetDataButton">모든 데이터 초기화</button>
+                    </div>
+                </div>
 
-                 <div class="settings-section">
-
- <h3 data-lang-key="resetDataTitle" id="reset-data-title">데이터 초기화</h3>
-                     <p class="warning" id="reset-data-warning"><strong data-lang-key="severeWarning">정말정말 주의!</strong> <span data-lang-key="resetWarning">😱 모든 데이터(측정, 목표, 메모)가 영구적으로 삭제됩니다!
- 초기화 전에 꼭! 데이터를 파일로 백업해주세요.</span></p>
-                      <div class="button-group">
-                         <button type="button" id="reset-data-button" class="danger-button" data-lang-key="resetDataButton">모든 데이터 초기화</button>
-                     </div>
-                 </div>
-
-
- <div class="settings-section info">
+                <div class="settings-section info glass-card">
                     <h3 data-lang-key="infoTitle" id="info-title">정보</h3>
-                    <p><span data-lang-key="versionLabel">버전:</span> <span id="app-version-display-footer">1.4</span></p> <p data-lang-key="privacyInfo" id="privacy-info">이 앱은 오프라인 작동하며 모든 데이터는 브라우저에만 안전하게 저장됩니다!
- 😉</p>
+                    <p><span data-lang-key="versionLabel">버전:</span> <span id="app-version-display-footer">1.4</span></p>
+                    <p data-lang-key="privacyInfo" id="privacy-info">이 앱은 오프라인 작동하며 모든 데이터는 브라우저에만 안전하게 저장됩니다! 😉</p>
                     <p style="margin-top: 15px;"><strong>Made by MUMU</strong> 💖</p>
-                    <p style="margin-top: 20px;"
- data-lang-key="developerMessage" id="developer-message">이 작은 도구가 당신의 소중한 여정에 즐거움과 도움이 되기를 바라요!</p>
-                    <p>© 2025. MUMU.
- All rights reserved.</p>
+                    <p style="margin-top: 20px;" data-lang-key="developerMessage" id="developer-message">이 작은 도구가 당신의 소중한 여정에 즐거움과 도움이 되기를 바라요!</p>
+                    <p>© 2025. MUMU. All rights reserved.</p>
                 </div>
             </div>
 
-        </div> <div id="save-popup" class="popup"></div>
+        </div>
+        <div id="save-popup" class="popup"></div>
+    </div>
 
-    </div> <script src="script.js"></script>
-
+    <script src="script.js"></script>
     <script>
-        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-
- navigator.serviceWorker.register('/sw.js') // Ensure sw.js is in the root directory
-                     .then(registration => {
-                        console.log('✅ Service Worker Registered:', registration.scope);
-                    })
-
- .catch(error => {
-                        console.log('🚨 Service Worker Registration Failed:', error);
-                    });
+                navigator.serviceWorker.register('/sw.js')
+                     .then(registration => console.log('✅ Service Worker Registered:', registration.scope))
+                     .catch(error => console.log('🚨 Service Worker Registration Failed:', error));
             });
- } else {
+        } else {
             console.log('Service Worker not supported by this browser.');
- }
+        }
     </script>
 </body>
 </html>

@@ -227,197 +227,202 @@
 
         </div>
 
-        <!-- 측정 기록 탭 -->
-        <div id="tab-history" class="tab-content">
-            <div class="glass-card">
-                <h2 data-lang-key="historyTitle" id="history-title-h2">측정 기록 꼼꼼히 보기 🧐</h2>
-                <p class="description" data-lang-key="historyDescription" id="history-description-p">(표가 화면보다 넓으면
-                    좌우로 스크롤해보세요!)</p>
-                <!-- JS에 의해 카드 뷰 또는 테이블 뷰가 채워짐 -->
-                <div id="history-cards-container" class="history-view"></div>
-                <div id="history-table-container" class="history-view table-responsive horizontal-scroll"></div>
-            </div>
+
+    </div>
+
+    <!-- 측정 기록 탭 -->
+    <div id="tab-history" class="tab-content">
+        <div class="glass-card">
+            <h2 data-lang-key="historyTitle" id="history-title-h2">측정 기록 꼼꼼히 보기 🧐</h2>
+            <p class="description" data-lang-key="historyDescription" id="history-description-p">(표가 화면보다 넓으면
+                좌우로 스크롤해보세요!)</p>
+            <!-- JS에 의해 카드 뷰 또는 테이블 뷰가 채워짐 -->
+            <div id="history-cards-container" class="history-view"></div>
+            <div id="history-table-container" class="history-view table-responsive horizontal-scroll"></div>
         </div>
+    </div>
 
-        <!-- 변화 보고서 탭 -->
-        <div id="tab-change-report" class="tab-content">
-            <div class="glass-card">
-                <h2 data-lang-key="reportTitle" id="report-title-h2">나의 변화 보고서 📈</h2>
+    <!-- 변화 보고서 탭 -->
+    <div id="tab-change-report" class="tab-content">
+        <div class="glass-card">
+            <h2 data-lang-key="reportTitle" id="report-title-h2">나의 변화 보고서 📈</h2>
 
-                <div class="report-section glass-section">
-                    <h3 data-lang-key="reportGraphTitle" id="report-graph-title">주차별 변화 그래프</h3>
-                    <p class="description" data-lang-key="reportGraphDesc" id="report-graph-description">보고 싶은 항목
-                        버튼을 눌러 선택하거나 해제할 수 있어요. 여러 항목을 겹쳐 볼 수도 있답니다!</p>
-                    <div class="chart-controls-container">
-                        <div id="chart-selector" class="chart-controls"></div>
-                        <div class="chart-bulk-actions">
-                            <button id="select-all-charts" class="glass-button" data-lang-key="selectAll">전체
-                                선택</button>
-                            <button id="deselect-all-charts" class="glass-button" data-lang-key="deselectAll">전체
-                                해제</button>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="measurement-chart"></canvas>
+            <div class="report-section glass-section">
+                <h3 data-lang-key="reportGraphTitle" id="report-graph-title">주차별 변화 그래프</h3>
+                <p class="description" data-lang-key="reportGraphDesc" id="report-graph-description">보고 싶은 항목
+                    버튼을 눌러 선택하거나 해제할 수 있어요. 여러 항목을 겹쳐 볼 수도 있답니다!</p>
+                <div class="chart-controls-container">
+                    <div id="chart-selector" class="chart-controls"></div>
+                    <div class="chart-bulk-actions">
+                        <button id="select-all-charts" class="glass-button" data-lang-key="selectAll">전체
+                            선택</button>
+                        <button id="deselect-all-charts" class="glass-button" data-lang-key="deselectAll">전체
+                            해제</button>
                     </div>
                 </div>
-
-                <div class="report-comparison-grid">
-                    <div class="report-section glass-card">
-                        <h3 class="table-title" data-lang-key="reportPrevWeekTitle" id="prev-week-comparison-title">
-                            지난주와 비교하면? 🤔</h3>
-                        <div id="prev-week-comparison-container" class="table-responsive">
-                            <p data-lang-key="reportNeedTwoRecords">데이터가 2개 이상 기록되어야 비교할 수 있어요.</p>
-                        </div>
-                    </div>
-                    <div class="report-section glass-card">
-                        <h3 class="table-title" data-lang-key="reportInitialTitle" id="initial-comparison-title">처음과
-                            비교하면? 🌱➡️🌳</h3>
-                        <div id="initial-comparison-container" class="table-responsive">
-                            <p data-lang-key="reportNeedTwoRecords">데이터가 2개 이상 기록되어야 비교할 수 있어요.</p>
-                        </div>
-                    </div>
-                    <div class="report-section glass-card">
-                        <h3 class="table-title" data-lang-key="reportTargetTitle" id="target-comparison-title">목표까지
-                            얼마나 왔을까? 🎯</h3>
-                        <div id="target-comparison-container" class="table-responsive">
-                            <p data-lang-key="reportNeedTarget">먼저 '목표 설정' 탭에서 목표를 입력해주세요!</p>
-                        </div>
-                    </div>
+                <div class="chart-container">
+                    <canvas id="measurement-chart"></canvas>
                 </div>
             </div>
-        </div>
 
-        <!-- 목표 설정 탭 -->
-        <div id="tab-targets" class="tab-content">
-            <div class="glass-card">
-                <h2 data-lang-key="targetTitle">나만의 목표 설정 💖</h2>
-                <form id="target-form">
-                    <p class="description" data-lang-key="targetDescription">원하는 목표 수치를 입력해주세요. 보고서 탭에서 달성률을 확인할 수
-                        있어요.</p>
-                    <div class="target-grid"></div>
-                    <button type="submit" id="save-targets-button" class="glass-button primary"
-                        data-lang-key="saveTarget">목표 저장! 💪</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- 메모 탭 -->
-        <div id="tab-overview" class="tab-content">
-            <div class="glass-card">
-                <h2 data-lang-key="overviewTitle">메모 📝</h2>
-                <div id="note-form-area" class="glass-section">
-                    <input type="hidden" id="edit-note-id" value="">
-                    <h3 id="note-form-title" data-lang-key="noteNewTitle">새 메모 작성</h3>
-                    <div class="form-group">
-                        <label for="note-title" data-lang-key="noteTitleLabel">제목</label>
-                        <input type="text" id="note-title" data-lang-key="noteTitlePlaceholder" placeholder="Text">
-                    </div>
-                    <div class="form-group">
-                        <label for="note-content" data-lang-key="noteContentLabel">내용</label>
-                        <textarea id="note-content" rows="5" data-lang-key="noteContentPlaceholder"
-                            placeholder="Text"></textarea>
-                    </div>
-                    <div class="button-group">
-                        <button id="save-note-button" class="glass-button primary" data-lang-key="saveNote">메모 저장
-                            🖋️</button>
-                        <button id="cancel-edit-note-button" class="glass-button" style="display: none;"
-                            data-lang-key="cancelEdit">수정 취소</button>
+            <div class="report-comparison-grid">
+                <div class="report-section glass-card">
+                    <h3 class="table-title" data-lang-key="reportPrevWeekTitle" id="prev-week-comparison-title">
+                        지난주와 비교하면? 🤔</h3>
+                    <div id="prev-week-comparison-container" class="table-responsive">
+                        <p data-lang-key="reportNeedTwoRecords">데이터가 2개 이상 기록되어야 비교할 수 있어요.</p>
                     </div>
                 </div>
-
-                <hr class="divider">
-
-                <h3 data-lang-key="noteListTitle" id="note-list-title">작성된 메모 목록 ✨</h3>
-                <div class="notes-controls">
-                    <select id="note-sort-order">
-                        <option value="newest" data-lang-key="sortNewest">최신 순</option>
-                        <option value="oldest" data-lang-key="sortOldest">오래된 순</option>
-                    </select>
+                <div class="report-section glass-card">
+                    <h3 class="table-title" data-lang-key="reportInitialTitle" id="initial-comparison-title">처음과
+                        비교하면? 🌱➡️🌳</h3>
+                    <div id="initial-comparison-container" class="table-responsive">
+                        <p data-lang-key="reportNeedTwoRecords">데이터가 2개 이상 기록되어야 비교할 수 있어요.</p>
+                    </div>
                 </div>
-                <div id="notes-list-container">
-                    <p data-lang-key="noNotesYet">아직 작성된 메모가 없네요. 첫 메모를 남겨보세요!</p>
+                <div class="report-section glass-card">
+                    <h3 class="table-title" data-lang-key="reportTargetTitle" id="target-comparison-title">목표까지
+                        얼마나 왔을까? 🎯</h3>
+                    <div id="target-comparison-container" class="table-responsive">
+                        <p data-lang-key="reportNeedTarget">먼저 '목표 설정' 탭에서 목표를 입력해주세요!</p>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- 설정 탭 -->
-        <div id="tab-settings" class="tab-content">
-            <h2 data-lang-key="settingsTitle">설정 ⚙️</h2>
+    <!-- 목표 설정 탭 -->
+    <div id="tab-targets" class="tab-content">
+        <div class="glass-card">
+            <h2 data-lang-key="targetTitle">나만의 목표 설정 💖</h2>
+            <form id="target-form">
+                <p class="description" data-lang-key="targetDescription">원하는 목표 수치를 입력해주세요. 보고서 탭에서 달성률을 확인할 수
+                    있어요.</p>
+                <div class="target-grid"></div>
+                <button type="submit" id="save-targets-button" class="glass-button primary"
+                    data-lang-key="saveTarget">목표 저장! 💪</button>
+            </form>
+        </div>
+    </div>
 
-            <div class="settings-section glass-card">
-                <h3 data-lang-key="languageSettingsTitle" id="language-settings-title">언어 설정</h3>
+    <!-- 메모 탭 -->
+    <div id="tab-overview" class="tab-content">
+        <div class="glass-card">
+            <h2 data-lang-key="overviewTitle">메모 📝</h2>
+            <div id="note-form-area" class="glass-section">
+                <input type="hidden" id="edit-note-id" value="">
+                <h3 id="note-form-title" data-lang-key="noteNewTitle">새 메모 작성</h3>
                 <div class="form-group">
-                    <label for="language-select" data-lang-key="language">언어</label>
-                    <select id="language-select">
-                        <option value="ko">한국어</option>
-                        <option value="en">English</option>
-                        <option value="ja">日本語</option>
-                    </select>
+                    <label for="note-title" data-lang-key="noteTitleLabel">제목</label>
+                    <input type="text" id="note-title" data-lang-key="noteTitlePlaceholder" placeholder="Text">
                 </div>
-            </div>
-
-            <div class="settings-section glass-card">
-                <h3 data-lang-key="modeSettingsTitle" id="mode-settings-title">모드 설정</h3>
-                <p class="description" data-lang-key="modeSettingsDesc" id="mode-settings-description">목표하는 신체 변화
-                    방향을 선택해주세요.</p>
                 <div class="form-group">
-                    <label for="mode-select" data-lang-key="mode" id="mode-label">모드</label>
-                    <select id="mode-select">
-                        <option value="mtf" data-lang-key="modeMtf">여성화</option>
-                        <option value="ftm" data-lang-key="modeFtm">남성화</option>
-                    </select>
+                    <label for="note-content" data-lang-key="noteContentLabel">내용</label>
+                    <textarea id="note-content" rows="5" data-lang-key="noteContentPlaceholder"
+                        placeholder="Text"></textarea>
                 </div>
-            </div>
-
-            <div class="settings-section glass-card">
-                <h3 data-lang-key="themeSettingsTitle">테마 설정</h3>
-                <div class="form-group">
-                    <label for="theme-select" data-lang-key="theme">테마</label>
-                    <select id="theme-select">
-                        <option value="system" data-lang-key="themeSystem">기기 값 참조</option>
-                        <option value="light" data-lang-key="themeLight">라이트 모드</option>
-                        <option value="dark" data-lang-key="themeDark">다크 모드</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="settings-section glass-card">
-                <h3 data-lang-key="dataManagementTitle" id="data-management-title">데이터 백업 & 복원</h3>
-                <p class="description" data-lang-key="dataManagementDesc" id="data-management-description">모든 기록을 파일
-                    하나로 저장하거나 복원할 수 있어요. 가끔 백업해두면 안심이에요! 😊</p>
                 <div class="button-group">
-                    <button type="button" id="export-data-button" class="glass-button" data-lang-key="exportData">파일
-                        저장하기</button>
-                    <button type="button" id="import-data-button" class="glass-button" data-lang-key="importData">파일
-                        불러오기</button>
-                </div>
-                <input type="file" id="import-file-input" accept=".json" style="display: none;">
-                <p class="warning"><strong data-lang-key="warning">주의!</strong> <span data-lang-key="importWarning">복원하면
-                        지금 브라우저에 있는 모든 데이터가 파일 내용으로 완전히 대체돼요!</span></p>
-            </div>
-
-            <div class="settings-section glass-card">
-                <h3 data-lang-key="resetDataTitle" id="reset-data-title">데이터 초기화</h3>
-                <p class="warning" id="reset-data-warning"><strong data-lang-key="severeWarning">정말정말 주의!</strong>
-                    <span data-lang-key="resetWarning">😱 모든 데이터가 영구적으로 삭제됩니다! 초기화 전에 꼭! 데이터를 파일로 백업해주세요.</span>
-                </p>
-                <div class="button-group">
-                    <button type="button" id="reset-data-button" class="glass-button danger"
-                        data-lang-key="resetDataButton">모든 데이터 초기화</button>
+                    <button id="save-note-button" class="glass-button primary" data-lang-key="saveNote">메모 저장
+                        🖋️</button>
+                    <button id="cancel-edit-note-button" class="glass-button" style="display: none;"
+                        data-lang-key="cancelEdit">수정 취소</button>
                 </div>
             </div>
 
-            <div class="settings-section info glass-card">
-                <h3 data-lang-key="infoTitle" id="info-title">정보</h3>
-                <p><span data-lang-key="versionLabel">버전:</span> <span id="app-version-display-footer">1.4</span>
-                </p>
-                <p data-lang-key="privacyInfo" id="privacy-info">이 앱은 오프라인 작동하며 모든 데이터는 브라우저에만 안전하게 저장됩니다! 😉</p>
-                <p style="margin-top: 15px;"><strong>Made by MUMU</strong> 💖</p>
-                <p style="margin-top: 20px;" data-lang-key="developerMessage" id="developer-message">이 작은 도구가 당신의
-                    소중한 여정에 즐거움과 도움이 되기를 바라요!</p>
-                <p>© 2025. MUMU. All rights reserved.</p>
+            <hr class="divider">
+
+            <h3 data-lang-key="noteListTitle" id="note-list-title">작성된 메모 목록 ✨</h3>
+            <div class="notes-controls">
+                <select id="note-sort-order">
+                    <option value="newest" data-lang-key="sortNewest">최신 순</option>
+                    <option value="oldest" data-lang-key="sortOldest">오래된 순</option>
+                </select>
             </div>
+            <div id="notes-list-container">
+                <p data-lang-key="noNotesYet">아직 작성된 메모가 없네요. 첫 메모를 남겨보세요!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 설정 탭 -->
+    <div id="tab-settings" class="tab-content">
+        <h2 data-lang-key="settingsTitle">설정 ⚙️</h2>
+
+        <div class="settings-section glass-card">
+            <h3 data-lang-key="languageSettingsTitle" id="language-settings-title">언어 설정</h3>
+            <div class="form-group">
+                <label for="language-select" data-lang-key="language">언어</label>
+                <select id="language-select">
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="settings-section glass-card">
+            <h3 data-lang-key="modeSettingsTitle" id="mode-settings-title">모드 설정</h3>
+            <p class="description" data-lang-key="modeSettingsDesc" id="mode-settings-description">목표하는 신체 변화
+                방향을 선택해주세요.</p>
+            <div class="form-group">
+                <label for="mode-select" data-lang-key="mode" id="mode-label">모드</label>
+                <select id="mode-select">
+                    <option value="mtf" data-lang-key="modeMtf">여성화</option>
+                    <option value="ftm" data-lang-key="modeFtm">남성화</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="settings-section glass-card">
+            <h3 data-lang-key="themeSettingsTitle">테마 설정</h3>
+            <div class="form-group">
+                <label for="theme-select" data-lang-key="theme">테마</label>
+                <select id="theme-select">
+                    <option value="system" data-lang-key="themeSystem">기기 값 참조</option>
+                    <option value="light" data-lang-key="themeLight">라이트 모드</option>
+                    <option value="dark" data-lang-key="themeDark">다크 모드</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="settings-section glass-card">
+            <h3 data-lang-key="dataManagementTitle" id="data-management-title">데이터 백업 & 복원</h3>
+            <p class="description" data-lang-key="dataManagementDesc" id="data-management-description">모든 기록을 파일
+                하나로 저장하거나 복원할 수 있어요. 가끔 백업해두면 안심이에요! 😊</p>
+            <div class="button-group">
+                <button type="button" id="export-data-button" class="glass-button" data-lang-key="exportData">파일
+                    저장하기</button>
+                <button type="button" id="import-data-button" class="glass-button" data-lang-key="importData">파일
+                    불러오기</button>
+            </div>
+            <input type="file" id="import-file-input" accept=".json" style="display: none;">
+            <p class="warning"><strong data-lang-key="warning">주의!</strong> <span data-lang-key="importWarning">복원하면
+                    지금 브라우저에 있는 모든 데이터가 파일 내용으로 완전히 대체돼요!</span></p>
+        </div>
+
+        <div class="settings-section glass-card">
+            <h3 data-lang-key="dataUpdateAndResetTitle">데이터 업데이트 및 초기화</h3>
+            <p class="warning" id="reset-data-warning"><strong data-lang-key="severeWarning">정말정말 주의!</strong>
+                <span data-lang-key="resetWarning">😱 데이터 초기화는 모든 기록(측정, 목표, Keeps)을 영구적으로 삭제합니다! 초기화 전에 꼭! 데이터를 파일로
+                    백업해주세요.</span>
+            </p>
+            <div class="button-group">
+                <button type="button" id="check-for-updates-button" class="glass-button"
+                    data-lang-key="checkForUpdatesButton">업데이트 확인</button>
+                <button type="button" id="reset-data-button" class="glass-button danger"
+                    data-lang-key="resetDataButton">모든 데이터 초기화</button>
+            </div>
+        </div>
+
+        <div class="settings-section info glass-card">
+            <h3 data-lang-key="infoTitle" id="info-title">정보</h3>
+            <p><span data-lang-key="versionLabel">버전:</span> <span id="app-version-display-footer">1.4</span>
+            </p>
+            <p data-lang-key="privacyInfo" id="privacy-info">이 앱은 오프라인 작동하며 모든 데이터는 브라우저에만 안전하게 저장됩니다! 😉</p>
+            <p style="margin-top: 15px;"><strong>Made by MUMU</strong> 💖</p>
+            <p style="margin-top: 20px;" data-lang-key="developerMessage" id="developer-message">이 작은 도구가 당신의
+                소중한 여정에 즐거움과 도움이 되기를 바라요!</p>
+            <p>© 2025. MUMU. All rights reserved.</p>
         </div>
     </div>
 

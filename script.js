@@ -134,6 +134,13 @@ const languages = {
         infoTitle: "정보", versionLabel: "버전:",
         privacyInfo: "이 앱은 오프라인 작동하며 모든 데이터는 앱에만 안전하게 저장됩니다! 😉",
         developerMessage: "이 작은 도구가 당신의 소중한 여정에 즐거움과 도움이 되기를 바라요!",
+        dataUpdateAndResetTitle: "데이터 업데이트 및 초기화",
+        checkForUpdatesButton: "업데이트 확인",
+        popupUpdateComplete: "업데이트 완료! 앱을 다시 시작합니다.",
+        popupUpdateFailed: "업데이트에 실패했습니다. 잠시 후 다시 시도해주세요.",
+        popupAlreadyLatest: "이미 최신 버전이에요! ✨",
+        popupOfflineForUpdate: "업데이트를 확인하려면 인터넷 연결이 필요해요.",
+        resetWarning: "😱 데이터 초기화는 모든 기록(측정, 목표, Keeps)을 영구적으로 삭제합니다! 초기화 전에 꼭! 데이터를 파일로 백업해주세요.",
         // Initial Setup
         initialSetupTitle: "초기 설정",
         initialSetupDesc: "ShiftV 사용을 시작하기 전에 언어와 모드를 선택해주세요.",
@@ -248,6 +255,13 @@ const languages = {
         infoTitle: "Information", versionLabel: "Version:",
         privacyInfo: "This app works offline and all data is stored securely only in your browser! 😉",
         developerMessage: "Hope this little tool brings joy and help to your precious journey!",
+        dataUpdateAndResetTitle: "Data Update & Reset",
+        checkForUpdatesButton: "Check for Updates",
+        popupUpdateComplete: "Update complete! The app will now restart.",
+        popupUpdateFailed: "Update failed. Please try again later.",
+        popupAlreadyLatest: "You are already on the latest version! ✨",
+        popupOfflineForUpdate: "An internet connection is required to check for updates.",
+        resetWarning: "😱 Resetting data will permanently delete all records (measurements, targets, Keeps)! Please back up your data before resetting.",
         // Initial Setup
         initialSetupTitle: "Initial Setup", initialSetupDesc: "Before starting ShiftV, please select your language and mode.",
         swipeThresholdMet: "Swipe detected: {direction}"
@@ -358,6 +372,13 @@ const languages = {
         infoTitle: "情報", versionLabel: "バージョン:",
         privacyInfo: "このアプリはオフラインで動作し、すべてのデータはブラウザ内にのみ安全に保存されます！ 😉",
         developerMessage: "この小さなツールが、あなたの貴重な旅に喜びと助けをもたらすことを願っています！",
+        dataUpdateAndResetTitle: "データの更新と初期化",
+        checkForUpdatesButton: "更新を確認",
+        popupUpdateComplete: "アップデートが完了しました。アプリを再起動します。",
+        popupUpdateFailed: "アップデートに失敗しました。後でもう一度お試しください。",
+        popupAlreadyLatest: "すでに最新バージョンです！✨",
+        popupOfflineForUpdate: "アップデートを確認するにはインターネット接続が必要です。",
+        resetWarning: "😱 データの初期化は、すべての記録（測定、目標、メモ）を完全に削除します！初期化する前に、必ずデータをファイルにバックアップしてください。",
         // Initial Setup
         initialSetupTitle: "初期設定", initialSetupDesc: "ShiftVを使用する前に、言語とモードを選択してください。",
         swipeThresholdMet: "スワイプ検出: {direction}"
@@ -470,6 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const devMessageP = document.getElementById('developer-message');
     const swInfoP = document.getElementById('sw-info');
     const resetDataButton = document.getElementById('reset-data-button');
+    const checkForUpdatesButton = document.getElementById('check-for-updates-button');
     const exportDataButton = document.getElementById('export-data-button');
     const importDataButton = document.getElementById('import-data-button');
     const importFileInput = document.getElementById('import-file-input');
@@ -983,6 +1005,58 @@ document.addEventListener('DOMContentLoaded', () => {
             showPopup('loadingError');
             measurements = []; targets = {}; notes = [];
         }
+    }
+
+    // Check for App Updates
+    function handleCheckForUpdates() {
+        if (!navigator.onLine) {
+            showPopup('popupOfflineForUpdate');
+            return;
+        }
+
+        if (!('serviceWorker' in navigator)) {
+            showPopup('popupUpdateFailed');
+            return;
+        }
+
+        navigator.serviceWorker.ready.then(registration => {
+            console.log("DEBUG: Checking for service worker update...");
+
+            let updateFound = false;
+            // Listen for the update event
+            registration.addEventListener('updatefound', () => {
+                updateFound = true;
+                console.log('DEBUG: New service worker found, installing...');
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        console.log('DEBUG: New service worker installed and ready.');
+                        showPopup('popupUpdateComplete', 3000);
+                        // Reload the page to apply the update
+                        setTimeout(() => window.location.reload(), 3000);
+                    }
+                });
+            });
+
+            // Trigger the update check
+            registration.update().then(() => {
+                // The 'update' promise doesn't tell us if an update was found.
+                // We use a timeout to see if the 'updatefound' event fired.
+                setTimeout(() => {
+                    if (!updateFound) {
+                        console.log('DEBUG: No new service worker found after check.');
+                        showPopup('popupAlreadyLatest');
+                    }
+                }, 3000); // Wait 3 seconds
+            }).catch(error => {
+                console.error('Error during service worker update check:', error);
+                showPopup('popupUpdateFailed');
+            });
+
+        }).catch(error => {
+            console.error('Service worker not ready:', error);
+            showPopup('popupUpdateFailed');
+        });
     }
 
     function calculateAndAddWeekNumbers() {
@@ -2279,6 +2353,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cancelEditBtn) cancelEditBtn.addEventListener('click', cancelEdit);
         // Button Clicks - Settings
         if (resetDataButton) resetDataButton.addEventListener('click', handleResetData);
+        if (checkForUpdatesButton) checkForUpdatesButton.addEventListener('click', handleCheckForUpdates);
         if (exportDataButton) exportDataButton.addEventListener('click', exportMeasurementData);
         if (importDataButton && importFileInput) {
             importDataButton.addEventListener('click', () => importFileInput.click());

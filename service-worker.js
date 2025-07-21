@@ -1,11 +1,11 @@
 const CACHE_NAME = 'shiftv-cache-v1';
 const urlsToCache = [
-  '/ShiftV/',
-  '/ShiftV/index.html',
-  '/ShiftV/style.css',
-  '/ShiftV/manifest.json',
-  '/ShiftV/android/android-launchericon-512-512.png',
-  '/ShiftV/android/android-launchericon-192-192.png',
+  '',
+  '/index.html',
+  '/style.css',
+  '/manifest.json',
+  '/android/android-launchericon-512-512.png',
+  '/android/android-launchericon-192-192.png',
 ];
 
 // 설치 이벤트: 캐시 파일 저장

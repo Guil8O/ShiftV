@@ -155,7 +155,7 @@ body {
     /* 부모 높이에 맞춤 */
 
     /* 핵심: 5초 동안 opacity(투명도)가 부드럽게 변하도록 설정 */
-    transition: opacity 5s ease-in-out;
+    transition: opacity 10s ease-in-out;
 }
 
 /* 기본 상태 (다크 모드) */
@@ -286,7 +286,7 @@ hr.divider {
     font-size: 0.75em;
     font-weight: 500;
     white-space: nowrap;
-    transition: transform var(--transition-fast), color 5s ease-in-out;
+    transition: transform var(--transition-fast), color 0.5s ease-in-out;
 }
 
 .tab-button svg {

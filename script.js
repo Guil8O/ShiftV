@@ -2394,3 +2394,14 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Error setting up sticky tab bar logic:", e);
     }
 }); // DOMContentLoaded End
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/ShiftV/service-worker.js')
+      .then(registration => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      })
+      .catch(error => {
+        console.error('Service Worker registration failed:', error);
+      });
+  });
+}

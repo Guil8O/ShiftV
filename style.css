@@ -319,7 +319,7 @@ hr.divider {
     transition: transform var(--transition-fast), color 0.5s ease-in-out;
     /* 핵심 블러 그림자 효과 */
     box-shadow: 0 0 30px 30px rgba(255, 96, 168, 1);
-    transition: background-color 5s ease-in-out, box-shadow 0.5s ease-in-out;
+    transition: background-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
 }
 
 .tab-content {
@@ -331,7 +331,7 @@ hr.divider {
     width: 100%;
     /* 이 줄을 추가하세요 */
     animation: fadeIn 0.5s;
-    transition: background-color 5s ease-in-out, border-color 5s ease-in-out, box-shadow 5s ease-in-out;
+    transition: background-color 0.5s ease-in-out, border-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
 }
 
 @keyframes fadeIn {

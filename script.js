@@ -74,20 +74,20 @@ const languages = {
         // Measurement Labels (camelCase keys)
         week: '주차', date: '날짜', timestamp: '기록 시간',
         height: '신장 (cm)', weight: '체중 (kg)', shoulder: '어깨너비 (cm)', neck: '목둘레 (cm)',
-        chest: '가슴둘레 (cm)', cupSize: '컵 사이즈', waist: '허리둘레 (cm)', hips: '엉덩이둘레 (cm)',
+        chest: '윗 가슴둘레 (cm)', cupSize: '아랫 가슴둘레 (cm)', waist: '허리둘레 (cm)', hips: '엉덩이둘레 (cm)',
         thigh: '허벅지둘레 (cm)', calf: '종아리둘레 (cm)', arm: '팔뚝둘레 (cm)',
         muscleMass: '근육량 (kg)', bodyFatPercentage: '체지방률 (%)', libido: '성욕 (회/주)',
-        semenStatus: '정액 상태', semenScore: '정액 점수', semenNotes: '정액 상세(텍스트)',
+        estrogenLevel: '에스트로겐 수치 (pg/ml)', testosteroneLevel: '테스토스테론 수치 (ng/ml)',
         healthStatus: '건강 상태', healthScore: '건강 점수', healthNotes: '건강 상세(텍스트)',
         skinCondition: '피부 상태',
         estradiol: '에스트라디올 (mg)', progesterone: '프로게스테론 (mg)',
-        antiAndrogen: '항안드로겐 (mg)', testosterone: '테스토스테론 (mg)',
+        antiAndrogen: '항안드로겐 (mg)', testosterone: '테스토스테론 (mg)', antiEstrogen: '항에스트로겐 (mg)',
         medicationOtherName: '기타 마법 이름',
         medicationOtherDose: '기타 마법 용량 (mg)',
         medicationOtherNamePlaceholder: '(기타)',
         unitMgPlaceholder: 'mg',
         // Placeholders
-        cupSizePlaceholder: '예: 75A', skinConditionPlaceholder: '예: 부드러워짐', libidoPlaceholder: '회/주',
+        skinConditionPlaceholder: '예: 부드러워짐', libidoPlaceholder: '회/주',
         scorePlaceholder: "점수", notesPlaceholder: "특이사항",
         unitCm: "cm", unitKg: "kg", unitPercent: "%", unitMg: "mg", unitCountPerWeek: "회/주",
         // History Tab
@@ -138,7 +138,13 @@ const languages = {
         initialSetupTitle: "초기 설정",
         initialSetupDesc: "ShiftV 사용을 시작하기 전에 언어와 모드를 선택해주세요.",
         // Swipe feature
-        swipeThresholdMet: "스와이프 감지: {direction}"
+        swipeThresholdMet: "스와이프 감지: {direction}",
+        labelInitial: "초기",
+        labelPrev: "전주",
+        labelCurrent: "현재",
+        labelTarget: "목표",
+        initialTargetSame: "초기/목표",
+        prevCurrentSame: "전주/현재"
     },
     en: {
         // General
@@ -188,21 +194,21 @@ const languages = {
         categoryBodySize: "Body Size 📐", categoryHealth: "Health 💪", categoryMedication: "Magic ✨",
         // Measurement Labels
         week: 'Week', date: 'Date', timestamp: 'Timestamp',
-        height: 'Height (cm)', weight: 'Weight (kg)', shoulder: 'Shoulder Width (cm)', neck: 'Neck Circum. (cm)',
-        chest: 'Chest Circum. (cm)', cupSize: 'Cup Size', waist: 'Waist Circum. (cm)', hips: 'Hip Circum. (cm)',
-        thigh: 'Thigh Circum. (cm)', calf: 'Calf Circum. (cm)', arm: 'Arm Circum. (cm)',
+        height: 'Height (cm)', weight: 'Weight (kg)', shoulder: 'Shoulder Width (cm)', neck: 'Neck Circum (cm)',
+        chest: 'Upper Chest Circum (cm)', cupSize: 'Under Bust Circum (cm)', waist: 'Waist Circum (cm)', hips: 'Hip Circum (cm)',
+        thigh: 'Thigh Circum (cm)', calf: 'Calf Circum (cm)', arm: 'Arm Circum (cm)',
         muscleMass: 'Muscle Mass (kg)', bodyFatPercentage: 'Body Fat (%)', libido: 'Libido (freq/wk)',
-        semenStatus: 'Semen Status', semenScore: 'Semen Score', semenNotes: 'Semen Detail(text)',
+        estrogenLevel: 'Estrogen Level (pg/ml)', testosteroneLevel: 'Testosterone Level (ng/ml)',
         healthStatus: 'Health Status', healthScore: 'Health Score', healthNotes: 'Health Detail(text)',
         skinCondition: 'Skin Condition',
         estradiol: 'Estradiol (mg)', progesterone: 'Progesterone (mg)',
-        antiAndrogen: 'Anti-androgen (mg)', testosterone: 'Testosterone (mg)',
+        antiAndrogen: 'Anti-androgen (mg)', testosterone: 'Testosterone (mg)', antiEstrogen: 'Anti-Estrogen (mg)',
         medicationOtherName: 'Other Magic Name',
         medicationOtherDose: 'Other Magic Dose (mg)',
         medicationOtherNamePlaceholder: '(Other)',
         unitMgPlaceholder: 'mg',
         // Placeholders
-        cupSizePlaceholder: 'e.g., 34A', skinConditionPlaceholder: 'e.g., Softer', libidoPlaceholder: 'freq/week',
+        skinConditionPlaceholder: 'e.g., Softer', libidoPlaceholder: 'freq/week',
         scorePlaceholder: "Score", notesPlaceholder: "Notes",
         unitCm: "cm", unitKg: "kg", unitPercent: "%", unitMg: "mg", unitCountPerWeek: "freq/wk",
         // History Tab
@@ -245,6 +251,13 @@ const languages = {
         // Initial Setup
         initialSetupTitle: "Initial Setup", initialSetupDesc: "Before starting ShiftV, please select your language and mode.",
         swipeThresholdMet: "Swipe detected: {direction}"
+        ,
+        labelInitial: "Initial",
+        labelPrev: "Prev",
+        labelCurrent: "Current",
+        labelTarget: "Target",
+        initialTargetSame: "Initial/Target",
+        prevCurrentSame: "Prev/Current"
     },
     ja: {
         // General
@@ -295,20 +308,20 @@ const languages = {
         // Measurement Labels
         week: '週目', date: '日付', timestamp: '記録時間',
         height: '身長 (cm)', weight: '体重 (kg)', shoulder: '肩幅 (cm)', neck: '首周り (cm)',
-        chest: '胸囲 (cm)', cupSize: 'カップサイズ', waist: '腹囲 (cm)', hips: 'ヒップ (cm)',
+        chest: 'トップバスト (cm)', cupSize: 'アンダーバスト (cm)', waist: '腹囲 (cm)', hips: 'ヒップ (cm)',
         thigh: '太もも周り (cm)', calf: 'ふくらはぎ周り (cm)', arm: '腕周り (cm)',
         muscleMass: '筋肉量 (kg)', bodyFatPercentage: '体脂肪率 (%)', libido: '性欲 (回/週)',
-        semenStatus: '精液の状態', semenScore: '精液スコア', semenNotes: '精液状態(テキスト)',
+        estrogenLevel: 'エストロゲン値 (pg/ml)', testosteroneLevel: 'テストステロン値 (ng/ml)',
         healthStatus: '健康状態', healthScore: '健康スコア', healthNotes: '健康状態(テキスト)',
         skinCondition: '肌の状態',
         estradiol: 'エストラジオール (mg)', progesterone: 'プロゲステロン (mg)',
-        antiAndrogen: '抗アンドロゲン (mg)', testosterone: 'テストステロン (mg)',
+        antiAndrogen: '抗アンドロゲン (mg)', testosterone: 'テストステロン (mg)', antiEstrogen: '抗エストロゲン剤 (mg)',
         medicationOtherName: 'その他の魔法名',
         medicationOtherDose: 'その他の魔法用量 (mg)',
         medicationOtherNamePlaceholder: '（その他）',
         unitMgPlaceholder: 'mg',
         // Placeholders
-        cupSizePlaceholder: '例: C70', skinConditionPlaceholder: '例: 柔らかくなった', libidoPlaceholder: '回/週',
+        skinConditionPlaceholder: '例: 柔らかくなった', libidoPlaceholder: '回/週',
         scorePlaceholder: "点数", notesPlaceholder: "特記事項",
         unitCm: "cm", unitKg: "kg", unitPercent: "%", unitMg: "mg", unitCountPerWeek: "回/週",
         // History Tab
@@ -348,6 +361,13 @@ const languages = {
         // Initial Setup
         initialSetupTitle: "初期設定", initialSetupDesc: "ShiftVを使用する前に、言語とモードを選択してください。",
         swipeThresholdMet: "スワイプ検出: {direction}"
+        ,
+        labelInitial: "初期",
+        labelPrev: "前週",
+        labelCurrent: "現在",
+        labelTarget: "目標",
+        initialTargetSame: "初期/目標",
+        prevCurrentSame: "前週/現在"
     }
 };
 // --- Main Application Logic ---
@@ -462,32 +482,39 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("DEBUG: DOM elements fetched.");
     // --- Constants for Measurement Keys (Using camelCase) ---
     const bodySizeKeys = ['height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm'];
-    const healthKeys = ['muscleMass', 'bodyFatPercentage', 'libido', 'semenScore', 'healthScore', 'skinCondition', 'semenNotes', 'healthNotes'];
+    const healthKeys = ['muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'healthScore', 'skinCondition', 'healthNotes']; // 'semenScore', 'semenNotes' 삭제 및 새 키 추가
     const medicationKeys_MtF = ['estradiol', 'progesterone', 'antiAndrogen'];
-    const medicationKeys_FtM = ['testosterone'];
+    const medicationKeys_FtM = ['testosterone', 'antiEstrogen']; // 'antiEstrogen' 추가
     const baseNumericKeys = [
-        'height', 'weight', 'shoulder', 'neck', 'chest', 'waist', 'hips', 'thigh', 'calf', 'arm',
-        'muscleMass', 'bodyFatPercentage', 'libido', 'semenScore', 'healthScore',
-        'estradiol', 'progesterone', 'antiAndrogen', 'testosterone',
+        'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm', // 'cupSize' 추가
+        'muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'healthScore', // 'semenScore' 삭제 및 새 키 추가
+        'estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen', // 'antiEstrogen' 추가
         'medicationOtherDose'
     ];
-    const textKeys = ['cupSize', 'semenNotes', 'healthNotes', 'skinCondition', 'medicationOtherName'];
+    const textKeys = ['healthNotes', 'skinCondition', 'medicationOtherName']; // 'cupSize', 'semenNotes' 삭제
+
+    // displayKeysInOrder를 업데이트합니다. (표시 순서 제어)
     const displayKeysInOrder = [
         'week', 'date',
         'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm',
-        'muscleMass', 'bodyFatPercentage', 'libido', 'skinCondition', 'healthScore', 'healthNotes',
-        'semenScore', 'semenNotes',
-        'estradiol', 'progesterone', 'antiAndrogen', 'testosterone',
+        'muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'skinCondition', 'healthScore', 'healthNotes',
+        'estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen',
         'medicationOtherName', 'medicationOtherDose',
         'timestamp'
     ];
+
+    // chartSelectableKeys를 업데이트합니다.
     const chartSelectableKeys = baseNumericKeys.filter(k => !k.includes('Score'));
+
+    // targetSettingKeys를 업데이트합니다. (목표 설정 가능 항목)
     const targetSettingKeys = baseNumericKeys.filter(k =>
-        bodySizeKeys.includes(k) || ['muscleMass', 'bodyFatPercentage'].includes(k)
+        bodySizeKeys.includes(k) || ['muscleMass', 'bodyFatPercentage', 'estrogenLevel', 'testosteroneLevel'].includes(k) // 새 키 추가
     ).filter(k => !textKeys.includes(k));
+
+    // comparisonKeys를 업데이트합니다. (리포트 비교 항목)
     const comparisonKeys = [
         'weight', 'muscleMass', 'bodyFatPercentage',
-        'shoulder', 'neck', 'chest', 'waist', 'hips', 'thigh', 'calf', 'arm'
+        'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm' // 'cupSize' 추가
     ];
     console.log("DEBUG: Measurement keys defined (camelCase).");
 
@@ -549,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 placeholderText = translate('unitMgPlaceholder') || 'mg';
                                 break;
                             default:
-                                if (el.type === 'number') {
+                                if (el.type === 'Number') {
                                     placeholderText = translate(key).split('(')[1]?.replace(')', '') || 'Number';
                                 } else {
                                     placeholderText = translate('notesPlaceholder') || 'Text';
@@ -1124,9 +1151,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function getFilteredDisplayKeys() {
         let keys = [...displayKeysInOrder];
         if (currentMode === 'mtf') {
+            // medicationKeys_FtM에 'antiEstrogen'이 추가되었으므로 이 로직은 자동으로 처리됩니다.
             keys = keys.filter(k => !medicationKeys_FtM.includes(k));
         } else if (currentMode === 'ftm') {
-            keys = keys.filter(k => !medicationKeys_MtF.includes(k) && k !== 'cupSize' && !k.startsWith('semen'));
+            // 'cupSize'와 'semen' 관련 필터링 부분만 수정합니다.
+            keys = keys.filter(k => !medicationKeys_MtF.includes(k) && !k.startsWith('semen'));
         }
         return keys;
     }
@@ -1204,179 +1233,279 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderComparisonTable(container, titleKey, dataCalculator) {
         if (!container) return;
         const dataResult = dataCalculator();
+        if (!dataResult) return;
+
         const data = dataResult.data;
         const headers = dataResult.headers;
-        const titleElement = document.getElementById(container.id.replace('-container', '-title'));
-        if (titleElement) titleElement.textContent = translate(titleKey);
 
         if (!data || data.length === 0) {
             if (titleKey === 'reportTargetTitle' && Object.keys(targets).length === 0) clearElement(container, 'reportNeedTarget');
             else if (measurements.length < 2 && (titleKey === 'reportPrevWeekTitle' || titleKey === 'reportInitialTitle')) clearElement(container, 'reportNeedTwoRecords');
-            else if (measurements.length === 0) clearElement(container, 'noDataYet');
-            else clearElement(container, 'noDataForChart');
+            else clearElement(container, 'noDataYet');
             return;
         }
-        let tableHTML = `<table class="comparison-table"><thead><tr>`;
-        headers.forEach(header => tableHTML += `<th>${header}</th>`);
-        tableHTML += `</tr></thead><tbody>`;
+
+        let tableHTML = `<table class="comparison-table"><thead><tr>
+        ${headers.map(h => `<th>${h}</th>`).join('')}
+    </tr></thead><tbody>`;
+
         data.forEach(item => {
-            tableHTML += `<tr>`;
-            if (Array.isArray(item)) {
-                item.forEach(cellData => {
-                    let value = cellData;
-                    let className = '';
-                    if (typeof cellData === 'object' && cellData !== null) {
-                        value = cellData.value; className = cellData.class || '';
+            const changeValue = item.change !== undefined ? item.change : item.progress;
+            let changeClass = '';
+            let changeText = '-';
+
+            if (typeof changeValue === 'number') { // ** BUG FIX **
+                if (item.progress !== undefined) {
+                    const roundedProgress = Math.round(changeValue);
+                    changeText = `${roundedProgress}%`;
+                    if (roundedProgress >= 100) changeClass = 'target-achieved';
+                    else if (roundedProgress > 0) changeClass = 'positive-change';
+                } else {
+                    const roundedChange = parseFloat(changeValue.toFixed(1));
+                    if (roundedChange === 0) {
+                        changeText = "0.0";
+                    } else {
+                        changeText = roundedChange > 0 ? `+${roundedChange}` : `${roundedChange}`;
+                        if (roundedChange > 0) changeClass = 'positive-change';
+                        if (roundedChange < 0) changeClass = 'negative-change';
                     }
-                    tableHTML += `<td ${className ? `class="${className}"` : ''}>${value}</td>`;
-                });
+                }
             }
-            tableHTML += `</tr>`;
+
+            tableHTML += `<tr>
+            <td>${translate(item.key)}</td>
+            ${createProgressBarHTML(item)}
+            <td class="${changeClass}">${changeText}</td>
+        </tr>`;
         });
+
         tableHTML += `</tbody></table>`;
         container.innerHTML = tableHTML;
     }
 
-    function calculatePrevWeekComparison() {
-        const headers = [translate('comparisonItem'), translate('comparisonChange')];
-        if (measurements.length < 2) return { data: [], headers };
-        const lastWeek = measurements[measurements.length - 1];
-        const secondLastWeek = measurements[measurements.length - 2];
-        const data = [];
-        getFilteredNumericKeys().forEach(key => {
-            const lastValue = parseFloat(lastWeek[key]);
-            const secondLastValue = parseFloat(secondLastWeek[key]);
-            let change = '-'; let changeClass = '';
-            if (!isNaN(lastValue) && !isNaN(secondLastValue)) {
-                const diff = lastValue - secondLastValue;
-                change = formatValue(diff, key);
-                const threshold = 0.05;
-                if (diff > threshold) { change = `+${change}`; changeClass = 'positive-change'; }
-                else if (diff < -threshold) { changeClass = 'negative-change'; }
-                data.push([translate(key).split('(')[0].trim(), { value: change, class: changeClass }]);
+    function calculateComparisonData() {
+        if (measurements.length < 1) return [];
+
+        const comparisonData = [];
+        const initial = measurements[0];
+        const latest = measurements[measurements.length - 1];
+        const previous = measurements.length > 1 ? measurements[measurements.length - 2] : null;
+
+        const keysToShow = comparisonKeys.filter(key => {
+            if (currentMode === 'ftm') return !medicationKeys_MtF.includes(key) && key !== 'cupSize' && !key.startsWith('semen');
+            return true;
+        });
+
+        keysToShow.forEach(key => {
+            const initialValue = parseFloat(initial[key]);
+            const currentValue = parseFloat(latest[key]);
+            const prevValue = previous ? parseFloat(previous[key]) : null;
+            const targetValue = targets[key] ? parseFloat(targets[key]) : null;
+
+            if (!isNaN(currentValue)) {
+                comparisonData.push({
+                    key: key,
+                    initialValue: isNaN(initialValue) ? null : initialValue,
+                    prevValue: isNaN(prevValue) ? null : prevValue,
+                    currentValue: currentValue,
+                    targetValue: isNaN(targetValue) ? null : targetValue,
+                });
             }
         });
+        return comparisonData;
+    }
+
+    function calculatePrevWeekComparison() {
+        const headers = [translate('comparisonItem'), ' ', translate('comparisonChange')];
+        if (measurements.length < 2) return { data: [], headers };
+
+        const fullData = calculateComparisonData();
+        const data = fullData.map(item => {
+            const change = item.currentValue - item.prevValue;
+            return { ...item, change: isNaN(change) ? null : change };
+        });
+
         return { data, headers };
     }
 
     function calculateInitialComparison() {
-        const headers = [translate('comparisonItem'), translate('comparisonChange')];
-        if (measurements.length < 1) return { data: [], headers };
-        const initial = measurements[0];
-        const latest = measurements[measurements.length - 1];
-        const isOnlyOneRecord = measurements.length === 1;
-        const data = [];
-        getFilteredNumericKeys().forEach(key => {
-            const initialValue = parseFloat(initial[key]);
-            const latestValue = parseFloat(latest[key]);
-            let change = '-'; let changeClass = '';
-            if (!isOnlyOneRecord && !isNaN(initialValue) && !isNaN(latestValue)) {
-                const diff = latestValue - initialValue;
-                change = formatValue(diff, key);
-                const threshold = 0.05;
-                if (diff > threshold) { change = `+${change}`; changeClass = 'positive-change'; }
-                else if (diff < -threshold) { changeClass = 'negative-change'; }
-                data.push([translate(key).split('(')[0].trim(), { value: change, class: changeClass }]);
-            }
+        const headers = [translate('comparisonItem'), ' ', translate('comparisonChange')];
+        if (measurements.length < 2) return { data: [], headers };
+
+        const fullData = calculateComparisonData();
+        const data = fullData.map(item => {
+            const change = item.currentValue - item.initialValue;
+            return { ...item, change: isNaN(change) ? null : change };
         });
+
         return { data, headers };
     }
 
-    // *** 수정 2: 달성률 계산 수정 (100% 상한 적용) ***
-    // *** 수정: 새로운 달성률 공식 적용 ***
-    function calculateTargetComparison() {
-        const headers = [translate('comparisonItem'), translate('comparisonProgress')];
-        // Use targetSettingKeys which filters for numeric, non-text body/health keys
-        const relevantTargetKeys = targetSettingKeys.filter(k => targets[k] !== null && targets[k] !== undefined && targets[k] !== '');
+    // script.js 수정 사항
 
-        // Need at least one measurement and one relevant target set
-        if (measurements.length === 0 || relevantTargetKeys.length === 0) {
-            // console.log("DEBUG: Target comparison skipped - no measurements or relevant targets."); // 디버깅 로그 필요시 주석 해제
+    // 기존 calculateTargetComparison 함수를 찾아서 아래 코드로 전체를 교체해주세요.
+
+    function calculateTargetComparison() {
+        const headers = [translate('comparisonItem'), ' ', translate('comparisonProgress')];
+        if (measurements.length < 1 || Object.keys(targets).length === 0) {
             return { data: [], headers };
         }
 
-        const latestMeasurement = measurements[measurements.length - 1];
-        const data = [];
-        const zeroThreshold = 0.0001; // 부동 소수점 0 비교를 위한 임계값
+        const fullData = calculateComparisonData();
+        // 목표가 설정된 항목만 필터링합니다.
+        const data = fullData.filter(item => item.targetValue !== null).map(item => {
+            let progress = null;
+            // 초기값이 있어야 진행률을 계산할 수 있습니다.
+            if (item.initialValue !== null) {
+                const totalChangeNeeded = item.targetValue - item.initialValue;
+                const currentChange = item.currentValue - item.initialValue;
 
-        // console.log("DEBUG: Calculating target comparison for keys:", relevantTargetKeys); // 디버깅 로그 필요시 주석 해제
-
-        relevantTargetKeys.forEach(key => {
-            const targetValue = parseFloat(targets[key]);
-            const currentValue = parseFloat(latestMeasurement[key]);
-
-            let achievementRateNum = NaN; // 계산 실패 시 NaN 유지
-            let achievementRateStr = '-';
-            let rateClass = '';
-
-            // 목표치(targetValue)와 현재기록치(currentValue)가 유효한 숫자인지 확인
-            if (!isNaN(targetValue) && !isNaN(currentValue)) {
-                // console.log(`DEBUG: Comparing Key: ${key}, Current: ${currentValue}, Target: ${targetValue}`); // 디버깅 로그 필요시 주석 해제
-
-                // --- ▼▼▼ 요청하신 새로운 달성률 계산 로직 적용 ▼▼▼ ---
-                if (Math.abs(targetValue) < zeroThreshold) { // 만약 목표치 == 0 이라면:
-                    if (Math.abs(currentValue) < zeroThreshold) { // 현재기록치 == 0 이면:
-                        achievementRateNum = 100; // 100%
-                    } else { // 현재기록치 != 0 이면:
-                        achievementRateNum = 0; // 0%
-                    }
-                } else { // 만약 목표치 != 0 이라면:
-                    // 근접도 (%) = MAX(0, (1 - |현재기록치 - 목표치| / |목표치|) * 100)
-                    const absoluteDifference = Math.abs(currentValue - targetValue);
-                    const absoluteTarget = Math.abs(targetValue); // 여기서 targetValue는 0이 아님
-                    // 0으로 나누는 경우 방지 (이론상 발생 안 함)
-                    if (absoluteTarget > zeroThreshold) {
-                        achievementRateNum = Math.max(0, (1 - (absoluteDifference / absoluteTarget)) * 100);
-                    } else {
-                        // 혹시 모를 극단적인 경우 처리 (목표치가 0에 매우 가깝지만 0은 아닐 때)
-                        achievementRateNum = (Math.abs(currentValue) < zeroThreshold) ? 100 : 0;
-                    }
-                }
-                // --- ▲▲▲ 새로운 달성률 계산 로직 끝 ▲▲▲ ---
-
-                // 계산이 성공했는지 확인 (결과가 NaN이 아닌지)
-                if (!isNaN(achievementRateNum)) {
-                    achievementRateStr = `${achievementRateNum.toFixed(0)}%`; // 정수로 표시
-
-                    // 계산된 비율에 따라 CSS 클래스 결정
-                    if (achievementRateNum >= 100) { // 100% 이상 달성 (정확히 100 포함)
-                        rateClass = 'target-achieved';
-                    } else if (achievementRateNum >= 80) { // 80% 이상
-                        rateClass = 'positive-change'; // 목표 근접 (긍정적)
-                    } else if (achievementRateNum > 50) { // 50% 초과
-                        rateClass = ''; // 중간 정도는 특별 클래스 없음
-                    } else { // 50% 이하
-                        rateClass = 'negative-change'; // 목표와 거리 있음 (부정적)
-                    }
-                    // console.log(`DEBUG: Key ${key} - Final Rate Str: ${achievementRateStr}, Class: ${rateClass}`); // 디버깅 로그 필요시 주석 해제
+                // 목표와 시작이 같은 경우 (유지 목표)
+                if (Math.abs(totalChangeNeeded) < 0.01) {
+                    // 현재 값도 같다면 100% 달성
+                    progress = (Math.abs(currentChange) < 0.01) ? 100 : 0;
                 } else {
-                    // console.log(`DEBUG: Key ${key} - Calculation failed (NaN).`); // 디버깅 로그 필요시 주석 해제
-                    achievementRateStr = '-';
-                    rateClass = '';
+                    progress = (currentChange / totalChangeNeeded) * 100;
                 }
-
-                // 테이블 렌더링을 위한 데이터 배열에 추가
-                data.push([
-                    translate(key).split('(')[0].trim(), // 항목 이름
-                    { value: achievementRateStr, class: rateClass } // 진행률 값 및 클래스
-                ]);
-
-            } else {
-                // 목표값 또는 현재값이 유효한 숫자가 아니지만, 목표 자체는 설정된 경우
-                if (!isNaN(targetValue)) {
-                    // console.log(`DEBUG: Key ${key} - Current value is invalid, cannot compare.`); // 디버깅 로그 필요시 주석 해제
-                    data.push([
-                        translate(key).split('(')[0].trim(),
-                        { value: '-', class: '' }
-                    ]);
-                } else {
-                    // console.log(`DEBUG: Key ${key} - Target value is invalid.`); // 디버깅 로그 필요시 주석 해제
-                    // 목표값 자체가 유효하지 않으면 행을 추가하지 않을 수도 있음 (선택사항)
-                }
+                // 진행률은 0% ~ 100% 사이로 제한합니다.
+                progress = Math.max(0, Math.min(progress, 100));
             }
-        }); // End forEach loop
+            return { ...item, progress: progress };
+        });
 
-        // console.log("DEBUG: Target comparison data generated:", data); // 디버깅 로그 필요시 주석 해제
+        return { data, headers };
+    }
+
+    // ** FINAL FIX for Progress Bar Rendering with Label Overlap Logic **
+    // ** FINAL FIX for Progress Bar Rendering with Overlap & Label Logic **
+    // ** FINAL FIX for Progress Bar Rendering with Overlap & Label Logic **
+    // script.js 파일에서 createProgressBarHTML 함수를 찾아 아래 코드로 교체해주세요.
+
+    function createProgressBarHTML(data) {
+        const { initialValue, prevValue, currentValue, targetValue } = data;
+        let values = [
+            { key: 'initial', value: initialValue, text: translate('labelInitial') },
+            { key: 'prev', value: prevValue, text: translate('labelPrev') },
+            { key: 'current', value: currentValue, text: translate('labelCurrent') },
+            { key: 'target', value: targetValue, text: translate('labelTarget') }
+        ].filter(v => v.value !== null && !isNaN(v.value));
+
+        if (values.length < 2 && (values.length === 0 || values[0].key !== 'current')) return '<td>-</td>';
+
+        const TOLERANCE = 0.01;
+        if (initialValue !== null && targetValue !== null && Math.abs(initialValue - targetValue) < TOLERANCE) {
+            values = values.filter(v => v.key !== 'initial' && v.key !== 'target');
+            values.push({ key: 'initialTarget', value: initialValue, text: translate('initialTargetSame') });
+        }
+        if (prevValue !== null && currentValue !== null && Math.abs(prevValue - currentValue) < TOLERANCE) {
+            values = values.filter(v => v.key !== 'prev' && v.key !== 'current');
+            values.push({ key: 'prevCurrent', value: currentValue, text: translate('prevCurrentSame'), isCurrent: true });
+        }
+
+        const numericValues = values.map(v => v.value);
+        const min = Math.min(...numericValues);
+        const max = Math.max(...numericValues);
+        const range = max - min;
+        const padding = range === 0 ? 1 : range * 0.1;
+        const displayMin = min - padding;
+        const displayRange = (max + padding) - displayMin;
+
+        if (displayRange === 0) return '<td>-</td>';
+        const calcPercent = (val) => ((val - displayMin) / displayRange) * 100;
+
+        values.forEach(v => {
+            v.pos = calcPercent(v.value);
+            v.staggerClass = ''; // 엇갈림 클래스를 저장할 속성 초기화
+        });
+        values.sort((a, b) => a.pos - b.pos);
+
+        // ▼▼▼ 좌우 엇갈림 로직 ▼▼▼
+        for (let i = 1; i < values.length; i++) {
+            const prev = values[i - 1];
+            const curr = values[i];
+            // 15% 이내로 가까우면 겹침으로 간주
+            if (curr.pos - prev.pos < 15) {
+                // 왼쪽 라벨은 왼쪽으로, 오른쪽 라벨은 오른쪽으로 밀어냅니다.
+                prev.staggerClass = 'stagger-left';
+                curr.staggerClass = 'stagger-right';
+            }
+        }
+
+        const pCurrent = calcPercent(currentValue);
+        const pInitial = initialValue !== null ? calcPercent(initialValue) : null;
+        const pPrev = prevValue !== null ? calcPercent(prevValue) : null;
+        const pTarget = targetValue !== null ? calcPercent(targetValue) : null;
+
+        const initialToCurrent = pInitial !== null ? `<div class="progress-bar-range range-initial" style="left: ${Math.min(pInitial, pCurrent)}%; width: ${Math.abs(pCurrent - pInitial)}%;"></div>` : '';
+        const prevToCurrent = pPrev !== null ? `<div class="progress-bar-range range-prev" style="left: ${Math.min(pPrev, pCurrent)}%; width: ${Math.abs(pCurrent - pPrev)}%;"></div>` : '';
+        const currentToTarget = pTarget !== null ? `<div class="progress-bar-range range-target" style="left: ${Math.min(pCurrent, pTarget)}%; width: ${Math.abs(pTarget - pCurrent)}%;"></div>` : '';
+
+        const labelsHTML = values.map(v => {
+            const isCurrentClass = v.key === 'current' || v.isCurrent ? 'current' : '';
+            // JS에서 할당한 staggerClass를 사용합니다.
+            return `<div class="progress-bar-label ${isCurrentClass} ${v.staggerClass}" style="left: ${v.pos}%;">
+                <span>${v.value}</span><br>${v.text}
+            </div>`;
+        }).join('');
+
+        return `
+    <td class="progress-bar-cell">
+        <div class="progress-bar-container">
+            <div class="progress-bar-track"></div>
+            ${initialToCurrent}
+            ${prevToCurrent}
+            ${currentToTarget}
+            <div class="progress-bar-marker" style="left: ${pCurrent}%;"></div>
+        </div>
+        <div class="progress-bar-labels">${labelsHTML}</div>
+    </td>`;
+    }
+
+
+
+    // *** 수정 2: 달성률 계산 수정 (100% 상한 적용) ***
+    // script.js 파일에서 calculateTargetComparison 함수를 찾아 아래 코드로 전체를 교체해주세요.
+
+    function calculateTargetComparison() {
+        const headers = [translate('comparisonItem'), ' ', translate('comparisonProgress')];
+
+        // 데이터가 1개 미만이거나, 설정된 목표가 없으면 빈 테이블을 반환합니다.
+        if (measurements.length < 1 || Object.keys(targets).length === 0) {
+            return { data: [], headers };
+        }
+
+        // 모든 비교 데이터를 가져옵니다.
+        const fullData = calculateComparisonData();
+
+        // fullData 배열에서 '목표값(targetValue)'이 실제로 설정된 항목만 필터링합니다.
+        const data = fullData.filter(item => item.targetValue !== null)
+            // 필터링된 각 항목에 대해 '진행률(progress)'을 계산하여 추가합니다.
+            .map(item => {
+                let progress = null; // 진행률 기본값은 null
+
+                // '초기값(initialValue)'이 있어야 진행률을 계산할 수 있습니다.
+                if (item.initialValue !== null) {
+                    const totalChangeNeeded = item.targetValue - item.initialValue; // 목표 달성을 위해 필요한 총 변화량
+                    const currentChange = item.currentValue - item.initialValue;   // 현재까지의 변화량
+
+                    // 목표와 시작이 거의 같은 '유지' 목표인 경우
+                    if (Math.abs(totalChangeNeeded) < 0.01) {
+                        // 현재 값도 같다면 100% 달성, 아니면 0%
+                        progress = (Math.abs(currentChange) < 0.01) ? 100 : 0;
+                    } else {
+                        // 일반적인 경우: (현재 변화량 / 총 필요 변화량) * 100
+                        progress = (currentChange / totalChangeNeeded) * 100;
+                    }
+
+                    // 진행률이 100%를 넘거나 0% 미만으로 가지 않도록 값을 0과 100 사이로 고정합니다.
+                    progress = Math.max(0, Math.min(progress, 100));
+                }
+
+                // 기존 item 객체에 계산된 progress를 추가하여 새로운 객체를 반환합니다.
+                return { ...item, progress: progress };
+            });
+
+        // 최종적으로 렌더링 함수가 사용할 수 있는 올바른 형식의 데이터를 반환합니다.
         return { data, headers };
     }
 
@@ -1387,6 +1516,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const metricButtonColors = {};
+    // script.js 에서 renderChartSelector 함수를 찾아 교체
     function renderChartSelector() {
         if (!chartSelector) return;
         const availableKeys = getFilteredChartKeys();
@@ -1396,48 +1526,59 @@ document.addEventListener('DOMContentLoaded', () => {
             button.classList.add('chart-select-button');
             button.dataset.metric = key;
             button.textContent = translate(key).split('(')[0].trim();
+
             const hue = (index * (360 / Math.min(availableKeys.length, 15))) % 360;
-            const color = `hsl(${hue}, 70%, 55%)`;
-            button.style.borderColor = color;
-            metricButtonColors[key] = color;
-            // ** FINAL FIX for Button Styling **
-            // ** FINAL FIX for Button Styling **
-            button.style.borderColor = color; // 테두리 색상은 계속 JS로 제어
+
+            // 두 가지 색상 정의: 활성(선명), 비활성(채도 낮춤)
+            const activeColor = `hsl(${hue}, 75%, 58%)`;
+            const inactiveColor = `hsl(${hue}, 50%, 70%)`;
+
+            // metricButtonColors 객체에 두 색상 모두 저장
+            metricButtonColors[key] = { active: activeColor, inactive: inactiveColor };
 
             if (selectedMetrics.includes(key)) {
                 button.classList.add('active');
-                button.style.backgroundColor = color; // 활성 배경색은 JS로 제어
-                button.style.color = '#ffffff'; // 활성 텍스트 색상
+                button.style.backgroundColor = activeColor;
+                button.style.borderColor = activeColor;
+                button.style.color = '#ffffff';
             } else {
                 button.classList.remove('active');
-                button.style.backgroundColor = ''; // 비활성 시 인라인 배경색 제거 -> CSS가 제어하도록 함
-                button.style.color = color;      // 비활성 텍스트 색상
+                button.style.backgroundColor = ''; // 비활성 시 배경 없음
+                button.style.borderColor = inactiveColor;
+                button.style.color = inactiveColor;
             }
             chartSelector.appendChild(button);
         });
     }
 
+    // script.js 에서 handleChartSelectorClick 함수를 찾아 교체
     function handleChartSelectorClick(event) {
         if (!event.target.classList.contains('chart-select-button')) return;
-        const metric = event.target.dataset.metric; if (!metric) return;
+        const metric = event.target.dataset.metric;
+        if (!metric) return;
+
         const button = event.target;
-        const color = metricButtonColors[metric];
-        // ** FINAL FIX for Button Click Handler **
+        const colors = metricButtonColors[metric]; // 저장된 색상 객체 가져오기
+
         if (selectedMetrics.includes(metric)) {
+            // --- 비활성화 로직 ---
             selectedMetrics = selectedMetrics.filter(m => m !== metric);
             button.classList.remove('active');
-            button.style.color = color;
-            button.style.backgroundColor = ''; // 인라인 스타일 제거
+            button.style.backgroundColor = '';
+            button.style.borderColor = colors.inactive;
+            button.style.color = colors.inactive;
         } else {
+            // --- 활성화 로직 ---
             selectedMetrics.push(metric);
             button.classList.add('active');
-            button.style.color = 'var(--lm-bg-card, #fff)';
-            button.style.backgroundColor = color;
+            button.style.backgroundColor = colors.active;
+            button.style.borderColor = colors.active;
+            button.style.color = '#ffffff';
         }
+
         saveSettingsToStorage();
         renderChart();
     }
-
     function handleSelectAllCharts() {
         selectedMetrics = [...getFilteredChartKeys()];
         renderChartSelector(); saveSettingsToStorage(); renderChart();
@@ -1448,6 +1589,8 @@ document.addEventListener('DOMContentLoaded', () => {
         renderChartSelector(); saveSettingsToStorage(); renderChart();
     }
 
+    // script.js 에서 renderChart 함수를 찾아 아래의 코드로 전체를 교체해주세요.
+
     function renderChart() {
         if (!chartCanvas) return;
         const ctx = chartCanvas.getContext('2d'); if (!ctx) return;
@@ -1457,7 +1600,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
             ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
 
-            // ** MODIFIED for Text Wrapping **
+            // ... (이 부분은 기존과 동일하므로 생략) ...
+
             const text = translate('noDataForChart');
             const x = chartCanvas.width / 2;
             let y = chartCanvas.height / 2;
@@ -1485,10 +1629,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             lines.push(line);
-
-            // Adjust starting y position to center the whole text block
             y -= (lines.length - 1) * lineHeight / 2;
-
             for (let i = 0; i < lines.length; i++) {
                 ctx.fillText(lines[i].trim(), x, y);
                 y += lineHeight;
@@ -1497,13 +1638,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const labels = measurements.map(m => m.week ?? '-');
         const datasets = metricsToRender.map(metric => {
-            const color = metricButtonColors[metric] || '#007bff';
+            // ▼▼▼▼▼ 바로 이 부분이 수정되었습니다! ▼▼▼▼▼
+            // 기존: const color = metricButtonColors[metric] || '#007bff';
+            // 수정: .active를 추가하여 객체에서 실제 색상 문자열을 가져옵니다.
+            const color = metricButtonColors[metric]?.active || '#007bff';
+            // ▲▲▲▲▲ 바로 이 부분이 수정되었습니다! ▲▲▲▲▲
+
             const translatedLabel = translate(metric).split('(')[0].trim();
             return {
                 label: translatedLabel,
                 data: measurements.map(m => m[metric] !== undefined && m[metric] !== null && m[metric] !== '' ? parseFloat(m[metric]) : NaN),
                 borderColor: color,
-                backgroundColor: color + '33',
+                backgroundColor: color + '33', // 이제 color가 문자열이므로 정상 동작합니다.
                 fill: false, tension: 0.1, pointRadius: 3, pointHoverRadius: 5, spanGaps: true, borderWidth: 2,
                 parsing: { xAxisKey: 'x', yAxisKey: 'y' }
             };
@@ -1519,6 +1665,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }))
             },
             options: {
+                // ... (나머지 옵션은 기존과 동일) ...
                 responsive: true, maintainAspectRatio: false,
                 scales: {
                     x: {
@@ -1541,8 +1688,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             color: '#5e5ebf'
                         },
 
-                        grid: { color: '#5e5ebf' }, // Use CSS var
-                        ticks: { color: '#5e5ebf' } // Use CSS var for tick color
+                        grid: { color: '#5e5ebf' },
+                        ticks: { color: '#5e5ebf' }
                     }
                 },
                 plugins: {
@@ -1557,7 +1704,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 if (value !== null && !isNaN(value)) {
                                     let originalKey = ''; const datasetIndex = context.datasetIndex;
                                     if (metricsToRender[datasetIndex]) { originalKey = metricsToRender[datasetIndex]; }
-                                    else { originalKey = context.dataset.label; } // Fallback
+                                    else { originalKey = context.dataset.label; }
                                     label += formatValue(value, originalKey);
                                     let displayUnit = '';
                                     if (originalKey.includes('Percentage')) displayUnit = '%';
@@ -1625,7 +1772,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const keysForMode = targetSettingKeys.filter(key => {
             if (currentMode === 'mtf') return !medicationKeys_FtM.includes(key);
-            else return !medicationKeys_MtF.includes(key) && key !== 'cupSize' && !key.startsWith('semen');
+            else return !medicationKeys_MtF.includes(key) && !key.startsWith('semen');
         });
         if (!updateOnly) {
             targetGrid.innerHTML = '';
@@ -2188,5 +2335,62 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("DEBUG: Swipe listeners attached to body.");
         console.log("DEBUG: Event listeners setup complete.");
     } catch (listenerError) { console.error(" Event listener setup error:", listenerError); alert(translate('alertListenerError') || `Event Listener Error: ${listenerError.message}`); }
+    // --- Sticky/Fixed Tab Bar Logic ---
+    // --- Sticky/Fixed Tab Bar Logic ---
+    try {
+        const stickyWrapper = document.querySelector('.tab-bar-sticky-wrapper');
 
+        if (stickyWrapper) {
+            const tabBarPlaceholder = document.getElementById('tab-bar-placeholder');
+            let stickyOffsetTop = stickyWrapper.offsetTop;
+
+            // 스크롤 위치를 다시 계산하는 함수
+            function calculateStickyOffset() {
+                // 클래스가 적용되지 않은 순수 상태에서 위치를 계산
+                stickyWrapper.classList.remove('is-fixed');
+                stickyOffsetTop = stickyWrapper.offsetTop;
+            }
+
+            // 스크롤 이벤트 처리 함수
+            const handleScroll = () => {
+                // 데스크톱 뷰(768px 이상)에서만 작동
+                if (window.innerWidth >= 768) {
+                    if (window.scrollY > stickyOffsetTop) {
+                        // 아직 고정되지 않았다면 고정 클래스 추가 및 플레이스홀더 활성화
+                        if (!stickyWrapper.classList.contains('is-fixed')) {
+                            tabBarPlaceholder.style.height = `${stickyWrapper.offsetHeight}px`;
+                            tabBarPlaceholder.style.display = 'block';
+                            stickyWrapper.classList.add('is-fixed');
+                        }
+                    } else {
+                        // 고정 상태를 해제해야 한다면 클래스 제거 및 플레이스홀더 숨김
+                        if (stickyWrapper.classList.contains('is-fixed')) {
+                            stickyWrapper.classList.remove('is-fixed');
+                            tabBarPlaceholder.style.display = 'none';
+                        }
+                    }
+                }
+            };
+
+            // PC/모바일 전환 시 로직 처리
+            const handleResize = () => {
+                // 모바일 뷰로 전환되면 PC용 고정 스타일을 모두 제거
+                if (window.innerWidth < 768) {
+                    stickyWrapper.classList.remove('is-fixed');
+                    tabBarPlaceholder.style.display = 'none';
+                }
+                // 데스크톱 뷰에서는 위치를 다시 계산
+                else {
+                    calculateStickyOffset();
+                }
+            };
+
+            // 페이지 로드 시, 화면 크기 변경 시, 스크롤 시 각각 필요한 함수를 연결
+            calculateStickyOffset(); // 최초 로드 시 위치 계산
+            window.addEventListener('scroll', handleScroll);
+            window.addEventListener('resize', debounce(handleResize, 100)); // 디바운스를 적용해 성능 최적화
+        }
+    } catch (e) {
+        console.error("Error setting up sticky tab bar logic:", e);
+    }
 }); // DOMContentLoaded End

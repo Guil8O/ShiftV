@@ -28,6 +28,7 @@
     --warning-text: #ffddaa;
 
     --glass-bg: rgba(42, 42, 98, 0.4);
+    --glass-bg1: rgba(182, 182, 212, 0.5);
     --glass-border: rgba(180, 180, 255, 0.2);
     --glass-shadow: rgba(0, 0, 0, 0.25);
     --glass-glow: rgba(255, 120, 200, 0.2);
@@ -107,7 +108,7 @@ body {
     background-color: var(--bg-main);
     color: var(--text-main);
     overscroll-behavior-y: contain;
-    transition: background-color var(--transition-medium), color var(--transition-medium);
+    transition: background-color 5s ease-in-out, color 5s ease-in-out;
 }
 
 .container {
@@ -117,14 +118,53 @@ body {
 }
 
 .title-container {
-    text-align: center;
+    position: relative;
+    /* 겹쳐질 자식 이미지들의 기준점이 됨 */
+    max-width: 80%;
+    /* 기존 스타일 유지 */
+    height: 120px;
+    /* 로고의 최대 높이만큼 공간을 미리 확보 */
+    margin: auto;
+    /* 중앙 정렬 */
     margin-bottom: 5px;
 }
 
-#main-title {
-    max-width: 80%;
-    height: auto;
-    max-height: 120px;
+/* 두 로고 이미지에 대한 공통 스타일 */
+.title-container img {
+    position: absolute;
+    /* 이미지를 겹치기 위해 absolute 포지션 적용 */
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    /* 정확한 중앙 정렬 */
+    width: auto;
+    max-height: 100%;
+    /* 부모 높이에 맞춤 */
+
+    /* 핵심: 5초 동안 opacity(투명도)가 부드럽게 변하도록 설정 */
+    transition: opacity 5s ease-in-out;
+}
+
+/* 기본 상태 (다크 모드) */
+#main-title-dark {
+    opacity: 1;
+    /* 다크 모드 로고 보이기 */
+}
+
+#main-title-light {
+    opacity: 0;
+    /* 라이트 모드 로고 숨기기 */
+}
+
+/* 라이트 모드가 적용되었을 때의 상태 */
+body.light-mode #main-title-dark {
+    opacity: 0;
+    /* 다크 모드 로고 숨기기 */
+}
+
+body.light-mode #main-title-light {
+    opacity: 1;
+    /* 라이트 모드 로고 보이기 */
 }
 
 .version-info {
@@ -174,7 +214,7 @@ hr.divider {
     box-shadow: 0 8px 32px 0 var(--glass-shadow);
     backdrop-filter: blur(12px) saturate(150%);
     -webkit-backdrop-filter: blur(12px) saturate(150%);
-    transition: var(--transition-medium);
+    transition: background-color 5s ease-in-out, border-color 5s ease-in-out, box-shadow 5s ease-in-out;
 }
 
 .glass-section {
@@ -193,6 +233,26 @@ hr.divider {
 }
 
 /* --- Tab Bar --- */
+
+.tab-bar-sticky-wrapper.is-fixed {
+    position: fixed;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 1000px;
+    /* .container의 max-width와 동일하게 설정 */
+    padding: 0 15px;
+    /* .container의 좌우 padding과 동일하게 설정 */
+    z-index: 100;
+}
+
+.tab-bar-sticky-wrapper {
+    position: relative;
+    z-index: 100;
+    /* z-index는 래퍼로 옮겨줍니다. */
+}
+
 .tab-bar {
     display: flex;
     justify-content: center;
@@ -200,16 +260,17 @@ hr.divider {
     gap: 5px;
     margin-bottom: 30px;
     padding: 8px;
-    position: sticky;
-    top: 15px;
-    z-index: 100;
     background-color: var(--tab-bar-bg);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     box-shadow: 0 8px 32px 0 var(--glass-shadow);
-    backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(10px) saturate(180%);
     -webkit-backdrop-filter: blur(18px) saturate(180%);
+    overflow: hidden;
+    position: relative;
+    transition: background-color 5s ease-in-out, border-color 5s ease-in-out, box-shadow 5s ease-in-out;
 }
+
 
 .tab-button {
     display: flex;
@@ -225,7 +286,7 @@ hr.divider {
     font-size: 0.75em;
     font-weight: 500;
     white-space: nowrap;
-    transition: var(--transition-fast);
+    transition: transform var(--transition-fast), color 5s ease-in-out;
 }
 
 .tab-button svg {
@@ -234,31 +295,31 @@ hr.divider {
     fill: currentColor;
 }
 
-.tab-button:hover,
-.tab-button:focus {
-    color: var(--text-main);
-    background-color: rgba(255, 255, 255, 0.1);
-}
 
 .tab-button.active {
     color: var(--tab-active-text);
     font-weight: 600;
     transform: scale(1.05);
+    transition: transform var(--transition-fast), color 5s ease-in-out;
 }
+
 .tab-button.active::before {
     content: '';
     position: absolute;
-    width: 17px;
-    height: 4px;
-    background-color: rgba(255, 96, 168, 1); /* 어두운 배경 */
-    border-radius: 22px;    /* 둥글게 */
+    width: 10px;
+    height: 15px;
+    background-color: rgba(255, 96, 168, 1);
+    /* 어두운 배경 */
+    border-radius: 50px;
+    /* 둥글게 */
     z-index: -1;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-
+    transition: transform var(--transition-fast), color 5s ease-in-out;
     /* 핵심 블러 그림자 효과 */
-    box-shadow: 0 0 15px 20px rgba(255, 96, 168, 1);
+    box-shadow: 0 0 30px 30px rgba(255, 96, 168, 1);
+    transition: background-color 5s ease-in-out, box-shadow 5s ease-in-out;
 }
 
 .tab-content {
@@ -268,6 +329,7 @@ hr.divider {
 .tab-content.active {
     display: block;
     animation: fadeIn 0.5s;
+    transition: background-color 5s ease-in-out, border-color 5s ease-in-out, box-shadow 5s ease-in-out;
 }
 
 @keyframes fadeIn {
@@ -286,7 +348,7 @@ hr.divider {
 .input-grid,
 .target-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px 20px;
 }
 
@@ -302,10 +364,15 @@ hr.divider {
     color: var(--text-dim);
 }
 
+
+
 .input-category {
     border: none;
     padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .input-category legend {
@@ -314,6 +381,7 @@ hr.divider {
     color: var(--primary);
     padding-bottom: 10px;
     width: 100%;
+    margin-bottom: 16px;
 }
 
 /* ** NEW ** Spacing for specific form elements */
@@ -343,11 +411,13 @@ select {
     background-color: var(--input-bg);
     color: var(--text-main);
     width: 100%;
-    transition: var(--transition-fast);
+    transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out,
+        background-color 5s ease-in-out, color 5s ease-in-out;
 }
+
 body.dark-mode select,
 body.dark-mode select option {
-    background-color: #2a2a4a;
+    background-color: #2b2b5c;
     color: #f0f0ff;
 }
 
@@ -386,7 +456,8 @@ input.invalid-input {
     border-radius: var(--radius-xl);
     font-size: 1em;
     font-weight: 600;
-    transition: var(--transition-fast);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+        background-color 5s ease-in-out, color 5s ease-in-out, border-color 5s ease-in-out;
     background-color: var(--glass-bg);
     color: var(--text-dim);
     border-color: var(--glass-border);
@@ -419,6 +490,16 @@ input.invalid-input {
     background-color: color-mix(in srgb, var(--glass-bg) 70%, #888);
 }
 
+h2,
+h3,
+p.description,
+.text-dim,
+.version-info,
+.form-group label,
+.progress-bar-label {
+    transition: color 5s ease-in-out;
+}
+
 /* --- History Tab --- */
 .history-view {
     display: none;
@@ -426,7 +507,7 @@ input.invalid-input {
 
 /* Mobile Card View */
 .history-card {
-    padding: 20px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -435,12 +516,21 @@ input.invalid-input {
 
 .history-card-header {
     display: flex;
-    justify-content: space-between; /* 주차 정보 왼쪽, 날짜 정보 오른쪽 정렬 */
+    font-size: 1.2em;
+    justify-content: space-between;
+    /* 주차 정보 왼쪽, 날짜 정보 오른쪽 정렬 */
     align-items: center;
-    margin-bottom: 4px;
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
+
 .history-card-header h3 {
-    font-size: 1em;
+    font-size: 1.4em;
+    margin-bottom: 2px;
+    font-weight: 700;
+    /* ← 더 굵게 추가 */
+    margin-top: 0;
+    /* ← 위 여백 제거 */
     margin-bottom: 2px;
 }
 
@@ -607,15 +697,43 @@ input.invalid-input {
     border-spacing: 0;
 }
 
+/* comparison-table 관련 스타일 전체를 아래 코드로 교체합니다 */
+
 .comparison-table th,
 .comparison-table td {
-    padding: 10px;
+    /* 상하 패딩을 줄여 행의 높이를 더 컴팩트하게 만듭니다. */
+    padding: 10px 10px;
     border-bottom: 1px solid var(--glass-border);
+    vertical-align: middle;
+    /* 모든 셀 내용을 세로 중앙 정렬합니다. */
 }
 
 .comparison-table th {
     font-weight: 600;
     color: var(--primary);
+    /* 헤더 텍스트(항목, 변화량)가 줄바꿈되지 않도록 설정합니다. */
+    white-space: nowrap;
+    /* 폰트 크기를 약간 줄여 공간을 확보합니다. */
+    font-size: 0.9em;
+}
+
+/* 첫 번째 열 (체중, 근육량 등 항목 레이블) */
+.comparison-table td:first-child {
+    /* 폰트 크기를 줄여 줄바꿈을 방지하고 균형을 맞춥니다. */
+    font-size: 0.75em;
+    font-weight: 500;
+    /* 레이블이 너무 좁아지지 않도록 최소 너비를 설정합니다. */
+    min-width: 75px;
+}
+
+/* 마지막 열 (변화량 값) */
+.comparison-table td:last-child {
+    /* 기존보다 폰트 크기를 약간 줄여 전체적인 균형을 맞춥니다. */
+    font-size: 0.9em;
+    font-weight: 700;
+    text-align: center;
+    /* 값의 정렬이 틀어지지 않도록 고정 너비를 부여합니다. */
+    width: 65px;
 }
 
 .positive-change {
@@ -635,6 +753,117 @@ input.invalid-input {
     padding: 20px;
 }
 
+/* ** NEW ** Progress Bar Styles */
+.progress-bar-cell {
+    vertical-align: middle !important;
+    padding-top: 15px !important;
+    padding-bottom: 35px !important;
+    width: 60%;
+    /* 바가 충분한 공간을 차지하도록 */
+    padding-right: 60px;
+}
+
+.progress-bar-container {
+    position: relative;
+    height: 8px;
+    width: 100%;
+}
+
+.progress-bar-track {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--input-bg);
+    border-radius: 4px;
+    border: 1px solid var(--input-border);
+}
+
+.progress-bar-range {
+    position: absolute;
+    height: 100%;
+    border-radius: 4px;
+    opacity: 0.6;
+}
+
+.range-initial {
+    background-color: #3498db;
+}
+
+/* Blue */
+.range-prev {
+    background-color: #2ecc71;
+}
+
+/* Green */
+.range-target {
+    background-color: #e67e22;
+}
+
+/* Orange */
+
+.progress-bar-marker {
+    position: absolute;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+
+    /* Glass Effect (Dark Mode Default) */
+    background-color: rgba(230, 230, 255, 0.2);
+    /* 기본(다크모드) 유리를 더 밝게 */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+
+    border-radius: 50%;
+
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    transition: var(--transition-fast);
+}
+
+
+
+.progress-bar-labels {
+    position: relative;
+    margin-top: 10px;
+    height: 30px;
+    /* 라벨을 위한 공간 */
+}
+
+.progress-bar-label {
+    position: absolute;
+    bottom: 0;
+    /* 상하 위치는 기본값으로 유지 */
+    transform: translateX(-50%);
+    /* 기본적으로 중앙 정렬 */
+    font-size: 0.7em;
+    color: var(--text-dim);
+    text-align: center;
+    white-space: nowrap;
+    transition: transform 0.2s ease-out;
+}
+
+/* 왼쪽으로 밀어내는 스타일 */
+.progress-bar-label.stagger-left {
+    transform: translateX(-95%);
+    /* 라벨의 오른쪽 끝이 기준점에 맞춰지도록 이동 */
+}
+
+/* 오른쪽으로 밀어내는 스타일 */
+.progress-bar-label.stagger-right {
+    transform: translateX(-5%);
+    /* 라벨의 왼쪽 끝이 기준점에 맞춰지도록 이동 */
+}
+
+.progress-bar-label span {
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+.progress-bar-label.current span {
+    color: var(--primary);
+}
+
 /* Chart */
 .chart-container {
     position: relative;
@@ -651,10 +880,15 @@ input.invalid-input {
 }
 
 .chart-controls {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    display: flex;
+    /* 버튼들을 중앙 정렬하기 위해 flexbox로 변경 */
+    flex-wrap: wrap;
+    /* 버튼이 많으면 다음 줄로 넘어가도록 설정 */
+    justify-content: center;
+    /* 핵심: 수평 중앙 정렬 */
     gap: 8px;
 }
+
 
 .chart-select-button {
     padding: 8px 10px;
@@ -772,7 +1006,8 @@ input.invalid-input {
     box-shadow: 0 8px 32px 0 var(--glass-shadow);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    transition: opacity 0.4s ease, bottom 0.4s ease;
+    transition: opacity 0.4s ease, bottom 0.4s ease,
+        background-color 5s ease-in-out, border-color 5s ease-in-out, box-shadow 5s ease-in-out;
 }
 
 .popup.show {
@@ -820,9 +1055,23 @@ body.mode-mtf .ftm-only {
 
 /* Tablet and Desktop */
 @media (min-width: 768px) {
-    .report-comparison-grid {
-        grid-template-columns: repeat(3, 1fr);
+    .tab-bar-sticky-wrapper.is-fixed {
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 1000px;
+        padding: 0 15px;
     }
+
+    .report-comparison-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .report-comparison-grid .report-section:nth-child(3) {
+        grid-column: 1 / span 2;
+    }
+
 
     .history-view {
         display: none;
@@ -840,7 +1089,7 @@ body.mode-mtf .ftm-only {
 @media (max-width: 767px) {
     body {
         padding: 10px;
-        padding-bottom: 120px;
+        padding-bottom: 90px;
     }
 
     .container {
@@ -852,20 +1101,35 @@ body.mode-mtf .ftm-only {
         padding: 20px;
     }
 
+    .tab-bar-sticky-wrapper {
+        position: fixed;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        padding: 10px;
+        box-sizing: border-box;
+        /* 패딩이 너비에 영향을 주지 않도록 설정 */
+        z-index: 100;
+    }
+
+
     .tab-bar {
         position: fixed;
-        /* 하단 고정을 위해 sticky 대신 fixed 사용 */
         width: calc(100% - 20px);
-        /* body padding 고려 */
+        /* 화면 너비에 맞춤 */
         left: 10px;
         right: 10px;
         top: auto;
+        /* 상단 위치 해제 */
         bottom: 10px;
+        /* 하단 10px에 고정 */
+        z-index: 100;
+
+        /* 위치가 변경되었으므로 margin-bottom 은 제거합니다. */
+        margin-bottom: 0;
         padding: 5px;
         gap: 2px;
         justify-content: space-around;
-        z-index: 100;
-        /* 다른 요소 위에 오도록 z-index 유지 */
     }
 
     .tab-button {
@@ -895,6 +1159,11 @@ body.mode-mtf .ftm-only {
         grid-template-columns: 1fr 1fr;
     }
 
+    .input-category legend {
+        display: block;
+        margin-bottom: 12px;
+    }
+
     .compound-input {
         flex-direction: column;
     }
@@ -910,4 +1179,6 @@ body.mode-mtf .ftm-only {
     .glass-button {
         width: 100%;
     }
+
+
 }

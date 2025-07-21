@@ -100,6 +100,10 @@ body.light-mode {
     box-sizing: border-box;
 }
 
+html {
+    height: 100%; /* 전체 높이 기준을 명확하게 설정 */
+}
+
 body {
     font-family: var(--font-family);
     line-height: 1.6;
@@ -107,16 +111,22 @@ body {
     padding: 20px;
     background-color: var(--bg-main);
     color: var(--text-main);
-    overscroll-behavior-y: contain;
+    
+    /* 기존: overscroll-behavior-y: contain; */
+    /* 수정: y축 스크롤 경계 효과를 완전히 제거하여 화살표 힌트를 차단합니다. */
+    overscroll-behavior-y: none;
+    
+
+    
     transition: background-color 5s ease-in-out, color 5s ease-in-out;
 }
+/* ▲▲▲▲▲ 여기까지 추가 및 수정하세요 ▲▲▲▲▲ */
 
 .container {
     max-width: 1000px;
     margin: auto;
     padding: 15px;
 }
-
 .title-container {
     position: relative;
     /* 겹쳐질 자식 이미지들의 기준점이 됨 */

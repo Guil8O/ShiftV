@@ -458,8 +458,8 @@ input.invalid-input {
     border-radius: var(--radius-xl);
     font-size: 1em;
     font-weight: 600;
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast),
-        background-color 5s ease-in-out, color 5s ease-in-out, border-color 5s ease-in-out;
+    transition: opacity 0.4s ease, bottom 0.4s ease,
+        background-color 5s ease-in-out, border-color 5s ease-in-out, box-shadow 5s ease-in-out;
     background-color: var(--glass-bg);
     color: var(--text-dim);
     border-color: var(--glass-border);

@@ -8,7 +8,7 @@
   "scope": "/",
   "id": "shiftv_mumu_app", 
   "display": "standalone", 
-  "orientation": "portrait", 
+  "orientation": "any", 
   "categories": [
     "health",
     "lifestyle",

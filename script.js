@@ -2062,24 +2062,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleResetData() {
         if (confirm(translate('confirmReset'))) {
             console.log("DEBUG: Resetting all data.");
+
             localStorage.removeItem(PRIMARY_DATA_KEY);
-            measurements = []; targets = {}; notes = [];
-            selectedMetrics = ['weight'];
+
+            measurements = [];
+            targets = {};
+            notes = [];
+
             isInitialSetupDone = false;
             saveSettingsToStorage();
 
-            clearElement(historyContainer, "noDataYet");
-            clearElement(prevWeekComparisonContainer, "noDataYet");
-            clearElement(initialComparisonContainer, "noDataYet");
-            clearElement(targetComparisonContainer, "noDataYet");
-            clearElement(notesListContainer, "noNotesYet");
-            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
-            renderChartSelector();
-            setupTargetInputs(true);
-            resetFormState(); handleCancelEditNote();
-            updateCurrentWeekDisplay(); renderNextMeasurementInfo(); renderChart();
             showPopup('popupDataResetSuccess', 3000);
-            setTimeout(() => window.location.reload(), 1000);
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         }
     }
 

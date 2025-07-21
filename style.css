@@ -244,29 +244,9 @@ hr.divider {
 
 /* --- Tab Bar --- */
 
-.tab-bar-sticky-wrapper.is-fixed {
-    position: fixed;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 1000px;
-    /* .container의 max-width와 동일하게 설정 */
-    padding: 0 15px;
-    /* .container의 좌우 padding과 동일하게 설정 */
-    z-index: 100;
-}
-
-.tab-bar-sticky-wrapper {
-    position: relative;
-    z-index: 100;
-    /* z-index는 래퍼로 옮겨줍니다. */
-}
-
 .tab-bar {
     display: flex;
     justify-content: center;
-    align-items: center;
     gap: 5px;
     margin-bottom: 30px;
     padding: 8px;
@@ -278,6 +258,13 @@ hr.divider {
     -webkit-backdrop-filter: blur(18px) saturate(180%);
     overflow: hidden;
     position: relative;
+    
+    /* 핵심: 항상 상단에 고정되는 간단한 sticky 로직 */
+    position: sticky;
+    top: 15px;
+    z-index: 100;
+    top: calc(15px + env(safe-area-inset-top)); 
+    
     transition: background-color 5s ease-in-out, border-color 5s ease-in-out, box-shadow 5s ease-in-out;
 }
 
@@ -338,6 +325,7 @@ hr.divider {
 
 .tab-content.active {
     display: block;
+    width: 100%; /* 이 줄을 추가하세요 */
     animation: fadeIn 0.5s;
     transition: background-color 5s ease-in-out, border-color 5s ease-in-out, box-shadow 5s ease-in-out;
 }
@@ -1099,7 +1087,7 @@ body.mode-mtf .ftm-only {
 @media (max-width: 767px) {
     body {
         padding: 10px;
-        padding-bottom: 90px;
+        padding-bottom: 20px;
     }
 
     .container {
@@ -1111,36 +1099,6 @@ body.mode-mtf .ftm-only {
         padding: 20px;
     }
 
-    .tab-bar-sticky-wrapper {
-        position: fixed;
-        width: 100%;
-        left: 0;
-        bottom: 0;
-        padding: 10px;
-        box-sizing: border-box;
-        /* 패딩이 너비에 영향을 주지 않도록 설정 */
-        z-index: 100;
-    }
-
-
-    .tab-bar {
-        position: fixed;
-        width: calc(100% - 20px);
-        /* 화면 너비에 맞춤 */
-        left: 10px;
-        right: 10px;
-        top: auto;
-        /* 상단 위치 해제 */
-        bottom: 10px;
-        /* 하단 10px에 고정 */
-        z-index: 100;
-
-        /* 위치가 변경되었으므로 margin-bottom 은 제거합니다. */
-        margin-bottom: 0;
-        padding: 5px;
-        gap: 2px;
-        justify-content: space-around;
-    }
 
     .tab-button {
         flex: 1;

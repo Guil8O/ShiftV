@@ -2335,5 +2335,15 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("DEBUG: Swipe listeners attached to body.");
         console.log("DEBUG: Event listeners setup complete.");
     } catch (listenerError) { console.error(" Event listener setup error:", listenerError); alert(translate('alertListenerError') || `Event Listener Error: ${listenerError.message}`); }
-    
-}); 
+
+});
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/ShiftV/service-worker.js').then(registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+
+        }).catch(error => {
+            console.error('Service Worker registration failed:', error);
+        });
+    });
+}

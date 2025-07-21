@@ -3,10 +3,9 @@ const urlsToCache = [
   '/ShiftV/',
   '/ShiftV/index.html',
   '/ShiftV/style.css',
-  '/ShiftV/app.js',
   '/ShiftV/manifest.json',
-  '/ShiftV/icons/icon-192.png',
-  '/ShiftV/icons/icon-512.png'
+  '/ShiftV/android/android-launchericon-512-512.png',
+  '/ShiftV/android/android-launchericon-192-192.png',
 ];
 
 // 설치 이벤트: 캐시 파일 저장

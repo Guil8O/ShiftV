@@ -300,7 +300,7 @@ hr.divider {
     color: var(--tab-active-text);
     font-weight: 600;
     transform: scale(1.05);
-    transition: transform var(--transition-fast), color 1s ease-in-out;
+    transition: transform var(--transition-fast), color 0.5s ease-in-out;
 }
 
 .tab-button.active::before {
@@ -316,10 +316,10 @@ hr.divider {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    transition: transform var(--transition-fast), color 5s ease-in-out;
+    transition: transform var(--transition-fast), color 0.5s ease-in-out;
     /* 핵심 블러 그림자 효과 */
     box-shadow: 0 0 30px 30px rgba(255, 96, 168, 1);
-    transition: background-color 5s ease-in-out, box-shadow 1s ease-in-out;
+    transition: background-color 5s ease-in-out, box-shadow 0.5s ease-in-out;
 }
 
 .tab-content {

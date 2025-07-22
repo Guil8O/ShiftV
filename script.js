@@ -1365,10 +1365,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const latest = measurements[measurements.length - 1];
         const previous = measurements.length > 1 ? measurements[measurements.length - 2] : null;
 
-        const keysToShow = comparisonKeys.filter(key => {
+        const keysToShow = targetSettingKeys.filter(key => {
             if (currentMode === 'ftm') return !medicationKeys_MtF.includes(key) && key !== 'cupSize' && !key.startsWith('semen');
             return true;
         });
+
 
         keysToShow.forEach(key => {
             const initialValue = parseFloat(initial[key]);

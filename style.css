@@ -317,11 +317,24 @@ hr.divider {
 }
 
 .tab-button svg {
-    flex-shrink: 0;
-    /* 아이콘이 찌그러지지 않도록 함 */
+    /* flex-shrink: 0; */
+    /* 이 줄을 삭제하고 아래 코드로 대체 */
+    flex: 0 0 24px;
+    /* ✅ 아이콘이 절대 늘어나거나 줄어들지 않고, 기본 너비를 24px로 고정 */
     width: 24px;
     height: 24px;
     fill: currentColor;
+    min-width: 24px;
+    min-height: 24px;
+
+}
+.tab-button img {
+    /* img 태그의 원래 색상을 무시하고 CSS로 색을 입히기 위한 설정입니다. */
+    background-color: currentColor; 
+    -webkit-mask: url('./assets/setting.svg') no-repeat center;
+    mask: url('./assets/setting.svg') no-repeat center;
+    -webkit-mask-size: cover;
+    mask-size: cover;
 }
 
 .tab-button span {
@@ -330,7 +343,8 @@ hr.divider {
     font-weight: 600;
     opacity: 0;
     max-width: 0;
-    visibility: hidden; /* [추가] 요소를 확실히 숨깁니다. */
+    visibility: hidden;
+    /* [추가] 요소를 확실히 숨깁니다. */
     transition: max-width 0.3s ease-out, opacity 0.2s ease-out, visibility 0s 0.2s;
 }
 
@@ -367,7 +381,8 @@ hr.divider {
     opacity: 1;
     max-width: 100px;
     /* 텍스트가 차지할 최대 너비 */
-    visibility: visible; /* [추가] 요소를 다시 보이게 합니다. */
+    visibility: visible;
+    /* [추가] 요소를 다시 보이게 합니다. */
     transition: max-width 0.3s ease-out, opacity 0.2s ease-out 0.1s;
 }
 
@@ -2132,7 +2147,7 @@ body.modal-open {
     background-color: var(--input-bg) 5s ease-in-out;
     border: 1px solid var(--input-border);
     transition: var(--transition-fast) 5s ease-in-out;
-    transition: color 5s ease-in-out, background-color 5s ease-in-out,;
+    transition: color 5s ease-in-out, background-color 5s ease-in-out, ;
 }
 
 .slider:before {
@@ -2144,8 +2159,8 @@ body.modal-open {
     bottom: 3px;
     background-color: var(--text-dim);
     transition: var(--transition-fast) 5s ease-in-out;
-    
-    transition: background-color 5s ease-in-out,;
+
+    transition: background-color 5s ease-in-out, ;
 }
 
 .slider.round {

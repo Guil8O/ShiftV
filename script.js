@@ -60,15 +60,91 @@ const languages = {
         alertCannotFindNoteEdit: "수정할 Keeps 찾기 실패.", alertCannotFindNoteDelete: "삭제할 Keeps 찾기 실패.",
 
         // Tabs
-        tabInput: "측정 입력", tabHistory: "측정 기록", tabReport: "변화 리포트",
-        tabTargets: "목표 설정", tabOverview: "Keeps", tabSettings: "설정",
+        tabMain: "메인",
+        tabRecord: "기록하기",
+        tabMy: "마이",
+        tabSettings: "설정",
+        myTitle: "마이 페이지 🧑‍🚀", // 임시 제목
+        // ▼▼▼ 새 키 추가 ▼▼▼
+        showHistoryButton: "기록 확인하기",
+        showInputButton: "입력으로 돌아가기",
+        recordKeepsLabel: "이번 주 Keeps 📝",
+        recordKeepsPlaceholder: "오늘의 기분, 이벤트, 신체 변화 등을 자유롭게 기록해보세요...",
+        memo: "Keeps",
+        //SVcard
+        svcard_shortcut_new: "새 마음으로<br><span class='countdown-days'>기록</span><br>해볼까요?",
+        svcard_shortcut_dday: "'D-Day!'<br>새로운 기록을<br>측정해주세요",
+        svcard_shortcut_overdue: "'측정이 {days}일 지났어요!'<br>새로운 기록을<br>측정해주세요",
+        svcard_shortcut_countdown: "다음 측정일까지<br><span class='countdown-days'>{days}일</span><br>남았어요",
+        // SV Card Titles & Content
+        svcard_title_highlights: "✨ 하이라이트",
+        svcard_title_targets: "🎯 목표 달성도",
+        svcard_title_hormones: "💉 호르몬 분석",
+        svcard_title_keeps: "📝 최근 Keeps",
+        svcard_no_data_for_highlights: "변화를 비교하려면 데이터가 2개 이상 필요해요.",
+        svcard_no_targets_set: "설정 탭에서 목표를 설정해주세요.",
+        svcard_overall_progress: "전체 달성률",
+        svcard_label_current: "현재: {value}",
+        targetLabelShort: "(목표:{value})",
+        // SV Card Titles & Content
+        svcard_guide_default: "꾸준함이 <br>변화를 만들어요! ✨",
+        svcard_guide_positive_short: "훌륭해요! <br>변화가 순조로워요.",
+        svcard_guide_positive_long: "최근 3주간 목표를 향해 <br>꾸준히 나아가고 있어요!",
+        svcard_guide_negative_short: "괜찮아요 <br>잠시 쉬어가는 주일 수도 있어요.",
+        svcard_guide_negative_long: "괜찮아요 <br>다시 한번 해볼까요?",
+        svcard_no_hormone_data: "호르몬 데이터가 부족해요.",
+        svcard_hormone_prediction: "다음 주 예상 {hormone} 수치: <strong>{value}</strong>",
+        notification_title: "ShiftV 측정 알림",
+        notification_body: "마지막으로 기록한 지 일주일이 지났어요. 새로운 변화를 기록해볼까요?",
+        notification_permission_denied: "알림 권한이 차단되었습니다. 브라우저 설정에서 허용해주세요.",
+        notificationSettingsTitle: "알림 설정",
+        notificationToggleLabel: "측정일 알림 받기",
+        notificationSettingsDesc: "마지막 측정일로부터 7일이 지나면 알려드려요. 알림을 받으려면 브라우저의 권한 허용이 필요해요.",
+        alertBrowserNotSupportNotification: "이 브라우저는 알림을 지원하지 않아요.",
+        comparisonModalTitle: "측정 상세 분석",
+        selectedWeekDataTitle: "{week}주차 상세 기록",
+
+        medicationHistoryTitle: "투여량 변화",
+        hormoneLevelHistoryTitle: "호르몬 수치 변화",
+        hormoneAnalysisTitle: "최근 2주 분석",
+        hormoneAnalysisAvgChange: "평균 변화량: {change}",
+        hormoneAnalysisNextWeek: "다음 주 예상 수치: {value}",
+        hormoneModalTitle: "호르몬 수치 분석",
+
+        svcard_no_major_changes: "최근 주요 변화가 없어요.",
+        svcard_change_vs_last_week: "지난 주 대비",
+        svcard_title_weekly_guide: "주간 가이드",
+        svcard_no_keeps_yet: "작성된 Keeps가 없어요.",
+        svcard_no_keeps_add_prompt: "작성된 Keeps가 없어요. '기록하기' 탭에서 추가해보세요!",
+        modalTabDetailedAnalysis: "상세 분석",
+        modalTabComparativeAnalysis: "비교 분석",
+        labelBase: "기준",
+        labelCompareTarget: "비교 대상",
+        svcard_hormone_weekly_change: "주간 변화량",
+
+        //hormon
+        hormoneAnalysisTitleChange: "수치 변화량 분석",
+        hormoneAnalysisTitleInfluence: "약물 영향력 분석",
+        hormoneAnalysisTitlePrediction: "미래 예측",
+        weeklyChange: "주간 변화량",
+        monthlyAvgChange: "월간 평균 변화량",
+        totalChange: "총 변화량",
+        totalChangeWithInitial: '총 변화량 (초기: {value})',
+        drugInfluence: "mg당 영향",
+        predictedNextWeek: "다음 주 예상",
+        daysToTarget: "목표까지 예상",
+        daysUnit: "{days}일",
+        notEnoughData: "데이터 부족",
+        dailyTSuppression: '일일 T 억제량',
+        influenceAnalysisDesc: '이 정보는 실측 데이터에 기반한 예측치입니다. <br>수치에는 오차가 있을 수 있습니다.',
+
         // Input Tab
-        formTitleNew: "측정 시작하기📏 (현재 {week}주차)", formTitleEdit: "측정 기록 수정 ({week}주차)",
+        formTitleNew: "측정 시작하기<br>현재 {week}주차", formTitleEdit: "측정 기록 수정 <br>{week}주차",
         inputDescription: "모든 항목은 선택 사항! 기록하고 싶은 것만 편하게 입력해주세요 😉",
         nextMeasurementInfoNoData: "마지막 측정일을 기준으로 다음 예정일을 계산해요.",
-        nextMeasurementInfo: "마지막 측정: {lastDate} ({daysAgo}일 전) | 다음 측정 추천일: {nextDate} ({daysUntil}일 후)",
-        nextMeasurementInfoToday: "마지막 측정: {lastDate} ({daysAgo}일 전) | 오늘은 측정하는 날!",
-        nextMeasurementInfoOverdue: "마지막 측정: {lastDate} ({daysAgo}일 전) | 측정이 {daysOverdue}일 지났어요!",
+        nextMeasurementInfo: "마지막 측정: {lastDate} ({daysAgo}일 전) <br>다음 측정 추천일: {nextDate} ({daysUntil}일 후)",
+        nextMeasurementInfoToday: "마지막 측정: {lastDate} ({daysAgo}일 전) <br>오늘은 측정하는 날!",
+        nextMeasurementInfoOverdue: "마지막 측정: {lastDate} ({daysAgo}일 전) <br>측정이 {daysOverdue}일 지났어요!",
         daysAgo: "{count}일 전", daysUntil: "{count}일 후", today: "오늘",
         categoryBodySize: "신체 사이즈 📐", categoryHealth: "건강 💪", categoryMedication: "마법 ✨",
         // Measurement Labels (camelCase keys)
@@ -90,6 +166,7 @@ const languages = {
         skinConditionPlaceholder: '예: 부드러워짐', libidoPlaceholder: '회/주',
         scorePlaceholder: "점수", notesPlaceholder: "특이사항",
         unitCm: "cm", unitKg: "kg", unitPercent: "%", unitMg: "mg", unitCountPerWeek: "회/주",
+        placeholderPrevious: "이전: {value}",
         // History Tab
         historyTitle: "측정 기록 꼼꼼히 보기 🧐",
         historyDescription: "(표가 화면보다 넓으면 좌우로 스크롤해보세요!)",
@@ -98,9 +175,9 @@ const languages = {
         reportTitle: "나의 변화 리포트 📈",
         reportGraphTitle: "주차별 변화 그래프",
         reportGraphDesc: "보고 싶은 항목 버튼을 눌러 선택(활성)하거나 해제할 수 있어요. 여러 항목을 겹쳐 볼 수도 있답니다!",
-        reportPrevWeekTitle: "지난주와 비교하면? 🤔",
-        reportInitialTitle: "처음과 비교하면? 🌱➡️🌳",
-        reportTargetTitle: "목표까지 얼마나 왔을까? 🎯",
+        reportPrevWeekTitle: "지난주와 비교🤔",
+        reportInitialTitle: "처음과 비교🌱",
+        reportTargetTitle: "목표 달성률🎯",
         reportNeedTwoRecords: "데이터가 2개 이상 기록되어야 비교할 수 있어요.",
         reportNeedTarget: "먼저 '목표 설정' 탭에서 목표를 입력해주세요!",
         chartAxisLabel: "주차",
@@ -108,7 +185,7 @@ const languages = {
         targetAchieved: "달성 🎉",
         // Targets Tab
         targetTitle: "나만의 목표 설정 💖",
-        targetDescription: "원하는 목표 수치를 입력해주세요. 리포트 탭에서 달성률을 확인할 수 있어요.",
+        targetDescription: "원하는 목표 수치를 입력해주세요. 메인 탭에서 달성률을 확인할 수 있어요.",
         targetItem: "항목", targetValue: "목표값",
         // Overview (Keeps) Tab
         overviewTitle: "Keeps 📝",
@@ -151,7 +228,14 @@ const languages = {
         labelCurrent: "현재",
         labelTarget: "목표",
         initialTargetSame: "초기/목표",
-        prevCurrentSame: "전주/현재"
+        prevCurrentSame: "전주/현재",
+        graphClickPrompt: "그래프의 수치를 클릭하면 해당 주차의 상세정보가 표시됩니다.",
+        biologicalSex: "생물학적 성별",
+        sexSettingsTitle: "생물학적 성별 설정",
+        sexSettingsDesc: "자연 호르몬 회복률 계산의 정확도를 높이기 위해 사용됩니다.",
+        sexMale: "남성",
+        sexFemale: "여성",
+        sexOther: "기타/무성별"
     },
     en: {
         // General
@@ -189,14 +273,90 @@ const languages = {
         alertInvalidIndex: "Error processing record: Invalid index.",
         alertCannotFindNoteEdit: "Cannot find Keeps to edit.", alertCannotFindNoteDelete: "Cannot find Keeps to delete.",
         // Tabs
-        tabInput: "Input", tabHistory: "History", tabReport: "Report", tabTargets: "Targets", tabOverview: "Keeps", tabSettings: "Settings",
+        tabMain: "Main",
+        tabRecord: "Record",
+        tabMy: "My",
+        tabSettings: "Settings",
+        myTitle: "My Page 🧑‍🚀", // Temporary title
+        showHistoryButton: "View History",
+        showInputButton: "Back to Input",
+        recordKeepsLabel: "This Week's Keeps 📝",
+        recordKeepsPlaceholder: "Freely write down your mood, events, body changes, etc.",
+        memo: "Keeps",
+        //SVcard
+        svcard_title_highlights: "✨Highlights",
+        svcard_title_targets: "🎯 Target Progress",
+        svcard_title_hormones: "💉 Hormone Analysis",
+        svcard_title_keeps: "📝 Recent Keeps",
+        svcard_no_data_for_highlights: "Need at least 2 records to compare changes.",
+        svcard_no_targets_set: "Set your goals in the Settings tab.",
+        svcard_overall_progress: "Overall Progress",
+
+        svcard_shortcut_new: "Ready for a<br><span class='countdown-days'>New Start</span><br>Shall we record?",
+        svcard_shortcut_dday: "'It's D-Day!'<br>Time to record<br>your new data",
+        svcard_shortcut_overdue: "'{days} days overdue!'<br>Time to record<br>your new data",
+        svcard_shortcut_countdown: "Next measurement in<br><span class='countdown-days'>{days} days</span><br>left",
+        // SV Card Titles & Content
+        svcard_guide_default: "Consistency creates change! ✨",
+        svcard_guide_positive_short: "Great work! <br>Progress is smooth.",
+        svcard_guide_positive_long: "You've been making steady <br>progress towards your goals!",
+        svcard_guide_negative_short: "It's okay, <br>this might be a week to rest.",
+        svcard_guide_negative_long: "It's okay, <br>you can start again!",
+        svcard_no_hormone_data: "Not enough hormone data.",
+        svcard_hormone_prediction: "Next week's predicted {hormone} level: <strong>{value}</strong>",
+        notification_title: "ShiftV Measurement Reminder",
+        notification_body: "It's been a week since your last record. Time to log your new changes!",
+        notification_permission_denied: "Notification permission was denied. Please allow it in your browser settings.",
+        notificationSettingsTitle: "Notification Settings",
+        notificationToggleLabel: "Receive measurement reminders",
+        notificationSettingsDesc: "Get notified 7 days after your last measurement. Browser permission is required.",
+        alertBrowserNotSupportNotification: "This browser does not support notifications.",
+        comparisonModalTitle: "Detailed Records Analysis",
+
+        medicationHistoryTitle: "Medication Dosage History",
+        hormoneLevelHistoryTitle: "Hormone Level History",
+        hormoneAnalysisTitle: "Last 2 Weeks Analysis",
+        hormoneAnalysisAvgChange: "Average Change: {change}",
+        hormoneAnalysisNextWeek: "Predicted Next Week: {value}",
+        hormoneModalTitle: "Hormone-Dose Analysis",
+        selectedWeekDataTitle: "Week {week} Detailed Data",
+
+        svcard_no_major_changes: "No major changes recently.",
+        svcard_change_vs_last_week: "vs last week",
+        svcard_title_weekly_guide: "Weekly Guide",
+        svcard_no_keeps_yet: "No Keeps written yet.",
+        svcard_no_keeps_add_prompt: "No Keeps written yet. Try adding one in the 'Record' tab!",
+        modalTabDetailedAnalysis: "Detailed Analysis",
+        modalTabComparativeAnalysis: "Comparative Analysis",
+        labelBase: "Base",
+        labelCompareTarget: "Compare Target",
+        svcard_hormone_weekly_change: "Weekly Change",
+        svcard_label_current: "Current: {value}",
+        targetLabelShort: "(Target:{value})",
+
+        //hormon
+        hormoneAnalysisTitleChange: "Level Change Analysis",
+        hormoneAnalysisTitleInfluence: "Medication Influence Analysis",
+        hormoneAnalysisTitlePrediction: "Prediction",
+        weeklyChange: "Weekly Change",
+        monthlyAvgChange: "Monthly Avg. Change",
+        totalChange: "Total Change",
+        totalChangeWithInitial: 'Total Change (Initial: {value})',
+        drugInfluence: "Influence/mg",
+        predictedNextWeek: "Next Week's Forecast",
+        daysToTarget: "Est. Days to Target",
+        daysUnit: "{days} days",
+        notEnoughData: "N/A",
+        dailyTSuppression: 'Daily T Suppression',
+        influenceAnalysisDesc: 'This is predictive data based on measurements. <br>Values may contain errors.',
+
         // Input Tab
-        formTitleNew: "Start Measuring📏 (Current Week {week})", formTitleEdit: "Edit Measurement Record (Week {week})",
+        formTitleNew: "Start Measuring📏 <br>Current Week {week}", formTitleEdit: "Edit Measurement Record <br>Week {week}",
         inputDescription: "All fields are optional! Feel free to enter only what you want to track 😉",
         nextMeasurementInfoNoData: "Calculates the next recommended date based on the last measurement.",
-        nextMeasurementInfo: "Last: {lastDate} ({daysAgo} ago) | Next recommended: {nextDate} ({daysUntil} away)",
-        nextMeasurementInfoToday: "Last: {lastDate} ({daysAgo} ago) | Today is measurement day!",
-        nextMeasurementInfoOverdue: "Last: {lastDate} ({daysAgo} ago) | Measurement is {daysOverdue} days overdue!",
+        nextMeasurementInfo: "Last: {lastDate} ({daysAgo} ago) <br>Next recommended: {nextDate} ({daysUntil} away)",
+        nextMeasurementInfoToday: "Last: {lastDate} ({daysAgo} ago) <br>Today is measurement day!",
+        nextMeasurementInfoOverdue: "Last: {lastDate} ({daysAgo} ago) <br>Measurement is {daysOverdue} days overdue!",
         daysAgo: "{count} days ago", daysUntil: "{count} days left", today: "Today",
         categoryBodySize: "Body Size 📐", categoryHealth: "Health 💪", categoryMedication: "Magic ✨",
         // Measurement Labels
@@ -218,6 +378,7 @@ const languages = {
         skinConditionPlaceholder: 'e.g., Softer', libidoPlaceholder: 'freq/week',
         scorePlaceholder: "Score", notesPlaceholder: "Notes",
         unitCm: "cm", unitKg: "kg", unitPercent: "%", unitMg: "mg", unitCountPerWeek: "freq/wk",
+        placeholderPrevious: "Prev: {value}",
         // History Tab
         historyTitle: "Measurement History 🧐",
         historyDescription: "(If the table is wider than the screen, scroll horizontally!)",
@@ -225,12 +386,13 @@ const languages = {
         // Report Tab
         reportTitle: "My Change Report 📈", reportGraphTitle: "Weekly Change Graph",
         reportGraphDesc: "Select (activate) or deselect items by clicking the buttons. You can overlay multiple items!",
-        reportPrevWeekTitle: "Compared to Last Week? 🤔", reportInitialTitle: "Compared to the Beginning? 🌱➡️🌳",
-        reportTargetTitle: "How Close to the Target? 🎯",
+        reportPrevWeekTitle: "vs Last Week🤔", reportInitialTitle: "vs Beginning🌱",
+        reportTargetTitle: "Target🎯",
         reportNeedTwoRecords: "At least two records are needed for comparison.", reportNeedTarget: "Please set your targets in the 'Targets' tab first!",
         chartAxisLabel: "Week", comparisonItem: "Item", comparisonChange: "Change", comparisonProgress: "Progress", targetAchieved: "Achieved 🎉",
         // Targets Tab
-        targetTitle: "Set Your Personal Goals 💖", targetDescription: "Enter your desired target values. You can check the progress in the Report tab.",
+        targetTitle: "Set Your Personal Goals 💖",
+        targetDescription: "Enter your desired target values. You can check the progress in the Main tab.",
         targetItem: "Item", targetValue: "Target Value",
         // Overview (Keeps) Tab
         overviewTitle: "Keeps 📝", noteNewTitle: "New Keeps", noteEditTitle: "Edit Keeps",
@@ -271,7 +433,14 @@ const languages = {
         labelCurrent: "Current",
         labelTarget: "Target",
         initialTargetSame: "Initial/Target",
-        prevCurrentSame: "Prev/Current"
+        prevCurrentSame: "Prev/Current",
+        graphClickPrompt: "Click a data point on the graph to view detailed records for that week.",
+        biologicalSex: "Biological Sex",
+        sexSettingsTitle: "Biological Sex Settings",
+        sexSettingsDesc: "Used to improve the accuracy of natural hormone recovery calculations.",
+        sexMale: "Male",
+        sexFemale: "Female",
+        sexOther: "Other"
     },
     ja: {
         // General
@@ -309,14 +478,91 @@ const languages = {
         alertInvalidIndex: "記録処理エラー：インデックス無効",
         alertCannotFindNoteEdit: "編集対象メモなし", alertCannotFindNoteDelete: "削除対象メモなし",
         // Tabs
-        tabInput: "測定入力", tabHistory: "測定記録", tabReport: "変化レポート", tabTargets: "目標設定", tabOverview: "メモ", tabSettings: "設定",
+        tabMain: "メイン",
+        tabRecord: "記録する",
+        tabMy: "マイページ",
+        tabSettings: "設定",
+        myTitle: "マイページ 🧑‍🚀", // 仮タイトル
+        //SVcard
+        svcard_shortcut_new: "新たな気持ちで<br><span class='countdown-days'>記録</span><br>しませんか？",
+        svcard_shortcut_dday: "「測定日です！」<br>新しい記録を<br>測定しましょう",
+        svcard_shortcut_overdue: "「測定が{days}日遅れています！」<br>新しい記録を<br>測定しましょう",
+        svcard_shortcut_countdown: "次の測定まで<br><span class='countdown-days'>{days}日</span><br>です",
+
+        svcard_title_highlights: "✨ ハイライト",
+        svcard_title_targets: "🎯 目標達成度",
+        svcard_title_hormones: "💉 ホルモン分析",
+        svcard_title_keeps: "📝 最近のメモ",
+        svcard_no_data_for_highlights: "比較するには記録が2つ以上必要です。",
+        svcard_no_targets_set: "設定タブで目標を設定してください。",
+        svcard_overall_progress: "全体達成率",
+
+        svcard_no_major_changes: "最近、主な変化はありません。",
+        svcard_change_vs_last_week: "先週より",
+        svcard_title_weekly_guide: "週間ガイド",
+        svcard_no_keeps_yet: "作成されたメモがありません。",
+        svcard_no_keeps_add_prompt: "作成されたメモがありません。「記録する」タブで追加してみてください！",
+        modalTabDetailedAnalysis: "詳細分析",
+        modalTabComparativeAnalysis: "比較分析",
+        labelBase: "基準",
+        labelCompareTarget: "比較対象",
+        svcard_hormone_weekly_change: "週間変化量",
+
+        // SV Card Titles & Content
+        svcard_guide_default: "継続は力なり！✨",
+        svcard_guide_positive_short: "素晴らしい！<br>変化は順調です。",
+        svcard_guide_positive_long: "ここ3週間、<br>着実に目標に向かっています！",
+        svcard_guide_negative_short: "大丈夫、<br>少し休む週かもしれません。",
+        svcard_guide_negative_long: "大丈夫、<br>また始めましょう！",
+        svcard_no_hormone_data: "ホルモンデータが不足しています。",
+        svcard_hormone_prediction: "来週の予測{hormone}値: <strong>{value}</strong>",
+        notification_title: "ShiftV 測定通知",
+        notification_body: "最後の記録から1週間が経ちました。新しい変化を記録しましょう！",
+        notification_permission_denied: "通知の許可が拒否されました。ブラウザの設定で許可してください。",
+        notificationSettingsTitle: "通知設定",
+        notificationToggleLabel: "測定日の通知を受け取る",
+        notificationSettingsDesc: "最終測定日から7日後に通知します。通知を受け取るには、ブラウザの許可が必要です。",
+        alertBrowserNotSupportNotification: "このブラウザは通知をサポートしていません。",
+        showHistoryButton: "記録を確認",
+        showInputButton: "入力に戻る",
+        recordKeepsLabel: "今週のメモ 📝",
+        recordKeepsPlaceholder: "今日の気分、出来事、体の変化などを自由に記録しましょう...",
+        memo: "メモ",
+        comparisonModalTitle: "記録レポートの詳細分析",
+
+        medicationHistoryTitle: "投薬量の変化",
+        hormoneLevelHistoryTitle: "ホルモン数値の変化",
+        hormoneAnalysisTitle: "過去2週間の分析",
+        hormoneAnalysisAvgChange: "平均変化量: {change}",
+        hormoneAnalysisNextWeek: "来週の予測値: {value}",
+        hormoneModalTitle: "ホルモン詳細分析",
+        selectedWeekDataTitle: "{week}週目の詳細記録",
+        svcard_label_current: "現在: {value}",
+        targetLabelShort: "(目標:{value})",
+
+        //hormon
+        hormoneAnalysisTitleChange: "数値変化分析",
+        hormoneAnalysisTitleInfluence: "薬物影響分析",
+        hormoneAnalysisTitlePrediction: "将来予測",
+        weeklyChange: "週間変化量",
+        monthlyAvgChange: "月間平均変化量",
+        totalChange: "総変化量",
+        totalChangeWithInitial: '総変化量 (初期値: {value})',
+        drugInfluence: "mgあたりの影響",
+        predictedNextWeek: "来週の予測",
+        daysToTarget: "目標までの予測日数",
+        daysUnit: "{days}日",
+        notEnoughData: "データ不足",
+        dailyTSuppression: '一日T抑制量',
+        influenceAnalysisDesc: 'この情報は実測データに基づく予測です。<br>数値には誤差が含まれる場合があります。',
+
         // Input Tab
-        formTitleNew: "測定開始📏（現在{week}週目）", formTitleEdit: "測定記録を編集（{week}週目）",
+        formTitleNew: "測定開始📏<br>現在{week}週", formTitleEdit: "測定記録を編集<br>{week}週目",
         inputDescription: "すべての項目は任意です！記録したいものだけ気軽に入力してください 😉",
         nextMeasurementInfoNoData: "最終測定日を基準に次の予定日を計算します。",
-        nextMeasurementInfo: "最終測定: {lastDate} ({daysAgo}日前) | 次回推奨日: {nextDate} ({daysUntil}日後)",
-        nextMeasurementInfoToday: "最終測定: {lastDate} ({daysAgo}日前) | 今日は測定日です！",
-        nextMeasurementInfoOverdue: "最終測定: {lastDate} ({daysAgo}日前) | 測定が{daysOverdue}日遅れています！",
+        nextMeasurementInfo: "最終測定: {lastDate} ({daysAgo}日前) <br>次回推奨日: {nextDate} ({daysUntil}日後)",
+        nextMeasurementInfoToday: "最終測定: {lastDate} ({daysAgo}日前) <br>今日は測定日です！",
+        nextMeasurementInfoOverdue: "最終測定: {lastDate} ({daysAgo}日前) <br>測定が{daysOverdue}日遅れています！",
         daysAgo: "{count}日前", daysUntil: "{count}日後", today: "今日",
         categoryBodySize: "身体サイズ 📐", categoryHealth: "健康 💪", categoryMedication: "魔法 ✨",
         // Measurement Labels
@@ -338,16 +584,17 @@ const languages = {
         skinConditionPlaceholder: '例: 柔らかくなった', libidoPlaceholder: '回/週',
         scorePlaceholder: "点数", notesPlaceholder: "特記事項",
         unitCm: "cm", unitKg: "kg", unitPercent: "%", unitMg: "mg", unitCountPerWeek: "回/週",
+        placeholderPrevious: "前回: {value}",
         // History Tab
         historyTitle: "測定記録の詳細 🧐", historyDescription: "（表が画面より広い場合は、左右にスクロールしてください！）", manageColumn: "管理",
         // Report Tab
         reportTitle: "私の変化レポート 📈", reportGraphTitle: "週ごとの変化グラフ",
         reportGraphDesc: "見たい項目のボタンを押して選択（アクティブ化）または解除できます。複数の項目を重ねて表示することも可能です！",
-        reportPrevWeekTitle: "先週と比較すると？ 🤔", reportInitialTitle: "最初と比較すると？ 🌱➡️🌳", reportTargetTitle: "目標まであとどれくらい？ 🎯",
+        reportPrevWeekTitle: "先週と比較🤔", reportInitialTitle: "最初と比較🌱", reportTargetTitle: "目標達成率🎯",
         reportNeedTwoRecords: "比較するには、少なくとも2つの記録が必要です。", reportNeedTarget: "まず「目標設定」タブで目標を入力してください！",
         chartAxisLabel: "週目", comparisonItem: "項目", comparisonChange: "変化量", comparisonProgress: "達成率", targetAchieved: "達成 🎉",
         // Targets Tab
-        targetTitle: "自分だけの目標設定 💖", targetDescription: "希望する目標数値を入力してください。レポートタブで達成率を確認できます。",
+        targetDescription: "希望する目標数値を入力してください。メインタブで達成率を確認できます。",
         targetItem: "項目", targetValue: "目標値",
         // Overview (Notes) Tab
         overviewTitle: "メモ 📝", noteNewTitle: "新しいメモを作成", noteEditTitle: "メモを編集",
@@ -388,7 +635,14 @@ const languages = {
         labelCurrent: "現在",
         labelTarget: "目標",
         initialTargetSame: "初期/目標",
-        prevCurrentSame: "前週/現在"
+        prevCurrentSame: "前週/現在",
+        graphClickPrompt: "グラフの数値をタップすると、該当週の詳細記録が表示されます。",
+        biologicalSex: "生物学的性別",
+        sexSettingsTitle: "生物学的性別設定",
+        sexSettingsDesc: "自然なホルモン回復率の計算精度を向上させるために使用されます。",
+        sexMale: "男性",
+        sexFemale: "女性",
+        sexOther: "その他"
     }
 };
 // --- Main Application Logic ---
@@ -399,107 +653,96 @@ document.addEventListener('DOMContentLoaded', () => {
     const PRIMARY_DATA_KEY = 'shiftV_Data_v1_1';
     const SETTINGS_KEY = 'shiftV_Settings_v1_0';
     let chartInstance = null;
+    let medicationChartInstance = null;
+    let hormoneChartInstance = null;
+    let comparisonChartInstance = null; // 이 줄 추가
+    let activeComparisonFilters = ['weight'];
     let measurements = [];
     let targets = {};
-    let notes = [];
-    let currentNoteSortOrder = 'newest';
+    let notes = []; // Legacy notes - will be phased out
     let selectedMetrics = ['weight'];
     let currentLanguage = 'ko';
     let currentMode = 'mtf';
     let isInitialSetupDone = false;
-    let lastScrollY = window.scrollY;
-    let isTabBarCollapsed = false;
-    let currentTheme = 'system'; // *** 수정 4: 테마 상태 변수 추가 ***
+    let currentTheme = 'system';
     let resizeDebounceTimer;
+    let activeHistoryFilters = [];
+    let notificationEnabled = false;
+    let activeModalTab = 'detailed-analysis';
+    let biologicalSex = 'male';
 
     // --- DOM Element References ---
-    const mainTitle = document.querySelector('#main-title');
+    const bodyElement = document.body;
     const tabBar = document.querySelector('.tab-bar');
     const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContentsContainer = document.querySelector('.tab-contents');
     const tabContents = document.querySelectorAll('.tab-content');
     const savePopup = document.getElementById('save-popup');
     const versionDisplays = document.querySelectorAll('#app-version-display, #app-version-display-footer');
-    const bodyElement = document.body;
-    // Initial Setup Popup
+    const modalOverlay = document.getElementById('modal-bottom-sheet-overlay');
+    const modalSheet = document.getElementById('modal-bottom-sheet');
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const notificationToggle = document.getElementById('notification-toggle');
+    // History View within My Tab (마이 탭의 기록 뷰) // ▼▼▼ 이 부분 추가 ▼▼▼
+    const myHistoryViewContainer = document.getElementById('my-history-view-container');
+    const myHistoryCardsContainer = document.getElementById('my-history-cards-container');
+    const myHistoryTableContainer = document.getElementById('my-history-table-container');
+    const myFilterControls = document.getElementById('my-history-filter-controls');
+    // Comparison Modal
+    const comparisonModalOverlay = document.getElementById('comparison-modal-overlay');
+    const comparisonModalCloseBtn = document.getElementById('comparison-modal-close-btn');
+    const hormoneModalOverlay = document.getElementById('hormone-modal-overlay');
+    const hormoneModalCloseBtn = document.getElementById('hormone-modal-close-btn');
+    const initialSexSelect = document.getElementById('initial-sex-select');
+    const sexSelect = document.getElementById('sex-select');
+
+    // Initial Setup
     const initialSetupPopup = document.getElementById('initial-setup-popup');
     const initialLanguageSelect = document.getElementById('initial-language-select');
     const initialModeSelect = document.getElementById('initial-mode-select');
     const initialSetupSaveBtn = document.getElementById('initial-setup-save');
-    // Input Tab
+
+    // Record Tab (기록하기 탭)
+    const recordInputView = document.getElementById('record-input-view');
     const form = document.getElementById('measurement-form');
-    const formTitle = document.getElementById('form-title');
+    const formTitle = document.querySelector('#record-input-view #form-title');
     const saveUpdateBtn = document.getElementById('save-update-button');
     const cancelEditBtn = document.getElementById('cancel-edit-button');
     const editIndexInput = document.getElementById('edit-index');
-    const currentWeekSpan = document.getElementById('current-week');
     const nextMeasurementInfoDiv = document.getElementById('next-measurement-info');
-    const inputDescriptionP = document.querySelector('#tab-input .description');
-    // History Tab
-    const historyTabContent = document.getElementById('tab-history'); // ** NEW ** For event delegation
-    const historyCardsContainer = document.getElementById('history-cards-container'); // ** NEW **
-    const historyTableContainer = document.getElementById('history-table-container'); // ** RENAMED from historyContainer **
-    const historyDescriptionP = document.querySelector('#tab-history .description');
-    const historyTitleH2 = document.querySelector('#tab-history h2');
-    // Report Tab
-    const reportTitleH2 = document.querySelector('#tab-change-report h2');
-    const reportGraphTitleH3 = document.getElementById('report-graph-title');
-    const reportGraphDescP = document.getElementById('report-graph-description');
-    const reportPrevWeekTitleH3 = document.getElementById('prev-week-comparison-title');
-    const reportInitialTitleH3 = document.getElementById('initial-comparison-title');
-    const reportTargetTitleH3 = document.getElementById('target-comparison-title');
-    const prevWeekComparisonContainer = document.getElementById('prev-week-comparison-container');
-    const initialComparisonContainer = document.getElementById('initial-comparison-container');
-    const targetComparisonContainer = document.getElementById('target-comparison-container');
-    const chartCanvas = document.getElementById('measurement-chart');
-    const chartContainer = document.querySelector('.chart-container');
-    const chartSelector = document.getElementById('chart-selector');
-    const selectAllChartsBtn = document.getElementById('select-all-charts');
-    const deselectAllChartsBtn = document.getElementById('deselect-all-charts');
-    // Targets Tab
+
+
+    // SV Tab (리포트 탭)
+    const svGrid = document.querySelector('.sv-grid');
+    const svCardShortcut = document.getElementById('sv-card-shortcut');
+    const svCardHighlights = document.getElementById('sv-card-highlights');
+    const svCardGuide = document.getElementById('sv-card-guide');
+    const svCardTargets = document.getElementById('sv-card-targets');
+    const svCardHormones = document.getElementById('sv-card-hormones');
+    const svCardKeeps = document.getElementById('sv-card-keeps');
+
+    const prevWeekComparisonContainer = null; // 이제 사용하지 않으므로 null 처리
+    const initialComparisonContainer = null;
+    const targetComparisonContainer = null;
+    const chartCanvas = null;
+    const chartSelector = null;
+    const selectAllChartsBtn = null;
+    const deselectAllChartsBtn = null;
+
+    // Settings Tab (설정 탭) - 목표 설정(Targets)은 이제 설정으로 이동
+    const settingsTab = document.getElementById('tab-settings');
     const targetForm = document.getElementById('target-form');
-    const targetTitleH2 = document.querySelector('#tab-targets h2');
-    const targetDescriptionP = document.querySelector('#tab-targets .description');
     let targetGrid = targetForm ? targetForm.querySelector('.target-grid') : null;
     const saveTargetsButton = document.getElementById('save-targets-button');
-    // Overview (Keeps) Tab
-    const overviewTitleH2 = document.querySelector('#tab-overview h2');
-    const noteFormArea = document.getElementById('note-form-area');
-    const noteTitleInput = document.getElementById('note-title');
-    const noteContentInput = document.getElementById('note-content');
-    const saveNoteButton = document.getElementById('save-note-button');
-    const noteSortOrderSelect = document.getElementById('note-sort-order');
-    const notesListContainer = document.getElementById('notes-list-container');
-    const noteFormTitle = document.getElementById('note-form-title');
-    const editNoteIdInput = document.getElementById('edit-note-id');
-    const cancelEditNoteBtn = document.getElementById('cancel-edit-note-button');
-    const noteListTitleH3 = document.getElementById('note-list-title');
-    const sortLabel = document.querySelector('label[for="note-sort-order"]');
-    const noteTitleLabel = document.querySelector('label[for="note-title"]');
-    const noteContentLabel = document.querySelector('label[for="note-content"]');
-    // Settings Tab
-    const settingsTitleH2 = document.querySelector('#tab-settings h2');
-    const langSettingsTitleH3 = document.getElementById('language-settings-title');
-    const modeSettingsTitleH3 = document.getElementById('mode-settings-title');
-    const modeSettingsDescP = document.getElementById('mode-settings-description');
-    const dataMgmtTitleH3 = document.getElementById('data-management-title');
-    const dataMgmtDescP = document.getElementById('data-management-description');
-    const resetDataTitleH3 = document.getElementById('reset-data-title');
-    const resetWarningP = document.getElementById('reset-data-warning');
-    const infoTitleH3 = document.getElementById('info-title');
-    const privacyInfoP = document.getElementById('privacy-info');
-    const devMessageP = document.getElementById('developer-message');
-    const swInfoP = document.getElementById('sw-info');
-    const resetDataButton = document.getElementById('reset-data-button');
-    const checkForUpdatesButton = document.getElementById('check-for-updates-button');
     const exportDataButton = document.getElementById('export-data-button');
     const importDataButton = document.getElementById('import-data-button');
     const importFileInput = document.getElementById('import-file-input');
     const languageSelect = document.getElementById('language-select');
     const modeSelect = document.getElementById('mode-select');
     const themeSelect = document.getElementById('theme-select');
-    const langLabel = document.querySelector('label[for="language-select"]');
-    const modeLabel = document.querySelector('label[for="mode-select"]');
+    const resetDataButton = document.getElementById('reset-data-button');
+    const checkForUpdatesButton = document.getElementById('check-for-updates-button');
 
     console.log("DEBUG: DOM elements fetched.");
     // --- Constants for Measurement Keys (Using camelCase) ---
@@ -513,15 +756,14 @@ document.addEventListener('DOMContentLoaded', () => {
         'estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen', // 'antiEstrogen' 추가
         'medicationOtherDose'
     ];
-    const textKeys = ['healthNotes', 'skinCondition', 'medicationOtherName']; // 'cupSize', 'semenNotes' 삭제
-
+    const textKeys = ['healthNotes', 'skinCondition', 'medicationOtherName', 'memo']; // <-- 'memo' 추가
     // displayKeysInOrder를 업데이트합니다. (표시 순서 제어)
     const displayKeysInOrder = [
         'week', 'date',
         'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm',
         'muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'skinCondition', 'healthScore', 'healthNotes',
         'estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen',
-        'medicationOtherName', 'medicationOtherDose',
+        'medicationOtherName', 'medicationOtherDose', 'memo',
         'timestamp'
     ];
 
@@ -560,12 +802,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return text;
     }
+    function getCssVar(varName) {
+        return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    }
 
-    function translateUI() {
-        console.log(`DEBUG: Translating UI to ${currentLanguage}`);
-        document.documentElement.lang = currentLanguage.split('-')[0];
+    function translateUI(context = document) {
+        console.log(`DEBUG: Translating UI to ${currentLanguage} within context:`, context.id || context.tagName);
+        if (context === document) {
+            document.documentElement.lang = currentLanguage.split('-')[0];
+        }
 
-        document.querySelectorAll('[data-lang-key]').forEach(el => {
+        context.querySelectorAll('[data-lang-key]').forEach(el => {
             const key = el.dataset.langKey;
             let translation = '';
             try {
@@ -607,8 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     el.placeholder = placeholderText;
-                } else if (el.tagName === 'BUTTON' || el.tagName === 'OPTION' || el.tagName === 'LEGEND' || el.tagName === 'LABEL' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'P' || el.tagName === 'SPAN' || el.tagName === 'STRONG' || el.tagName === 'TD' || el.tagName === 'TH') {
-                    // 단순 텍스트 요소 업데이트
+                } else if (el.tagName === 'BUTTON' || el.tagName === 'OPTION' || el.tagName === 'LEGEND' || el.tagName === 'LABEL' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'H4' || el.tagName === 'P' || el.tagName === 'SPAN' || el.tagName === 'STRONG' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'SUMMARY') {
                     if (el.childElementCount === 0 || el.classList.contains('description') || el.classList.contains('table-title') || el.classList.contains('tab-button') || el.tagName === 'BUTTON' || el.tagName === 'OPTION' || el.tagName === 'LEGEND' || el.tagName === 'LABEL' || el.classList.contains('version-info') || el.classList.contains('form-title') || el.classList.contains('warning') || el.classList.contains('placeholder-text')) {
                         // Check if it's the specific span for version number to avoid overwriting
                         if (!el.id?.includes('app-version-display')) {
@@ -633,20 +879,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Specific Element Updates (using translate function) ---
         if (saveUpdateBtn) saveUpdateBtn.textContent = translate(editIndexInput.value === '' ? 'saveRecord' : 'edit');
-        if (saveNoteButton) saveNoteButton.textContent = translate(editNoteIdInput.value === '' ? 'saveNote' : 'edit');
-        if (cancelEditBtn) cancelEditBtn.textContent = translate('cancelEdit');
-        if (cancelEditNoteBtn) cancelEditNoteBtn.textContent = translate('cancelEdit');
         if (selectAllChartsBtn) selectAllChartsBtn.textContent = translate('selectAll');
         if (deselectAllChartsBtn) deselectAllChartsBtn.textContent = translate('deselectAll');
-        if (saveTargetsButton) saveTargetsButton.textContent = translate('saveTarget');
         if (exportDataButton) exportDataButton.textContent = translate('exportData');
         if (importDataButton) importDataButton.textContent = translate('importData');
         if (resetDataButton) resetDataButton.textContent = translate('resetDataButton');
         if (initialSetupSaveBtn) initialSetupSaveBtn.textContent = translate('saveSettings');
 
-        // Dynamic Titles
-        updateFormTitle(); // 주차 계산 및 번역
-        if (noteFormTitle) noteFormTitle.textContent = translate(editNoteIdInput.value === '' ? 'noteNewTitle' : 'noteEditTitle');
 
         // Update Select options
         [languageSelect, initialLanguageSelect].forEach(select => {
@@ -668,13 +907,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (select.id === 'mode-select') select.value = currentMode;
             }
         });
-        if (noteSortOrderSelect) {
-            Array.from(noteSortOrderSelect.options).forEach(option => {
-                const key = option.value === 'newest' ? 'sortNewest' : 'sortOldest';
-                option.textContent = translate(key);
-            });
-            noteSortOrderSelect.value = currentNoteSortOrder;
-        }
         // *** 수정 4: 테마 선택 옵션 번역 ***
         if (themeSelect) {
             Array.from(themeSelect.options).forEach(option => {
@@ -691,10 +923,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Re-render components that depend on language
         console.log("DEBUG: Re-rendering components after translation...");
         renderChartSelector();
-        setupTargetInputs(true);
-        renderHistoryView();
         renderAllComparisonTables();
-        renderNotesList();
         renderNextMeasurementInfo();
         if (chartInstance && chartInstance.options) {
             if (chartInstance.options.scales?.x?.title) {
@@ -706,6 +935,456 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log("DEBUG: UI Translation complete.");
     }
+
+    function calculateAdvancedHormoneAnalytics() {
+        if (measurements.length < 2) return null;
+
+        const MIN_DAYS_INTERVAL = 1;
+
+        // --- 물리 상수 및 Helper 함수 (이전과 동일) ---
+        const T_BASELINE_MALE = 630, T_BASELINE_FEMALE = 30, E_BASELINE_FEMALE = 115;
+        const T_RECOVERY_HALFLIFE = 1.5, E_RECOVERY_HALFLIFE = 1.5;
+        const S_E_R_INFINITY = 0.82, S_E_TAU_RECOVERY = 3;
+        const getSuppressionRate = (e) => {
+            if (isNaN(e) || e < 135) return 0;
+            if (e < 200) return 0.5 * (e - 135) / 65;
+            if (e < 500) return 0.5 + 0.4 * (e - 200) / 300;
+            return Math.min(0.95, 0.9 + 0.05 * (e - 500) / 500);
+        };
+        const getNaturalRecoveryChange = (t_days, t0, baseline, half_life) => {
+            if (baseline === null || isNaN(t0)) return 0;
+            return (baseline - (baseline - t0) * Math.exp(-t_days / half_life)) - t0;
+        };
+        const getDrugAttributedChanges = (prev, curr, daysDiff) => {
+            const prevE = parseFloat(prev.estrogenLevel), currE = parseFloat(curr.estrogenLevel);
+            const prevT = parseFloat(prev.testosteroneLevel), currT = parseFloat(curr.testosteroneLevel);
+            if ([prevE, currE, prevT, currT].some(isNaN)) return null;
+            let naturalEChange = 0, naturalTChange = 0;
+            const T_BASELINE = biologicalSex === 'male' ? T_BASELINE_MALE : (biologicalSex === 'female' ? T_BASELINE_FEMALE : null);
+            const E_BASELINE = biologicalSex === 'female' ? E_BASELINE_FEMALE : null;
+            naturalTChange += getNaturalRecoveryChange(daysDiff, prevT, T_BASELINE, T_RECOVERY_HALFLIFE);
+            if (currentMode === 'ftm') naturalEChange += getNaturalRecoveryChange(daysDiff, prevE, E_BASELINE, E_RECOVERY_HALFLIFE);
+            const avgE = (prevE + currE) / 2;
+            const Se = getSuppressionRate(avgE);
+            const kt = 1 - (1 - S_E_R_INFINITY) * (1 - Math.exp(-daysDiff / S_E_TAU_RECOVERY));
+            naturalTChange += prevT * (1 - (Se * kt)) - prevT;
+            return { eChange: (currE - prevE) - naturalEChange, tChange: (currT - prevT) - naturalTChange };
+        };
+
+        const analytics = { estrogenLevel: {}, testosteroneLevel: {}, influence: {} };
+        // --- 기본적인 변화량 계산 (변경 없음) ---
+        const initial = measurements[0], latest = measurements[measurements.length - 1], previous = measurements.length > 1 ? measurements[measurements.length - 2] : null;
+        const oneMonthAgoTime = latest.timestamp - (28 * 86400000);
+        const monthAgoRecord = measurements.slice().reverse().find(m => m.timestamp <= oneMonthAgoTime) || initial;
+        const daysForMonthAvg = (latest.timestamp - monthAgoRecord.timestamp) / 86400000;
+        ['estrogenLevel', 'testosteroneLevel'].forEach(h => {
+            const latestVal = parseFloat(latest[h]);
+            if (!isNaN(latestVal)) {
+                analytics[h].current = latestVal;
+                analytics[h].weeklyChange = (previous && !isNaN(parseFloat(previous[h]))) ? latestVal - parseFloat(previous[h]) : null;
+                const initialVal = parseFloat(initial[h]);
+                analytics[h].totalChange = !isNaN(initialVal) ? latestVal - initialVal : null;
+                analytics[h].initial = !isNaN(initialVal) ? initialVal : null;
+                analytics[h].monthlyAvgChange = (daysForMonthAvg > 0 && !isNaN(parseFloat(monthAgoRecord[h]))) ? ((latestVal - parseFloat(monthAgoRecord[h])) / daysForMonthAvg) * 7 : null;
+            }
+        });
+
+        // === ★★★ 새로운 약물 영향력 계산 로직 ★★★ ===
+        const drugRoles = { estradiol: { estrogen: 1, testosterone: 0 }, antiAndrogen: { estrogen: 0, testosterone: -1 }, testosterone: { estrogen: 0, testosterone: 1 }, antiEstrogen: { estrogen: -1, testosterone: 0 } };
+        const otherDrugs = [...new Set(measurements.map(m => m.medicationOtherName).filter(Boolean))];
+        const allDrugs = [...new Set([...Object.keys(drugRoles), ...otherDrugs])];
+
+        const periodData = [];
+        for (let i = 1; i < measurements.length; i++) {
+            const curr = measurements[i], prev = measurements[i - 1];
+            const daysDiff = (curr.timestamp - prev.timestamp) / 86400000;
+            if (daysDiff < MIN_DAYS_INTERVAL) continue;
+
+            const changes = getDrugAttributedChanges(prev, curr, daysDiff);
+            if (changes === null) continue;
+
+            // ★★★ 여기가 핵심 수정 사항입니다 ★★★
+            // 입력된 용량을 '일일 복용량'으로 해석하고, 이를 '주간 평균 복용량'으로 환산합니다.
+            const weeklyDoses = {};
+            allDrugs.forEach(drug => {
+                const dailyDose = parseFloat(curr[drug] || (curr.medicationOtherName === drug ? curr.medicationOtherDose : 0)) || 0;
+                weeklyDoses[drug] = dailyDose * 7; // 일일 복용량 * 7일 = 주간 복용량
+            });
+
+            periodData.push({
+                doses: weeklyDoses,
+                weeklyEChange: (changes.eChange / daysDiff) * 7,
+                weeklyTChange: (changes.tChange / daysDiff) * 7
+            });
+        }
+
+        let influences = {};
+        allDrugs.forEach(drug => influences[drug] = { estrogen: 0, testosterone: 0 });
+
+        const MAX_ITERATIONS = 15;
+        for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
+            allDrugs.forEach(drugToEstimate => {
+                const residualsE = [], residualsT = [], dosesOfDrug = [];
+
+                periodData.forEach(p => {
+                    if (p.doses[drugToEstimate] <= 0) return;
+                    let eExpectedFromOthers = 0, tExpectedFromOthers = 0;
+                    allDrugs.forEach(otherDrug => {
+                        if (otherDrug !== drugToEstimate) {
+                            eExpectedFromOthers += influences[otherDrug].estrogen * p.doses[otherDrug];
+                            tExpectedFromOthers += influences[otherDrug].testosterone * p.doses[otherDrug];
+                        }
+                    });
+                    residualsE.push(p.weeklyEChange - eExpectedFromOthers);
+                    residualsT.push(p.weeklyTChange - tExpectedFromOthers);
+                    dosesOfDrug.push(p.doses[drugToEstimate]);
+                });
+
+                if (dosesOfDrug.length > 0) {
+                    const filterOutliers = (arr, doses) => {
+                        const samples = arr.map((res, index) => doses[index] > 0 ? res / doses[index] : 0).filter(isFinite);
+                        if (samples.length < 4) return samples;
+                        const sorted = [...samples].sort((a, b) => a - b);
+                        const q1 = sorted[Math.floor(sorted.length / 4)], q3 = sorted[Math.floor(sorted.length * 3 / 4)];
+                        const iqr = q3 - q1;
+                        const lower = q1 - 1.5 * iqr, upper = q3 + 1.5 * iqr;
+                        return samples.filter(x => x >= lower && x <= upper);
+                    };
+
+                    const filteredE = filterOutliers(residualsE, dosesOfDrug);
+                    const filteredT = filterOutliers(residualsT, dosesOfDrug);
+
+                    if (filteredE.length > 0) influences[drugToEstimate].estrogen = filteredE.reduce((a, b) => a + b, 0) / filteredE.length;
+                    if (filteredT.length > 0) influences[drugToEstimate].testosterone = filteredT.reduce((a, b) => a + b, 0) / filteredT.length;
+                }
+            });
+        }
+
+        Object.keys(drugRoles).forEach(drug => {
+            if (influences[drug]) {
+                if (drugRoles[drug].estrogen > 0 && influences[drug].estrogen < 0) influences[drug].estrogen = 0;
+                if (drugRoles[drug].estrogen < 0 && influences[drug].estrogen > 0) influences[drug].estrogen = 0;
+                if (drugRoles[drug].testosterone > 0 && influences[drug].testosterone < 0) influences[drug].testosterone = 0;
+                if (drugRoles[drug].testosterone < 0 && influences[drug].testosterone > 0) influences[drug].testosterone = 0;
+            }
+        });
+        analytics.influence = influences;
+
+        // --- 미래 예측 (변경 없음) ---
+        // (이 부분은 이전 코드와 동일하여 생략합니다. 그대로 두시면 됩니다.)
+        const latestE = analytics.estrogenLevel.current;
+        const weeklyEChange = analytics.estrogenLevel.monthlyAvgChange;
+
+        if (!isNaN(latestE) && weeklyEChange !== null) {
+            // 다음 주 예상 = 현재 수치 + 월간 평균 주간 변화량
+            analytics.estrogenLevel.predictedNext = latestE + weeklyEChange;
+
+            const targetE = parseFloat(targets.estrogenLevel);
+            const dailyEChange = weeklyEChange / 7; // 일일 평균 변화량
+
+            if (!isNaN(targetE) && dailyEChange !== 0 && Math.sign(targetE - latestE) === Math.sign(dailyEChange)) {
+                analytics.estrogenLevel.daysToTarget = Math.abs(Math.round((targetE - latestE) / dailyEChange));
+            }
+        }
+
+        const latestT = analytics.testosteroneLevel.current;
+        const weeklyTChange = analytics.testosteroneLevel.monthlyAvgChange;
+
+        if (!isNaN(latestT) && weeklyTChange !== null) {
+            // 다음 주 예상 = 현재 수치 + 월간 평균 주간 변화량
+            analytics.testosteroneLevel.predictedNext = latestT + weeklyTChange;
+
+            const targetT = parseFloat(targets.testosteroneLevel);
+            const dailyTChange = weeklyTChange / 7; // 일일 평균 변화량
+
+            if (!isNaN(targetT) && dailyTChange !== 0 && Math.sign(targetT - latestT) === Math.sign(dailyTChange)) {
+                analytics.testosteroneLevel.daysToTarget = Math.abs(Math.round((targetT - latestT) / dailyTChange));
+            }
+        }
+        return analytics;
+    }
+
+
+    // --- Modal Bottom Sheet Functions ---
+    function openModal(title, contentHTML) {
+        if (!modalOverlay || !modalTitle || !modalContent) return;
+
+        modalTitle.textContent = title;
+        modalContent.innerHTML = contentHTML;
+
+        translateUI(modalContent); // <<< 이 한 줄을 추가해주세요!
+
+        bodyElement.classList.add('modal-open');
+        modalOverlay.classList.add('visible');
+    }
+
+    function closeModal() {
+        if (!modalOverlay) return;
+
+        bodyElement.classList.remove('modal-open');
+        modalOverlay.classList.remove('visible');
+    }
+
+    // --- Hormone Modal Functions ---
+    function openHormoneModal() {
+        if (!hormoneModalOverlay) return;
+
+        // 모달을 열기 전에 내용을 먼저 채웁니다.
+        renderHormoneReport();
+
+        const hormoneModalContent = hormoneModalOverlay.querySelector('.modal-content'); // <<< 이 줄 추가
+        if (hormoneModalContent) {
+            hormoneModalContent.scrollTop = 0;
+            translateUI(hormoneModalContent); // <<< 이 한 줄을 추가해주세요!
+        }
+
+        bodyElement.classList.add('modal-open');
+        hormoneModalOverlay.classList.add('visible');
+    }
+
+    function closeHormoneModal() {
+        if (!hormoneModalOverlay) return;
+        bodyElement.classList.remove('modal-open');
+        hormoneModalOverlay.classList.remove('visible');
+
+        // 모달이 닫힐 때 차트 인스턴스를 파괴
+        if (medicationChartInstance) {
+            medicationChartInstance.destroy();
+            medicationChartInstance = null;
+        }
+        if (hormoneChartInstance) {
+            hormoneChartInstance.destroy();
+            hormoneChartInstance = null;
+        }
+    }
+
+    // script.js (약 1080번째 줄 근처, 기존 openComparisonModal 부터 handleComparisonFilterClick 까지를 아래 코드로 교체)
+
+    // --- Comparison Modal 'Flow View' Functions ---
+    function openComparisonModal() {
+        const comparisonViewTemplate = document.getElementById('compare-flow-view');
+        if (!comparisonViewTemplate) return;
+
+        const contentHTML = comparisonViewTemplate.innerHTML;
+        const title = translate('comparisonModalTitle'); // 이 부분은 '최근 변화 하이라이트' 등으로 바꿀 수 있습니다.
+        openModal(title, contentHTML);
+
+        // 모달이 열리면 상세 분석 뷰를 기본으로 렌더링
+        renderDetailedAnalysisView();
+
+        // [수정된 부분 시작]
+        // 모달이 열린 후, 필터 버튼이 있는 컨테이너를 찾아 이벤트 리스너를 연결합니다.
+        // 이벤트 위임을 사용하여 컨테이너에 한 번만 리스너를 붙여 효율적으로 처리합니다.
+        const filterContainer = modalContent.querySelector('#comparison-filter-controls');
+        if (filterContainer) {
+            filterContainer.addEventListener('click', handleComparisonFilterClick);
+        }
+        // [수정된 부분 끝]
+
+        // 탭 전환 이벤트 리스너 연결
+        const tabSwitcher = modalContent.querySelector('.modal-tab-switcher');
+        if (tabSwitcher) {
+            tabSwitcher.addEventListener('click', handleModalTabSwitch);
+        }
+    }
+
+    function handleComparisonFilterClick(event) {
+        const button = event.target.closest('.filter-button');
+        if (!button) return;
+
+        const key = button.dataset.key;
+
+        if (key === 'all') { // 전체 선택
+            activeComparisonFilters = getFilteredChartKeys();
+        } else if (key === 'none') { // 전체 해제
+            activeComparisonFilters = [];
+        } else { // 개별 항목 토글
+            const index = activeComparisonFilters.indexOf(key);
+            if (index > -1) {
+                activeComparisonFilters.splice(index, 1); // 있으면 제거
+            } else {
+                activeComparisonFilters.push(key); // 없으면 추가
+            }
+        }
+
+        // 클릭 후 모달 전체를 다시 렌더링하여 변경사항 반영
+        renderComparisonFilters();
+        renderComparisonChart();
+        renderComparisonTable();
+    }
+
+    function renderComparisonFilters() {
+        const container = modalContent.querySelector('#detailed-analysis-view #comparison-filter-controls');
+        if (!container) return;
+
+        const filterableKeys = getFilteredChartKeys();
+
+        // 1. 측정 항목 버튼들의 HTML만 먼저 생성합니다.
+        const categoryButtonsHTML = filterableKeys.map(key => {
+            const label = translate(key).split('(')[0].trim();
+            const isActive = activeComparisonFilters.includes(key);
+            return `<button class="filter-button ${isActive ? 'active' : ''}" data-key="${key}">${label}</button>`;
+        }).join('');
+
+        // 2. '전체 선택', '전체 해제' 버튼을 별도의 div(.comparison-actions)로 묶어줍니다.
+        const actionButtonsHTML = `
+            <div class="comparison-actions">
+                <button class="filter-button" data-key="all">${translate('selectAll')}</button>
+                <button class="filter-button" data-key="none">${translate('deselectAll')}</button>
+            </div>
+        `;
+
+        // 3. 두 부분의 HTML을 합쳐서 컨테이너에 삽입합니다.
+        container.innerHTML = categoryButtonsHTML + actionButtonsHTML;
+
+        // 버튼에 동적 스타일을 적용하는 로직은 그대로 유지합니다.
+        container.querySelectorAll('button[data-key]').forEach(button => {
+            const key = button.dataset.key;
+            if (key === 'all' || key === 'none') return; // 전체선택/해제 버튼은 색상 변경 안 함
+
+            const color = getMetricColor(key);
+            const lightColor = getMetricColor(key, true);
+
+            if (button.classList.contains('active')) {
+                button.style.backgroundColor = color;
+                button.style.borderColor = color;
+                button.style.color = 'white';
+            } else {
+                button.style.backgroundColor = 'transparent';
+                button.style.borderColor = lightColor;
+                button.style.color = lightColor;
+            }
+        });
+    }
+
+    function renderComparisonChart() {
+        const ctx = modalContent.querySelector('#detailed-analysis-view #comparison-chart')?.getContext('2d');
+        if (!ctx) return;
+
+        if (comparisonChartInstance) {
+            comparisonChartInstance.destroy();
+        }
+
+        if (measurements.length < 1 || activeComparisonFilters.length === 0) {
+            return; // 데이터 없으면 차트 그리지 않음
+        }
+
+        const labels = measurements.map(m => `${m.week}${translate('week')}`);
+        const datasets = activeComparisonFilters.map(metric => {
+            const color = getMetricColor(metric); // 헬퍼 함수로 색상 가져오기
+            return {
+                label: translate(metric).split('(')[0].trim(),
+                data: measurements.map(m => m[metric] ?? null),
+                borderColor: color,
+                backgroundColor: color + '33',
+                tension: 0.1,
+                borderWidth: 2.5,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                spanGaps: true,
+            };
+        });
+
+        // <<< 시작: 라이트 모드에 따른 색상 변수를 정의하는 코드를 여기에 추가합니다.
+        const isLightMode = document.body.classList.contains('light-mode');
+        const tickColor = isLightMode ? '#5c5c8a' : getCssVar('--text-dim2');
+        const gridColor = isLightMode ? 'rgba(200, 200, 235, 0.5)' : getCssVar('--glass-border');
+        // <<< 종료
+
+        comparisonChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: { labels, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                    const points = comparisonChartInstance.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
+                    const titleEl = modalContent.querySelector('#comparison-selected-week-data-title');
+                    const contentEl = modalContent.querySelector('#comparison-selected-week-data-content');
+                    const placeholderEl = modalContent.querySelector('#comparison-data-placeholder');
+
+                    if (!titleEl || !contentEl || !placeholderEl) return;
+
+                    if (points.length) {
+                        const firstPoint = points[0];
+                        const weekIndex = firstPoint.index;
+                        const weekData = measurements[weekIndex];
+
+                        if (weekData) {
+                            titleEl.textContent = translate('selectedWeekDataTitle', { week: weekData.week });
+                            let contentHTML = '';
+                            getFilteredDisplayKeys().forEach(key => {
+                                // 값이 유효할 때만 항목을 표시합니다.
+                                if (weekData[key] !== null && weekData[key] !== undefined && weekData[key] !== '') {
+                                    contentHTML += `
+                                    <div class="data-item">
+                                        <span class="data-item-label">${translate(key).split('(')[0].trim()}</span>
+                                        <span class="data-item-value">${formatValue(weekData[key], key)}</span>
+                                    </div>`;
+                                }
+                            });
+                            contentEl.innerHTML = contentHTML;
+
+                            contentEl.style.display = 'grid';
+                            placeholderEl.style.display = 'none';
+                        }
+                    }
+                },
+                scales: {
+                    // <<< 시작: 축과 그리드 라인의 색상을 위에서 정의한 변수로 교체합니다.
+                    x: {
+                        ticks: { color: tickColor },
+                        grid: { color: gridColor },
+                        border: { color: gridColor }
+                    },
+                    y: {
+                        ticks: { color: tickColor },
+                        grid: { color: gridColor },
+                        border: { color: gridColor },
+                        beginAtZero: false
+                    }
+                    // <<< 종료
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    // 신규 추가: 상세 데이터 테이블 렌더링 함수
+    function renderComparisonTable() {
+        const container = modalContent.querySelector('#detailed-analysis-view #comparison-table-container');
+        if (!container) return;
+        if (measurements.length < 1) {
+            container.innerHTML = `<p>${translate('noDataYet')}</p>`;
+            return;
+        }
+
+        const allKeys = getFilteredDisplayKeys().filter(key => !['week', 'date', 'timestamp'].includes(key));
+        let tableHTML = '<table><thead><tr>';
+        tableHTML += `<th>${translate('week')}</th><th>${translate('date')}</th>`;
+        allKeys.forEach(key => {
+            tableHTML += `<th>${translate(key).split('(')[0].trim()}</th>`;
+        });
+        tableHTML += '</tr></thead><tbody>';
+
+        measurements.forEach(m => {
+            tableHTML += '<tr>';
+            tableHTML += `<td>${m.week}</td><td>${formatTimestamp(m.timestamp)}</td>`;
+            allKeys.forEach(key => {
+                const isActiveCol = activeComparisonFilters.includes(key);
+                tableHTML += `<td class="${isActiveCol ? 'active-col' : ''}">${formatValue(m[key], key)}</td>`;
+            });
+            tableHTML += '</tr>';
+        });
+
+        tableHTML += '</tbody></table>';
+        container.innerHTML = tableHTML;
+    }
+
 
     function showPopup(messageKey, duration = 2500, params = {}) {
         if (!savePopup) {
@@ -765,10 +1444,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (includeTime) {
             const hours = date.getHours().toString().padStart(2, '0');
             const minutes = date.getMinutes().toString().padStart(2, '0');
-            return `${year}-${month}-${day} ${hours}:${minutes}`;
+            const seconds = date.getSeconds().toString().padStart(2, '0'); // 초(second) 추가
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`; // 반환 형식에 초 추가
         } else {
             return `${year}-${month}-${day}`;
         }
+    }
+
+    function getMetricColor(key, light = false) {
+        const availableKeys = getFilteredChartKeys();
+        const index = availableKeys.indexOf(key);
+        if (index === -1) return '#cccccc'; // Fallback color
+        const hue = (index * (360 / Math.min(availableKeys.length, 15))) % 360;
+
+        if (light) {
+            // 비활성 버튼을 위한 연한 색상
+            return `hsl(${hue}, 50%, 75%)`;
+        }
+        // 활성 버튼 및 차트 라인을 위한 기본 색상
+        return `hsl(${hue}, 75%, 58%)`;
     }
 
     // --- 테마 설정 함수 ---
@@ -799,28 +1493,671 @@ document.addEventListener('DOMContentLoaded', () => {
         resizeDebounceTimer = setTimeout(func, delay);
     }
 
-    // ** NEW ** Master function to decide which history view to render
-    function renderHistoryView() {
-        // This function will be called on load and on resize
-        const isMobileView = window.innerWidth < 768;
+    // --- Notification Functions ---
+    function showNotification() {
+        if (!('Notification' in window)) {
+            console.log("This browser does not support desktop notification");
+            return;
+        }
 
-        if (isMobileView) {
-            if (historyCardsContainer) historyCardsContainer.style.display = 'grid';
-            if (historyTableContainer) historyTableContainer.style.display = 'none';
-            renderHistoryCards();
-        } else {
-            if (historyCardsContainer) historyCardsContainer.style.display = 'none';
-            if (historyTableContainer) historyTableContainer.style.display = 'block';
-            renderHistoryTable();
+        if (Notification.permission === "granted") {
+            const notification = new Notification(translate('notification_title'), {
+                body: translate('notification_body'),
+                icon: '/icons/apple-touch-icon.png' // 앱 아이콘 경로
+            });
+            // 알림 클릭 시 앱 창으로 포커스
+            notification.onclick = () => {
+                window.focus();
+            };
         }
     }
 
-    // ** NEW ** Function to render history records as cards (for mobile)
-    // ** NEW ** Function to render history records as cards (for mobile)
-    // ** NEW ** Function to render history records as cards (for mobile)
-    // ** FINAL FIX ** Function to render history records as cards with an inner table for scrolling
-    // ** FINAL FIX ** Function to render history records as cards with an inner table for scrolling
-    // ** FINAL FIX ** Function to render history records with a dedicated scroll wrapper
+    function checkAndRequestNotification() {
+        if (!notificationEnabled || !('Notification' in window) || measurements.length === 0) {
+            return;
+        }
+
+
+        const lastMeasurement = measurements[measurements.length - 1];
+        const lastTimestamp = lastMeasurement.timestamp;
+        const sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000;
+
+        // 마지막 측정 후 7일이 지났는지 확인
+        if (Date.now() - lastTimestamp > sevenDaysInMillis) {
+            if (Notification.permission === "granted") {
+                showNotification();
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        showNotification();
+                    }
+                });
+            } else {
+                console.warn(translate('notification_permission_denied'));
+            }
+        }
+    }
+
+    function renderHistoryFilters() {
+        const container = document.getElementById('history-filter-controls');
+        if (!container) return;
+
+        const filterableKeys = chartSelectableKeys.filter(key => {
+            if (currentMode === 'ftm') return !medicationKeys_MtF.includes(key);
+            return !medicationKeys_FtM.includes(key);
+        });
+
+        // '전체' 버튼 추가
+        let buttonsHTML = `<button class="filter-button ${activeHistoryFilters.length === 0 ? 'active' : ''}" data-key="all">${translate('selectAll')}</button>`;
+
+        filterableKeys.forEach(key => {
+            const label = translate(key).split('(')[0].trim();
+            const isActive = activeHistoryFilters.includes(key);
+            buttonsHTML += `<button class="filter-button ${isActive ? 'active' : ''}" data-key="${key}">${label}</button>`;
+        });
+
+        container.innerHTML = buttonsHTML;
+    }
+
+    // --- SV Tab Card Rendering ---
+
+    // 하이라이트 카드 렌더링 함수
+    function renderHighlightsCard() {
+        const card = document.getElementById('sv-card-highlights');
+        const titleEl = document.getElementById('sv-card-highlights-title');
+        const contentEl = document.getElementById('sv-card-highlights-content');
+        const dotsEl = document.getElementById('sv-card-highlights-dots');
+
+        if (!card || !titleEl || !contentEl || !dotsEl) return;
+
+        const icon = '';
+        const title = translate('svcard_title_highlights');
+        titleEl.innerHTML = `${icon} ${title}`;
+
+        if (measurements.length < 2) {
+            contentEl.innerHTML = `<div class="carousel-item"><p class="placeholder">${translate('svcard_no_data_for_highlights')}</p></div>`;
+            dotsEl.innerHTML = '';
+            return;
+        }
+
+        const latest = measurements[measurements.length - 1];
+        const previous = measurements[measurements.length - 2];
+        const allChanges = [];
+
+        comparisonKeys.forEach(key => {
+            const latestValue = parseFloat(latest[key]);
+            const prevValue = parseFloat(previous[key]);
+
+            if (!isNaN(latestValue) && !isNaN(prevValue) && prevValue !== 0) {
+                const change = latestValue - prevValue;
+                const percentageChange = Math.abs((change / prevValue) * 100);
+                if (percentageChange > 0.1) { // 0.1% 이상 변화만 의미있는 것으로 간주
+                    allChanges.push({
+                        key: key,
+                        percentageChange: percentageChange,
+                        value: latestValue,
+                        diff: change
+                    });
+                }
+            }
+        });
+
+
+
+        // 변화율이 가장 큰 순서대로 정렬하고, 상위 3개만 선택
+        allChanges.sort((a, b) => b.percentageChange - a.percentageChange);
+        const topChanges = allChanges.slice(0, 3);
+
+        if (topChanges.length === 0) {
+            contentEl.innerHTML = `<div class="carousel-item"><p class="placeholder">${translate('svcard_no_major_changes')}</p></div>`; // 수정
+            dotsEl.innerHTML = '';
+            return;
+        }
+
+        // 캐러셀 아이템과 점(dot) 생성
+        contentEl.innerHTML = topChanges.map(item => {
+            const changeText = item.diff > 0 ? `+${item.diff.toFixed(1)}` : `${item.diff.toFixed(1)}`;
+            const changeClass = item.diff > 0 ? 'positive-change' : 'negative-change';
+            return `
+        <div class="carousel-item">
+            <p style="font-size: 1.1em; font-weight: 500;">${translate(item.key)}</p>
+            <p style="font-size: 2.2em; font-weight: 700; color: var(--text-main); margin: 5px 0;">${formatValue(item.value, item.key)}</p>
+            <p class="${changeClass}" style="font-weight: 600;">${translate('svcard_change_vs_last_week')} ${changeText}</p>
+        </div>`;
+        }).join('');
+
+        dotsEl.innerHTML = topChanges.map((_, index) => `<div class="carousel-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></div>`).join('');
+
+        // 스크롤 이벤트 리스너 추가 (이벤트 중복 방지)
+        contentEl.removeEventListener('scroll', handleCarouselScroll); // 기존 리스너 제거
+        contentEl.addEventListener('scroll', handleCarouselScroll); // 새 리스너 추가
+    }
+
+    function renderHormoneReport() {
+        const modalTitleEl = document.getElementById('hormone-modal-title');
+        if (modalTitleEl) modalTitleEl.textContent = translate('hormoneModalTitle');
+
+        const analysisEl = document.getElementById('hormone-analysis-text');
+        if (!analysisEl) return;
+
+        const analytics = calculateAdvancedHormoneAnalytics();
+        let analysisHTML = '';
+
+        if (!analytics) {
+            analysisHTML = `<h4 class="table-title">${translate('hormoneAnalysisTitle')}</h4><p class="placeholder">${translate('notEnoughData')}</p>`;
+        } else {
+            const formatChange = (val) => {
+                if (val === null || val === undefined || isNaN(val)) return translate('notEnoughData');
+                const fixedVal = val.toFixed(1);
+                return val >= 0 ? `+${fixedVal}` : fixedVal;
+            };
+
+            // --- 섹션 1: 수치 변화량 분석 ---
+            analysisHTML += `<h4 class="table-title">${translate('hormoneAnalysisTitleChange')}</h4><br>
+<div class="sv-grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="sv-card">
+        <h3>${translate('estrogenLevel').split('(')[0]}</h3>
+        <p class="analysis-card-subtitle">${translate('svcard_label_current', { value: formatValue(analytics.estrogenLevel.current, 'estrogenLevel') })}</p>
+        <div class="analysis-card-content">
+            <div class="analysis-item"><span class="analysis-label">${translate('weeklyChange')}</span><span class="analysis-value">${formatChange(analytics.estrogenLevel.weeklyChange)}</span></div>
+            <div class="analysis-item"><span class="analysis-label">${translate('monthlyAvgChange')}</span><span class="analysis-value">${formatChange(analytics.estrogenLevel.monthlyAvgChange)}</span></div>
+            <div class="analysis-item"><span class="analysis-label">${translate('totalChangeWithInitial', { value: formatValue(analytics.estrogenLevel.initial, 'estrogenLevel') })}</span><span class="analysis-value">${formatChange(analytics.estrogenLevel.totalChange)}</span></div>
+            <div class="analysis-item"><span class="analysis-label">${translate('dailyTSuppression')}</span><span class="analysis-value">${analytics.testosteroneLevel.dailyChange ? formatChange(analytics.testosteroneLevel.dailyChange) : '-'}</span></div>
+        </div>
+    </div>
+    <div class="sv-card">
+        <h3>${translate('testosteroneLevel').split('(')[0]}</h3>
+        <p class="analysis-card-subtitle">${translate('svcard_label_current', { value: formatValue(analytics.testosteroneLevel.current, 'testosteroneLevel') })}</p>
+        <div class="analysis-card-content">
+            <div class="analysis-item"><span class="analysis-label">${translate('weeklyChange')}</span><span class="analysis-value">${formatChange(analytics.testosteroneLevel.weeklyChange)}</span></div>
+            <div class="analysis-item"><span class="analysis-label">${translate('monthlyAvgChange')}</span><span class="analysis-value">${formatChange(analytics.testosteroneLevel.monthlyAvgChange)}</span></div>
+            <div class="analysis-item"><span class="analysis-label">${translate('totalChangeWithInitial', { value: formatValue(analytics.testosteroneLevel.initial, 'testosteroneLevel') })}</span><span class="analysis-value">${formatChange(analytics.testosteroneLevel.totalChange)}</span></div>
+            <div class="analysis-item"><span class="analysis-label">${translate('dailyTSuppression')}</span><span class="analysis-value">${analytics.testosteroneLevel.dailyChange ? formatChange(analytics.testosteroneLevel.dailyChange) : '-'}</span></div>
+        </div>
+    </div>
+</div>`;
+
+            // --- 섹션 2: 약물 영향력 분석 (수정된 로직 적용) ---
+            const allInfluenceDrugs = Object.keys(analytics.influence);
+            if (allInfluenceDrugs.length > 0) {
+                const drugRoles = { estradiol: { estrogen: 1, testosterone: 0 }, antiAndrogen: { estrogen: 0, testosterone: -1 }, testosterone: { estrogen: 0, testosterone: 1 }, antiEstrogen: { estrogen: -1, testosterone: 0 } };
+                const otherDrugs = [...new Set(measurements.map(m => m.medicationOtherName).filter(Boolean))];
+
+                const usedDrugs = new Set();
+                const allPossibleDrugs = [...new Set([...Object.keys(drugRoles), ...otherDrugs])];
+                measurements.forEach(m => {
+                    allPossibleDrugs.forEach(drug => {
+                        const dose = parseFloat(m[drug] || (m.medicationOtherName === drug ? m.medicationOtherDose : 0)) || 0;
+                        if (dose > 0) usedDrugs.add(drug);
+                    });
+                });
+
+                const influenceEntries = Object.entries(analytics.influence).filter(([drug, effects]) =>
+                    usedDrugs.has(drug) && (effects.estrogen.toFixed(2) != '0.00' || effects.testosterone.toFixed(2) != '0.00')
+                );
+
+                if (influenceEntries.length > 0) {
+                    // <<< 안내 문구 추가
+                    analysisHTML += `<h4 class="table-title">${translate('hormoneAnalysisTitleInfluence')}</h4><br>
+                                     <p class="description" style="text-align: center; margin-top: -10px; margin-bottom: 30px;">${translate('influenceAnalysisDesc')}</p>
+                                     <div class="sv-grid drug-influence-grid">`; // <<< drug-influence-grid 클래스 추가
+                    // >>> 수정 완료
+
+                    analysisHTML += influenceEntries.map(([drug, effects]) => `
+                     <div class="sv-card">
+                         <h3>${translate(drug) || drug}</h3>
+                         <div class="analysis-card-content">
+                             <div class="analysis-item"><span class="analysis-label">E₂ ${translate('drugInfluence')}</span><span class="analysis-value ${effects.estrogen >= 0 ? 'positive-change' : 'negative-change'}">${effects.estrogen.toFixed(2)}</span></div>
+                             <div class="analysis-item"><span class="analysis-label">T ${translate('drugInfluence')}</span><span class="analysis-value ${effects.testosterone >= 0 ? 'positive-change' : 'negative-change'}">${effects.testosterone.toFixed(2)}</span></div>
+                         </div>
+                     </div>`).join('');
+
+                    analysisHTML += `</div>`; // div 닫기
+                }
+            }
+
+            // --- 섹션 3: 미래 예측 ---
+            analysisHTML += `<h4 class="table-title">${translate('hormoneAnalysisTitlePrediction')}</h4><br>
+        <div class="sv-grid" style="grid-template-columns: 1fr 1fr;">
+             <div class="sv-card">
+                <h3>${translate('estrogenLevel').split('(')[0]}</h3>
+                <div class="analysis-card-content">
+                    <div class="analysis-item"><span class="analysis-label">${translate('predictedNextWeek')}</span><span class="analysis-value">${analytics.estrogenLevel.predictedNext ? analytics.estrogenLevel.predictedNext.toFixed(1) : '-'}</span></div>
+                    <div class="analysis-item"><span class="analysis-label">${translate('daysToTarget')} ${targets.estrogenLevel ? translate('targetLabelShort', { value: targets.estrogenLevel }) : ''}</span><span class="analysis-value">${analytics.estrogenLevel.daysToTarget ? translate('daysUnit', { days: analytics.estrogenLevel.daysToTarget }) : '-'}</span></div>
+                </div>
+            </div>
+            <div class="sv-card">
+                <h3>${translate('testosteroneLevel').split('(')[0]}</h3>
+                 <div class="analysis-card-content">
+                    <div class="analysis-item"><span class="analysis-label">${translate('predictedNextWeek')}</span><span class="analysis-value">${analytics.testosteroneLevel.predictedNext ? analytics.testosteroneLevel.predictedNext.toFixed(1) : '-'}</span></div>
+                    <div class="analysis-item"><span class="analysis-label">${translate('daysToTarget')} ${targets.testosteroneLevel ? translate('targetLabelShort', { value: targets.testosteroneLevel }) : ''}</span><span class="analysis-value">${analytics.testosteroneLevel.daysToTarget ? translate('daysUnit', { days: analytics.testosteroneLevel.daysToTarget }) : '-'}</span></div>
+                </div>
+            </div>
+        </div>`;
+        }
+        analysisEl.innerHTML = analysisHTML;
+
+        // --- 이하 그래프 렌더링 로직 ---
+        const medicationCtx = document.getElementById('medication-chart')?.getContext('2d');
+        const hormoneCtx = document.getElementById('hormone-chart')?.getContext('2d');
+        const selectedDataContainer = document.getElementById('selected-week-data-container');
+        const selectedDataTitle = document.getElementById('selected-week-data-title');
+        const selectedDataContent = document.getElementById('selected-week-data-content');
+        const hormonePlaceholderEl = document.getElementById('hormone-data-placeholder');
+
+        if (!medicationCtx || !hormoneCtx || !selectedDataContainer || !hormonePlaceholderEl) return;
+
+        if (medicationChartInstance) medicationChartInstance.destroy();
+        if (hormoneChartInstance) hormoneChartInstance.destroy();
+
+        selectedDataContainer.style.display = 'block';
+        selectedDataTitle.innerHTML = '';
+        selectedDataContent.innerHTML = '';
+        selectedDataContent.style.display = 'none';
+        hormonePlaceholderEl.style.display = 'block';
+        hormonePlaceholderEl.textContent = translate('graphClickPrompt');
+
+        const labels = measurements.map(m => `${m.week}${translate('week')}`);
+        const medicationKeys = currentMode === 'mtf' ? medicationKeys_MtF : medicationKeys_FtM;
+        const medicationColors = ['#ff8fcd', '#ff60a8', '#ff5577'];
+        const medicationDatasets = medicationKeys.map((key, index) => ({
+            label: translate(key).split('(')[0].trim(), data: measurements.map(m => m[key] || null), borderColor: medicationColors[index], backgroundColor: medicationColors[index] + '33', tension: 0.1, borderWidth: 2, pointRadius: 4, pointHoverRadius: 6
+        }));
+
+        const hormoneKeys = ['estrogenLevel', 'testosteroneLevel'];
+        const hormoneColors = ['#55f0d0', '#8888ff'];
+        const hormoneDatasets = hormoneKeys.map((key, index) => ({
+            label: translate(key).split('(')[0].trim(), data: measurements.map(m => m[key] ? parseFloat(m[key]) : NaN), borderColor: hormoneColors[index], backgroundColor: hormoneColors[index] + '33', tension: 0.1, borderWidth: 2, spanGaps: true, pointRadius: 4, pointHoverRadius: 6
+        }));
+
+        const onChartClick = (event, chartInstance) => {
+            const points = chartInstance.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
+            if (points.length) {
+                const firstPoint = points[0];
+                const weekIndex = firstPoint.index;
+                const weekData = measurements[weekIndex];
+                if (weekData) {
+                    selectedDataTitle.textContent = translate('selectedWeekDataTitle', { week: weekData.week });
+                    let contentHTML = '';
+                    getFilteredDisplayKeys().forEach(key => {
+                        if (weekData[key] !== null && weekData[key] !== undefined && weekData[key] !== '') {
+                            contentHTML += `
+                <div class="data-item">
+                    <span class="data-item-label">${translate(key).split('(')[0].trim()}</span>
+                    <span class="data-item-value">${formatValue(weekData[key], key)}</span>
+                </div>`;
+                        }
+                    });
+                    selectedDataContent.innerHTML = contentHTML;
+                    selectedDataContent.style.display = 'grid';
+                    hormonePlaceholderEl.style.display = 'none';
+                }
+            }
+        };
+
+        const chartOptions = (chartInstanceProvider) => {
+            // <<< 이 부분을 추가하여 현재 모드를 확인하고 색상을 결정합니다.
+            const isLightMode = document.body.classList.contains('light-mode');
+            const tickColor = isLightMode ? '#5c5c8a' : getCssVar('--text-dim2'); // 라이트 모드일 때 사용할 진한 폰트 색상
+            const gridColor = isLightMode ? 'rgba(200, 200, 235, 0.5)' : getCssVar('--glass-border'); // 라이트 모드일 때 사용할 연한 그리드 색상
+
+            return {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { ticks: { color: tickColor }, grid: { color: gridColor }, border: { color: gridColor } },
+                    y: { ticks: { color: tickColor }, grid: { color: gridColor }, border: { color: gridColor } }
+                },
+                plugins: { legend: { display: false } },
+                onClick: (event) => onChartClick(event, chartInstanceProvider())
+            }
+        };
+
+        medicationChartInstance = new Chart(medicationCtx, { type: 'line', data: { labels, datasets: medicationDatasets }, options: chartOptions(() => medicationChartInstance) });
+        hormoneChartInstance = new Chart(hormoneCtx, { type: 'line', data: { labels, datasets: hormoneDatasets }, options: chartOptions(() => hormoneChartInstance) });
+
+        const medicationLegendEl = document.getElementById('medication-legend-controls');
+        const hormoneLegendEl = document.getElementById('hormone-legend-controls');
+        if (!medicationLegendEl || !hormoneLegendEl) return;
+
+        const createLegend = (chart, container) => {
+            container.innerHTML = chart.data.datasets.map((dataset, index) => {
+                const color = dataset.borderColor;
+                // <<< 아래 style 속성을 수정하여 배경색을 추가하고 폰트색을 흰색으로 고정합니다.
+                return `<button class="legend-button" data-chart="${chart.canvas.id}" data-dataset-index="${index}" style="background-color: ${color}; border-color: ${color}; color: white;">
+                    ${dataset.label}
+                </button>`;
+            }).join('');
+        };
+        createLegend(medicationChartInstance, medicationLegendEl);
+        createLegend(hormoneChartInstance, hormoneLegendEl);
+    }
+
+    // 캐러셀 스크롤 이벤트 핸들러 (유틸리티 함수 섹션에 추가해도 좋습니다)
+    function handleCarouselScroll(event) {
+        const contentEl = event.target;
+        const dots = contentEl.closest('.carousel-container').querySelectorAll('.carousel-dot');
+        if (!dots.length) return;
+
+        const itemWidth = contentEl.querySelector('.carousel-item').offsetWidth;
+        const scrollLeft = contentEl.scrollLeft;
+        const currentIndex = Math.round(scrollLeft / itemWidth);
+
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === currentIndex);
+        });
+    }
+
+    // 가이드 카드 렌더링 함수
+    function renderGuideCard() {
+        if (!svCardGuide) return;
+
+        let message = translate('svcard_guide_default');
+        let icon = '💬';
+        let title = translate('svcard_title_weekly_guide');
+        svCardGuide.className = 'sv-card sv-card-widget'; // 클래스 초기화
+
+        // 모든 경우에 기본 이미지 클래스를 먼저 추가합니다.
+        svCardGuide.classList.add('sv-card-with-image');
+
+        // 데이터가 충분할 때만 점수를 계산하고, 그렇지 않으면 기본 상태를 유지합니다.
+        if (measurements.length >= 4 && Object.keys(targets).length > 0) {
+            const lastFour = measurements.slice(-4);
+            let progressScores = [];
+
+            // 최근 3주간의 변화를 계산
+            for (let i = 1; i < lastFour.length; i++) {
+                const current = lastFour[i];
+                const prev = lastFour[i - 1];
+                let weeklyProgress = 0;
+                let validTargetsInWeek = 0;
+
+                Object.keys(targets).forEach(key => {
+                    const targetValue = parseFloat(targets[key]);
+                    const prevValue = parseFloat(prev[key]);
+                    const currentValue = parseFloat(current[key]);
+
+                    if (![targetValue, prevValue, currentValue].some(isNaN)) {
+                        const direction = Math.sign(targetValue - prevValue);
+                        if (direction !== 0) {
+                            if (Math.sign(currentValue - prevValue) === direction) {
+                                weeklyProgress += 1;
+                            } else if (Math.sign(currentValue - prevValue) === -direction) {
+                                weeklyProgress -= 1;
+                            }
+                        }
+                        validTargetsInWeek++;
+                    }
+                });
+
+                if (validTargetsInWeek > 0) {
+                    progressScores.push(weeklyProgress / validTargetsInWeek);
+                } else {
+                    progressScores.push(0);
+                }
+            }
+
+            const totalScore = progressScores.reduce((a, b) => a + b, 0);
+
+            if (totalScore >= 2) {
+                message = translate('svcard_guide_positive_long');
+                icon = '🎉';
+                svCardGuide.classList.add('sv-card--countdown-green', 'sv-card-image-good');
+            } else if (totalScore > 0) {
+                message = translate('svcard_guide_positive_short');
+                icon = '👍';
+                svCardGuide.classList.add('sv-card--countdown-yellow', 'sv-card-image-normal');
+            } else if (totalScore <= -2) {
+                message = translate('svcard_guide_negative_long');
+                icon = '😥';
+                svCardGuide.classList.add('sv-card--countdown-red', 'sv-card-image-bad');
+            } else if (totalScore < 0) {
+                message = translate('svcard_guide_negative_short');
+                icon = '🤔';
+                svCardGuide.classList.add('sv-card--dday', 'sv-card-image-bad');
+            } else {
+                // 점수가 0이거나 계산 불가일 때 (기본 메시지 유지)
+                svCardGuide.classList.add('sv-card-image-nothing');
+            }
+        } else {
+            // 데이터가 부족한 경우
+            svCardGuide.classList.add('sv-card-image-nothing');
+        }
+
+        svCardGuide.innerHTML = `<h3>${icon} ${title}</h3><div class="sv-card-content"><p>${message}</p></div>`;
+    }
+
+    // 목표 달성도 카드 렌더링 함수
+    function renderTargetsCard() {
+        if (!svCardTargets) return;
+
+        let content = `<h3>${translate('svcard_title_targets')}</h3>`;
+        const targetKeys = Object.keys(targets);
+
+        if (measurements.length < 1 || targetKeys.length === 0) {
+            content += `<div class="sv-card-content"><p>${translate('svcard_no_targets_set')}</p></div>`;
+            svCardTargets.innerHTML = content;
+            return;
+        }
+
+        const initial = measurements[0];
+        const latest = measurements[measurements.length - 1];
+        let totalProgress = 0;
+        let validTargets = 0;
+
+        targetKeys.forEach(key => {
+            const targetValue = parseFloat(targets[key]);
+            const initialValue = parseFloat(initial[key]);
+            const latestValue = parseFloat(latest[key]);
+
+            if (![targetValue, initialValue, latestValue].some(isNaN)) {
+                const totalChangeNeeded = targetValue - initialValue;
+                const currentChange = latestValue - initialValue;
+
+                let progress = 0;
+                if (Math.abs(totalChangeNeeded) > 0.01) {
+                    progress = (currentChange / totalChangeNeeded) * 100;
+                } else if (Math.abs(currentChange) < 0.01) {
+                    progress = 100;
+                }
+                totalProgress += Math.max(0, Math.min(progress, 100)); // 0~100%로 제한
+                validTargets++;
+            }
+        });
+
+        const overallProgress = validTargets > 0 ? Math.round(totalProgress / validTargets) : 0;
+
+        const circumference = 50 * 2 * Math.PI; // 반지름 50
+        const offset = circumference - (overallProgress / 100) * circumference;
+
+        content += `
+        <div class="sv-card-content">
+            <div class="progress-circle-container">
+                <svg height="120" width="120" viewBox="0 0 120 120">
+                    <circle class="progress-circle-bg" cx="60" cy="60" r="50"></circle>
+                    <circle class="progress-circle-bar" cx="60" cy="60" r="50"
+                        stroke-dasharray="${circumference}"
+                        stroke-dashoffset="${offset}"
+                    ></circle>
+                </svg>
+                <div class="progress-circle-text">${overallProgress}%</div>
+            </div>
+            <p>${translate('svcard_overall_progress')}</p>
+        </div>
+    `;
+
+        svCardTargets.innerHTML = content;
+    }
+
+    // 호르몬 카드 렌더링 함수
+    function renderHormonesCard() {
+        if (!svCardHormones) return;
+
+        svCardHormones.classList.add('sv-card--clickable');
+        // ▼▼▼▼▼ 여기가 수정된 부분입니다 ▼▼▼▼▼
+        const analytics = calculateAdvancedHormoneAnalytics();
+        // ▲▲▲▲▲ 여기가 수정된 부분입니다 ▲▲▲▲▲
+        let content = `<h3>${translate('svcard_title_hormones')}</h3><div class="sv-card-content" style="align-items: stretch; text-align: left; gap: 20px;">`;
+
+        if (measurements.length < 1) {
+            content += `<p class="placeholder" style="text-align: center;">${translate('svcard_no_hormone_data')}</p>`;
+        } else {
+            const initial = measurements[0];
+            const latest = measurements[measurements.length - 1];
+            const previous = measurements.length > 1 ? measurements[measurements.length - 2] : null;
+
+            const hormonesToDisplay = [
+                { key: 'estrogenLevel', label: translate('estrogenLevel').split('(')[0] },
+                { key: 'testosteroneLevel', label: translate('testosteroneLevel').split('(')[0] }
+            ];
+
+            hormonesToDisplay.forEach(h => {
+                const barData = {
+                    key: h.key,
+                    initialValue: initial ? parseFloat(initial[h.key]) : null,
+                    prevValue: previous ? parseFloat(previous[h.key]) : null,
+                    currentValue: latest ? parseFloat(latest[h.key]) : null,
+                    targetValue: targets[h.key] ? parseFloat(targets[h.key]) : null,
+                };
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = `<table><tr>${createProgressBarHTML(barData)}</tr></table>`;
+                const barHTML = tempDiv.querySelector('.progress-bar-cell')?.innerHTML || '<p class="placeholder" style="font-size: 0.8em; text-align: center;">-</p>';
+
+                let weeklyChangeHTML = '';
+
+                // analytics가 null이 아니고, 해당 호르몬 키가 있는지 확인
+                if (analytics && analytics[h.key] && analytics[h.key].weeklyChange !== null) {
+                    const change = analytics[h.key].weeklyChange;
+                    const changeClass = change >= 0 ? 'positive-change' : 'negative-change';
+                    const changeText = change >= 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
+                    weeklyChangeHTML = `
+                        <div class="hormone-weekly-change">
+                            <span class="change-label">${translate('svcard_hormone_weekly_change')}</span>
+                            <span class="change-value ${changeClass}">${changeText}</span>
+                        </div>
+                    `;
+                } else {
+                    weeklyChangeHTML = `
+                        <div class="hormone-weekly-change">
+                            <span class="change-label">${translate('svcard_hormone_weekly_change')}</span>
+                            <span class="change-value">-</span>
+                        </div>
+                    `;
+                }
+
+                content += `
+                    <div class="hormone-item">
+                        <label style="font-weight: 600; font-size: 0.9em; color: var(--text-main); margin-bottom: 5px; display: block;">${h.label}</label>
+                        <div class="hormone-item-row">
+                            <div class="hormone-progress-bar-container">
+                                ${barHTML}
+                            </div>
+                            ${weeklyChangeHTML}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        content += '</div>';
+        svCardHormones.innerHTML = content;
+    }
+
+
+
+    // Keeps 카드 렌더링 함수
+    function renderKeepsCard() {
+        const card = document.getElementById('sv-card-keeps');
+        card.classList.add('sv-card-with-image', 'sv-card-image-keeps');
+        const titleEl = document.getElementById('sv-card-keeps-title');
+        const contentEl = document.getElementById('sv-card-keeps-content');
+        const dotsEl = document.getElementById('sv-card-keeps-dots');
+
+        if (!card || !titleEl || !contentEl || !dotsEl) return;
+
+        const icon = '';
+        const title = translate('svcard_title_keeps');
+        titleEl.innerHTML = `${icon} ${title}`;
+
+        const recentMemos = measurements
+            .filter(m => m.memo && m.memo.trim() !== '')
+            .slice(-3) // 최근 3개만 가져오기
+            .reverse(); // 최신순으로
+
+        if (recentMemos.length === 0) {
+            contentEl.innerHTML = `<div class="carousel-item"><p class="placeholder">${translate('svcard_no_keeps_yet')}</p></div>`;
+            dotsEl.innerHTML = '';
+            return;
+        }
+
+        contentEl.innerHTML = recentMemos.map(item => `
+            <div class="carousel-item keeps-preview">
+                <div class="keeps-week">${translate('week')} ${item.week}</div>
+                <p class="keeps-text-preview">${escapeHTML(item.memo)}</p>
+            </div>
+        `).join('');
+
+        dotsEl.innerHTML = recentMemos.map((_, index) => `<div class="carousel-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></div>`).join('');
+
+        // 스크롤 이벤트 리스너 추가 (중복 방지)
+        contentEl.removeEventListener('scroll', handleCarouselScroll);
+        contentEl.addEventListener('scroll', handleCarouselScroll);
+    }
+
+    // 모든 SV 카드를 한번에 렌더링하는 마스터 함수
+    function renderSvTab() {
+        if (!svGrid) return; // SV 탭이 아니면 실행 안 함
+
+        console.log("DEBUG: Rendering SV Tab Cards...");
+        renderShortcutCard();
+        renderHighlightsCard();
+        renderGuideCard();
+        renderTargetsCard();
+        renderHormonesCard();
+        renderKeepsCard();
+    }
+
+    function renderShortcutCard() {
+        if (!svCardShortcut) return;
+
+        svCardShortcut.className = 'sv-card sv-card--clickable'; // 기본 클래스 + 클릭 가능 클래스
+        svCardShortcut.classList.add('sv-card-with-image', 'sv-card-image-write');
+        let contentHTML = '';
+
+        if (measurements.length === 0) {
+            svCardShortcut.classList.add('sv-card--new');
+            contentHTML = translate('svcard_shortcut_new');
+        } else {
+            const lastMeasurement = measurements[measurements.length - 1];
+            const lastTimestamp = lastMeasurement.timestamp;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const nextMeasurementDate = new Date(lastTimestamp);
+            nextMeasurementDate.setDate(nextMeasurementDate.getDate() + 7);
+
+            const diffTime = nextMeasurementDate - today;
+            const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (daysUntil <= 0) {
+                svCardShortcut.classList.add('sv-card--dday');
+                if (daysUntil === 0) {
+                    contentHTML = translate('svcard_shortcut_dday');
+                } else {
+                    contentHTML = translate('svcard_shortcut_overdue', { days: Math.abs(daysUntil) });
+                }
+            } else {
+                if (daysUntil <= 1) svCardShortcut.classList.add('sv-card--countdown-red');
+                else if (daysUntil <= 3) svCardShortcut.classList.add('sv-card--countdown-yellow');
+                else svCardShortcut.classList.add('sv-card--countdown-green');
+                contentHTML = translate('svcard_shortcut_countdown', { days: daysUntil });
+            }
+        }
+
+        svCardShortcut.innerHTML = `<div class="shortcut-content">${contentHTML}</div>`;
+    }
+
+
     // ** FINAL FIX ** Function to render history records with a dedicated scroll wrapper
     function renderHistoryCards() {
         if (!historyCardsContainer) return;
@@ -829,14 +2166,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+
+
         let html = '';
         const reversedMeasurements = [...measurements].reverse();
         reversedMeasurements.forEach((m, revIndex) => {
             const index = measurements.length - 1 - revIndex;
-            const displayKeys = getFilteredDisplayKeys().filter(key =>
+
+            let displayKeys = getFilteredDisplayKeys().filter(key =>
                 !['week', 'date', 'timestamp'].includes(key) && (m[key] !== null && m[key] !== undefined && m[key] !== '')
             );
 
+            if (activeHistoryFilters.length > 0) {
+                displayKeys = displayKeys.filter(key => activeHistoryFilters.includes(key));
+            }
             const labelsRow = displayKeys.map(key => `<th class="label">${translate(key).split('(')[0].trim()}</th>`).join('');
             const valuesRow = displayKeys.map(key => `<td class="value">${formatValue(m[key], key)}</td>`).join('');
 
@@ -866,6 +2209,181 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         historyCardsContainer.innerHTML = html;
     }
+
+    // '마이' 탭의 기록 뷰를 렌더링하는 마스터 함수
+    function renderMyHistoryView() {
+        const isMobileView = window.innerWidth < 768;
+        renderMyHistoryFilters(); // 필터는 항상 렌더링
+
+        if (isMobileView) {
+            if (myHistoryCardsContainer) myHistoryCardsContainer.style.display = 'grid';
+            if (myHistoryTableContainer) myHistoryTableContainer.style.display = 'none';
+            renderMyHistoryCards();
+        } else {
+            if (myHistoryCardsContainer) myHistoryCardsContainer.style.display = 'none';
+            if (myHistoryTableContainer) myHistoryTableContainer.style.display = 'block';
+            renderMyHistoryTable();
+        }
+    }
+
+    // '마이' 탭의 필터 버튼 렌더링
+    function renderMyHistoryFilters() {
+        if (!myFilterControls) return;
+        // 로직은 기존 renderHistoryFilters와 동일, 대상만 다름
+        const filterableKeys = chartSelectableKeys.filter(key => {
+            if (currentMode === 'ftm') return !medicationKeys_MtF.includes(key);
+            return !medicationKeys_FtM.includes(key);
+        });
+        let buttonsHTML = `<button class="filter-button ${activeHistoryFilters.length === 0 ? 'active' : ''}" data-key="all">${translate('selectAll')}</button>`;
+        filterableKeys.forEach(key => {
+            const label = translate(key).split('(')[0].trim();
+            const isActive = activeHistoryFilters.includes(key);
+            buttonsHTML += `<button class="filter-button ${isActive ? 'active' : ''}" data-key="${key}">${label}</button>`;
+        });
+        myFilterControls.innerHTML = buttonsHTML;
+    }
+
+
+    // --- My Tab History Rendering (Refactored) ---
+
+    // '마이' 탭의 기록 뷰를 렌더링하는 마스터 함수
+    function renderMyHistoryView() {
+        // 필터링된 데이터와 헤더를 한 번만 계산
+        const { data, headers } = getFilteredHistoryData();
+
+        renderMyHistoryFilters(); // 필터 UI는 항상 렌더링
+
+        // 화면 크기에 따라 카드 또는 테이블 뷰를 렌더링
+        const isMobileView = window.innerWidth < 768;
+        if (isMobileView) {
+            if (myHistoryCardsContainer) myHistoryCardsContainer.style.display = 'grid';
+            if (myHistoryTableContainer) myHistoryTableContainer.style.display = 'none';
+            renderMyHistoryCards(data); // 계산된 데이터를 인자로 전달
+        } else {
+            if (myHistoryCardsContainer) myHistoryCardsContainer.style.display = 'none';
+            if (myHistoryTableContainer) myHistoryTableContainer.style.display = 'block';
+            renderMyHistoryTable(data, headers); // 계산된 데이터와 헤더를 인자로 전달
+        }
+    }
+
+    // 표시할 기록 데이터를 계산하고 필터링하는 함수
+    function getFilteredHistoryData() {
+        if (!measurements || measurements.length === 0) {
+            return { data: [], headers: [] };
+        }
+
+        const currentDisplayKeys = getFilteredDisplayKeys();
+        let headers = currentDisplayKeys.filter(k => k !== 'timestamp');
+
+        // 헤더 필터링 (테이블 뷰용)
+        if (activeHistoryFilters.length > 0) {
+            headers = currentDisplayKeys.filter(key =>
+                ['week', 'date', 'memo'].includes(key) || activeHistoryFilters.includes(key)
+            );
+        }
+
+        // 데이터 필터링 (카드/테이블 뷰 공통)
+        let filteredData = [...measurements];
+        if (activeHistoryFilters.length > 0) {
+            filteredData = measurements.filter(m => {
+                // 선택된 모든 필터에 대해 데이터가 존재하는 기록만 남김
+                return activeHistoryFilters.every(key =>
+                    m[key] !== null && m[key] !== undefined && m[key] !== ''
+                );
+            });
+        }
+
+        const data = filteredData.reverse(); // 최신순 정렬
+
+        return { data, headers };
+    }
+
+    // '마이' 탭의 카드 뷰 렌더링 (모바일용)
+    // '마이' 탭의 카드 뷰 렌더링 (모바일용)
+    function renderMyHistoryCards(data) {
+        if (!myHistoryCardsContainer) return;
+        if (data.length === 0) {
+            clearElement(myHistoryCardsContainer, "noDataYet");
+            return;
+        }
+
+        let html = '';
+        data.forEach(m => {
+            const index = m.week;
+
+            let displayKeys = getFilteredDisplayKeys().filter(key =>
+                !['week', 'date', 'timestamp', 'memo'].includes(key) && (m[key] !== null && m[key] !== undefined && m[key] !== '')
+            );
+            if (activeHistoryFilters.length > 0) {
+                displayKeys = displayKeys.filter(key => activeHistoryFilters.includes(key));
+            }
+
+            const labelsRow = displayKeys.map(key => `<th class="label">${translate(key).split('(')[0].trim()}</th>`).join('');
+            const valuesRow = displayKeys.map(key => `<td class="value">${formatValue(m[key], key)}</td>`).join('');
+
+            html += `
+        <div class="history-card glass-card">
+            <div class="history-card-header">
+                <h4>${translate('week')} ${m.week}</h4>
+                <span class="date-label">${formatTimestamp(m.timestamp, true)}</span>
+            </div>
+            ${displayKeys.length > 0 ? `
+            <div class="history-card-body">
+                <div class="inner-table-wrapper">
+                    <table class="inner-history-table">
+                        <thead><tr>${labelsRow}</tr></thead>
+                        <tbody><tr>${valuesRow}</tr></tbody>
+                    </table>
+                </div>
+            </div>` : ''}
+            ${m.memo ? `<p class="keeps-text">${escapeHTML(m.memo).replace(/\n/g, '<br>')}</p>` : ''}
+            <div class="button-group">
+                <button class="glass-button btn-edit" data-index="${index}">${translate('edit')}</button>
+                <button class="glass-button danger btn-delete" data-index="${index}">${translate('delete')}</button>
+            </div>
+        </div>`;
+        });
+        myHistoryCardsContainer.innerHTML = html;
+    }
+
+    // '마이' 탭의 테이블 뷰 렌더링 (데스크톱용)
+    function renderMyHistoryTable(data, headers) {
+        if (!myHistoryTableContainer) return;
+        if (data.length === 0) {
+            clearElement(myHistoryTableContainer, "noDataYet");
+            return;
+        }
+
+        let tableHTML = '<table><thead><tr>';
+        headers.forEach(key => {
+            if (key === 'timestamp') return;
+            const labelText = translate(key).split('(')[0].trim();
+            tableHTML += `<th>${labelText}</th>`;
+        });
+        tableHTML += `<th class="sticky-col">${translate('manageColumn')}</th></tr></thead><tbody>`;
+
+        data.forEach(m => {
+            const index = m.week;
+            tableHTML += '<tr>';
+            headers.forEach(key => {
+                if (key === 'timestamp') return;
+                let value = (key === 'date') ? formatTimestamp(m.timestamp, true) : formatValue(m[key], key);
+                if (key === 'memo' && value.length > 20) {
+                    value = value.substring(0, 20) + '...';
+                }
+                tableHTML += `<td>${value}</td>`;
+            });
+            tableHTML += `<td class="action-buttons sticky-col">
+                        <button class="glass-button btn-edit" data-index="${index}">${translate('edit')}</button>
+                        <button class="glass-button danger btn-delete" data-index="${index}">${translate('delete')}</button>
+                      </td></tr>`;
+        });
+
+        tableHTML += '</tbody></table>';
+        myHistoryTableContainer.innerHTML = tableHTML;
+    }
+
+
 
     function applyTheme() {
         let themeToApply = currentTheme;
@@ -908,7 +2426,9 @@ document.addEventListener('DOMContentLoaded', () => {
             mode: currentMode,
             theme: currentTheme, // *** 수정 4: 테마 설정 저장 ***
             initialSetupDone: isInitialSetupDone,
-            selectedMetrics: selectedMetrics
+            selectedMetrics: selectedMetrics,
+            notificationEnabled: notificationEnabled,
+            biologicalSex: biologicalSex
         };
         try {
             localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
@@ -929,6 +2449,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentTheme = settings.theme || 'system'; // *** 수정 4: 테마 설정 로드 ***
                 isInitialSetupDone = settings.initialSetupDone || false;
                 selectedMetrics = Array.isArray(settings.selectedMetrics) ? settings.selectedMetrics : ['weight'];
+                notificationEnabled = settings.notificationEnabled || false;
+                biologicalSex = settings.biologicalSex || 'male';
                 console.log("DEBUG: Settings loaded", settings);
             } else {
                 console.log("DEBUG: No settings found, using defaults.");
@@ -937,11 +2459,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentTheme = 'system'; // *** 수정 4: 기본 테마 설정 ***
                 isInitialSetupDone = false;
                 selectedMetrics = ['weight'];
+                notificationEnabled = false;
+                biologicalSex = 'male';
             }
             // Update UI elements after loading settings
             if (languageSelect) languageSelect.value = currentLanguage;
             if (modeSelect) modeSelect.value = currentMode;
             if (themeSelect) themeSelect.value = currentTheme; // *** 수정 4: 테마 드롭다운 업데이트 ***
+            if (notificationToggle) notificationToggle.checked = notificationEnabled;
+            if (sexSelect) sexSelect.value = biologicalSex;
         } catch (e) {
             console.error("Error loading settings:", e);
             showPopup('loadingError');
@@ -949,8 +2475,10 @@ document.addEventListener('DOMContentLoaded', () => {
             currentLanguage = 'ko';
             currentMode = 'mtf';
             currentTheme = 'system';
+            notificationEnabled = false;
             isInitialSetupDone = false;
             selectedMetrics = ['weight'];
+            biologicalSex = 'male';
         }
     }
 
@@ -986,6 +2514,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         m.timestamp = m.date ? new Date(m.date).getTime() : Date.now() - (measurements.length - 1 - index) * 86400000;
                         needsSave = true;
                     }
+                    if (m.memoLiked === undefined) { m.memoLiked = false; needsSave = true; }
                 });
                 notes.forEach(note => {
                     if (!note.id) { note.id = 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9); needsSave = true; }
@@ -1100,11 +2629,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleInitialSetupSave() {
-        if (!initialLanguageSelect || !initialModeSelect) {
+        if (!initialLanguageSelect || !initialModeSelect || !initialSexSelect) {
             console.error("Initial setup select elements missing during save."); return;
         }
         currentLanguage = initialLanguageSelect.value;
         currentMode = initialModeSelect.value;
+        biologicalSex = initialSexSelect.value;
         isInitialSetupDone = true;
         console.log("DEBUG: Initial setup saved.", { lang: currentLanguage, mode: currentMode });
 
@@ -1114,7 +2644,6 @@ document.addEventListener('DOMContentLoaded', () => {
         applyLanguageToUI(); // This triggers translateUI
         loadPrimaryDataFromStorage(); // Load data AFTER setup complete
         applyTheme(); // Apply theme AFTER settings are saved/loaded
-        setupTargetInputs();
         renderAll();
         showPopup('popupSettingsSaved');
 
@@ -1132,10 +2661,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.ftm-only').forEach(el => el.style.display = currentMode === 'ftm' ? '' : 'none');
 
         if (modeSelect) modeSelect.value = currentMode;
-        setupTargetInputs(true); // Update target inputs visibility/labels
 
         if (isInitialSetupDone) { // Avoid unnecessary renders during initial setup
-            renderHistoryTable();
             renderAllComparisonTables();
             renderChartSelector();
             renderChart();
@@ -1158,27 +2685,21 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = `<p class="placeholder-text">${translate(messageKey)}</p>`;
     }
 
-    function getCurrentWeekNumber() {
-        if (measurements.length === 0) return 0;
-        return measurements.length - 1; // 0-based index
-    }
-
-    function updateCurrentWeekDisplay() {
-        if (currentWeekSpan) {
-            currentWeekSpan.textContent = getCurrentWeekNumber();
-        }
-    }
 
     function updateFormTitle() {
         if (!formTitle) return;
         let week = 0;
         const editIndexVal = editIndexInput.value;
-        if (editIndexVal !== '' && !isNaN(editIndexVal)) {
+        if (editIndexVal !== '' && !isNaN(editIndexVal)) { // 수정 모드
             const index = parseInt(editIndexVal, 10);
-            if (index >= 0 && index < measurements.length && measurements[index].week !== undefined) {
-                week = measurements[index].week;
-            } else { week = getCurrentWeekNumber(); }
-        } else { week = measurements.length; }
+            // 수정하는 기록의 'week' 속성을 사용하고, 없다면 인덱스 자체를 폴백으로 사용
+            if (index >= 0 && index < measurements.length) {
+                week = measurements[index].week ?? index;
+            }
+        } else { // 새 기록 모드
+            // 새 기록의 주차는 현재 기록의 총 개수와 같음 (0부터 시작)
+            week = measurements.length;
+        }
         const titleKey = editIndexVal === '' ? 'formTitleNew' : 'formTitleEdit';
         formTitle.innerHTML = translate(titleKey, { week: week });
     }
@@ -1265,8 +2786,16 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             measurements.sort((a, b) => (a.week || 0) - (b.week || 0));
             const currentDisplayKeys = getFilteredDisplayKeys();
+            let filteredHeaderKeys = currentDisplayKeys;
+            if (activeHistoryFilters.length > 0) {
+                // '주차'와 '날짜'는 항상 표시하고, 선택된 필터 항목을 추가
+                filteredHeaderKeys = currentDisplayKeys.filter(key =>
+                    ['week', 'date', 'memo'].includes(key) || activeHistoryFilters.includes(key)
+                );
+            }
+
             let tableHTML = '<table><thead><tr>';
-            currentDisplayKeys.forEach(key => {
+            filteredHeaderKeys.forEach(key => {
                 if (key === 'timestamp') return;
                 const labelData = translate(key).match(/^(.*?) *(\((.*?)\))?$/);
                 const labelText = labelData ? labelData[1].trim() : translate(key);
@@ -1279,7 +2808,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const m = measurements[i];
                 const displayDate = formatTimestamp(m.timestamp || m.date, false);
                 tableHTML += '<tr>';
-                currentDisplayKeys.forEach(key => {
+                filteredHeaderKeys.forEach(key => {
                     if (key === 'timestamp') return;
                     let value = '-';
                     if (key === 'week') { value = m.week ?? i; }
@@ -1740,31 +3269,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 }))
             },
             options: {
-                // ... (나머지 옵션은 기존과 동일) ...
                 responsive: true, maintainAspectRatio: false,
                 scales: {
                     x: {
-                        type: 'linear', title: { display: true, text: translate('chartAxisLabel'), color: '#5e5ebf' },
+                        type: 'linear',
+                        title: {
+                            display: true,
+                            text: translate('chartAxisLabel'),
+                            // <<< 제목 색상도 동적으로 변경
+                            color: document.body.classList.contains('light-mode') ? '#5c5c8a' : getCssVar('--text-dim')
+                        },
                         ticks: {
                             stepSize: 1,
                             callback: function (value) { if (Number.isInteger(value) && value >= 0) { return value; } return null; },
-                            color: '#5e5ebf'
+                            // <<< 틱 색상도 동적으로 변경
+                            color: document.body.classList.contains('light-mode') ? '#5c5c8a' : getCssVar('--text-dim')
                         },
                         border: {
                             display: true,
-                            color: '#5e5ebf'
+                            // <<< 테두리 및 그리드 색상도 동적으로 변경
+                            color: document.body.classList.contains('light-mode') ? 'rgba(200, 200, 235, 0.5)' : getCssVar('--glass-border')
                         },
-                        grid: { display: true, color: '#5e5ebf' }
+                        grid: {
+                            display: true,
+                            color: document.body.classList.contains('light-mode') ? 'rgba(200, 200, 235, 0.5)' : getCssVar('--glass-border')
+                        }
                     },
                     y: {
                         beginAtZero: false, title: { display: false },
                         border: {
                             display: true,
-                            color: '#5e5ebf'
+                            color: document.body.classList.contains('light-mode') ? 'rgba(200, 200, 235, 0.5)' : getCssVar('--glass-border')
                         },
-
-                        grid: { color: '#5e5ebf' },
-                        ticks: { color: '#5e5ebf' }
+                        grid: {
+                            color: document.body.classList.contains('light-mode') ? 'rgba(200, 200, 235, 0.5)' : getCssVar('--glass-border')
+                        },
+                        ticks: {
+                            color: document.body.classList.contains('light-mode') ? '#5c5c8a' : getCssVar('--text-dim')
+                        }
                     }
                 },
                 plugins: {
@@ -1807,31 +3349,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const timeB = b.timestamp || b.createdAt || b.id || 0;
             return order === 'newest' ? timeB - timeA : timeA - timeB;
         });
-    }
-
-    function renderNotesList() {
-        if (!notesListContainer) return;
-        if (notes.length === 0) { clearElement(notesListContainer, "noNotesYet"); return; }
-        const sortedNotes = sortNotes(notes, currentNoteSortOrder);
-        let notesHTML = ''; // Was '<div class="notes-grid">'
-        sortedNotes.forEach(note => {
-            const title = note.title || translate('noteTitleUntitled');
-            const previewLength = 100;
-            const previewContent = note.content ? (note.content.length > previewLength ? note.content.substring(0, previewLength).replace(/\n/g, ' ') + '...' : note.content.replace(/\n/g, ' ')) : translate('notePreviewEmpty');
-            const createdStr = formatTimestamp(note.timestamp || note.createdAt || note.id, true);
-            notesHTML += `
-         <div class="note-card glass-card" data-note-id="${note.id}">
-                <h4>${escapeHTML(title)}</h4>
-                 <p class="note-timestamp">${translate('noteDateCreated')} ${createdStr}</p>
-                 <p class="note-content-preview">${escapeHTML(previewContent)}</p>
-                 <div class="note-actions">
-                    <button class="glass-button edit-note-button" data-id="${note.id}">${translate('edit')}</button>
-                    <button class="glass-button danger delete-note-button" data-id="${note.id}" data-title="${escapeHTML(title)}">${translate('delete')}</button>
-                </div>
-            </div>
-        `;
-        });
-        notesListContainer.innerHTML = notesHTML;
     }
 
     function escapeHTML(str) {
@@ -1907,8 +3424,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // *** 수정 1 확인: HTML의 name이 카멜케이스로 변경되었으므로, JS 키와 일치함 ***
         const collectedData = {}; // 폼에서 읽어온 데이터만 임시 저장
         [...baseNumericKeys, ...textKeys].forEach(key => { // Process all keys
-            let value = formData.get(key); // Get value using the camelCase key
-            const inputElement = form.querySelector(`[name="${key}"]`); // Find element by camelCase name
+            const formKey = (key === 'memo') ? 'record-keeps' : key;
+            let value = formData.get(formKey);
+            const inputElement = form.querySelector(`[name="${formKey}"]`);
 
             if (value !== null && value !== undefined) {
                 if (baseNumericKeys.includes(key) && value !== '') {
@@ -1957,6 +3475,7 @@ document.addEventListener('DOMContentLoaded', () => {
             measurements.push(fullMeasurementData);
             console.log("DEBUG: New measurement added with week", measurementData.week);
             showPopup('popupSaveSuccess');
+            activateTab('tab-sv');
 
             measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
             calculateAndAddWeekNumbers(); // Recalculate weeks after adding and sorting
@@ -1990,6 +3509,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const measurementToEdit = measurements[index];
             console.log("DEBUG: Editing measurement at index", index, measurementToEdit);
             // *** 수정 1 확인: HTML name과 JS key가 일치하므로 정상 작동 예상 ***
+
+            const memoTextarea = form.querySelector('[name="record-keeps"]');
+            if (memoTextarea) {
+                memoTextarea.value = measurementToEdit.memo || '';
+            }
+
             [...baseNumericKeys, ...textKeys, 'date'].forEach(key => { // Add date key
                 const input = form.querySelector(`[name="${key}"]`); // Find by camelCase name
                 if (input) {
@@ -2027,6 +3552,38 @@ document.addEventListener('DOMContentLoaded', () => {
         updateFormTitle();
         if (saveUpdateBtn) saveUpdateBtn.textContent = translate('saveRecord');
         if (cancelEditBtn) cancelEditBtn.style.display = 'none';
+        updatePlaceholders();
+    }
+
+    function updatePlaceholders() {
+        if (!form) return;
+
+        const lastMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
+
+        form.querySelectorAll('input[type="number"], input[type="text"], textarea').forEach(input => {
+            const key = input.name;
+            if (!key) return; // 이름 없는 input은 건너뛰기
+
+            let placeholderText = '';
+
+            // Keeps 통합 textarea는 별도 처리
+            if (key === 'record-keeps') {
+                placeholderText = translate('recordKeepsPlaceholder');
+                input.placeholder = placeholderText;
+                return;
+            }
+
+            const lastValue = lastMeasurement ? lastMeasurement[key] : null;
+
+            if (lastValue !== null && lastValue !== undefined && lastValue !== '') {
+                placeholderText = translate('placeholderPrevious', { value: formatValue(lastValue, key) });
+            } else {
+                // 기존 단위 placeholder 로직 (단순화 버전)
+                const unit = translate(key).match(/\((.*?)\)/)?.[1] || '';
+                placeholderText = unit;
+            }
+            input.placeholder = placeholderText;
+        });
     }
 
     // Save Targets
@@ -2063,63 +3620,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("DEBUG: Targets saved", targets);
         savePrimaryDataToStorage();
         showPopup('popupTargetSaveSuccess');
+        activateTab('tab-sv');
         renderAllComparisonTables();
     }
 
-    // Save/Update Note
-    function handleSaveNote() {
-        const title = noteTitleInput.value.trim();
-        const content = noteContentInput.value.trim();
-        const noteId = editNoteIdInput.value;
-        if (!content && !title) { showPopup('alertNoteContentMissing'); noteContentInput.focus(); return; }
-        if (noteId) {
-            const noteIndex = notes.findIndex(n => n.id === noteId);
-            if (noteIndex !== -1) {
-                notes[noteIndex].title = title; notes[noteIndex].content = content;
-                notes[noteIndex].timestamp = Date.now();
-                console.log("DEBUG: Note (Keeps) updated", notes[noteIndex]);
-                showPopup('popupNoteUpdateSuccess');
-            } else { console.error("Cannot find note to update:", noteId); showPopup('alertCannotFindNoteEdit'); handleCancelEditNote(); return; }
-        } else {
-            const newNote = {
-                id: 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
-                title: title, content: content, timestamp: Date.now()
-            };
-            notes.push(newNote); console.log("DEBUG: New note (Keeps) added", newNote); showPopup('popupNoteSaveSuccess');
-        }
-        savePrimaryDataToStorage(); handleCancelEditNote(); renderNotesList();
-    }
-
-    // Start Edit Note
-    function handleEditNoteStart(noteId) {
-        const noteToEdit = notes.find(n => n.id === noteId);
-        if (noteToEdit) {
-            editNoteIdInput.value = noteId; noteTitleInput.value = noteToEdit.title || ''; noteContentInput.value = noteToEdit.content || '';
-            if (noteFormTitle) noteFormTitle.textContent = translate('noteEditTitle');
-            if (saveNoteButton) saveNoteButton.textContent = translate('edit');
-            if (cancelEditNoteBtn) cancelEditNoteBtn.style.display = 'inline-block';
-            noteTitleInput.focus();
-            if (noteFormArea) noteFormArea.scrollIntoView({ behavior: 'smooth' });
-        } else { console.error("Cannot find note to edit:", noteId); showPopup('alertCannotFindNoteEdit'); }
-    }
-
-    // Cancel Edit Note
-    function handleCancelEditNote() {
-        editNoteIdInput.value = ''; noteTitleInput.value = ''; noteContentInput.value = '';
-        if (noteFormTitle) noteFormTitle.textContent = translate('noteNewTitle');
-        if (saveNoteButton) saveNoteButton.textContent = translate('saveNote');
-        if (cancelEditNoteBtn) cancelEditNoteBtn.style.display = 'none';
-    }
-
-    // Delete Note
-    function handleDeleteNote(noteId, noteTitle) {
-        const titleToShow = noteTitle || translate('noteTitleUntitled');
-        if (confirm(translate('confirmDeleteNote', { title: titleToShow }))) {
-            notes = notes.filter(n => n.id !== noteId);
-            savePrimaryDataToStorage(); renderNotesList(); showPopup('popupNoteDeleteSuccess');
-            if (editNoteIdInput.value === noteId) { handleCancelEditNote(); }
-        }
-    }
 
     // Handle Language Change
     function handleLanguageChange(event) {
@@ -2212,76 +3716,49 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsText(file);
     }
 
-    // --- Swipe Navigation ---
-    let touchStartX = 0; let touchEndX = 0; let touchStartY = 0;
-    const swipeThreshold = 50; let isSwiping = false;
-    function handleTouchStart(e) {
-        const target = e.target;
-        if (target.closest('.tab-bar, button, input, textarea, select, .table-responsive, .chart-controls, .chart-container, .note-actions, .modal-content, .notes-grid, [data-no-swipe]')) {
-            isSwiping = false; return;
-        }
-        touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; isSwiping = true;
-    }
-    function handleTouchMove(e) {
-        if (!isSwiping) return;
-        const currentX = e.changedTouches[0].screenX; const currentY = e.changedTouches[0].screenY;
-        const deltaX = currentX - touchStartX; const deltaY = currentY - touchStartY;
-        if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 10) { isSwiping = false; return; }
-        touchEndX = currentX;
-    }
-    function handleTouchEnd(e) {
-        if (!isSwiping) return; isSwiping = false; touchEndX = e.changedTouches[0].screenX;
-        const deltaX = touchEndX - touchStartX;
-        if (Math.abs(deltaX) > swipeThreshold) {
-            const direction = deltaX < 0 ? 'left' : 'right';
-            console.log("DEBUG: Swipe detected:", direction); navigateTabs(direction);
-        }
-        touchStartX = 0; touchEndX = 0; touchStartY = 0;
-    }
-    function navigateTabs(direction) {
-        if (!tabBar) return; const currentActiveButton = tabBar.querySelector('.tab-button.active'); if (!currentActiveButton) return;
-        const buttons = Array.from(tabBar.querySelectorAll('.tab-button'));
-        const currentIndex = buttons.findIndex(btn => btn === currentActiveButton); let nextIndex;
-        if (direction === 'left') { nextIndex = (currentIndex + 1) % buttons.length; }
-        else { nextIndex = (currentIndex - 1 + buttons.length) % buttons.length; }
-        if (nextIndex !== currentIndex && buttons[nextIndex]) {
-            console.log(`DEBUG: Navigating via swipe from index ${currentIndex} to ${nextIndex}`);
-            activateTab(buttons[nextIndex].dataset.tab);
-        }
-    }
+
 
     // --- Tab Activation ---
     function activateTab(targetTabId) {
-        if (!tabBar) return; console.log("DEBUG: Activating tab:", targetTabId);
-        tabButtons.forEach(button => button.classList.remove('active'));
-        tabContents.forEach(content => {
-            content.classList.remove('active'); // For animation
-            content.style.display = 'none';
-        });
+        if (!tabBar) return;
+        console.log("DEBUG: Activating tab:", targetTabId);
+
         const targetButton = tabBar.querySelector(`[data-tab="${targetTabId}"]`);
-        const targetContent = document.getElementById(targetTabId);
-        if (targetButton) { targetButton.classList.add('active'); }
-        if (targetContent) {
-            targetContent.style.display = 'block';
+        if (!targetButton) {
+            console.error("Target tab button not found:", targetTabId);
+            return;
+        }
 
-            // ** MODIFIED **
-            if (targetTabId === 'tab-history') {
-                renderHistoryView();
+        // 1. 모든 버튼에서 active 클래스 제거
+        tabButtons.forEach(button => button.classList.remove('active'));
+
+        // 2. 타겟 버튼에 active 클래스 추가
+        targetButton.classList.add('active');
+
+        // 3. 탭 콘텐츠 표시/숨기기
+        tabContents.forEach(content => {
+            content.style.display = (content.id === targetTabId) ? 'block' : 'none';
+            if (content.id === targetTabId) {
+                setTimeout(() => content.classList.add('active'), 10);
+            } else {
+                content.classList.remove('active');
             }
-            else if (targetTabId === 'tab-change-report') { renderChart(); renderAllComparisonTables(); }
-            else if (targetTabId === 'tab-overview') { renderNotesList(); }
-            else if (targetTabId === 'tab-targets') { populateTargetInputs(); setupTargetInputs(true); }
-            else if (targetTabId === 'tab-input') { renderNextMeasurementInfo(); }
+        });
 
-            // Add active class after a short delay to trigger animation correctly
-            setTimeout(() => {
-                targetContent.classList.add('active');
-            }, 10);
+        // 4. 탭에 따른 동적 렌더링
+        if (targetTabId === 'tab-record') {
+            document.getElementById('record-input-view').style.display = 'block';
+            renderNextMeasurementInfo();
+        } else if (targetTabId === 'tab-sv') {
+            renderSvTab();
+        } else if (targetTabId === 'tab-my') {
+            setupTargetInputs();
+            renderMyHistoryView();
+        }
 
-        } else {
-            console.error("Target tab content not found:", targetTabId);
-            const firstTabButton = tabBar.querySelector('.tab-button');
-            if (firstTabButton) activateTab(firstTabButton.dataset.tab);
+        // 5. (핵심) 탭 버튼을 클릭했으므로, 확장된 탭 바를 축소시킵니다.
+        if (tabBar.classList.contains('tab-bar-expanded')) {
+            tabBar.classList.remove('tab-bar-expanded');
         }
     }
 
@@ -2289,15 +3766,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAll() {
         console.log("DEBUG: === renderAll triggered ===");
         try {
-            updateCurrentWeekDisplay(); renderNextMeasurementInfo();
-            renderHistoryView(); // ** MODIFIED **
-            renderAllComparisonTables(); renderChartSelector(); renderNotesList();
-            populateTargetInputs(); setupTargetInputs(true);
-            const activeTabContent = document.querySelector('.tab-content[style*="display: block"]');
-            const activeTabId = activeTabContent ? activeTabContent.id : null;
-            if (activeTabId === 'tab-change-report') { renderChart(); }
+            updateFormTitle();
+            renderNextMeasurementInfo();
+            renderAllComparisonTables(); // 이 함수는 현재 내용이 없지만, 나중에 채워질 수 있으니 둡니다.
+            updatePlaceholders();
+            renderMyHistoryView(); // '마이' 탭의 기록 뷰를 항상 렌더링
+
+            // 현재 활성화된 탭에 따라 필요한 것만 렌더링
+            const activeTabContent = document.querySelector('.tab-content.active');
+            const activeTabId = activeTabContent ? activeTabContent.id : 'tab-sv';
+            if (activeTabId === 'tab-sv') {
+                renderSvTab();
+            }
+            // 'tab-record'에 대한 추가 렌더링은 이제 필요 없습니다.
             console.log("DEBUG: === renderAll complete ===");
-        } catch (e) { console.error(`renderAll error: ${e.message}`, e.stack); showPopup('unexpectedError', 5000, { message: e.message }); }
+        } catch (e) {
+            console.error(`renderAll error: ${e.message}`, e.stack);
+            showPopup('unexpectedError', { message: e.message });
+        }
     }
 
     // ===============================================
@@ -2310,113 +3796,775 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isIOS()) { bodyElement.classList.add('ios-device'); }
 
         if (!isInitialSetupDone) {
-            showInitialSetupPopup(); console.log("DEBUG: Initial setup required.");
+            showInitialSetupPopup();
+            console.log("DEBUG: Initial setup required.");
         } else {
             console.log("DEBUG: Initial setup already done.");
             applyModeToUI();
             applyLanguageToUI();
             loadPrimaryDataFromStorage();
-            applyTheme(); // Apply theme after loading settings
-            setupTargetInputs();
+            checkAndRequestNotification(); // <--- 이 줄을 추가하세요.
+            applyTheme();
             renderAll();
-            activateTab('tab-input');
+            activateTab('tab-sv');
         }
 
-        // *** 수정 4: 시스템 테마 변경 감지 리스너 추가 ***
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        try {
-            mediaQuery.addEventListener('change', () => { if (currentTheme === 'system') { applyTheme(); } });
-        } catch (e1) {
-            try { // Fallback for older browsers
-                mediaQuery.addListener(() => { if (currentTheme === 'system') { applyTheme(); } });
-            } catch (e2) { console.error("Error adding listener for system theme changes:", e2); }
-        }
+        mediaQuery.addEventListener('change', () => { if (currentTheme === 'system') applyTheme(); });
 
         console.log("DEBUG: App Initialization Sequence Complete");
-    } catch (initError) { console.error("App Initialization Error:", initError); alert(translate('alertInitError') || `App Initialization Error: ${initError.message}`); }
+    } catch (initError) {
+        console.error("App Initialization Error:", initError);
+        alert(translate('alertInitError') || `App Initialization Error: ${initError.message}`);
+    }
+    // --- Notification Toggle Handler ---
+    function handleNotificationToggle() {
+        if (!notificationToggle) return;
+        const isEnabled = notificationToggle.checked;
 
+        if (isEnabled) {
+            // 알림을 켜려고 할 때
+            if (!('Notification' in window)) {
+                showPopup('alertBrowserNotSupportNotification', 3000);
+                notificationToggle.checked = false;
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    console.log("DEBUG: Notification permission granted.");
+                    notificationEnabled = true;
+                    saveSettingsToStorage();
+                    showPopup('popupSettingsSaved');
+                } else {
+                    console.log("DEBUG: Notification permission denied.");
+                    notificationEnabled = false;
+                    notificationToggle.checked = false; // 사용자가 거부하면 토글을 다시 끔
+                    saveSettingsToStorage();
+                }
+            });
+        } else {
+            // 알림을 끌 때
+            notificationEnabled = false;
+            saveSettingsToStorage();
+            console.log("DEBUG: Notifications disabled by user.");
+            showPopup('popupSettingsSaved');
+        }
+    }
     // ===============================================
     // Event Listener Setup
     // ===============================================
     console.log("DEBUG: Setting up event listeners...");
     try {
-        // Tab Bar Clicks
-        if (tabBar) {
-            tabBar.addEventListener('click', (e) => {
-                const button = e.target.closest('.tab-button');
-                if (button && button.dataset.tab) { activateTab(button.dataset.tab); }
+        // Tab Bar
+        tabBar.addEventListener('click', (e) => {
+            const button = e.target.closest('.tab-button');
+            const isTouchDevice = !window.matchMedia('(hover: hover)').matches;
+
+            // --- 1. 데스크톱(마우스 사용) 환경의 경우 ---
+            if (!isTouchDevice) {
+                // 마우스 환경에서는 버튼을 클릭하면 항상 바로 탭 이동
+                if (button) {
+                    activateTab(button.dataset.tab);
+                }
+                return; // 배경 클릭은 아무것도 하지 않음
+            }
+
+            // --- 2. 터치스크린 환경의 경우 ---
+            const isExpanded = tabBar.classList.contains('tab-bar-expanded');
+
+            if (isExpanded) {
+                // **[동작 B] 이미 확장된 상태일 때**
+                if (button) {
+                    // (핵심) 버튼을 클릭하면 탭 이동 및 축소
+                    activateTab(button.dataset.tab);
+                } else {
+                    // 버튼이 아닌 배경을 클릭하면 그냥 축소만 함
+                    tabBar.classList.remove('tab-bar-expanded');
+                }
+            } else {
+                // **[동작 A] 축소된 상태일 때**
+                // 버튼이든 배경이든, 어떤 곳을 클릭해도 확장만 함
+                tabBar.classList.add('tab-bar-expanded');
+            }
+        });
+        // --- Modal Bottom Sheet Events ---
+        if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', (e) => {
+                // 오버레이의 검은 배경을 클릭했을 때만 닫히도록 함
+                if (e.target === modalOverlay) {
+                    closeModal();
+                }
             });
-        } else { console.error("DEBUG: [Error!] tabBar element missing!"); }
-        // Form Submissions
+        }
+        // ✅ 교체할 코드 2: modalContent 이벤트 리스너
+        if (modalContent) {
+            modalContent.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.btn-edit');
+                const deleteBtn = e.target.closest('.btn-delete');
+                const likeBtn = e.target.closest('.keeps-like-btn'); // '좋아요' 버튼 변수 추가
+                const index = parseInt(editBtn?.dataset.index || deleteBtn?.dataset.index || likeBtn?.dataset.index, 10);
+
+                if (isNaN(index)) return;
+
+                // '좋아요' 버튼 클릭 시 처리 로직
+                if (likeBtn) {
+                    if (index >= 0 && index < measurements.length) {
+                        // 1. 데이터 업데이트
+                        measurements[index].memoLiked = !measurements[index].memoLiked;
+                        savePrimaryDataToStorage();
+
+                        // 2. UI 즉시 업데이트 (CSS 클래스 토글)
+                        likeBtn.classList.toggle('liked', measurements[index].memoLiked);
+                    }
+                    return; // 좋아요 처리 후 함수 종료
+                }
+
+                // 수정 버튼 클릭 시 처리
+                if (editBtn) {
+                    console.log(`DEBUG: Edit button clicked in modal for index ${index}`);
+                    closeModal(); // 모달을 먼저 닫고
+                    // 0.1초 후 수정 함수 호출 및 해당 탭으로 이동
+                    setTimeout(() => {
+                        handleEditClick(index);
+                        activateTab('tab-record');
+                    }, 100);
+                }
+                // 삭제 버튼 클릭 시 처리
+                else if (deleteBtn) {
+                    console.log(`DEBUG: Delete button clicked in modal for index ${index}`);
+                    closeModal(); // 모달을 먼저 닫고
+                    setTimeout(() => {
+                        handleDeleteMeasurement(index);
+                    }, 100);
+                }
+            });
+        }
+
+        // --- Hormone Modal Events ---
+        if (hormoneModalCloseBtn) {
+            hormoneModalCloseBtn.addEventListener('click', closeHormoneModal);
+        }
+
+        // 👇👇👇 이 부분을 추가하거나, 기존 코드를 이 코드로 교체해주세요. 👇👇👇
+        if (hormoneModalOverlay) {
+            hormoneModalOverlay.addEventListener('click', (e) => {
+                // 모달의 검은 배경을 클릭했을 때 닫히도록 함
+                if (e.target === hormoneModalOverlay) {
+                    closeHormoneModal();
+                }
+
+                // 이벤트 위임: 범주 버튼(.legend-button) 클릭 처리
+                const button = e.target.closest('.legend-button');
+                if (button) {
+                    const chartId = button.dataset.chart;
+                    const datasetIndex = parseInt(button.dataset.datasetIndex, 10);
+                    const chart = chartId === 'medication-chart' ? medicationChartInstance : hormoneChartInstance;
+
+                    if (chart) {
+                        const isHidden = chart.isDatasetVisible(datasetIndex);
+                        chart.setDatasetVisibility(datasetIndex, !isHidden);
+                        button.classList.toggle('inactive', isHidden);
+                        chart.update();
+                    }
+                }
+            });
+        }
+
+
+
+        // 파일의 약 3050번째 줄 근처, Event Listener Setup 섹션 내부
+        // --- Clickable Main Cards Events ---
+        if (svCardHormones) {
+            svCardHormones.classList.add('sv-card--clickable'); // 이 줄을 참고하세요
+            svCardHormones.addEventListener('click', () => {
+                openHormoneModal();
+            });
+        }
+
+        if (svCardHighlights) {
+            svCardHighlights.classList.add('sv-card--clickable'); // 이 줄을 추가하세요
+            svCardHighlights.addEventListener('click', () => {
+                openComparisonModal();
+            });
+        }
+
+        // --- Clickable Main Cards Events ---
+        if (svCardTargets) {
+            svCardTargets.classList.add('sv-card--clickable'); // 이 줄을 추가하세요
+            svCardTargets.addEventListener('click', () => {
+                // ... (기존 코드 생략)
+            });
+        }
+
+        if (svCardKeeps) {
+            svCardKeeps.classList.add('sv-card--clickable'); // 이 줄을 추가하세요
+            svCardKeeps.addEventListener('click', () => {
+                // ... (기존 코드 생략)
+            });
+        }
+
+        // ... (다른 리스너들) ...
+
+        if (svCardShortcut) {
+            svCardShortcut.classList.add('sv-card--clickable'); // 이 줄을 추가하세요
+            svCardShortcut.addEventListener('click', () => {
+                activateTab('tab-record');
+            });
+        }
+
+
+        // --- Clickable Main Cards Events ---
+        if (svCardTargets) {
+            svCardTargets.addEventListener('click', () => {
+                const title = translate('svcard_title_targets');
+
+                // 1. 탭 구조를 포함한 모달의 HTML을 생성합니다.
+                const content = `
+            <div class="modal-content-wrapper">
+                <div class="modal-tab-switcher">
+                    <button class="modal-tab-btn active" data-tab="target-progress-view">${translate('reportTargetTitle')}</button>
+                    <button class="modal-tab-btn" data-tab="prev-week-view">${translate('reportPrevWeekTitle')}</button>
+                    <button class="modal-tab-btn" data-tab="initial-view">${translate('reportInitialTitle')}</button>
+                </div>
+
+                <div id="target-progress-view" class="modal-tab-content active">
+                    <!-- '목표 달성도' 탭 내용이 여기에 렌더링됩니다. -->
+                </div>
+                <div id="prev-week-view" class="modal-tab-content">
+                    <!-- '지난주와 비교' 탭 내용이 여기에 렌더링됩니다. -->
+                </div>
+                <div id="initial-view" class="modal-tab-content">
+                    <!-- '처음과 비교' 탭 내용이 여기에 렌더링됩니다. -->
+                </div>
+            </div>
+        `;
+
+                // 2. 새로운 HTML 구조로 모달을 엽니다.
+                openModal(title, content);
+
+                // 3. 기본으로 선택된 '목표 달성도' 탭의 내용을 렌더링합니다.
+                renderTargetProgressTab();
+
+                // 4. 탭 버튼에 클릭 이벤트를 연결합니다.
+                const tabSwitcher = modalContent.querySelector('.modal-tab-switcher');
+                if (tabSwitcher) {
+                    tabSwitcher.addEventListener('click', handleTargetModalTabSwitch);
+                }
+            });
+        }
+
+        if (svCardKeeps) {
+            svCardKeeps.addEventListener('click', () => {
+                const title = translate('svcard_title_keeps');
+
+                // 모달의 상태를 관리할 변수
+                let currentSortOrder = 'newest'; // 'newest' 또는 'oldest'
+                let showFavoritesOnly = false;   // true 또는 false
+
+                // 모달의 기본 HTML 구조 (컨트롤 영역 + 리스트 영역)
+                const initialContent = `
+            <div class="keeps-modal-controls">
+                <!-- JS가 컨트롤 버튼들을 여기에 렌더링합니다 -->
+            </div>
+            <div class="keeps-list">
+                <!-- JS가 메모 목록을 여기에 렌더링합니다 -->
+            </div>
+        `;
+
+                openModal(title, initialContent);
+
+                // 메모 목록과 컨트롤 UI를 렌더링하는 함수
+                const renderKeepsList = () => {
+                    const controlsContainer = modalContent.querySelector('.keeps-modal-controls');
+                    const listContainer = modalContent.querySelector('.keeps-list');
+                    if (!controlsContainer || !listContainer) return;
+
+                    // 1. 컨트롤 버튼 HTML 생성
+                    controlsContainer.innerHTML = `
+                <div class="sort-controls">
+                    <button class="control-btn ${currentSortOrder === 'newest' ? 'active' : ''}" data-action="sort" data-value="newest">${translate('sortNewest')}</button>
+                    <button class="control-btn ${currentSortOrder === 'oldest' ? 'active' : ''}" data-action="sort" data-value="oldest">${translate('sortOldest')}</button>
+                </div>
+                <div class="filter-controls">
+                    <button class="control-btn-icon ${showFavoritesOnly ? 'active' : ''}" data-action="filter-favorites" title="좋아요만 보기">
+                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                            <path class="heart-outline" d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.05.05-.05-.05C7.32 14.43 4 11.72 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 3.22-3.32 5.93-8.1 10.05z"></path>
+                            <path class="heart-fill" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+
+                    // 2. 데이터 필터링 및 정렬
+                    let memos = measurements
+                        .map((m, index) => ({ ...m, originalIndex: index }))
+                        .filter(m => m.memo && m.memo.trim() !== '');
+
+                    if (showFavoritesOnly) {
+                        memos = memos.filter(m => m.memoLiked === true);
+                    }
+
+                    memos.sort((a, b) => {
+                        return currentSortOrder === 'newest' ?
+                            (b.timestamp || 0) - (a.timestamp || 0) :
+                            (a.timestamp || 0) - (b.timestamp || 0);
+                    });
+
+                    // 3. 목록 HTML 생성
+                    if (memos.length === 0) {
+                        listContainer.innerHTML = `<p class="placeholder">${translate('svcard_no_keeps_add_prompt')}</p>`;
+                    } else {
+                        listContainer.innerHTML = memos.map(memoEntry => {
+                            const isLiked = memoEntry.memoLiked ? 'liked' : '';
+                            return `
+                        <div class="keeps-list-item glass-section">
+                            <div class="keeps-header">
+                                <div class="keeps-header-left">
+                                    <span class="keeps-week">${translate('week')} ${memoEntry.week}</span>
+                                    <button class="keeps-like-btn ${isLiked}" data-index="${memoEntry.originalIndex}" title="좋아요">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                            <path class="heart-outline" d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.05.05-.05-.05C7.32 14.43 4 11.72 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 3.22-3.32 5.93-8.1 10.05z"></path>
+                                            <path class="heart-fill" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <span class="keeps-date">${formatTimestamp(memoEntry.timestamp)}</span>
+                            </div>
+                            <p class="keeps-text">${escapeHTML(memoEntry.memo).replace(/\n/g, '<br>')}</p>
+                            <div class="keeps-actions">
+                                <button class="glass-button btn-edit" data-index="${memoEntry.originalIndex}">${translate('edit')}</button>
+                                <button class="glass-button danger btn-delete" data-index="${memoEntry.originalIndex}">${translate('delete')}</button>
+                            </div>
+                        </div>
+                    `;
+                        }).join('');
+                    }
+                };
+
+                // 모달 내부의 클릭 이벤트를 처리하는 핸들러 (정렬, 필터)
+                const handleModalInteraction = (e) => {
+                    const button = e.target.closest('button');
+                    if (!button) return;
+
+                    const action = button.dataset.action;
+                    if (action === 'sort') {
+                        currentSortOrder = button.dataset.value;
+                        renderKeepsList(); // 정렬 순서 변경 후 다시 렌더링
+                    } else if (action === 'filter-favorites') {
+                        showFavoritesOnly = !showFavoritesOnly;
+                        renderKeepsList(); // 필터 상태 변경 후 다시 렌더링
+                    }
+                };
+
+                // 이벤트 리스너 연결 (정렬, 필터 버튼에만)
+                const controlsContainer = modalContent.querySelector('.keeps-modal-controls');
+                if (controlsContainer) {
+                    controlsContainer.addEventListener('click', handleModalInteraction);
+                }
+
+                // 초기 렌더링 실행
+                renderKeepsList();
+            });
+        }
+
+
+        if (myHistoryViewContainer) {
+            myHistoryViewContainer.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.btn-edit');
+                const deleteBtn = e.target.closest('.btn-delete');
+                const index = parseInt(editBtn?.dataset.index || deleteBtn?.dataset.index, 10);
+                if (isNaN(index)) return;
+
+                if (editBtn) {
+                    handleEditClick(index);
+                    activateTab('tab-record');
+                } else if (deleteBtn) {
+                    handleDeleteMeasurement(index);
+                }
+            });
+        }
+
+        // My Tab: History Filter
+        if (myFilterControls) {
+            myFilterControls.addEventListener('click', e => {
+                const button = e.target.closest('.filter-button');
+                if (!button) return;
+                const key = button.dataset.key;
+
+                if (key === 'all') {
+                    activeHistoryFilters = [];
+                } else {
+                    if (activeHistoryFilters.includes(key)) {
+                        activeHistoryFilters = activeHistoryFilters.filter(k => k !== key);
+                    } else {
+                        activeHistoryFilters.push(key);
+                    }
+                }
+                // 변경된 필터 상태로 '마이' 탭의 기록 뷰만 다시 렌더링
+                renderMyHistoryView();
+            });
+        }
+
+        if (svCardShortcut) {
+            svCardShortcut.addEventListener('click', () => {
+                activateTab('tab-record');
+            });
+        }
+
+        // Forms
+        if (form) form.addEventListener('submit', handleFormSubmit);
         if (form) form.addEventListener('submit', handleFormSubmit);
         if (targetForm) targetForm.addEventListener('submit', handleTargetFormSubmit);
-        // Button Clicks - Input Form
+
+        // Buttons
         if (cancelEditBtn) cancelEditBtn.addEventListener('click', cancelEdit);
-        // Button Clicks - Settings
         if (resetDataButton) resetDataButton.addEventListener('click', handleResetData);
         if (checkForUpdatesButton) checkForUpdatesButton.addEventListener('click', handleCheckForUpdates);
         if (exportDataButton) exportDataButton.addEventListener('click', exportMeasurementData);
-        if (importDataButton && importFileInput) {
-            importDataButton.addEventListener('click', () => importFileInput.click());
-            importFileInput.addEventListener('click', (e) => { e.target.value = null; });
-        }
+        if (importDataButton) importDataButton.addEventListener('click', () => importFileInput.click());
         if (importFileInput) importFileInput.addEventListener('change', importMeasurementData);
+
+        // Selects
         if (languageSelect) languageSelect.addEventListener('change', handleLanguageChange);
         if (modeSelect) modeSelect.addEventListener('change', handleModeChange);
-        if (themeSelect) themeSelect.addEventListener('change', handleThemeChange); // *** 수정 4: 테마 변경 리스너 ***
-        // Button Clicks - History Table (Event Delegation)
-        if (historyTabContent) {
-            historyTabContent.addEventListener('click', (e) => {
-                const editBtn = e.target.closest('.btn-edit');
-                const deleteBtn = e.target.closest('.btn-delete');
-                if (editBtn?.dataset.index !== undefined) handleEditClick(parseInt(editBtn.dataset.index, 10));
-                else if (deleteBtn?.dataset.index !== undefined) handleDeleteMeasurement(parseInt(deleteBtn.dataset.index, 10));
+        if (themeSelect) themeSelect.addEventListener('change', handleThemeChange);
+        if (sexSelect) {
+            sexSelect.addEventListener('change', (event) => {
+                biologicalSex = event.target.value;
+                console.log("DEBUG: Biological sex changed to", biologicalSex);
+                saveSettingsToStorage();
+                showPopup('popupSettingsSaved');
+                renderAll(); // 계산식에 영향을 주므로 다시 렌더링
             });
         }
-        // Button Clicks - Notes (Keeps) Tab
-        if (saveNoteButton) saveNoteButton.addEventListener('click', handleSaveNote);
-        if (cancelEditNoteBtn) cancelEditNoteBtn.addEventListener('click', handleCancelEditNote);
-        if (noteSortOrderSelect) {
-            noteSortOrderSelect.addEventListener('change', (e) => { currentNoteSortOrder = e.target.value; renderNotesList(); });
-        }
-        // Button Clicks - Notes (Keeps) List (Event Delegation)
-        if (notesListContainer) {
-            notesListContainer.addEventListener('click', (e) => {
-                const editBtn = e.target.closest('.edit-note-button');
-                const deleteBtn = e.target.closest('.delete-note-button');
-                if (editBtn?.dataset.id) handleEditNoteStart(editBtn.dataset.id);
-                else if (deleteBtn?.dataset.id) handleDeleteNote(deleteBtn.dataset.id, deleteBtn.dataset.title);
-            });
-        }
-        // Button Clicks - Chart Controls
+
+        // Chart Controls
         if (chartSelector) chartSelector.addEventListener('click', handleChartSelectorClick);
         if (selectAllChartsBtn) selectAllChartsBtn.addEventListener('click', handleSelectAllCharts);
         if (deselectAllChartsBtn) deselectAllChartsBtn.addEventListener('click', handleDeselectAllCharts);
-        // Initial Setup Save Button
+
+        // Initial Setup
         if (initialSetupSaveBtn) initialSetupSaveBtn.addEventListener('click', handleInitialSetupSave);
-        window.addEventListener('resize', () => debounce(renderHistoryView, 150));
-        // Swipe Listeners
-        document.body.addEventListener('touchstart', function (e) {
-            if ((e.touches.length > 1) || e.targetTouches.length > 1) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-            }
-        }, { passive: false });
-        document.body.addEventListener('touchmove', handleTouchMove, { passive: false });
-        document.body.addEventListener('touchend', handleTouchEnd);
-        console.log("DEBUG: Swipe listeners attached to body.");
+
+        // Window & Body events
+        window.addEventListener('resize', () => debounce(renderMyHistoryView, 150));
+
+        // --- Carousel Button Logic ---
+        function setupCarouselControls(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const prevBtn = container.querySelector('.carousel-nav-btn.prev');
+            const nextBtn = container.querySelector('.carousel-nav-btn.next');
+            const content = container.querySelector('.carousel-content');
+
+            if (!prevBtn || !nextBtn || !content) return;
+
+            const scrollCarousel = (direction) => {
+                const item = content.querySelector('.carousel-item');
+                if (item) {
+                    const itemWidth = item.offsetWidth;
+                    content.scrollBy({
+                        left: itemWidth * direction,
+                        behavior: 'smooth'
+                    });
+                }
+            };
+
+            prevBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // 카드 전체 클릭 방지
+                scrollCarousel(-1); // 이전으로 이동
+            });
+
+            nextBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // 카드 전체 클릭 방지
+                scrollCarousel(1); // 다음으로 이동
+            });
+        }
+
+        // 이벤트 리스너 설정 부분에서 위 함수를 호출합니다.
+        setupCarouselControls('sv-card-highlights');
+        setupCarouselControls('sv-card-keeps');
+
+
         console.log("DEBUG: Event listeners setup complete.");
-    } catch (listenerError) { console.error(" Event listener setup error:", listenerError); alert(translate('alertListenerError') || `Event Listener Error: ${listenerError.message}`); }
+    } catch (listenerError) {
+        console.error(" Event listener setup error:", listenerError);
+        alert(translate('alertListenerError') || `Event Listener Error: ${listenerError.message}`);
+    }
+
+    // 상세 분석 뷰 렌더링 (기존 렌더링 함수들을 호출)
+    function renderDetailedAnalysisView() {
+        renderComparisonFilters();
+        renderComparisonChart();
+        renderComparisonTable();
+
+        const container = modalContent.querySelector('#comparison-selected-week-data-container');
+        const titleEl = modalContent.querySelector('#comparison-selected-week-data-title');
+        const contentEl = modalContent.querySelector('#comparison-selected-week-data-content');
+        const placeholderEl = modalContent.querySelector('#comparison-data-placeholder');
+
+        if (container) container.style.display = 'block'; // 전체 섹션은 항상 보이도록
+        if (titleEl) titleEl.innerHTML = ''; // 제목 초기화
+        if (contentEl) {
+            contentEl.innerHTML = '';
+            contentEl.style.display = 'none'; // 데이터 영역은 숨김
+        }
+        if (placeholderEl) {
+            placeholderEl.style.display = 'block'; // 안내 문구는 보이게
+            placeholderEl.textContent = translate('graphClickPrompt'); // 다국어 텍스트 적용
+        }
+    }
+
+    // 비교 분석 뷰 렌더링
+    function renderComparativeAnalysisView() {
+        const leftSelect = modalContent.querySelector('#compare-left-select');
+        const rightSelect = modalContent.querySelector('#compare-right-select');
+
+        if (!leftSelect || !rightSelect || measurements.length < 1) {
+            const grid = modalContent.querySelector('#comparison-results-grid');
+            if (grid) grid.innerHTML = `<p>${translate('noDataYet')}</p>`;
+            return;
+        };
+
+        // 셀렉트 박스 옵션 채우기
+        const optionsHTML = measurements.map((m, index) =>
+            `<option value="${index}">${m.week}${translate('week')} (${formatTimestamp(m.timestamp)})</option>` // 수정
+        ).reverse().join(''); // 최신순으로 정렬
+
+        leftSelect.innerHTML = optionsHTML;
+        rightSelect.innerHTML = optionsHTML;
+
+        // 기본 선택값 설정 (가장 최신 데이터와 그 이전 데이터)
+        if (measurements.length >= 2) {
+            leftSelect.value = measurements.length - 2;
+            rightSelect.value = measurements.length - 1;
+        } else {
+            leftSelect.value = 0;
+            rightSelect.value = 0;
+        }
+
+        // 셀렉트 박스 변경 시 결과 업데이트
+        leftSelect.addEventListener('change', updateComparisonResults);
+        rightSelect.addEventListener('change', updateComparisonResults);
+
+        // 초기 결과 렌더링
+        updateComparisonResults();
+    }
+
+    // 비교 분석 탭의 결과 업데이트
+    function updateComparisonResults() {
+        const leftIndex = parseInt(modalContent.querySelector('#compare-left-select').value);
+        const rightIndex = parseInt(modalContent.querySelector('#compare-right-select').value);
+        const grid = modalContent.querySelector('#comparison-results-grid');
+
+        if (isNaN(leftIndex) || isNaN(rightIndex) || !grid) return;
+
+        const leftData = measurements[leftIndex];
+        const rightData = measurements[rightIndex];
+        const displayKeys = getFilteredDisplayKeys().filter(k => !['week', 'date', 'timestamp', 'memo'].includes(k));
+
+        let html = `
+    <div class="comparison-item-header label">${translate('comparisonItem')}</div>
+    <div class="comparison-item-header">${leftData.week}${translate('week')}</div> 
+    <div class="comparison-item-header">${rightData.week}${translate('week')}</div>
+`; // 수정
+
+        displayKeys.forEach(key => {
+            const leftValue = leftData[key];
+            const rightValue = rightData[key];
+
+            // 두 값 중 하나라도 존재할 때만 행을 추가
+            if ((leftValue !== null && leftValue !== undefined && leftValue !== '') ||
+                (rightValue !== null && rightValue !== undefined && rightValue !== '')) {
+                html += `
+                <div class="comparison-item-label">${translate(key).split('(')[0].trim()}</div>
+                <div class="comparison-item-value">${formatValue(leftValue, key)}</div>
+                <div class="comparison-item-value">${formatValue(rightValue, key)}</div>
+            `;
+            }
+        });
+
+        grid.innerHTML = html;
+    }
+
+    // 모달 내부 탭 전환 핸들러
+    function handleModalTabSwitch(event) {
+        const button = event.target.closest('.modal-tab-btn');
+        if (!button) return;
+
+        const targetTab = button.dataset.tab;
+        if (targetTab === activeModalTab) return; // 이미 활성화된 탭이면 무시
+
+        activeModalTab = targetTab;
+
+        // 모든 버튼과 컨텐츠에서 active 클래스 제거
+        modalContent.querySelectorAll('.modal-tab-btn').forEach(btn => btn.classList.remove('active'));
+        modalContent.querySelectorAll('.modal-tab-content').forEach(content => content.classList.remove('active'));
+
+        // 클릭된 버튼과 해당 컨텐츠에 active 클래스 추가
+        button.classList.add('active');
+        const targetContent = modalContent.querySelector(`#${targetTab}-view`);
+        if (targetContent) {
+            targetContent.classList.add('active');
+
+            // 활성화된 탭에 따라 필요한 렌더링 함수 호출
+            if (targetTab === 'detailed-analysis') {
+                renderDetailedAnalysisView();
+            } else if (targetTab === 'comparative-analysis') {
+                renderComparativeAnalysisView();
+            }
+        }
+    }
+
+    function handleTargetModalTabSwitch(event) {
+        const button = event.target.closest('.modal-tab-btn');
+        if (!button) return;
+
+        const targetTabId = button.dataset.tab;
+
+        // 모든 탭 버튼과 컨텐츠의 'active' 클래스를 제거
+        modalContent.querySelectorAll('.modal-tab-btn').forEach(btn => btn.classList.remove('active'));
+        modalContent.querySelectorAll('.modal-tab-content').forEach(content => content.classList.remove('active'));
+
+        // 클릭된 버튼과 그에 맞는 컨텐츠에 'active' 클래스를 추가
+        button.classList.add('active');
+        const targetContent = modalContent.querySelector(`#${targetTabId}`);
+        if (targetContent) {
+            targetContent.classList.add('active');
+
+            // 어떤 탭이 클릭되었는지에 따라 해당 탭의 내용을 렌더링
+            if (targetTabId === 'target-progress-view') {
+                renderTargetProgressTab();
+            } else if (targetTabId === 'prev-week-view') {
+                renderPrevWeekComparisonTab();
+            } else if (targetTabId === 'initial-view') {
+                renderInitialComparisonTab();
+            }
+        }
+    }
+
+    // '목표 달성도' 탭의 내용을 렌더링하는 함수
+    function renderTargetProgressTab() {
+        const container = modalContent.querySelector('#target-progress-view');
+        if (!container) return;
+
+        const { data, headers } = calculateTargetComparison();
+
+        if (data.length === 0) {
+            container.innerHTML = `<p class="placeholder">${translate('reportNeedTarget')}</p>`;
+            return;
+        }
+
+        let tableRows = data.map(item => {
+            const progress = item.progress !== null ? Math.round(item.progress) : '-';
+            const progressClass = progress >= 100 ? 'target-achieved' : (progress > 0 ? 'positive-change' : '');
+            return `
+            <tr>
+                <td>${translate(item.key)}</td>
+                ${createProgressBarHTML(item)}
+                <td class="${progressClass}">${progress}%</td>
+            </tr>
+        `;
+        }).join('');
+
+        container.innerHTML = `
+        <div class="table-responsive">
+            <table class="comparison-table progress-comparison-table">
+                <thead><tr><th>${headers[0]}</th><th></th><th>${headers[2]}</th></tr></thead>
+                <tbody>${tableRows}</tbody>
+            </table>
+        </div>
+    `;
+    }
+
+    // '지난주와 비교' 탭의 내용을 렌더링하는 함수
+    function renderPrevWeekComparisonTab() {
+        const container = modalContent.querySelector('#prev-week-view');
+        if (!container) return;
+
+        const { data, headers } = calculatePrevWeekComparison();
+
+        if (data.length === 0) {
+            container.innerHTML = `<p class="placeholder">${translate('reportNeedTwoRecords')}</p>`;
+            return;
+        }
+
+        let tableRows = data.map(item => {
+            let changeText = '-';
+            let changeClass = '';
+            if (item.change !== null && !isNaN(item.change)) {
+                const roundedChange = parseFloat(item.change.toFixed(1));
+                if (roundedChange > 0) {
+                    changeText = `+${roundedChange}`;
+                    changeClass = 'positive-change';
+                } else {
+                    changeText = `${roundedChange}`;
+                    if (roundedChange < 0) changeClass = 'negative-change';
+                }
+            }
+            return `
+            <tr>
+                <td>${translate(item.key)}</td>
+                ${createProgressBarHTML(item)}
+                <td class="${changeClass}">${changeText}</td>
+            </tr>
+        `;
+        }).join('');
+
+        container.innerHTML = `
+        <div class="table-responsive">
+            <table class="comparison-table progress-comparison-table">
+                <thead><tr><th>${headers[0]}</th><th></th><th>${headers[2]}</th></tr></thead>
+                <tbody>${tableRows}</tbody>
+            </table>
+        </div>
+    `;
+    }
+
+    // '처음과 비교' 탭의 내용을 렌더링하는 함수
+    function renderInitialComparisonTab() {
+        const container = modalContent.querySelector('#initial-view');
+        if (!container) return;
+
+        const { data, headers } = calculateInitialComparison();
+
+        if (data.length === 0) {
+            container.innerHTML = `<p class="placeholder">${translate('reportNeedTwoRecords')}</p>`;
+            return;
+        }
+
+        let tableRows = data.map(item => {
+            let changeText = '-';
+            let changeClass = '';
+            if (item.change !== null && !isNaN(item.change)) {
+                const roundedChange = parseFloat(item.change.toFixed(1));
+                if (roundedChange > 0) {
+                    changeText = `+${roundedChange}`;
+                    changeClass = 'positive-change';
+                } else {
+                    changeText = `${roundedChange}`;
+                    if (roundedChange < 0) changeClass = 'negative-change';
+                }
+            }
+            return `
+            <tr>
+                <td>${translate(item.key)}</td>
+                ${createProgressBarHTML(item)}
+                <td class="${changeClass}">${changeText}</td>
+            </tr>
+        `;
+        }).join('');
+
+        container.innerHTML = `
+        <div class="table-responsive">
+            <table class="comparison-table progress-comparison-table">
+                 <thead><tr><th>${headers[0]}</th><th></th><th>${headers[2]}</th></tr></thead>
+                <tbody>${tableRows}</tbody>
+            </table>
+        </div>
+    `;
+    }
 
 });
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/ShiftV/service-worker.js').then(registration => {
-            console.log('Service Worker registered with scope:', registration.scope);
-
-        }).catch(error => {
-            console.error('Service Worker registration failed:', error);
-        });
-    });
-}

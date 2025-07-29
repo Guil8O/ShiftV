@@ -946,7 +946,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const T_RECOVERY_HALFLIFE = 1.5, E_RECOVERY_HALFLIFE = 1.5;
         const S_E_R_INFINITY = 0.82, S_E_TAU_RECOVERY = 3;
         const getSuppressionRate = (e) => {
-            if (isNaN(e) || e < 135) return 0;
+            if (isNaN(e) || e < 60) return 0;
             if (e < 200) return 0.5 * (e - 135) / 65;
             if (e < 500) return 0.5 + 0.4 * (e - 200) / 300;
             return Math.min(0.95, 0.9 + 0.05 * (e - 500) / 500);

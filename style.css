@@ -328,14 +328,7 @@ hr.divider {
     min-height: 24px;
 
 }
-.tab-button img {
-    /* img 태그의 원래 색상을 무시하고 CSS로 색을 입히기 위한 설정입니다. */
-    background-color: currentColor; 
-    -webkit-mask: url('./assets/setting.svg') no-repeat center;
-    mask: url('./assets/setting.svg') no-repeat center;
-    -webkit-mask-size: cover;
-    mask-size: cover;
-}
+
 
 .tab-button span {
     margin-left: 17px;

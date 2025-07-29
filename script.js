@@ -58,6 +58,9 @@ const languages = {
         alertCannotFindRecordEdit: "수정할 기록 찾기 실패.", alertCannotFindRecordDelete: "삭제할 기록 찾기 실패.",
         alertInvalidIndex: "기록 처리 중 오류: 인덱스 오류.",
         alertCannotFindNoteEdit: "수정할 Keeps 찾기 실패.", alertCannotFindNoteDelete: "삭제할 Keeps 찾기 실패.",
+        notification_setup_success_title: "알림 설정 완료",
+        notification_setup_success_body: "알림이 설정되었습니다. 매주 측정일이 되면 알려드릴게요!",
+        notification_permission_denied: "알림 권한이 차단되었습니다. 브라우저 설정에서 허용해주세요.",
 
         // Tabs
         tabMain: "메인",
@@ -272,6 +275,9 @@ const languages = {
         alertCannotFindRecordEdit: "Cannot find record to edit.", alertCannotFindRecordDelete: "Cannot find record to delete.",
         alertInvalidIndex: "Error processing record: Invalid index.",
         alertCannotFindNoteEdit: "Cannot find Keeps to edit.", alertCannotFindNoteDelete: "Cannot find Keeps to delete.",
+        notification_setup_success_title: "Notification Setup Complete",
+        notification_setup_success_body: "Notifications have been set. We'll remind you on your weekly measurement day!",
+        notification_permission_denied: "Notification permission was denied. Please allow it in your browser settings.",
         // Tabs
         tabMain: "Main",
         tabRecord: "Record",
@@ -477,6 +483,9 @@ const languages = {
         alertCannotFindRecordEdit: "編集対象記録なし", alertCannotFindRecordDelete: "削除対象記録なし",
         alertInvalidIndex: "記録処理エラー：インデックス無効",
         alertCannotFindNoteEdit: "編集対象メモなし", alertCannotFindNoteDelete: "削除対象メモなし",
+        notification_setup_success_title: "通知設定完了",
+        notification_setup_success_body: "通知が設定されました。毎週測定日にお知らせします！",
+        notification_permission_denied: "通知の許可が拒否されました。ブラウザの設定で許可してください。",
         // Tabs
         tabMain: "メイン",
         tabRecord: "記録する",
@@ -1191,12 +1200,11 @@ document.addEventListener('DOMContentLoaded', () => {
             filterContainer.addEventListener('click', handleComparisonFilterClick);
         }
         // [수정된 부분 끝]
-
-        // 탭 전환 이벤트 리스너 연결
         const tabSwitcher = modalContent.querySelector('.modal-tab-switcher');
         if (tabSwitcher) {
             tabSwitcher.addEventListener('click', handleModalTabSwitch);
         }
+
     }
 
     function handleComparisonFilterClick(event) {
@@ -3834,12 +3842,25 @@ document.addEventListener('DOMContentLoaded', () => {
         alert(translate('alertInitError') || `App Initialization Error: ${initError.message}`);
     }
     // --- Notification Toggle Handler ---
+    function showConfirmationNotification() {
+        if (!('Notification' in window) || Notification.permission !== 'granted') {
+            return;
+        }
+        const title = translate('notification_setup_success_title');
+        const body = translate('notification_setup_success_body');
+        new Notification(title, {
+            body: body,
+            icon: '/icons/apple-touch-icon.png'
+        });
+    }
+
+
+    // --- Notification Toggle Handler ---
     function handleNotificationToggle() {
         if (!notificationToggle) return;
         const isEnabled = notificationToggle.checked;
 
         if (isEnabled) {
-            // 알림을 켜려고 할 때
             if (!('Notification' in window)) {
                 showPopup('alertBrowserNotSupportNotification', 3000);
                 notificationToggle.checked = false;
@@ -3851,15 +3872,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     notificationEnabled = true;
                     saveSettingsToStorage();
                     showPopup('popupSettingsSaved');
+                    // ▼▼▼▼▼ 아래 함수 호출을 추가합니다. ▼▼▼▼▼
+                    showConfirmationNotification(); // 설정 완료 확인 알림 표시
                 } else {
                     console.log("DEBUG: Notification permission denied.");
                     notificationEnabled = false;
-                    notificationToggle.checked = false; // 사용자가 거부하면 토글을 다시 끔
+                    notificationToggle.checked = false;
                     saveSettingsToStorage();
                 }
             });
         } else {
-            // 알림을 끌 때
             notificationEnabled = false;
             saveSettingsToStorage();
             console.log("DEBUG: Notifications disabled by user.");
@@ -3903,22 +3925,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 tabBar.classList.add('tab-bar-expanded');
             }
         });
+
+        if (notificationToggle) {
+            notificationToggle.addEventListener('change', handleNotificationToggle);
+        }
         // --- Modal Bottom Sheet Events ---
-        if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
-        if (modalOverlay) {
+        if (modalCloseBtn) { // <--- 이 부분을 추가하세요
+            modalCloseBtn.addEventListener('click', closeModal);
+        }
+
+        if (modalOverlay) { // <--- 이 부분을 추가하세요
             modalOverlay.addEventListener('click', (e) => {
-                // 오버레이의 검은 배경을 클릭했을 때만 닫히도록 함
+                // 클릭된 요소가 모달의 어두운 배경(오버레이) 자체일 때만 닫히도록 함
                 if (e.target === modalOverlay) {
                     closeModal();
                 }
             });
         }
-        // ✅ 교체할 코드 2: modalContent 이벤트 리스너
         if (modalContent) {
             modalContent.addEventListener('click', (e) => {
                 const editBtn = e.target.closest('.btn-edit');
                 const deleteBtn = e.target.closest('.btn-delete');
-                const likeBtn = e.target.closest('.keeps-like-btn'); // '좋아요' 버튼 변수 추가
+                const likeBtn = e.target.closest('.keeps-like-btn');
                 const index = parseInt(editBtn?.dataset.index || deleteBtn?.dataset.index || likeBtn?.dataset.index, 10);
 
                 if (isNaN(index)) return;
@@ -3926,32 +3954,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 // '좋아요' 버튼 클릭 시 처리 로직
                 if (likeBtn) {
                     if (index >= 0 && index < measurements.length) {
-                        // 1. 데이터 업데이트
                         measurements[index].memoLiked = !measurements[index].memoLiked;
                         savePrimaryDataToStorage();
-
-                        // 2. UI 즉시 업데이트 (CSS 클래스 토글)
                         likeBtn.classList.toggle('liked', measurements[index].memoLiked);
                     }
                     return; // 좋아요 처리 후 함수 종료
                 }
 
-                // 수정 버튼 클릭 시 처리
-                if (editBtn) {
-                    console.log(`DEBUG: Edit button clicked in modal for index ${index}`);
-                    closeModal(); // 모달을 먼저 닫고
-                    // 0.1초 후 수정 함수 호출 및 해당 탭으로 이동
+                // 수정 또는 삭제 버튼 클릭 시 모달을 닫고 액션 실행
+                if (editBtn || deleteBtn) {
+                    closeModal();
                     setTimeout(() => {
-                        handleEditClick(index);
-                        activateTab('tab-record');
-                    }, 100);
-                }
-                // 삭제 버튼 클릭 시 처리
-                else if (deleteBtn) {
-                    console.log(`DEBUG: Delete button clicked in modal for index ${index}`);
-                    closeModal(); // 모달을 먼저 닫고
-                    setTimeout(() => {
-                        handleDeleteMeasurement(index);
+                        if (editBtn) {
+                            handleEditClick(index);
+                            activateTab('tab-record');
+                        } else if (deleteBtn) {
+                            handleDeleteMeasurement(index);
+                        }
                     }, 100);
                 }
             });
@@ -4411,7 +4430,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!button) return;
 
         const targetTab = button.dataset.tab;
-        if (targetTab === activeModalTab) return; // 이미 활성화된 탭이면 무시
+        if (targetTab === activeModalTab) return;
 
         activeModalTab = targetTab;
 

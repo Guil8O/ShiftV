@@ -95,17 +95,17 @@
                 <span>마이</span>
             </button>
             <!-- 4. 설정 탭 -->
-             <button class="tab-button" data-tab="tab-settings" data-lang-key="tabSettings">
+            <button class="tab-button" data-tab="tab-settings" data-lang-key="tabSettings">
                 <div class="active-tab-indicator"></div>
-                <img src="./assets/setting.svg" alt="설정" width="24" height="24">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path
+                        d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z" />
+                    <path
+                        d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.902 3.433 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zM8 13a5 5 0 1 1 0-10 5 5 0 0 1 0 10z" />
+                </svg>
                 <span>설정</span>
             </button>
         </div>
-
-
-
-
-
 
         <div class="container">
             <div class="title-container">
@@ -393,9 +393,8 @@
 
 
                         <div class="settings-section glass-card">
-                            <h3 data-lang-key="languageSettingsTitle" id="language-settings-title">언어 설정</h3>
-                            <div class="form-group">
-                                <label for="language-select" data-lang-key="language">언어</label>
+                            <div class="setting-item">
+                                <h3 data-lang-key="languageSettingsTitle" id="language-settings-title">언어 설정</h3>
                                 <select id="language-select">
                                     <option value="ko">한국어</option>
                                     <option value="en">English</option>
@@ -404,37 +403,36 @@
                             </div>
                         </div>
 
+                        <!-- [수정] 생물학적 성별 설정 -->
                         <div class="settings-section glass-card">
-                            <h3 data-lang-key="sexSettingsTitle">생물학적 성별 설정</h3>
-                            <p class="description" data-lang-key="sexSettingsDesc">자연 호르몬 회복률 계산에 사용됩니다.</p>
-                            <div class="form-group">
-                                <label for="sex-select" data-lang-key="biologicalSex">생물학적 성별</label>
+                            <div class="setting-item">
+                                <h3 data-lang-key="sexSettingsTitle">생물학적 성별 설정</h3>
                                 <select id="sex-select">
                                     <option value="male" data-lang-key="sexMale">남성</option>
                                     <option value="female" data-lang-key="sexFemale">여성</option>
                                     <option value="other" data-lang-key="sexOther">기타-무성별</option>
                                 </select>
                             </div>
+                            <p class="description" data-lang-key="sexSettingsDesc">자연 호르몬 회복률 계산에 사용됩니다.</p>
                         </div>
+
+                        <!-- [수정] 모드 설정 -->
                         <div class="settings-section glass-card">
-                            <h3 data-lang-key="modeSettingsTitle" id="mode-settings-title">모드 설정</h3>
-                            <p class="description" data-lang-key="modeSettingsDesc" id="mode-settings-description">목표하는
-                                신체
-                                변화
-                                방향을 선택해주세요.</p>
-                            <div class="form-group">
-                                <label for="mode-select" data-lang-key="mode" id="mode-label">모드</label>
+                            <div class="setting-item">
+                                <h3 data-lang-key="modeSettingsTitle" id="mode-settings-title">모드 설정</h3>
                                 <select id="mode-select">
                                     <option value="mtf" data-lang-key="modeMtf">여성화</option>
                                     <option value="ftm" data-lang-key="modeFtm">남성화</option>
                                 </select>
                             </div>
+                            <p class="description" data-lang-key="modeSettingsDesc" id="mode-settings-description">목표하는
+                                신체 변화 방향을 선택해주세요.</p>
                         </div>
 
+                        <!-- [수정] 테마 설정 -->
                         <div class="settings-section glass-card">
-                            <h3 data-lang-key="themeSettingsTitle">테마 설정</h3>
-                            <div class="form-group">
-                                <label for="theme-select" data-lang-key="theme">테마</label>
+                            <div class="setting-item">
+                                <h3 data-lang-key="themeSettingsTitle">테마 설정</h3>
                                 <select id="theme-select">
                                     <option value="system" data-lang-key="themeSystem">기기 값 참조</option>
                                     <option value="light" data-lang-key="themeLight">라이트 모드</option>
@@ -444,17 +442,20 @@
                         </div>
 
                         <div class="settings-section glass-card">
-                            <h3 data-lang-key="notificationSettingsTitle">알림 설정</h3>
                             <div class="setting-item">
-                                <label for="notification-toggle" data-lang-key="notificationToggleLabel">측정일 알림
-                                    받기</label>
+                                <h3 data-lang-key="notificationSettingsTitle"
+                                    style="margin: 0; color: var(--primary); font-size: 1.2em;">알림 설정</h3>
                                 <label class="switch">
                                     <input type="checkbox" id="notification-toggle">
                                     <span class="slider round"></span>
                                 </label>
                             </div>
-                            <p class="description" data-lang-key="notificationSettingsDesc">마지막 측정일로부터 7일이 지나면 알려드려요.
-                                알림을 받으려면 브라우저의 권한 허용이 필요해요.</p>
+                            <div>
+                                <p class="description" data-lang-key="notificationSettingsDesc"
+                                    style="margin-top: 15px;">마지막 측정일로부터 7일이 지나면
+                                    알려드려요.
+                                    알림을 받으려면 브라우저의 권한 허용이 필요해요.</p>
+                            </div>
                         </div>
 
 

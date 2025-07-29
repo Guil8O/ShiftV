@@ -1101,6 +1101,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 analytics.testosteroneLevel.daysToTarget = Math.abs(Math.round((targetT - latestT) / dailyTChange));
             }
         }
+        const latestEForSuppression = parseFloat(latest.estrogenLevel);
+        const T_BASELINE_ForSuppression = biologicalSex === 'male' ? T_BASELINE_MALE : (biologicalSex === 'female' ? T_BASELINE_FEMALE : null);
+
+        if (!isNaN(latestEForSuppression) && T_BASELINE_ForSuppression !== null) {
+            const suppressionRate = getSuppressionRate(latestEForSuppression);
+            // 억제량은 음수로 표시해야 하므로 -1을 곱합니다.
+            const dailySuppressionAmount = -1 * T_BASELINE_ForSuppression * suppressionRate;
+            analytics.testosteroneLevel.dailySuppression = dailySuppressionAmount;
+        } else {
+            analytics.testosteroneLevel.dailySuppression = null;
+        }
         return analytics;
     }
 
@@ -1662,7 +1673,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="analysis-item"><span class="analysis-label">${translate('weeklyChange')}</span><span class="analysis-value">${formatChange(analytics.estrogenLevel.weeklyChange)}</span></div>
             <div class="analysis-item"><span class="analysis-label">${translate('monthlyAvgChange')}</span><span class="analysis-value">${formatChange(analytics.estrogenLevel.monthlyAvgChange)}</span></div>
             <div class="analysis-item"><span class="analysis-label">${translate('totalChangeWithInitial', { value: formatValue(analytics.estrogenLevel.initial, 'estrogenLevel') })}</span><span class="analysis-value">${formatChange(analytics.estrogenLevel.totalChange)}</span></div>
-            <div class="analysis-item"><span class="analysis-label">${translate('dailyTSuppression')}</span><span class="analysis-value">${analytics.testosteroneLevel.dailyChange ? formatChange(analytics.testosteroneLevel.dailyChange) : '-'}</span></div>
+            <div class="analysis-item">
+    <span class="analysis-label">${translate('dailyTSuppression')}</span>
+    <span class="analysis-value">${analytics.testosteroneLevel.dailySuppression ? formatChange(analytics.testosteroneLevel.dailySuppression) : '-'}</span>
+</div>
         </div>
     </div>
     <div class="sv-card">
@@ -1672,8 +1686,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="analysis-item"><span class="analysis-label">${translate('weeklyChange')}</span><span class="analysis-value">${formatChange(analytics.testosteroneLevel.weeklyChange)}</span></div>
             <div class="analysis-item"><span class="analysis-label">${translate('monthlyAvgChange')}</span><span class="analysis-value">${formatChange(analytics.testosteroneLevel.monthlyAvgChange)}</span></div>
             <div class="analysis-item"><span class="analysis-label">${translate('totalChangeWithInitial', { value: formatValue(analytics.testosteroneLevel.initial, 'testosteroneLevel') })}</span><span class="analysis-value">${formatChange(analytics.testosteroneLevel.totalChange)}</span></div>
-            <div class="analysis-item"><span class="analysis-label">${translate('dailyTSuppression')}</span><span class="analysis-value">${analytics.testosteroneLevel.dailyChange ? formatChange(analytics.testosteroneLevel.dailyChange) : '-'}</span></div>
-        </div>
+<div class="analysis-item">
+    <span class="analysis-label">${translate('dailyTSuppression')}</span>
+    <span class="analysis-value">${analytics.testosteroneLevel.dailySuppression ? formatChange(analytics.testosteroneLevel.dailySuppression) : '-'}</span>
+</div>        </div>
     </div>
 </div>`;
 
@@ -3532,7 +3548,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateFormTitle();
             if (saveUpdateBtn) saveUpdateBtn.textContent = translate('edit');
             if (cancelEditBtn) cancelEditBtn.style.display = 'inline-block';
-            activateTab('tab-input');
+            activateTab('tab-record');
             setTimeout(() => {
                 form.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 const firstVisibleInput = form.querySelector('fieldset:not([style*="display: none"]) input, fieldset:not([style*="display: none"]) textarea');
@@ -3707,7 +3723,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     savePrimaryDataToStorage(); saveSettingsToStorage();
                     console.log("DEBUG: Data imported successfully."); showPopup('popupDataImportSuccess');
                     applyModeToUI(); applyLanguageToUI(); applyTheme();
-                    setupTargetInputs(); renderAll(); activateTab('tab-history');
+                    setupTargetInputs(); renderAll(); activateTab('tab-my');
                 } else { console.error("Import failed: Invalid file structure."); showPopup('alertImportInvalidFile', 4000); }
             } catch (err) { console.error("Error parsing imported file:", err); showPopup('alertImportReadError', 4000); }
             finally { if (importFileInput) importFileInput.value = ''; }

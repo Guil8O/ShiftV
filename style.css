@@ -3040,3 +3040,18 @@ body.light-mode .modal-tab-btn.active {
     width: 1px;
     background-color: var(--glass-border);
 }
+/* 설정 탭 내부의 h3 태그의 기본 마진을 제거하여 정렬을 맞춥니다. */
+#tab-settings .setting-item > h3 {
+    margin: 0;
+}
+
+/* 설정 탭의 description 단락의 상단 마진을 통일합니다. */
+#tab-settings .setting-item + .description {
+    margin-top: 15px;
+}
+
+/* 설정 탭의 select 드롭다운 너비를 조정하여 보기 좋게 만듭니다. */
+#tab-settings .setting-item > select {
+    width: 50%;
+    max-width: 180px; /* 너무 넓어지지 않도록 최대 너비 설정 */
+}

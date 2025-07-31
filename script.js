@@ -1139,12 +1139,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeModal() {
-        if (!modalOverlay) return;
-
-        bodyElement.classList.remove('modal-open');
-        modalOverlay.classList.remove('visible');
+        // 이미 닫혀있으면 아무것도 하지 않음
+        if (!modalOverlay.classList.contains('visible')) return;
+        history.back();
     }
-
     // --- Hormone Modal Functions ---
     function openHormoneModal() {
         if (!hormoneModalOverlay) return;
@@ -1163,9 +1161,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeHormoneModal() {
-        if (!hormoneModalOverlay) return;
-        bodyElement.classList.remove('modal-open');
-        hormoneModalOverlay.classList.remove('visible');
+        if (!hormoneModalOverlay.classList.contains('visible')) return;
+        history.back();
 
         // 모달이 닫힐 때 차트 인스턴스를 파괴
         if (medicationChartInstance) {
@@ -3835,6 +3832,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===============================================
     console.log("DEBUG: App Initialization Start");
     try {
+        history.pushState(null, '', location.href);
         updateAppVersionDisplay();
         loadSettingsFromStorage();
         if (isIOS()) { bodyElement.classList.add('ios-device'); }
@@ -4621,5 +4619,68 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
     `;
     }
+
+    function closeAllModalsVisually() {
+        let aModalWasClosed = false;
+
+        // 모든 모달 오버레이를 확인합니다.
+        const allModalOverlays = [
+            document.getElementById('modal-bottom-sheet-overlay'),
+            document.getElementById('hormone-modal-overlay')
+        ];
+
+        allModalOverlays.forEach(overlay => {
+            if (overlay && overlay.classList.contains('visible')) {
+                overlay.classList.remove('visible');
+                aModalWasClosed = true;
+
+                // 특정 모달에만 필요한 후처리 (예: 차트 파괴)
+                if (overlay.id === 'hormone-modal-overlay') {
+                    if (medicationChartInstance) {
+                        medicationChartInstance.destroy();
+                        medicationChartInstance = null;
+                    }
+                    if (hormoneChartInstance) {
+                        hormoneChartInstance.destroy();
+                        hormoneChartInstance = null;
+                    }
+                }
+            }
+        });
+
+        if (aModalWasClosed) {
+            document.body.classList.remove('modal-open');
+        }
+
+        return aModalWasClosed;
+    }
+
+
+    /**
+     * 뒤로가기 버튼 이벤트를 처리하는 메인 핸들러
+     */
+    window.addEventListener('popstate', function (event) {
+        // 1. 뒤로가기 시 앱이 종료되는 것을 막기 위해 즉시 히스토리를 다시 추가 (재-무장)
+        history.pushState(null, '', location.href);
+
+        // 2. (최우선) 열려있는 모달이 있는지 확인하고 닫습니다.
+        if (closeAllModalsVisually()) {
+            // 모달을 닫는 것이 목적이었으므로, 여기서 처리를 종료합니다.
+            return;
+        }
+
+        // 3. 모달이 없다면, 현재 활성화된 탭을 확인합니다.
+        const activeTab = document.querySelector('.tab-button.active')?.dataset.tab;
+
+        // 4. 현재 탭이 메인(sv) 탭이 아니라면, 메인 탭으로 이동시킵니다.
+        if (activeTab && activeTab !== 'tab-sv') {
+            activateTab('tab-sv');
+            return;
+        }
+
+        // 5. 현재 탭이 메인 탭이라면, 아무것도 하지 않아 앱 종료를 방지합니다.
+        // (1번에서 이미 히스토리를 추가했기 때문에 추가 동작 필요 없음)
+        console.log("Back button pressed on main tab. Preventing exit.");
+    });
 
 });

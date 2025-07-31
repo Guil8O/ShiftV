@@ -1426,19 +1426,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }, duration);
     }
 
+    // script.js 파일에서 formatValue 함수를 찾아 아래 코드로 교체해주세요.
+
     function formatValue(value, key = '') {
         if (value === null || value === undefined || value === '') return '-';
-        if (textKeys.includes(key) || key === 'skinCondition') { // skinCondition도 textKey 처럼 처리
+        if (textKeys.includes(key) || key === 'skinCondition') {
             return value;
         }
         const num = parseFloat(value);
         if (isNaN(num)) return '-';
 
-        if (['weight', 'muscleMass', 'bodyFatPercentage', 'height', 'shoulder', 'neck', 'chest', 'waist', 'hips', 'thigh', 'calf', 'arm', 'estradiol', 'semenScore', 'healthScore'].includes(key)) {
-            return num.toFixed(1);
-        } else if (['progesterone', 'antiAndrogen', 'testosterone', 'libido'].includes(key)) {
-            return num.toFixed(0);
+        // 소수점 첫째 자리까지 표시할 항목들
+        const toFixed1Keys = [
+            // 신체 사이즈
+            'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm',
+            // 건강 수치
+            'muscleMass', 'bodyFatPercentage', 'estrogenLevel', 'testosteroneLevel', 'healthScore',
+            // 모든 약물 용량
+            'estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen', 'medicationOtherDose'
+        ];
+
+        // 정수로 표시할 항목들
+        const toFixed0Keys = [
+            'libido'
+        ];
+
+        if (toFixed1Keys.includes(key)) {
+            return num.toFixed(1); // 0.5는 "0.5"로, 0은 "0.0"으로 표시
+        } else if (toFixed0Keys.includes(key)) {
+            return num.toFixed(0); // 정수로 반올림하여 표시
         }
+
+        // 위에 해당하지 않는 다른 모든 숫자 값
         return num.toString();
     }
 
@@ -1717,7 +1736,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const influenceEntries = Object.entries(analytics.influence).filter(([drug, effects]) =>
-                    usedDrugs.has(drug) && (effects.estrogen.toFixed(2) != '0.00' || effects.testosterone.toFixed(2) != '0.00')
+                    usedDrugs.has(drug) && effects && (effects.estrogen !== 0 || effects.testosterone !== 0)
                 );
 
                 if (influenceEntries.length > 0) {
@@ -2049,24 +2068,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let weeklyChangeHTML = '';
 
-                // analytics가 null이 아니고, 해당 호르몬 키가 있는지 확인
-                if (analytics && analytics[h.key] && analytics[h.key].weeklyChange !== null) {
+                // analytics.weeklyChange 값이 유효한 'number' 타입인지 명확하게 확인합니다.
+                if (analytics && analytics[h.key] && typeof analytics[h.key].weeklyChange === 'number') {
                     const change = analytics[h.key].weeklyChange;
                     const changeClass = change >= 0 ? 'positive-change' : 'negative-change';
                     const changeText = change >= 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
                     weeklyChangeHTML = `
-                        <div class="hormone-weekly-change">
-                            <span class="change-label">${translate('svcard_hormone_weekly_change')}</span>
-                            <span class="change-value ${changeClass}">${changeText}</span>
-                        </div>
-                    `;
+                    <div class="hormone-weekly-change">
+                        <span class="change-label">${translate('svcard_hormone_weekly_change')}</span>
+                        <span class="change-value ${changeClass}">${changeText}</span>
+                    </div>
+                `;
                 } else {
+                    // 값이 유효하지 않으면 '-'로 표시합니다.
                     weeklyChangeHTML = `
-                        <div class="hormone-weekly-change">
-                            <span class="change-label">${translate('svcard_hormone_weekly_change')}</span>
-                            <span class="change-value">-</span>
-                        </div>
-                    `;
+                    <div class="hormone-weekly-change">
+                        <span class="change-label">${translate('svcard_hormone_weekly_change')}</span>
+                        <span class="change-value">-</span>
+                    </div>
+                `;
                 }
 
                 content += `

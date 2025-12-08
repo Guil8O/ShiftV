@@ -17,31 +17,31 @@ const languages = {
         // General
         save: "저장", edit: "수정", delete: "삭제", cancel: "취소",
         saveRecord: "기록하기 ✨", cancelEdit: "수정 취소", saveTarget: "목표 저장! 💪",
-        saveNote: "Keeps 저장 🖋️",
+        saveNote: "플래닝 저장 🖋️",
         saveSettings: "설정 저장", close: "닫기", ComRemainder: '남은 수치',
         confirm: "확인", selectAll: "전체 선택", deselectAll: "전체 해제",
         noDataYet: "첫 기록을 남겨볼까요?",
-        noNotesYet: "첫 Keeps를 남겨보세요!",
+        noNotesYet: "첫 플래닝을 남겨보세요!",
         noTargetsYet: "설정된 목표가 없어요.", noDataForChart: "표시할 항목을 선택하거나 데이터를 입력하세요.",
         invalidValue: "유효하지 않은 값", loadingError: "데이터 로드 오류", savingError: "데이터 저장 오류",
-        confirmReset: "정말로 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든 측정 기록, 목표, Keeps가 영구적으로 삭제됩니다. 초기화 전에 데이터를 백업하는 것이 좋습니다.",
+        confirmReset: "정말로 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든 측정 기록, 목표, 플래닝가 영구적으로 삭제됩니다. 초기화 전에 데이터를 백업하는 것이 좋습니다.",
         confirmDeleteRecord: "주차 {week} ({date}) 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.", // Updated delete confirmation
-        confirmDeleteNote: "Keeps '{title}'을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        confirmDeleteNote: "플래닝 '{title}'을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
         dataExported: "데이터가 파일로 저장되었습니다.", dataImported: "데이터를 성공적으로 불러왔습니다!",
         dataReset: "모든 데이터가 초기화되었습니다.", dataSaved: "저장 완료! 👍",
-        noteSaved: "Keeps가 저장되었습니다.",
+        noteSaved: "플래닝가 저장되었습니다.",
         targetsSaved: "목표가 저장되었습니다.", settingsSaved: "설정이 저장되었습니다.",
         importError: "파일을 불러오는 중 오류 발생:", importSuccessRequiresReload: "데이터를 성공적으로 불러왔습니다. 변경사항을 적용하려면 페이지를 새로고침해주세요.",
         unexpectedError: "예상치 못한 오류가 발생했습니다 😢 콘솔(F12)을 확인해주세요.\n오류: {message}",
         alertInitError: "앱 초기화 중 오류 발생!", alertListenerError: "이벤트 리스너 설정 오류!",
         popupSaveSuccess: "측정 기록 저장 완료! 🎉", popupUpdateSuccess: "측정 기록 수정 완료! ✨",
         popupDeleteSuccess: "측정 기록 삭제 완료 👍", popupTargetSaveSuccess: "목표 저장 완료! 👍",
-        popupNoteSaveSuccess: "새 Keeps 저장 완료! 🎉", popupNoteUpdateSuccess: "Keeps 수정 완료! ✨",
-        popupNoteDeleteSuccess: "Keeps 삭제 완료 👍", popupDataExportSuccess: "데이터 내보내기 성공! 🎉",
+        popupNoteSaveSuccess: "새 플래닝 저장 완료! 🎉", popupNoteUpdateSuccess: "플래닝 수정 완료! ✨",
+        popupNoteDeleteSuccess: "플래닝 삭제 완료 👍", popupDataExportSuccess: "데이터 내보내기 성공! 🎉",
         popupDataImportSuccess: "데이터 가져오기 성공! ✨", popupDataResetSuccess: "모든 데이터가 초기화되었습니다. ✨",
         popupSettingsSaved: "설정 저장 완료! 👍",
         alertValidationError: "유효하지 않은 입력 값이 있습니다. 빨간색 표시 필드를 확인해주세요. 숫자 값은 0 이상이어야 합니다.",
-        alertNoteContentMissing: "Keeps 제목이나 내용을 입력해주세요!",
+        alertNoteContentMissing: "플래닝 제목이나 내용을 입력해주세요!",
         alertImportConfirm: "현재 데이터를 덮어쓰고 가져온 데이터로 복원하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
         alertImportInvalidFile: "파일 형식이 올바르지 않거나 호환되지 않는 데이터입니다.",
         alertImportReadError: "파일 읽기/처리 중 오류 발생.", alertImportFileReadError: "파일 읽기 실패.",
@@ -50,13 +50,13 @@ const languages = {
         alertSaveError: "로컬 스토리지 저장 실패.", alertExportError: "데이터 내보내기 중 오류 발생.",
         alertCannotFindRecordEdit: "수정할 기록 찾기 실패.", alertCannotFindRecordDelete: "삭제할 기록 찾기 실패.",
         alertInvalidIndex: "기록 처리 중 오류: 인덱스 오류.",
-        alertCannotFindNoteEdit: "수정할 Keeps 찾기 실패.", alertCannotFindNoteDelete: "삭제할 Keeps 찾기 실패.",
+        alertCannotFindNoteEdit: "수정할 플래닝 찾기 실패.", alertCannotFindNoteDelete: "삭제할 플래닝 찾기 실패.",
         notification_setup_success_title: "알림 설정 완료",
         notification_setup_success_body: "알림이 설정되었습니다. 매주 측정일이 되면 알려드릴게요!",
         notification_permission_denied: "알림 권한이 차단되었습니다. 브라우저 설정에서 허용해주세요.",
 
         // Tabs
-        tabMain: "메인",
+        tabMain: "홈",
         tabRecord: "기록하기",
         tabMy: "마이",
         tabSettings: "설정",
@@ -64,19 +64,19 @@ const languages = {
         // ▼▼▼ 새 키 추가 ▼▼▼
         showHistoryButton: "기록 확인하기",
         showInputButton: "입력으로 돌아가기",
-        recordKeepsLabel: "이번 주 Keeps 📝",
+        recordKeepsLabel: "이번 주 플래닝! 📝",
         recordKeepsPlaceholder: "오늘의 기분, 이벤트, 신체 변화 등을 자유롭게 기록해보세요...",
-        memo: "Keeps",
+        memo: "플래닝",
         //SVcard
         svcard_shortcut_new: "새 마음으로<br><span class='countdown-days'>기록</span><br>해볼까요?",
         svcard_shortcut_dday: "'D-Day!'<br>새로운 기록을<br>측정해주세요",
         svcard_shortcut_overdue: "'측정이 {days}일 지났어요!'<br>새로운 기록을<br>측정해주세요",
         svcard_shortcut_countdown: "다음 측정일까지<br><span class='countdown-days'>{days}일</span><br>남았어요",
         // SV Card Titles & Content
-        svcard_title_highlights: "✨ 하이라이트",
-        svcard_title_targets: "🎯 목표 달성도",
-        svcard_title_hormones: "💉 호르몬 분석",
-        svcard_title_keeps: "📝 최근 Keeps",
+        svcard_title_highlights: "✨ 바디 브리핑",
+        svcard_title_targets: "🎯 변화 로드맵",
+        svcard_title_hormones: "💉 호르몬 저널",
+        svcard_title_keeps: "📝 플래닝 노트",
         svcard_no_data_for_highlights: "변화를 비교하려면 데이터가 2개 이상 필요해요.",
         svcard_no_targets_set: "설정 탭에서 목표를 설정해주세요.",
         svcard_overall_progress: "전체 달성률",
@@ -97,7 +97,7 @@ const languages = {
         notificationToggleLabel: "측정일 알림 받기",
         notificationSettingsDesc: "마지막 측정일로부터 7일이 지나면 알려드려요. 알림을 받으려면 브라우저의 권한 허용이 필요해요.",
         alertBrowserNotSupportNotification: "이 브라우저는 알림을 지원하지 않아요.",
-        comparisonModalTitle: "측정 상세 분석",
+        comparisonModalTitle: "바디 브리핑",
         selectedWeekDataTitle: "{week}주차 상세 기록",
 
         medicationHistoryTitle: "투여량 변화",
@@ -105,13 +105,13 @@ const languages = {
         hormoneAnalysisTitle: "최근 2주 분석",
         hormoneAnalysisAvgChange: "평균 변화량: {change}",
         hormoneAnalysisNextWeek: "다음 주 예상 수치: {value}",
-        hormoneModalTitle: "호르몬 수치 분석",
+        hormoneModalTitle: "호르몬 저널",
 
         svcard_no_major_changes: "최근 주요 변화가 없어요.",
         svcard_change_vs_last_week: "지난 주 대비",
-        svcard_title_weekly_guide: "주간 가이드",
-        svcard_no_keeps_yet: "작성된 Keeps가 없어요.",
-        svcard_no_keeps_add_prompt: "작성된 Keeps가 없어요. '기록하기' 탭에서 추가해보세요!",
+        svcard_title_weekly_guide: "오늘의 한마디",
+        svcard_no_keeps_yet: "작성된 플래닝가 없어요.",
+        svcard_no_keeps_add_prompt: "작성된 플래닝가 없어요. '기록하기' 탭에서 추가해보세요!",
         modalTabDetailedAnalysis: "상세 분석",
         modalTabComparativeAnalysis: "비교 분석",
         labelBase: "기준",
@@ -190,11 +190,11 @@ const languages = {
         targetDescription: "원하는 목표 수치를 입력해주세요. 메인 탭에서 달성률을 확인할 수 있어요.",
         targetItem: "항목", targetValue: "목표값",
         // Overview (Keeps) Tab
-        overviewTitle: "Keeps 📝",
-        noteNewTitle: "새 Keeps 작성", noteEditTitle: "Keeps 수정",
-        noteTitleLabel: "제목", noteTitlePlaceholder: "Keeps 제목 (선택)",
-        noteContentLabel: "내용", noteContentPlaceholder: "이벤트, 몸 상태, 생각 등 자유롭게 Keeps에 기록해요!",
-        noteListTitle: "작성된 Keeps 목록 ✨", noteTitleUntitled: "제목 없음",
+        overviewTitle: "플래닝 📝",
+        noteNewTitle: "새 플래닝 작성", noteEditTitle: "플래닝 수정",
+        noteTitleLabel: "제목", noteTitlePlaceholder: "플래닝 제목 (선택)",
+        noteContentLabel: "내용", noteContentPlaceholder: "이벤트, 몸 상태, 생각 등 자유롭게 플래닝에 기록해요!",
+        noteListTitle: "작성된 플래닝 목록 ✨", noteTitleUntitled: "제목 없음",
         sortBy: "정렬:", sortNewest: "최신 순", sortOldest: "오래된 순",
         noteDateCreated: "작성:", noteDateUpdated: "(수정: {date})", notePreviewEmpty: "내용을 적어 보세요",
         // Settings Tab
@@ -204,11 +204,11 @@ const languages = {
         mode: "모드", modeMtf: "여성화", modeFtm: "남성화",
         themeSettingsTitle: "테마 설정", theme: "테마", themeSystem: "기기 값 참조", themeLight: "라이트 모드", themeDark: "다크 모드",
         dataManagementTitle: "데이터 백업 & 복원",
-        dataManagementDesc: "모든 기록(측정, 목표, Keeps)을 파일 하나로 저장하거나 복원할 수 있어요. 가끔 백업해두면 안심이에요! 😊",
+        dataManagementDesc: "모든 기록(측정, 목표, 플래닝)을 파일 하나로 저장하거나 복원할 수 있어요. 가끔 백업해두면 안심이에요! 😊",
         exportData: "파일 저장하기", importData: "파일 불러오기",
         warning: "주의!", importWarning: "복원하면 지금 앱에 있는 모든 데이터가 파일 내용으로 완전히 대체돼요!",
         resetDataTitle: "데이터 초기화",
-        severeWarning: "정말정말 주의!", resetWarning: "😱 모든 데이터(측정, 목표, Keeps)가 영구적으로 삭제됩니다! 초기화 전에 꼭! 데이터를 파일로 백업해주세요.",
+        severeWarning: "정말정말 주의!", resetWarning: "😱 모든 데이터(측정, 목표, 플래닝)가 영구적으로 삭제됩니다! 초기화 전에 꼭! 데이터를 파일로 백업해주세요.",
         resetDataButton: "모든 데이터 초기화",
         infoTitle: "정보", versionLabel: "버전:",
         privacyInfo: "이 앱은 오프라인 작동하며 모든 데이터는 앱에만 안전하게 저장됩니다! 😉",
@@ -219,7 +219,7 @@ const languages = {
         popupUpdateFailed: "업데이트에 실패했습니다. 잠시 후 다시 시도해주세요.",
         popupAlreadyLatest: "이미 최신 버전이에요! ✨",
         popupOfflineForUpdate: "업데이트를 확인하려면 인터넷 연결이 필요해요.",
-        resetWarning: "😱 데이터 초기화는 모든 기록(측정, 목표, Keeps)을 영구적으로 삭제합니다! 초기화 전에 꼭! 데이터를 파일로 백업해주세요.",
+        resetWarning: "😱 데이터 초기화는 모든 기록(측정, 목표, 플래닝)을 영구적으로 삭제합니다! 초기화 전에 꼭! 데이터를 파일로 백업해주세요.",
         // Initial Setup
         initialSetupTitle: "초기 설정",
         initialSetupDesc: "ShiftV 사용을 시작하기 전에 언어와 모드를 선택해주세요.",
@@ -243,28 +243,28 @@ const languages = {
         // General
         save: "Save", edit: "Edit", delete: "Delete", cancel: "Cancel",
         saveRecord: "Record ✨", cancelEdit: "Cancel Edit", saveTarget: "Save Targets! 💪",
-        saveNote: "Save Keeps 🖋️", saveSettings: "Save Settings", close: "Close", ComRemainder: 'Remainder',
+        saveNote: "Save Planning 🖋️", saveSettings: "Save Settings", close: "Close", ComRemainder: 'Remainder',
         confirm: "Confirm", selectAll: "Select All", deselectAll: "Deselect All",
-        noDataYet: "Let's add the first record!", noNotesYet: "No Keeps written yet. Let's add the first Keeps!",
+        noDataYet: "Let's add the first record!", noNotesYet: "No Planning written yet. Let's add the first Planning!",
         noTargetsYet: "No targets set.", noDataForChart: "Select items to display or enter data.",
         invalidValue: "Invalid value", loadingError: "Data loading error", savingError: "Data saving error",
-        confirmReset: "Are you absolutely sure you want to reset all data? This action cannot be undone and will permanently delete all measurement records, targets, and Keeps. It is highly recommended to back up your data before proceeding.",
+        confirmReset: "Are you absolutely sure you want to reset all data? This action cannot be undone and will permanently delete all measurement records, targets, and Planning. It is highly recommended to back up your data before proceeding.",
         confirmDeleteRecord: "Delete record for Week {week} ({date})? This action cannot be undone.",
-        confirmDeleteNote: "Delete Keeps \"{title}\"? This cannot be undone.",
+        confirmDeleteNote: "Delete Planning \"{title}\"? This cannot be undone.",
         dataExported: "Data exported to file.", dataImported: "Data imported successfully!",
         dataReset: "All data has been reset.", dataSaved: "Saved! 👍",
-        noteSaved: "Keeps saved.👍", targetsSaved: "Targets saved.👍", settingsSaved: "Settings saved.👍",
+        noteSaved: "Planning saved.👍", targetsSaved: "Targets saved.👍", settingsSaved: "Settings saved.👍",
         importError: "Error importing file:", importSuccessRequiresReload: "Data imported successfully. Please reload the page to apply changes.",
         unexpectedError: "An unexpected error occurred 😢 Check console (F12).\nError: {message}",
         alertInitError: "Error during app initialization!", alertListenerError: "Error setting up event listeners!",
         popupSaveSuccess: "Measurement saved! 🎉", popupUpdateSuccess: "Measurement updated! ✨",
         popupDeleteSuccess: "Measurement deleted 👍", popupTargetSaveSuccess: "Targets saved! 👍",
-        popupNoteSaveSuccess: "New Keeps saved! 🎉", popupNoteUpdateSuccess: "Keeps updated! ✨",
-        popupNoteDeleteSuccess: "Keeps deleted 👍", popupDataExportSuccess: "Data export successful! 🎉",
+        popupNoteSaveSuccess: "New Planning saved! 🎉", popupNoteUpdateSuccess: "Planning updated! ✨",
+        popupNoteDeleteSuccess: "Planning deleted 👍", popupDataExportSuccess: "Data export successful! 🎉",
         popupDataImportSuccess: "Data import successful! ✨", popupDataResetSuccess: "All data has been reset. ✨",
         popupSettingsSaved: "Settings saved!",
         alertValidationError: "Invalid input value(s). Check red fields. Numbers must be 0 or greater.",
-        alertNoteContentMissing: "Please enter Keeps title or content!",
+        alertNoteContentMissing: "Please enter Planning title or content!",
         alertImportConfirm: "Overwrite current data and restore from file? This cannot be undone.",
         alertImportInvalidFile: "Invalid file format or incompatible data.",
         alertImportReadError: "Error reading/processing file.", alertImportFileReadError: "Failed to read file.",
@@ -273,7 +273,7 @@ const languages = {
         alertSaveError: "Failed to save data.", alertExportError: "Error exporting data.",
         alertCannotFindRecordEdit: "Cannot find record to edit.", alertCannotFindRecordDelete: "Cannot find record to delete.",
         alertInvalidIndex: "Error processing record: Invalid index.",
-        alertCannotFindNoteEdit: "Cannot find Keeps to edit.", alertCannotFindNoteDelete: "Cannot find Keeps to delete.",
+        alertCannotFindNoteEdit: "Cannot find Planning to edit.", alertCannotFindNoteDelete: "Cannot find Planning to delete.",
         notification_setup_success_title: "Notification Setup Complete",
         notification_setup_success_body: "Notifications have been set. We'll remind you on your weekly measurement day!",
         notification_permission_denied: "Notification permission was denied. Please allow it in your browser settings.",
@@ -285,14 +285,14 @@ const languages = {
         myTitle: "My Page 🧑‍🚀", // Temporary title
         showHistoryButton: "View History",
         showInputButton: "Back to Input",
-        recordKeepsLabel: "This Week's Keeps 📝",
+        recordKeepsLabel: "This Week's Planning 📝",
         recordKeepsPlaceholder: "Freely write down your mood, events, body changes, etc.",
-        memo: "Keeps",
+        memo: "Planning",
         //SVcard
-        svcard_title_highlights: "✨Highlights",
-        svcard_title_targets: "🎯 Target Progress",
-        svcard_title_hormones: "💉 Hormone Analysis",
-        svcard_title_keeps: "📝 Recent Keeps",
+        svcard_title_highlights: "✨Body Brief",
+        svcard_title_targets: "🎯 Change Roadmap",
+        svcard_title_hormones: "💉 Hormone Journal",
+        svcard_title_keeps: "📝 Planning Notes",
         svcard_no_data_for_highlights: "Need at least 2 records to compare changes.",
         svcard_no_targets_set: "Set your goals in the Settings tab.",
         svcard_overall_progress: "Overall Progress",
@@ -316,21 +316,21 @@ const languages = {
         notificationToggleLabel: "Receive measurement reminders",
         notificationSettingsDesc: "Get notified 7 days after your last measurement. Browser permission is required.",
         alertBrowserNotSupportNotification: "This browser does not support notifications.",
-        comparisonModalTitle: "Detailed Records Analysis",
+        comparisonModalTitle: "Body Brief",
 
         medicationHistoryTitle: "Medication Dosage History",
         hormoneLevelHistoryTitle: "Hormone Level History",
         hormoneAnalysisTitle: "Last 2 Weeks Analysis",
         hormoneAnalysisAvgChange: "Average Change: {change}",
         hormoneAnalysisNextWeek: "Predicted Next Week: {value}",
-        hormoneModalTitle: "Hormone-Dose Analysis",
+        hormoneModalTitle: "Hormone Journal",
         selectedWeekDataTitle: "Week {week} Detailed Data",
 
         svcard_no_major_changes: "No major changes recently.",
         svcard_change_vs_last_week: "vs last week",
-        svcard_title_weekly_guide: "Weekly Guide",
-        svcard_no_keeps_yet: "No Keeps written yet.",
-        svcard_no_keeps_add_prompt: "No Keeps written yet. Try adding one in the 'Record' tab!",
+        svcard_title_weekly_guide: "Today's Words",
+        svcard_no_keeps_yet: "No Planning written yet.",
+        svcard_no_keeps_add_prompt: "No Planning written yet. Try adding one in the 'Record' tab!",
         modalTabDetailedAnalysis: "Detailed Analysis",
         modalTabComparativeAnalysis: "Comparative Analysis",
         labelBase: "Base",
@@ -406,10 +406,10 @@ const languages = {
         targetDescription: "Enter your desired target values. You can check the progress in the Main tab.",
         targetItem: "Item", targetValue: "Target Value",
         // Overview (Keeps) Tab
-        overviewTitle: "Keeps 📝", noteNewTitle: "New Keeps", noteEditTitle: "Edit Keeps",
-        noteTitleLabel: "Title", noteTitlePlaceholder: "Keeps title (optional)",
-        noteContentLabel: "Content", noteContentPlaceholder: "Record anything - events, body changes, thoughts in Keeps!",
-        noteListTitle: "Saved Keeps ✨", noteTitleUntitled: "Untitled",
+        overviewTitle: "Planning 📝", noteNewTitle: "New Planning", noteEditTitle: "Edit Planning",
+        noteTitleLabel: "Title", noteTitlePlaceholder: "Planning title (optional)",
+        noteContentLabel: "Content", noteContentPlaceholder: "Record anything - events, body changes, thoughts in Planning!",
+        noteListTitle: "Saved Planning ✨", noteTitleUntitled: "Untitled",
         sortBy: "Sort by:", sortNewest: "Newest First", sortOldest: "Oldest First",
         noteDateCreated: "Created:", noteDateUpdated: "(Edited: {date})", notePreviewEmpty: "(No content)",
         // Settings Tab
@@ -419,11 +419,11 @@ const languages = {
         mode: "Mode", modeMtf: "Feminization", modeFtm: "Masculinization",
         themeSettingsTitle: "Theme Settings", theme: "Theme", themeSystem: "Follow Device", themeLight: "Light Mode", themeDark: "Dark Mode",
         dataManagementTitle: "Data Backup & Restore",
-        dataManagementDesc: "You can save all your records (measurements, targets, Keeps) to a single file or restore from one. Backing up occasionally gives peace of mind! 😊",
+        dataManagementDesc: "You can save all your records (measurements, targets, Planning) to a single file or restore from one. Backing up occasionally gives peace of mind! 😊",
         exportData: "Export Data", importData: "Import Data",
         warning: "Warning!", importWarning: "Restoring will completely replace all data currently in your browser with the file's content!",
         resetDataTitle: "Reset Data",
-        severeWarning: "Extreme Caution!", resetWarning: "😱 All data (measurements, targets, Keeps) will be permanently deleted! Please back up your data before proceeding.",
+        severeWarning: "Extreme Caution!", resetWarning: "😱 All data (measurements, targets, Planning) will be permanently deleted! Please back up your data before proceeding.",
         resetDataButton: "Reset All Data",
         infoTitle: "Information", versionLabel: "Version:",
         privacyInfo: "This app works offline and all data is stored securely only in your browser! 😉",
@@ -434,7 +434,7 @@ const languages = {
         popupUpdateFailed: "Update failed. Please try again later.",
         popupAlreadyLatest: "You are already on the latest version! ✨",
         popupOfflineForUpdate: "An internet connection is required to check for updates.",
-        resetWarning: "😱 Resetting data will permanently delete all records (measurements, targets, Keeps)! Please back up your data before resetting.",
+        resetWarning: "😱 Resetting data will permanently delete all records (measurements, targets, Planning)! Please back up your data before resetting.",
         // Initial Setup
         initialSetupTitle: "Initial Setup", initialSetupDesc: "Before starting ShiftV, please select your language and mode.",
         swipeThresholdMet: "Swipe detected: {direction}"
@@ -457,28 +457,28 @@ const languages = {
         // General
         save: "保存", edit: "編集", delete: "削除", cancel: "キャンセル",
         saveRecord: "記録する ✨", cancelEdit: "編集をキャンセル", saveTarget: "目標を保存! 💪",
-        saveNote: "メモを保存 🖋️", saveSettings: "設定を保存", close: "閉じる", ComRemainder: '残り',
+        saveNote: "プランを保存 🖋️", saveSettings: "設定を保存", close: "閉じる", ComRemainder: '残り',
         confirm: "確認", selectAll: "すべて選択", deselectAll: "すべて解除",
-        noDataYet: "最初の記録を残しましょうか？", noNotesYet: "まだ作成されたメモがありません。最初のメモを残しましょうか？",
+        noDataYet: "最初の記録を残しましょうか？", noNotesYet: "まだ作成されたプランがありません。最初のプランを残しましょうか？",
         noTargetsYet: "目標が設定されていません。", noDataForChart: "表示する項目を選択するか、データを入力してください。",
         invalidValue: "無効な値", loadingError: "データの読み込みエラー", savingError: "データの保存エラー",
-        confirmReset: "本当にすべてのデータを初期化しますか？ この操作は元に戻すことができず、すべての測定記録、目標、メモが完全に削除されます。初期化する前にデータをバックアップすることを強くお勧めします。",
+        confirmReset: "本当にすべてのデータを初期化しますか？ この操作は元に戻すことができず、すべての測定記録、目標、プランが完全に削除されます。初期化する前にデータをバックアップすることを強くお勧めします。",
         confirmDeleteRecord: "週{week} ({date}) の記録を削除しますか？ この操作は元に戻せません。",
-        confirmDeleteNote: "メモ「{title}」を削除しますか？ この操作は元に戻せません。",
+        confirmDeleteNote: "プラン「{title}」を削除しますか？ この操作は元に戻せません。",
         dataExported: "データがファイルに保存されました。", dataImported: "データが正常に読み込まれました！",
         dataReset: "すべてのデータが初期化されました。", dataSaved: "保存されました！",
-        noteSaved: "メモが保存されました。", targetsSaved: "目標が保存されました。", settingsSaved: "設定が保存されました。",
+        noteSaved: "プランが保存されました。", targetsSaved: "目標が保存されました。", settingsSaved: "設定が保存されました。",
         importError: "ファイルの読み込み中にエラーが発生しました:", importSuccessRequiresReload: "データが正常に読み込まれました。変更を適用するにはページを再読み込みしてください。",
         unexpectedError: "予期しないエラーが発生しました 😢 コンソール（F12）を確認してください。\nエラー: {message}",
         alertInitError: "アプリの初期化中にエラーが発生しました！", alertListenerError: "イベントリスナーの設定中にエラーが発生しました！",
         popupSaveSuccess: "測定記録 保存完了！🎉", popupUpdateSuccess: "測定記録 更新完了！✨",
         popupDeleteSuccess: "測定記録 削除完了 👍", popupTargetSaveSuccess: "目標 保存完了！👍",
-        popupNoteSaveSuccess: "新規メモ 保存完了！🎉", popupNoteUpdateSuccess: "メモ 更新完了！✨",
-        popupNoteDeleteSuccess: "メモ 削除完了 👍", popupDataExportSuccess: "データ エクスポート成功！🎉",
+        popupNoteSaveSuccess: "新規プラン 保存完了！🎉", popupNoteUpdateSuccess: "プラン 更新完了！✨",
+        popupNoteDeleteSuccess: "プラン 削除完了 👍", popupDataExportSuccess: "データ エクスポート成功！🎉",
         popupDataImportSuccess: "データ インポート成功！✨", popupDataResetSuccess: "全データ リセット完了。 ✨",
         popupSettingsSaved: "設定 保存完了！",
         alertValidationError: "無効な入力値あり。赤色箇所を確認。数値は0以上必須。",
-        alertNoteContentMissing: "メモのタイトルか内容を入力してください！",
+        alertNoteContentMissing: "プランのタイトルか内容を入力してください！",
         alertImportConfirm: "現在のデータを上書きしファイルから復元しますか？元に戻せません。",
         alertImportInvalidFile: "ファイル形式が無効か互換性がありません",
         alertImportReadError: "ファイル読込/処理エラー", alertImportFileReadError: "ファイル読込失敗",
@@ -487,12 +487,12 @@ const languages = {
         alertSaveError: "保存失敗", alertExportError: "エクスポート中エラー",
         alertCannotFindRecordEdit: "編集対象記録なし", alertCannotFindRecordDelete: "削除対象記録なし",
         alertInvalidIndex: "記録処理エラー：インデックス無効",
-        alertCannotFindNoteEdit: "編集対象メモなし", alertCannotFindNoteDelete: "削除対象メモなし",
+        alertCannotFindNoteEdit: "編集対象プランなし", alertCannotFindNoteDelete: "削除対象プランなし",
         notification_setup_success_title: "通知設定完了",
         notification_setup_success_body: "通知が設定されました。毎週測定日にお知らせします！",
         notification_permission_denied: "通知の許可が拒否されました。ブラウザの設定で許可してください。",
         // Tabs
-        tabMain: "メイン",
+        tabMain: "ホーム",
         tabRecord: "記録する",
         tabMy: "マイページ",
         tabSettings: "設定",
@@ -503,19 +503,19 @@ const languages = {
         svcard_shortcut_overdue: "「測定が{days}日遅れています！」<br>新しい記録を<br>測定しましょう",
         svcard_shortcut_countdown: "次の測定まで<br><span class='countdown-days'>{days}日</span><br>です",
 
-        svcard_title_highlights: "✨ ハイライト",
-        svcard_title_targets: "🎯 目標達成度",
+        svcard_title_highlights: "✨ ボディまとめ",
+        svcard_title_targets: "🎯 変化ロードマップ",
         svcard_title_hormones: "💉 ホルモン分析",
-        svcard_title_keeps: "📝 最近のメモ",
+        svcard_title_keeps: "📝 プランノート",
         svcard_no_data_for_highlights: "比較するには記録が2つ以上必要です。",
         svcard_no_targets_set: "設定タブで目標を設定してください。",
         svcard_overall_progress: "全体達成率",
 
         svcard_no_major_changes: "最近、主な変化はありません。",
         svcard_change_vs_last_week: "先週より",
-        svcard_title_weekly_guide: "週間ガイド",
-        svcard_no_keeps_yet: "作成されたメモがありません。",
-        svcard_no_keeps_add_prompt: "作成されたメモがありません。「記録する」タブで追加してみてください！",
+        svcard_title_weekly_guide: "今日のひとこと",
+        svcard_no_keeps_yet: "作成されたプランがありません。",
+        svcard_no_keeps_add_prompt: "作成されたプランがありません。「記録する」タブで追加してみてください！",
         modalTabDetailedAnalysis: "詳細分析",
         modalTabComparativeAnalysis: "比較分析",
         labelBase: "基準",
@@ -539,9 +539,9 @@ const languages = {
         alertBrowserNotSupportNotification: "このブラウザは通知をサポートしていません。",
         showHistoryButton: "記録を確認",
         showInputButton: "入力に戻る",
-        recordKeepsLabel: "今週のメモ 📝",
+        recordKeepsLabel: "今週のプラン 📝",
         recordKeepsPlaceholder: "今日の気分、出来事、体の変化などを自由に記録しましょう...",
-        memo: "メモ",
+        memo: "プラン",
         comparisonModalTitle: "記録レポートの詳細分析",
 
         medicationHistoryTitle: "投薬量の変化",
@@ -549,7 +549,7 @@ const languages = {
         hormoneAnalysisTitle: "過去2週間の分析",
         hormoneAnalysisAvgChange: "平均変化量: {change}",
         hormoneAnalysisNextWeek: "来週の予測値: {value}",
-        hormoneModalTitle: "ホルモン詳細分析",
+        hormoneModalTitle: "ホルモン分析",
         selectedWeekDataTitle: "{week}週目の詳細記録",
         svcard_label_current: "現在: {value}",
         targetLabelShort: "(目標:{value})",
@@ -617,10 +617,10 @@ const languages = {
         targetDescription: "希望する目標数値を入力してください。メインタブで達成率を確認できます。",
         targetItem: "項目", targetValue: "目標値",
         // Overview (Notes) Tab
-        overviewTitle: "メモ 📝", noteNewTitle: "新しいメモを作成", noteEditTitle: "メモを編集",
-        noteTitleLabel: "タイトル", noteTitlePlaceholder: "メモのタイトル（任意）",
+        overviewTitle: "プラン 📝", noteNewTitle: "新しいプランを作成", noteEditTitle: "プランを編集",
+        noteTitleLabel: "タイトル", noteTitlePlaceholder: "プランのタイトル（任意）",
         noteContentLabel: "内容", noteContentPlaceholder: "イベント、体調の変化、考えなど、自由に記録しましょう！",
-        noteListTitle: "作成されたメモ一覧 ✨", noteTitleUntitled: "無題",
+        noteListTitle: "作成されたプラン一覧 ✨", noteTitleUntitled: "無題",
         sortBy: "並び替え:", sortNewest: "新しい順", sortOldest: "古い順",
         noteDateCreated: "作成:", noteDateUpdated: "(編集: {date})", notePreviewEmpty: "(内容なし)",
         // Settings Tab
@@ -630,11 +630,11 @@ const languages = {
         mode: "モード", modeMtf: "女性化", modeFtm: "男性化",
         themeSettingsTitle: "テーマ設定", theme: "テーマ", themeSystem: "デバイスの設定に従う", themeLight: "ライトモード", themeDark: "ダークモード",
         dataManagementTitle: "データのバックアップと復元",
-        dataManagementDesc: "すべての記録（測定、目標、メモ）を1つのファイルに保存したり、復元したりできます。時々バックアップしておくと安心です！ 😊",
+        dataManagementDesc: "すべての記録（測定、目標、プラン）を1つのファイルに保存したり、復元したりできます。時々バックアップしておくと安心です！ 😊",
         exportData: "ファイルに保存", importData: "ファイルから読み込む",
         warning: "注意！", importWarning: "復元すると、現在ブラウザにあるすべてのデータがファイルの内容に完全に置き換えられます！",
         resetDataTitle: "データ初期化",
-        severeWarning: "！！！警告！！！", resetWarning: "😱 すべてのデータ（測定、目標、メモ）が完全に削除されます！ 初期化する前に必ずデータをファイルにバックアップしてください。",
+        severeWarning: "！！！警告！！！", resetWarning: "😱 すべてのデータ（測定、目標、プラン）が完全に削除されます！ 初期化する前に必ずデータをファイルにバックアップしてください。",
         resetDataButton: "すべてのデータを初期化",
         infoTitle: "情報", versionLabel: "バージョン:",
         privacyInfo: "このアプリはオフラインで動作し、すべてのデータはブラウザ内にのみ安全に保存されます！ 😉",
@@ -645,7 +645,7 @@ const languages = {
         popupUpdateFailed: "アップデートに失敗しました。後でもう一度お試しください。",
         popupAlreadyLatest: "すでに最新バージョンです！✨",
         popupOfflineForUpdate: "アップデートを確認するにはインターネット接続が必要です。",
-        resetWarning: "😱 データの初期化は、すべての記録（測定、目標、メモ）を完全に削除します！初期化する前に、必ずデータをファイルにバックアップしてください。",
+        resetWarning: "😱 データの初期化は、すべての記録（測定、目標、プラン）を完全に削除します！初期化する前に、必ずデータをファイルにバックアップしてください。",
         // Initial Setup
         initialSetupTitle: "初期設定", initialSetupDesc: "ShiftVを使用する前に、言語とモードを選択してください。",
         swipeThresholdMet: "スワイプ検出: {direction}"
@@ -2673,9 +2673,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
                 let needsSave = false;
                 measurements.forEach((m, index) => {
+                    // 1. 주차 번호 복구
                     if (m.week !== index) { m.week = index; needsSave = true; }
-                    if (!m.timestamp) {
-                        m.timestamp = m.date ? new Date(m.date).getTime() : Date.now() - (measurements.length - 1 - index) * 86400000;
+
+                    // 2. Timestamp 및 Date 복구 (NaN 체크 필수)
+                    if (!m.timestamp || isNaN(m.timestamp)) {
+                        if (m.date && !isNaN(new Date(m.date).getTime())) {
+                            m.timestamp = new Date(m.date).getTime();
+                        } else {
+                            // 날짜 정보도 없으면 현재 시간에서 역산하거나 index 기반 추정
+                            m.timestamp = Date.now() - ((measurements.length - 1 - index) * 7 * 86400000);
+                            console.warn(`Recovered invalid timestamp for index ${index}`);
+                        }
                         needsSave = true;
                     }
                     if (m.memoLiked === undefined) { m.memoLiked = false; needsSave = true; }
@@ -2871,63 +2880,85 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderNextMeasurementInfo() {
         if (!nextMeasurementInfoDiv) return;
 
-        // 데이터가 없거나 유효하지 않을 때 처리
+        // 데이터가 없으면 초기 문구 표시
         if (!measurements || measurements.length === 0) {
             nextMeasurementInfoDiv.innerHTML = `<p>${translate('nextMeasurementInfoNoData')}</p>`;
             return;
         }
 
-        // 타임스탬프 기준 정렬 보장
-        const sortedMeasurements = [...measurements].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-        const lastMeasurement = sortedMeasurements[sortedMeasurements.length - 1];
-        const lastTimestamp = lastMeasurement.timestamp || (lastMeasurement.date ? new Date(lastMeasurement.date).getTime() : 0);
-
-        if (!lastTimestamp || isNaN(lastTimestamp)) {
-            nextMeasurementInfoDiv.innerHTML = `<p>${translate('nextMeasurementInfoNoData')}</p>`;
-            console.warn("DEBUG: Last measurement has invalid date/timestamp.");
-            return;
-        }
-
-        const lastDate = new Date(lastTimestamp);
-        const today = new Date();
-
-        // 시간대 영향을 없애기 위해 시/분/초 초기화
-        today.setHours(0, 0, 0, 0);
-        const lastDateNormalized = new Date(lastDate);
-        lastDateNormalized.setHours(0, 0, 0, 0);
-
-        const diffTime = today - lastDateNormalized;
-        const daysAgo = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
-
-        const nextMeasurementDate = new Date(lastDateNormalized);
-        nextMeasurementDate.setDate(nextMeasurementDate.getDate() + 7);
-
-        const diffUntilNext = nextMeasurementDate - today;
-        // Math.ceil을 사용하여 올림 처리 (예: 0.1일 남았으면 1일 남음, -0.1일이면 -0일(오늘))
-        const daysUntil = Math.ceil(diffUntilNext / (1000 * 60 * 60 * 24));
-
-        let messageKey = 'nextMeasurementInfo';
-        let params = {
-            lastDate: formatTimestamp(lastTimestamp),
-            daysAgo: daysAgo,
-            nextDate: formatTimestamp(nextMeasurementDate),
-            daysUntil: Math.abs(daysUntil) // 절대값으로 전달
-        };
-
-        if (daysUntil < 0) {
-            messageKey = 'nextMeasurementInfoOverdue';
-            params.daysOverdue = Math.abs(daysUntil);
-        } else if (daysUntil === 0) {
-            messageKey = 'nextMeasurementInfoToday';
-        }
-
         try {
+            // 안전한 데이터 추출 및 정렬
+            // 원본 데이터를 손상시키지 않기 위해 복사본 사용
+            const validData = measurements.filter(m => {
+                // 유효한 timestamp나 date가 있는지 확인
+                const ts = m.timestamp || (m.date ? new Date(m.date).getTime() : 0);
+                return !isNaN(ts) && ts > 0;
+            });
+
+            if (validData.length === 0) {
+                nextMeasurementInfoDiv.innerHTML = `<p>${translate('nextMeasurementInfoNoData')}</p>`;
+                return;
+            }
+
+            const sortedMeasurements = validData.sort((a, b) =>
+                (a.timestamp || new Date(a.date).getTime()) - (b.timestamp || new Date(b.date).getTime())
+            );
+
+            const lastMeasurement = sortedMeasurements[sortedMeasurements.length - 1];
+
+            // 날짜 파싱 안전장치
+            let lastTimestamp = lastMeasurement.timestamp;
+            if (!lastTimestamp || isNaN(lastTimestamp)) {
+                lastTimestamp = lastMeasurement.date ? new Date(lastMeasurement.date).getTime() : Date.now();
+            }
+
+            if (isNaN(lastTimestamp)) {
+                console.warn("DEBUG: Still invalid date after fallback");
+                throw new Error("Invalid Timestamp");
+            }
+
+            const lastDate = new Date(lastTimestamp);
+            const today = new Date();
+
+            // 시간/분/초 제거 (날짜 단위 계산을 위해)
+            today.setHours(0, 0, 0, 0);
+            const lastDateNormalized = new Date(lastDate);
+            lastDateNormalized.setHours(0, 0, 0, 0);
+
+            const diffTime = today.getTime() - lastDateNormalized.getTime();
+            const daysAgo = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+
+            const nextMeasurementDate = new Date(lastDateNormalized);
+            nextMeasurementDate.setDate(nextMeasurementDate.getDate() + 7);
+
+            const diffUntilNext = nextMeasurementDate.getTime() - today.getTime();
+            // ceil을 사용해 '오늘' 개념 잡기
+            const daysUntil = Math.ceil(diffUntilNext / (1000 * 60 * 60 * 24));
+
+            let messageKey = 'nextMeasurementInfo';
+            let params = {
+                lastDate: formatTimestamp(lastTimestamp),
+                daysAgo: daysAgo,
+                nextDate: formatTimestamp(nextMeasurementDate),
+                daysUntil: Math.abs(daysUntil)
+            };
+
+            if (daysUntil < 0) {
+                messageKey = 'nextMeasurementInfoOverdue';
+                params.daysOverdue = Math.abs(daysUntil);
+            } else if (daysUntil === 0) {
+                messageKey = 'nextMeasurementInfoToday';
+            }
+
             nextMeasurementInfoDiv.innerHTML = `<p>${translate(messageKey, params)}</p>`;
+
         } catch (e) {
-            console.error("Rendering Info Error:", e);
-            nextMeasurementInfoDiv.innerHTML = `<p>${formatTimestamp(nextMeasurementDate)}</p>`;
+            console.error("Rendering Info Critical Error:", e);
+            // 오류가 발생해도 사용자에게는 최소한의 정보 표시 후 종료 (앱 멈춤 방지)
+            nextMeasurementInfoDiv.innerHTML = `<p>${translate('nextMeasurementInfoNoData')}</p>`;
         }
     }
+
 
     function getFilteredDisplayKeys() {
         let keys = [...displayKeysInOrder];
@@ -3901,25 +3932,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Global Render Function ---
     function renderAll() {
         console.log("DEBUG: === renderAll triggered ===");
-        try {
-            updateFormTitle();
-            renderNextMeasurementInfo();
-            renderAllComparisonTables(); // 이 함수는 현재 내용이 없지만, 나중에 채워질 수 있으니 둡니다.
-            updatePlaceholders();
-            renderMyHistoryView(); // '마이' 탭의 기록 뷰를 항상 렌더링
 
-            // 현재 활성화된 탭에 따라 필요한 것만 렌더링
-            const activeTabContent = document.querySelector('.tab-content.active');
-            const activeTabId = activeTabContent ? activeTabContent.id : 'tab-sv';
-            if (activeTabId === 'tab-sv') {
-                renderSvTab();
-            }
-            // 'tab-record'에 대한 추가 렌더링은 이제 필요 없습니다.
-            console.log("DEBUG: === renderAll complete ===");
-        } catch (e) {
-            console.error(`renderAll error: ${e.message}`, e.stack);
-            showPopup('unexpectedError', { message: e.message });
+        // 개별 렌더링 함수들을 각각 try-catch로 감싸서, 하나가 실패해도 나머지는 그리도록 합니다.
+
+        try { updateFormTitle(); } catch (e) { console.error("Form Title Error", e); }
+
+        try { renderNextMeasurementInfo(); } catch (e) { console.error("Next Measurement Info Error", e); }
+
+        try { renderAllComparisonTables(); } catch (e) { console.error("Comparison Table Error", e); }
+
+        // placeholder는 입력의 편의성을 위해 매우 중요하므로 반드시 실행 시도
+        try { updatePlaceholders(); } catch (e) { console.error("Update Placeholder Error", e); }
+
+        try { renderMyHistoryView(); } catch (e) { console.error("History View Error", e); }
+
+        const activeTabContent = document.querySelector('.tab-content.active');
+        const activeTabId = activeTabContent ? activeTabContent.id : 'tab-sv';
+
+        if (activeTabId === 'tab-sv') {
+            try { renderSvTab(); } catch (e) { console.error("SV Tab Error", e); }
         }
+
+        console.log("DEBUG: === renderAll complete ===");
     }
 
     // ===============================================
@@ -4779,31 +4813,97 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    /* --- PWA Navigation & Back Button Logic (New) --- */
+
     /**
-     * 뒤로가기 버튼 이벤트를 처리하는 메인 핸들러
+     * 히스토리 상태를 관리하는 함수입니다.
+     * 앱의 주요 상태 변경(탭 이동, 모달 열기 등) 시 호출하세요.
      */
+    function pushHistoryState(stateType, tabId = null) {
+        // 중복 상태 방지를 위해 현재 state 확인
+        const currentState = history.state;
+        if (currentState && currentState.type === stateType && currentState.tab === tabId) {
+            return;
+        }
+        history.pushState({ type: stateType, tab: tabId }, '', '');
+    }
+
+    // 1. 탭 변경 함수 수정 (기존 activateTab 함수 내부 상단에 추가)
+    /* 기존 activateTab 함수 찾아서 앞부분에 추가하세요 */
+    const _originalActivateTab = activateTab;
+    activateTab = function (targetTabId) {
+        // 탭 이동 시 히스토리 스택 추가
+        // 단, popstate 이벤트에 의해 호출된 경우는 제외해야 함(무한루프 방지)가 정석이나
+        // 간단 구현을 위해 여기서 pushState를 하고, popstate 핸들러에서 중복 처리를 제어
+        const currentState = history.state;
+        if (!currentState || currentState.tab !== targetTabId) {
+            // 모달이 열려있다면 모달을 닫는 동작이 우선이므로 탭 이동 기록은 신중해야 함
+            // 메인 탭이 아닌 다른 탭으로 갈 때 히스토리 추가
+            if (targetTabId !== 'tab-sv') {
+                pushHistoryState('tab', targetTabId);
+            }
+        }
+
+        _originalActivateTab(targetTabId);
+
+        // 만약 메인 탭('tab-sv')으로 돌아왔다면, 필요없는 히스토리를 정리하면 좋지만
+        // 모바일 브라우저 특성상 사용자가 뒤로가기를 연타할 것을 대비해
+        // 별도 처리 안 함.
+    };
+
+    // 2. 모달 열기 함수 수정 (openModal 내부 상단에 추가)
+    const _originalOpenModal = openModal;
+    openModal = function (title, contentHTML) {
+        pushHistoryState('modal'); // 모달 상태 푸시
+        _originalOpenModal(title, contentHTML);
+    };
+
+    // 2-1. 호르몬 모달 등 다른 모달 함수도 마찬가지
+    const _originalOpenHormoneModal = openHormoneModal;
+    openHormoneModal = function () {
+        pushHistoryState('modal-hormone');
+        _originalOpenHormoneModal();
+    };
+
+    // 3. 뒤로가기(PopState) 이벤트 핸들러 (기존 popstate 리스너 대체)
+    window.removeEventListener('popstate', window.onpopstate); // 혹시 모를 중복 제거
     window.addEventListener('popstate', function (event) {
-        // 1. 뒤로가기 시 앱이 종료되는 것을 막기 위해 즉시 히스토리를 다시 추가 (재-무장)
-        history.pushState(null, '', location.href);
 
-        // 2. (최우선) 열려있는 모달이 있는지 확인하고 닫습니다.
+        console.log("DEBUG: Popstate triggered", event.state);
+
+        // 1. 열려있는 모달이 있는지 확인 (최우선 순위)
+        // closeAllModalsVisually 함수가 true를 반환하면 모달을 닫았다는 뜻
         if (closeAllModalsVisually()) {
-            // 모달을 닫는 것이 목적이었으므로, 여기서 처리를 종료합니다.
+            console.log("Back button: Closed a modal");
+            return; // 모달만 닫고 종료
+        }
+
+        // 2. 탭 이동 처리
+        // 현재 히스토리 상태가 있다면 그에 맞춰 이동, 없다면 메인으로
+        if (event.state && event.state.type === 'tab') {
+            // 무한 루프 방지를 위해 내부 함수 직접 호출 또는 플래그 사용
+            // 여기서는 activateTab을 부르되, 내부에서 history.push를 안하도록 수정 필요하나
+            // 단순하게 기존 탭 활성화 함수 호출 (사용성상 큰 문제 없음)
+            _originalActivateTab(event.state.tab);
             return;
         }
 
-        // 3. 모달이 없다면, 현재 활성화된 탭을 확인합니다.
+        // 3. 상태가 없거나(초기 상태), 메인 탭이 아닌 경우 -> 메인 탭으로 이동
         const activeTab = document.querySelector('.tab-button.active')?.dataset.tab;
-
-        // 4. 현재 탭이 메인(sv) 탭이 아니라면, 메인 탭으로 이동시킵니다.
         if (activeTab && activeTab !== 'tab-sv') {
-            activateTab('tab-sv');
+            console.log("Back button: Going to Home tab");
+            _originalActivateTab('tab-sv');
             return;
         }
 
-        // 5. 현재 탭이 메인 탭이라면, 아무것도 하지 않아 앱 종료를 방지합니다.
-        // (1번에서 이미 히스토리를 추가했기 때문에 추가 동작 필요 없음)
-        console.log("Back button pressed on main tab. Preventing exit.");
+        // 4. 이미 메인 탭이고 모달도 없다면?
+        // 여기서 앱을 종료시킬지, 계속 유지할지 결정.
+        // PWA에서는 보통 여기서 종료되도록 두거나, 토스트 메시지("한번 더 누르면 종료")를 띄움.
+        console.log("Back button: Exiting app flow");
     });
+
+    /* [중요] 초기 로드 시 히스토리 상태 초기화 */
+    // script.js 마지막 부분 Initialization 쪽에 추가
+    history.replaceState({ type: 'tab', tab: 'tab-sv' }, '', '');
 
 });

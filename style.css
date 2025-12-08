@@ -19,12 +19,12 @@
 
     /* --- Dark Mode Variables (Default) --- */
     --bg-main: #1a1a3a;
-    --text-main: #f0f0ff;
-    --text-dim: #a8a8d8;
-    --text-dim2: #a8a8d8;
     --primary: #ff8fcd;
     --accent: #ff60a8;
     --danger: #ff5577;
+    --text-main: #f0f0ff;
+    --text-dim: #a8a8d8;
+    --text-dim2: #a8a8d8;
     --positive: #55f0d0;
     --warning-text: #ffddaa;
 
@@ -52,11 +52,31 @@
     --table-row-hover-bg: rgba(122, 11, 192, 0.3);
     --chart-button-bg: rgba(255, 255, 255, 0.05);
     --chart-wrapper-bg: rgba(0, 0, 0, 0.15);
+
+
+      /* 배경: 단순 단색 -> 그라데이션을 위한 변수 (Base) */
+    --bg-gradient-light: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    --bg-gradient-dark: linear-gradient(135deg, #1e1e48 0%, #2a2a60 50%, #151532 100%);
+
+    /* 3D Glass Shadows (더 깊고 부드럽게) */
+    --glass-shadow: 
+        0 8px 32px 0 rgba(0, 0, 0, 0.15),
+        0 1px 2px 0 rgba(255, 255, 255, 0.1) inset; /* 안쪽 광원 효과 */
+    
+    --glass-shadow-floating: 
+        0 20px 50px rgba(0,0,0,0.25),
+        0 10px 20px rgba(0,0,0,0.15); /* 더 높이 떠있는 느낌 */
+
+    
+    /* 모달 디자인 변수 (플로팅) */
+    --modal-radius: 24px;
+    --modal-floating-margin: 16px; /* 좌우 여백 */
 }
 
 body.light-mode {
     /* --- Light Mode Variable Overrides --- */
     --bg-main: #fdeef5;
+    background-image: linear-gradient(160deg, #fdeef5 0%, #dfe9f3 100%);
     --text-main: #2c2c58;
     --text-dim: #525273;
     --text-dim2: #383858;
@@ -68,7 +88,11 @@ body.light-mode {
 
     --glass-bg: rgba(255, 255, 255, 0.5);
     --glass-border: rgba(255, 111, 145, 0.3);
-    --glass-shadow: rgba(100, 100, 150, 0.15);
+    --glass-shadow: 
+        0 8px 24px rgba(140, 140, 160, 0.15),
+        0 1px 2px rgba(255, 255, 255, 0.8) inset;
+    --glass-shadow-floating: 
+        0 20px 40px rgba(100,100,120, 0.15);
     --glass-glow: rgba(255, 111, 145, 0.2);
 
     /* ▼▼▼ 라이트 모드 모달 전용 변수 추가 ▼▼▼ */
@@ -130,12 +154,20 @@ body {
     background-color: var(--bg-main);
     color: var(--text-main);
 
+    background: var(--bg-main); 
+    background-image: var(--bg-gradient-dark);
+    background-attachment: fixed; /* 스크롤 시 배경 고정 */
+    font-family: var(--font-family);
+    overscroll-behavior-y: none;
+    min-height: 100vh;
+
     /* 기존: overscroll-behavior-y: contain; */
     /* 수정: y축 스크롤 경계 효과를 완전히 제거하여 화살표 힌트를 차단합니다. */
     overscroll-behavior-y: none;
 
     /* ▼▼▼ 추가된 부분: 배경과 텍스트 색상을 5초 동안 부드럽게 전환 ▼▼▼ */
     transition: background-color 5s ease-in-out, color 5s ease-in-out;
+    transition: background-image 5s ease-in-out, color 5s ease-in-out;
 }
 
 .app-wrapper {
@@ -288,9 +320,11 @@ hr.divider {
     flex-shrink: 0;
     background-color: var(--glass-bg);
     border-right: 1px solid var(--glass-border);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.05);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    transition: background-color 5s ease-in-out, color 5s ease-in-out, width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 5s ease-in-out, color 5s ease-in-out, width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    
     /* 부드러운 애니메이션 */
     z-index: 200;
 }
@@ -463,6 +497,7 @@ select {
     padding: 12px 15px;
     border: 1px solid var(--input-border);
     border-radius: var(--radius-s);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); /* 내부 그림자로 깊이감 */
     font-size: 1em;
     background-color: var(--input-bg);
     color: var(--text-main);
@@ -480,9 +515,11 @@ body.dark-mode select option {
 input:focus,
 textarea:focus,
 select:focus {
+    transform: translateY(-1px);
     outline: none;
     border-color: var(--input-focus-border);
-    box-shadow: 0 0 0 3px var(--input-focus-glow);
+    box-shadow: 0 0px 12px var(--input-focus-glow);
+    background-color: rgba(255,255,255, 0.1);
 }
 
 input.invalid-input {
@@ -1737,13 +1774,14 @@ body.mode-mtf .ftm-only {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     z-index: 3000;
     display: flex;
     justify-content: center;
     align-items: flex-end;
+    padding-bottom: 0;
 
     /* 기본 상태: 투명하고 보이지 않음 */
     opacity: 0;
@@ -1761,16 +1799,29 @@ body.mode-mtf .ftm-only {
 
 .modal-bottom-sheet {
     background-color: var(--modal-bg);
-    border-top: 1px solid var(--modal-border);
-    width: 100%;
-    max-width: 1200px;
-    height: 90%;
-    max-height: 90vh;
+    border: 1px solid var(--modal-border);
+    border-bottom: none;
+
     border-top-left-radius: var(--radius-l);
     border-top-right-radius: var(--radius-l);
-    box-shadow: 0 -8px 32px 0 var(--glass-shadow);
+
+
+    width: calc(100% - (var(--modal-floating-margin) * 2)); /* 양옆 여백 */
+    margin: 0 auto; /* 중앙 정렬 */
+    margin-bottom: var(--modal-floating-margin); /* 바닥에서 띄움 */
+    border-radius: var(--modal-radius); /* 전체 둥글게 */
+    
+    box-shadow: var(--glass-shadow-floating); /* 강한 그림자로 띄움 */
+    
+    max-width: 600px; /* 모바일에서도 너무 넓지 않게 */
+    height: 85%; /* 높이 조절 */
+    max-height: 85vh;
+    
     display: flex;
     flex-direction: column;
+    transform: translateY(110%); /* 애니메이션 시작점 (화면 밖 아래) */
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); /* 탄성 있는 애니메이션 */
+
 
     /* 애니메이션 시작 위치: 화면 아래쪽 바깥 */
     transform: translateY(100%);

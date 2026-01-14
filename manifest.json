@@ -7,7 +7,7 @@
   "start_url": "/ShiftV/",
   "scope": "/ShiftV/", 
   "id": "/ShiftV/",
-  "display": "standalone", 
+  "display": "fullscreen", 
   "orientation": "any", 
   "prefer_related_applications": false,
   "categories": [

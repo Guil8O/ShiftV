@@ -1,0 +1,28 @@
+{
+  "name": "shiftv",
+  "version": "1.5.0",
+  "description": "신체 변화 추적 앱 - 호르몬 치료 및 신체 측정 기록",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "optimize-images": "node scripts/optimize-images.js"
+  },
+  "keywords": [
+    "health",
+    "tracking",
+    "hormone",
+    "transgender",
+    "pwa"
+  ],
+  "author": "MUMU",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "vite-plugin-pwa": "^0.19.0"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0"
+  }
+}

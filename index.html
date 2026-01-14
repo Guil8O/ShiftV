@@ -206,16 +206,20 @@
                                             <div class="form-group"><label for="libido" data-lang-key="libido">성욕
                                                     (회/주)</label><input type="number" id="libido" name="libido"
                                                     step="0.1" min="0" placeholder="number"></div>
-                                            <div class="form-group form-group-compound"><label
-                                                    data-lang-key="healthStatus">건강 상태</label>
-                                                <div class="compound-input"><input type="text" id="healthNotes"
-                                                        name="healthNotes" data-lang-key="notesPlaceholder"
-                                                        placeholder="Text"></div>
+                                            
+                                            <!-- 증상 선택 시스템 (새로운 구조) -->
+                                            <div class="form-group form-group-full-width">
+                                                <label data-lang-key="symptomsLabel">증상 선택</label>
+                                                <p class="description" data-lang-key="symptomsDescription">
+                                                    경험하고 있는 증상을 선택하고 심각도를 표시하세요. (여러 개 선택 가능)
+                                                </p>
+                                                <div id="symptoms-container" class="symptoms-container">
+                                                    <!-- 증상 항목들이 동적으로 추가됩니다 -->
+                                                </div>
+                                                <button type="button" id="add-symptom-btn" class="glass-button add-btn" data-lang-key="addSymptom">
+                                                    <span>➕</span> 증상 추가
+                                                </button>
                                             </div>
-                                            <div class="form-group"><label for="skinCondition"
-                                                    data-lang-key="skinCondition">피부 상태</label><input type="text"
-                                                    id="skinCondition" name="skinCondition"
-                                                    data-lang-key="skinConditionPlaceholder" placeholder="Text"></div>
                                         </div>
                                     </div>
                                 </details>
@@ -525,81 +529,269 @@
 
 
 
-    <div id="compare-flow-view" class="modal-tab-content">
-        <!-- 모달 컨텐츠 래퍼 -->
+    <!-- Body Briefing Modal Template -->
+    <div id="body-briefing-view" class="modal-tab-content" style="display: none;">
         <div class="modal-content-wrapper">
-
             <!-- 탭 전환 버튼 -->
             <div class="modal-tab-switcher">
-                <button class="modal-tab-btn active" data-tab="detailed-analysis"
-                    data-lang-key="modalTabDetailedAnalysis">상세 분석</button>
-                <button class="modal-tab-btn" data-tab="comparative-analysis"
-                    data-lang-key="modalTabComparativeAnalysis">비교 분석</button>
+                <button class="modal-tab-btn active" data-tab="briefing-summary"
+                    data-lang-key="modalTabBriefingSummary">요약</button>
+                <button class="modal-tab-btn" data-tab="briefing-detail"
+                    data-lang-key="modalTabBriefingDetail">상세</button>
             </div>
 
-            <!-- 1. 상세 분석 탭 (기존 내용) -->
-            <div id="detailed-analysis-view" class="modal-tab-content active">
+            <!-- 1. 요약 탭 (새로운 구조) -->
+            <div id="briefing-summary-view" class="modal-tab-content active">
+                <div class="hormone-report-container">
+                <!-- 전체 목표 달성률 프로그래스 바 -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">1</span>
+                            <span data-lang-key="briefingOverallProgress">전체 목표 달성률</span>
+                        </h2>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar-wrapper">
+                            <div id="briefing-overall-progress-bar" class="progress-bar">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-info">
+                                <span id="briefing-progress-percentage">0%</span>
+                                <span id="briefing-progress-count">(0/0 목표)</span>
+                            </div>
+                        </div>
+                        <div class="progress-change-info">
+                            <span data-lang-key="briefingWeeklyChange">주간 변화:</span>
+                            <span id="briefing-weekly-change">+0%</span>
+                            <span data-lang-key="briefingMonthlyAvg">월평균:</span>
+                            <span id="briefing-monthly-avg">+0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 전체 신체 변화 바 (여성화/남성화) -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">2</span>
+                            <span data-lang-key="briefingBodyChange">전체 신체 변화</span>
+                        </h2>
+                    </div>
+                    <div class="body-change-container">
+                        <div class="body-change-bar-wrapper">
+                            <div id="briefing-body-change-bar" class="body-change-bar">
+                                <div class="body-change-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="body-change-info">
+                                <span id="briefing-body-change-score">0점</span>
+                                <span id="briefing-body-change-label">(중성)</span>
+                            </div>
+                        </div>
+                        <div class="body-change-details">
+                            <div class="change-item">
+                                <span data-lang-key="briefingPreviousWeek">지난주:</span>
+                                <span id="briefing-prev-week">0점</span>
+                            </div>
+                            <div class="change-item">
+                                <span data-lang-key="briefingMonthlyAvg">월평균:</span>
+                                <span id="briefing-monthly-score">0점</span>
+                            </div>
+                            <div class="change-item">
+                                <span data-lang-key="briefingTarget">목표:</span>
+                                <span id="briefing-target-score">85점</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 목표 달성률 -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">3</span>
+                            <span data-lang-key="briefingTargetAchievement">목표 달성률</span>
+                        </h2>
+                    </div>
+                    <div id="briefing-target-achievement-list" class="target-achievement-list">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 신체 비율 분석 -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">4</span>
+                            <span data-lang-key="briefingBodyRatio">신체 비율 분석</span>
+                        </h2>
+                    </div>
+                    <div id="briefing-body-ratio-container" class="body-ratio-container">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 미래 예측 -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">5</span>
+                            <span data-lang-key="briefingFuturePrediction">미래 예측</span>
+                        </h2>
+                    </div>
+                    <div id="briefing-predictions-container" class="predictions-container">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 건강 경고 알림 -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">6</span>
+                            <span data-lang-key="briefingHealthAlerts">건강 경고 알림</span>
+                        </h2>
+                    </div>
+                    <div id="briefing-alerts-container" class="alerts-container">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- 2. 상세 탭 (기존 그래프 유지) -->
+            <div id="briefing-detail-view" class="modal-tab-content">
                 <div class="comparison-report-container">
                     <!-- 필터 버튼 섹션 -->
-                    <div id="comparison-filter-controls" class="comparison-filter-controls">
+                    <div id="briefing-filter-controls" class="comparison-filter-controls">
                         <!-- JS에서 필터 버튼 생성 -->
                     </div>
                     <!-- 메인 그래프 섹션 -->
                     <div class="chart-section">
                         <div class="chart-wrapper">
-                            <canvas id="comparison-chart"></canvas>
+                            <canvas id="briefing-chart"></canvas>
                         </div>
                     </div>
 
-                    <div id="comparison-selected-week-data-container" class="selected-week-data-container">
-                        <h4 id="comparison-selected-week-data-title"></h4>
-                        <div id="comparison-selected-week-data-content" class="selected-week-data-content"
+                    <div id="briefing-selected-week-data-container" class="selected-week-data-container">
+                        <h4 id="briefing-selected-week-data-title"></h4>
+                        <div id="briefing-selected-week-data-content" class="selected-week-data-content"
                             style="display: none;">
-                            <!-- JS에 의해 데이터가 채워지는 곳 (초기에는 숨김) -->
+                            <!-- JS에 의해 데이터가 채워지는 곳 -->
                         </div>
-                        <p id="comparison-data-placeholder" class="placeholder-text" data-lang-key="graphClickPrompt">
+                        <p id="briefing-data-placeholder" class="placeholder-text" data-lang-key="graphClickPrompt">
                             <!-- JS에 의해 안내 문구가 채워지는 곳 -->
                         </p>
                     </div>
 
-                    <div id="comparison-selected-week-data-container" class="selected-week-data-container"
-                        style="display: none;">
-                        <h4 id="comparison-selected-week-data-title"></h4>
-                        <div id="comparison-selected-week-data-content" class="selected-week-data-content">
-                            <!-- JS에 의해 채워짐 -->
-                        </div>
-                        <p id="comparison-data-placeholder" class="placeholder-text">그래프의 수치정보를 클릭하면 해당 주차의 상세정보가 표시됩니다.
-                        </p>
-                    </div>
-
                     <!-- 상세 데이터 테이블 섹션 -->
-                    <div id="comparison-table-container" class="table-responsive horizontal-scroll">
+                    <div id="briefing-table-container" class="table-responsive horizontal-scroll">
                         <!-- JS에서 상세 테이블 생성 -->
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- 2. 비교 분석 탭 (새로운 내용) -->
-            <div id="comparative-analysis-view" class="modal-tab-content">
-                <div class="comparison-view-container">
-                    <!-- 상단: 비교 대상 선택 드롭다운 -->
-                    <div class="comparison-selectors">
-                        <div class="form-group">
-                            <label for="compare-left-select" data-lang-key="labelBase">기준</label>
-                            <select id="compare-left-select"></select>
+    <!-- Change Roadmap Modal Template -->
+    <div id="change-roadmap-view" class="modal-tab-content" style="display: none;">
+        <div class="modal-content-wrapper">
+            <!-- 탭 전환 버튼 -->
+            <div class="modal-tab-switcher">
+                <button class="modal-tab-btn active" data-tab="roadmap-summary"
+                    data-lang-key="modalTabRoadmapSummary">요약</button>
+                <button class="modal-tab-btn" data-tab="roadmap-detail"
+                    data-lang-key="modalTabRoadmapDetail">상세</button>
+            </div>
+
+            <!-- 1. 요약 탭 -->
+            <div id="roadmap-summary-view" class="modal-tab-content active">
+                <!-- 전체 진행도 -->
+                <div class="roadmap-section">
+                    <h3 data-lang-key="roadmapOverallProgress">전체 진행도</h3>
+                    <div class="roadmap-progress-container">
+                        <div class="roadmap-progress-bar">
+                            <div id="roadmap-progress-fill" class="roadmap-progress-fill" style="width: 0%">
+                                <!-- 주간 변화 틱들이 여기에 표시됨 -->
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="compare-right-select" data-lang-key="labelCompareTarget">비교 대상</label>
-                            <select id="compare-right-select"></select>
+                        <div class="roadmap-progress-labels">
+                            <span data-lang-key="roadmapStart">시작</span>
+                            <span id="roadmap-current-week">Week 0</span>
+                            <span id="roadmap-target-week">목표</span>
+                        </div>
+                        <div class="roadmap-progress-info">
+                            <span data-lang-key="roadmapAchievementRate">전체 달성률:</span>
+                            <span id="roadmap-achievement-rate">0%</span>
+                            <span id="roadmap-achievement-count">(0/0 목표)</span>
                         </div>
                     </div>
-                    <!-- 하단: 비교 결과 그리드 -->
-                    <div id="comparison-results-grid" class="comparison-results-grid">
-                        <!-- JS에 의해 채워짐 -->
+                </div>
+
+                <!-- 타임라인 -->
+                <div class="roadmap-section">
+                    <h3 data-lang-key="roadmapTimeline">타임라인</h3>
+                    <div id="roadmap-timeline-container" class="timeline-container">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 월별 요약 -->
+                <div class="roadmap-section">
+                    <h3 data-lang-key="roadmapMonthlySummary">월별 요약</h3>
+                    <div id="roadmap-monthly-summary-container" class="monthly-summary-container">
+                        <!-- JS에서 동적 생성 -->
                     </div>
                 </div>
             </div>
 
+            <!-- 2. 상세 탭 -->
+            <div id="roadmap-detail-view" class="modal-tab-content">
+                <!-- 상세 그래프 -->
+                <div class="roadmap-section">
+                    <h3 data-lang-key="roadmapDetailedGraph">상세 그래프</h3>
+                    <div class="chart-section">
+                        <div class="chart-wrapper">
+                            <canvas id="roadmap-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 변화 비교 -->
+                <div class="roadmap-section">
+                    <h3 data-lang-key="roadmapChangeComparison">변화 비교</h3>
+                    <div id="roadmap-comparison-container" class="comparison-container">
+                        <!-- 지난주와 비교, 처음과 비교 -->
+                        <div class="comparison-item">
+                            <h4 data-lang-key="roadmapComparePreviousWeek">지난주와 비교</h4>
+                            <div id="roadmap-compare-previous" class="comparison-results">
+                                <!-- JS에서 동적 생성 -->
+                            </div>
+                        </div>
+                        <div class="comparison-item">
+                            <h4 data-lang-key="roadmapCompareFirst">처음과 비교</h4>
+                            <div id="roadmap-compare-first" class="comparison-results">
+                                <!-- JS에서 동적 생성 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 특정일과 비교 -->
+                <div class="roadmap-section">
+                    <h3 data-lang-key="roadmapCompareSpecificDate">특정일과 비교</h3>
+                    <div class="date-selector-container">
+                        <label for="roadmap-compare-date-select" data-lang-key="roadmapSelectDate">날짜 선택:</label>
+                        <select id="roadmap-compare-date-select">
+                            <option value="">-- 날짜 선택 --</option>
+                            <!-- JS에서 동적 생성 -->
+                        </select>
+                    </div>
+                    <div id="roadmap-compare-specific" class="comparison-results">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="modal-bottom-sheet-overlay" class="modal-bottom-sheet-overlay">

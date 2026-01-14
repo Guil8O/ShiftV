@@ -2275,8 +2275,8 @@ input:checked+.slider:before {
     border-radius: var(--radius-s);
     padding: 4px;
     width: fit-content;
-    margin: 0 auto;
-    /* 중앙 정렬 */
+    margin: 0 auto 20px auto;
+    /* 중앙 정렬, 하단 마진 추가 */
 }
 
 .modal-tab-btn {
@@ -2301,6 +2301,7 @@ input:checked+.slider:before {
     overflow: hidden;
     /* 탭 전환 시 스크롤바 문제 방지 */
     position: relative;
+    padding: 0;
 }
 
 .modal-tab-content {
@@ -2308,6 +2309,7 @@ input:checked+.slider:before {
     height: 100%;
     overflow-y: auto;
     padding: 20px;
+    box-sizing: border-box;
 }
 
 .modal-tab-content.active {
@@ -2330,14 +2332,44 @@ input:checked+.slider:before {
 
 .chart-wrapper {
     height: 250px;
-    /* 그래프의 높이를 지정 */
     padding: 10px;
     background-color: rgba(0, 0, 0, 0.15);
     border-radius: var(--radius-m);
+    position: relative;
+    /* JavaScript에서 동적으로 overflow 설정 */
+}
+
+/* 차트 내부 컨테이너 (Chart.js 크기 제어용) */
+.chart-inner-container {
+    position: relative;
+    /* 크기는 JavaScript에서 동적 설정 */
+}
+
+.chart-inner-container canvas {
+    display: block;
+    /* 캔버스가 컨테이너를 꽉 채우도록 */
+}
+
+/* 스크롤바 스타일링 */
+.chart-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.chart-wrapper::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+.chart-wrapper::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+}
+
+.chart-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
 }
 
 .light-mode .chart-wrapper {
-
     background-color: color-mix(in srgb, #ff6f91 5%, transparent);
 }
 
@@ -2411,9 +2443,6 @@ input:checked+.slider:before {
 }
 
 /* 필터 버튼 스타일 재사용 */
-.comparison-filter-controls .filter-button {
-    /* 기존 .filter-button 스타일이 대부분 적용됩니다. */
-}
 
 /* 비교 모달의 차트는 더 크게 표시 */
 .comparison-report-container .chart-section {
@@ -2513,6 +2542,7 @@ input:checked+.slider:before {
     display: flex;
     flex-direction: column;
     height: 100%;
+    padding: 0;
 }
 
 .modal-tab-switcher {
@@ -2522,7 +2552,7 @@ input:checked+.slider:before {
     /* 더 둥글게 변경 */
     padding: 4px;
     width: fit-content;
-    margin: 0 auto;
+    margin: 0 auto 20px auto;
     transition: background-color var(--transition-medium);
 }
 
@@ -2719,7 +2749,6 @@ body.light-mode .modal-tab-btn.active {
 
 /* 바텀 시트 모달 내부의 콘텐츠 래퍼 스타일 */
 .hormone-report-container,
-.modal-content-wrapper,
 .keeps-list {
     max-width: 1100px;
     /* 콘텐츠 최대 너비를 1100px로 확장 */
@@ -2727,6 +2756,14 @@ body.light-mode .modal-tab-btn.active {
     margin-left: auto;
     /* 좌우 마진을 auto로 설정하여 중앙 정렬 */
     margin-right: auto;
+}
+
+.modal-content-wrapper {
+    max-width: 1100px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
 }
 
 /* 호르몬 모달 범주 버튼 컨테이너 */
@@ -2980,6 +3017,695 @@ body.light-mode .modal-tab-btn.active {
     margin-top: 0;
 }
 
+/* ========================================
+   HORMONE JOURNAL - COMPLETE REDESIGN
+   ======================================== */
+
+/* Section Container */
+.hormone-section {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid var(--glass-border);
+}
+
+.hormone-section:last-child {
+    border-bottom: none;
+}
+
+/* Section Header */
+.hormone-section-header {
+    margin-bottom: 25px;
+}
+
+.hormone-section-title {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    color: var(--bg-main);
+    border-radius: 50%;
+    font-size: 0.85em;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.hormone-section-desc {
+    font-size: 0.95em;
+    color: var(--text-dim);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Hormone Grid (2-column layout) */
+.hormone-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .hormone-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Hormone Card Base */
+.hormone-card {
+    background: var(--glass-bg);
+    border: 1.5px solid var(--glass-border);
+    border-radius: var(--radius-l);
+    padding: 20px;
+    backdrop-filter: blur(var(--blur-standard));
+    -webkit-backdrop-filter: blur(var(--blur-standard));
+    box-shadow: var(--elevation-1);
+    transition: var(--transition-medium);
+}
+
+.hormone-card:hover {
+    box-shadow: var(--elevation-2);
+    border-color: var(--primary);
+}
+
+/* Highlight Card (for important data) */
+.highlight-card {
+    border: 2px solid var(--primary);
+    box-shadow: var(--elevation-2), 0 0 20px rgba(255, 143, 205, 0.15);
+    text-align: center;
+}
+
+.hormone-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.highlight-card .hormone-card-header {
+    justify-content: center;
+}
+
+.hormone-name {
+    font-size: 1.15em;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.hormone-current-mini {
+    font-size: 0.9em;
+    color: var(--text-dim);
+    font-weight: 500;
+}
+
+/* Current Level Value (BIG numbers) */
+.hormone-current-value {
+    font-size: 2.2em;
+    font-weight: 800;
+    color: var(--primary);
+    text-align: center;
+    margin: 15px 0;
+    line-height: 1.2;
+}
+
+.hormone-target {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.target-label {
+    font-size: 0.9em;
+    color: var(--text-dim);
+}
+
+.target-value {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* Status Badge (with icons) */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: var(--radius-xl);
+    font-size: 0.95em;
+    font-weight: 600;
+    margin-top: 10px;
+    border: 2px solid;
+    transition: var(--transition-medium);
+}
+
+.status-badge.optimal-badge {
+    border-color: var(--primary);
+    background: rgba(255, 143, 205, 0.15);
+    color: var(--primary);
+}
+
+.status-badge.above-badge {
+    border-color: #f1c40f;
+    background: rgba(241, 196, 15, 0.15);
+    color: #d4a300;
+}
+
+.status-badge.below-badge {
+    border-color: #ff6b9d;
+    background: rgba(255, 107, 157, 0.15);
+    color: #ff6b9d;
+}
+
+.status-badge.danger-badge {
+    border-color: var(--danger);
+    background: rgba(255, 107, 157, 0.2);
+    color: var(--danger);
+    box-shadow: 0 0 15px rgba(255, 107, 157, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.status-badge.neutral-badge {
+    border-color: var(--glass-border);
+    background: var(--container-bg-subtle);
+    color: var(--text-dim);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Info Card (explanations) */
+.info-card {
+    background: var(--container-bg-subtle);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
+    padding: 18px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.info-card-title {
+    font-size: 1.05em;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-card-content p {
+    margin: 8px 0;
+    font-size: 0.92em;
+    color: var(--text-dim);
+    line-height: 1.6;
+}
+
+.info-card.mini {
+    padding: 15px;
+    margin-bottom: 0;
+}
+
+.info-card-text {
+    font-size: 0.88em;
+    color: var(--text-dim);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.info-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .info-card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Change Metrics */
+.change-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.change-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--container-bg-subtle);
+    border-radius: var(--radius-s);
+    transition: var(--transition-fast);
+}
+
+.change-item:hover {
+    background: rgba(255, 143, 205, 0.1);
+}
+
+.change-label {
+    font-size: 0.9em;
+    color: var(--text-dim);
+    font-weight: 500;
+}
+
+.change-value {
+    font-size: 1.15em;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.change-value.positive {
+    color: #4ADE80;
+}
+
+.change-value.negative {
+    color: #ff6b9d;
+}
+
+/* Emax Specific Styles */
+.emax-special {
+    border: 2px solid var(--primary);
+    background: linear-gradient(135deg, var(--glass-bg), rgba(255, 143, 205, 0.05));
+}
+
+.emax-metrics {
+    display: flex;
+    align-items: stretch;
+    gap: 20px;
+}
+
+.emax-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.emax-label {
+    font-size: 0.9em;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+}
+
+.emax-value {
+    font-size: 2em;
+    font-weight: 800;
+    margin: 8px 0;
+    line-height: 1;
+}
+
+.emax-value.primary-color {
+    color: var(--primary);
+}
+
+.emax-value.positive {
+    color: #4ADE80;
+}
+
+.emax-value.negative {
+    color: #ff6b9d;
+}
+
+.emax-unit {
+    font-size: 0.8em;
+    color: var(--text-dim2);
+    font-weight: 500;
+}
+
+.emax-message {
+    font-size: 0.85em;
+    color: var(--text-dim);
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.emax-divider {
+    width: 2px;
+    background: var(--glass-border);
+    margin: 0 10px;
+    border-radius: 2px;
+}
+
+/* Stability Display */
+.stability-display {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+.stability-cv {
+    text-align: center;
+}
+
+.stability-cv-value {
+    font-size: 2em;
+    font-weight: 800;
+    color: var(--primary);
+    display: block;
+}
+
+.stability-cv-label {
+    font-size: 0.85em;
+    color: var(--text-dim);
+    display: block;
+    margin-top: 5px;
+}
+
+.stability-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 20px;
+    border-radius: var(--radius-xl);
+    font-size: 0.95em;
+    font-weight: 600;
+    border: 2px solid;
+}
+
+.stability-status.stable {
+    border-color: #4ADE80;
+    background: rgba(74, 222, 128, 0.15);
+    color: #4ADE80;
+}
+
+.stability-status.moderate {
+    border-color: #f1c40f;
+    background: rgba(241, 196, 15, 0.15);
+    color: #d4a300;
+}
+
+.stability-status.unstable {
+    border-color: #ff6b9d;
+    background: rgba(255, 107, 157, 0.15);
+    color: #ff6b9d;
+}
+
+/* Prediction Display */
+.prediction-card {
+    background: linear-gradient(135deg, var(--glass-bg), rgba(100, 149, 237, 0.05));
+}
+
+.prediction-display {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.prediction-item {
+    padding: 12px 15px;
+    background: var(--container-bg-subtle);
+    border-radius: var(--radius-m);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.prediction-label {
+    font-size: 0.9em;
+    color: var(--text-dim);
+    font-weight: 500;
+}
+
+.prediction-value {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.prediction-target {
+    font-size: 0.85em;
+    color: var(--text-dim2);
+}
+
+/* Drug Cards */
+.drug-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .drug-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.drug-card {
+    background: var(--glass-bg);
+    border: 1.5px solid var(--glass-border);
+    border-radius: var(--radius-l);
+    padding: 18px;
+    backdrop-filter: blur(var(--blur-standard));
+    -webkit-backdrop-filter: blur(var(--blur-standard));
+    box-shadow: var(--elevation-1);
+    transition: var(--transition-medium);
+}
+
+.drug-card:hover {
+    box-shadow: var(--elevation-2);
+    transform: translateY(-2px);
+}
+
+.drug-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.drug-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.drug-samples {
+    font-size: 0.85em;
+    color: var(--text-dim);
+    background: var(--container-bg-subtle);
+    padding: 4px 10px;
+    border-radius: var(--radius-s);
+}
+
+.drug-influences {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.drug-influence-item {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--container-bg-subtle);
+    border-radius: var(--radius-s);
+}
+
+.drug-hormone-label {
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 0.95em;
+}
+
+.drug-influence-value {
+    font-size: 1.6em;
+    font-weight: 800;
+    text-align: center;
+}
+
+.drug-influence-value.positive {
+    color: #4ADE80;
+}
+
+.drug-influence-value.negative {
+    color: #ff6b9d;
+}
+
+.drug-influence-unit {
+    font-size: 0.75em;
+    color: var(--text-dim2);
+    text-align: right;
+}
+
+.drug-confidence {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 15px;
+    border-radius: var(--radius-s);
+    font-size: 0.9em;
+    border: 1.5px solid;
+}
+
+.drug-confidence.high {
+    border-color: #4ADE80;
+    background: rgba(74, 222, 128, 0.15);
+}
+
+.drug-confidence.medium {
+    border-color: #f1c40f;
+    background: rgba(241, 196, 15, 0.15);
+}
+
+.drug-confidence.low {
+    border-color: var(--glass-border);
+    background: var(--container-bg-subtle);
+}
+
+.confidence-label {
+    font-weight: 500;
+    color: var(--text-dim);
+}
+
+.confidence-value {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Body Ratio Styles */
+.body-ratio-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.body-ratio-card {
+    background: var(--glass-bg);
+    border: 1.5px solid var(--glass-border);
+    border-radius: var(--radius-l);
+    padding: 20px;
+    backdrop-filter: blur(var(--blur-standard));
+    -webkit-backdrop-filter: blur(var(--blur-standard));
+    box-shadow: var(--elevation-1);
+}
+
+.body-ratio-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 15px 0;
+}
+
+.ratio-value-display {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.ratio-number {
+    font-size: 1.8em;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+/* 비율 바 컨테이너 (E/T, Body Ratios) */
+.ratio-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
+    width: 100%;
+}
+
+.ratio-icon-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 60px;
+}
+
+.ratio-icon {
+    font-size: 1.8em;
+    text-align: center;
+}
+
+.ratio-icon.male {
+    color: #4A90E2;
+}
+
+.ratio-icon.female {
+    color: #E879F9;
+}
+
+.ratio-percentile {
+    font-size: 0.75em;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.ratio-bar {
+    position: relative;
+    flex: 1;
+    height: 20px;
+    background: linear-gradient(90deg, #4A90E2 0%, #A78BFA 50%, #E879F9 100%);
+    border-radius: var(--radius-xl);
+    overflow: visible;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    opacity: 0.5;
+}
+
+.ratio-bar-fill {
+    display: none; /* 더 이상 사용하지 않음 - 배경 그라데이션으로 대체 */
+}
+
+.ratio-bar-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 22px;
+    height: 22px;
+    background: white;
+    border: 4px solid var(--primary);
+    border-radius: 50%;
+    box-shadow: var(--elevation-4), 0 0 15px var(--primary), 0 0 25px rgba(255, 143, 205, 0.5);
+    z-index: 2;
+    transition: var(--transition-medium);
+    cursor: pointer;
+}
+
+.ratio-bar-marker:hover {
+    width: 26px;
+    height: 26px;
+    box-shadow: var(--elevation-4), 0 0 20px var(--primary), 0 0 35px rgba(255, 143, 205, 0.7);
+}
+
+/* Ratio Card Specific */
+.ratio-card {
+    padding: 25px;
+}
+
 
 
 /* 1. '주간 가이드' 카드 기본 스타일 */
@@ -3098,4 +3824,896 @@ body.light-mode .modal-tab-btn.active {
 #tab-settings .setting-item > select {
     width: 50%;
     max-width: 180px; /* 너무 넓어지지 않도록 최대 너비 설정 */
+}
+
+/* ============================================
+   증상 선택 시스템 스타일
+   ============================================ */
+
+/* 전체 너비 form-group */
+.form-group-full-width {
+    grid-column: 1 / -1; /* 그리드 전체 너비 차지 */
+}
+
+/* 증상 컨테이너 */
+.symptoms-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+/* 개별 증상 항목 */
+.symptom-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.symptom-item:hover {
+    background: var(--glass-hover);
+    border-color: var(--primary);
+}
+
+/* 증상 선택 드롭다운 */
+.symptom-select {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 15px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.symptom-select:hover {
+    border-color: var(--primary);
+}
+
+.symptom-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* 증상 카테고리 옵션 그룹 스타일 */
+.symptom-select optgroup {
+    font-weight: bold;
+    color: var(--primary);
+    background: var(--bg-primary);
+}
+
+.symptom-select option {
+    padding: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* 심각도 컨테이너 */
+.severity-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.severity-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* 심각도 선택 (별점 스타일) */
+.severity-stars {
+    display: flex;
+    gap: 5px;
+}
+
+.severity-star {
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.severity-star.empty {
+    color: var(--glass-border);
+}
+
+.severity-star.filled {
+    color: var(--warning);
+}
+
+.severity-star:hover {
+    transform: scale(1.2);
+}
+
+/* 삭제 버튼 */
+.remove-symptom-btn {
+    padding: 8px 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    color: #ef4444;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.remove-symptom-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+    transform: scale(1.1);
+}
+
+/* 증상 추가 버튼 */
+.add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    background: var(--glass-bg);
+    border: 2px dashed var(--glass-border);
+    transition: all 0.3s ease;
+}
+
+.add-btn:hover {
+    background: var(--glass-hover);
+    border-color: var(--primary);
+    border-style: solid;
+}
+
+.add-btn span {
+    font-size: 18px;
+}
+
+/* 빈 상태 메시지 */
+.symptoms-empty-state {
+    padding: 30px;
+    text-align: center;
+    color: var(--text-secondary);
+    border: 2px dashed var(--glass-border);
+    border-radius: 12px;
+    margin-top: 15px;
+}
+
+.symptoms-empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .symptom-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .symptom-select {
+        min-width: unset;
+        width: 100%;
+    }
+    
+    .severity-container {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .severity-stars {
+        gap: 8px;
+    }
+    
+    .severity-star {
+        font-size: 28px;
+    }
+}
+
+/* ============================================
+   Body Briefing & Change Roadmap Modal Styles
+   ============================================ */
+
+/* Briefing Section */
+/* Body Briefing Modal - 호르몬 저널 스타일 적용 */
+.briefing-section.hormone-section {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid var(--glass-border);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--glass-border);
+    border-radius: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+    padding: 0 0 30px 0;
+}
+
+.briefing-section.hormone-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.briefing-section.hormone-section .hormone-section-header {
+    margin-bottom: 25px;
+}
+
+.briefing-section.hormone-section .hormone-section-title {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.briefing-section.hormone-section .section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    color: var(--bg-main);
+    border-radius: 50%;
+    font-size: 0.85em;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Progress Bar Styles */
+.progress-container {
+    margin-top: 0;
+}
+
+.progress-bar-wrapper {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 24px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 12px;
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.progress-change-info {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 5px;
+}
+
+/* Body Change Bar */
+.body-change-container {
+    margin-top: 0;
+}
+
+.body-change-bar-wrapper {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.body-change-bar {
+    width: 100%;
+    height: 32px;
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+}
+
+.body-change-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8b5cf6, #ec4899);
+    border-radius: 14px;
+    transition: width 0.5s ease;
+}
+
+.body-change-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.body-change-details {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.change-item {
+    display: flex;
+    gap: 5px;
+    color: var(--text-secondary);
+}
+
+/* Target Achievement List */
+.target-achievement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 0;
+}
+
+.target-achievement-item {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+}
+
+.target-achievement-item .metric-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.target-achievement-item .metric-name {
+    font-weight: 500;
+}
+
+.target-achievement-item .status-message {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.target-achievement-item .progress-bar-container {
+    margin-top: 8px;
+}
+
+/* Body Ratio Container - 1열로 길게 */
+.body-ratio-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 0;
+}
+
+.body-ratio-item {
+    padding: 15px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+}
+
+.body-ratio-item-fullwidth {
+    width: 100%;
+}
+
+.body-ratio-item .ratio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.body-ratio-item .ratio-name {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 1em;
+}
+
+.body-ratio-item .ratio-value-display {
+    display: flex;
+    align-items: center;
+}
+
+.body-ratio-item .ratio-number {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.body-ratio-item .ratio-evaluation {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+
+/* Predictions Container */
+.predictions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 0;
+}
+
+.prediction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 15px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+}
+
+.prediction-item .prediction-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.prediction-item .prediction-metric-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.prediction-item .prediction-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.prediction-item .current-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.prediction-item .prediction-arrow {
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+.prediction-item .prediction-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.prediction-item .prediction-progress {
+    margin-top: 0;
+}
+
+.prediction-item .prediction-progress-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.prediction-item .prediction-progress-bar {
+    height: 8px;
+    background: var(--input-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--input-border);
+}
+
+.prediction-item .prediction-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.prediction-item .prediction-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 120px;
+    max-width: 150px;
+    padding-left: 20px;
+    border-left: 1px solid var(--glass-border);
+    flex-shrink: 0;
+    align-self: stretch;
+}
+
+.prediction-item .change-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.prediction-item .change-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.prediction-item .change-value {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.prediction-item .change-value.positive {
+    color: var(--positive);
+}
+
+.prediction-item .change-value.negative {
+    color: var(--danger);
+}
+
+/* Alerts Container */
+.alerts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 0;
+}
+
+.alert-item {
+    padding: 15px;
+    border-radius: 12px;
+    border-left: 4px solid;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.alert-item.critical {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.alert-item.warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+.alert-item.info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.alert-item .alert-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.alert-item .alert-content {
+    flex: 1;
+}
+
+.alert-item .alert-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.alert-item .alert-description {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Roadmap Styles */
+.roadmap-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+}
+
+.roadmap-section h3 {
+    margin: 0 0 15px 0;
+    color: var(--primary);
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+/* Roadmap Progress Bar */
+.roadmap-progress-container {
+    margin-top: 15px;
+}
+
+.roadmap-progress-bar {
+    width: 100%;
+    height: 40px;
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.roadmap-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 18px;
+    transition: width 0.5s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Weekly Change Ticks */
+.weekly-tick {
+    position: absolute;
+    width: 4px;
+    height: 100%;
+    top: 0;
+}
+
+.weekly-tick.positive {
+    background: #10b981;
+}
+
+.weekly-tick.negative {
+    background: #ef4444;
+}
+
+.roadmap-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.roadmap-progress-info {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Timeline Container */
+.timeline-container {
+    margin-top: 15px;
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 25px;
+    padding-left: 30px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -25px;
+    top: 0;
+    bottom: -25px;
+    width: 2px;
+    background: var(--glass-border);
+}
+
+.timeline-item:last-child::before {
+    display: none;
+}
+
+.timeline-item::after {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 2px solid var(--primary);
+}
+
+.timeline-item.current::after {
+    background: var(--primary);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+}
+
+.timeline-item.achievement::after {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.timeline-item .timeline-week {
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 5px;
+}
+
+.timeline-item .timeline-date {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.timeline-item .timeline-content {
+    padding: 10px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.timeline-item .timeline-milestone {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 18px;
+}
+
+/* Monthly Summary */
+.monthly-summary-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.monthly-summary-item {
+    padding: 15px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+}
+
+.monthly-summary-item .month-name {
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+
+.monthly-summary-item .top-changes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.monthly-summary-item .change-item {
+    padding: 5px 10px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 6px;
+    color: var(--accent);
+}
+
+/* Comparison Container */
+.comparison-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.comparison-item {
+    padding: 15px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+}
+
+.comparison-item h4 {
+    margin: 0 0 15px 0;
+    color: var(--primary);
+    font-size: 1.1em;
+}
+
+.comparison-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.comparison-result-item {
+    padding: 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+}
+
+.comparison-result-item .metric-name {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.comparison-result-item .comparison-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.comparison-result-item .comparison-change {
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.comparison-result-item .comparison-change.positive {
+    color: #10b981;
+}
+
+.comparison-result-item .comparison-change.negative {
+    color: #ef4444;
+}
+
+/* Date Selector */
+.date-selector-container {
+    margin-bottom: 15px;
+}
+
+.date-selector-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.date-selector-container select {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px 15px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .body-ratio-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .comparison-results {
+        grid-template-columns: 1fr;
+    }
+    
+    .body-change-details {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .timeline-container {
+        padding-left: 20px;
+    }
+    
+    .timeline-item {
+        padding-left: 20px;
+    }
 }

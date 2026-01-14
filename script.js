@@ -125,9 +125,53 @@ const languages = {
         rfMessage_negative: "수치가 상승했습니다. (플레어/변동) 📈",
 
         //hormon
+        currentLevelEvaluation: "현재 수치 평가",
+        currentLevelEvaluationDesc: "목표치와 비교하여 현재 호르몬 수치가 적절한지 평가합니다.",
         hormoneAnalysisTitleChange: "수치 변화량 분석",
+        hormoneChangeAnalysisDesc: "시간에 따른 호르몬 수치의 변화를 주간, 월간, 전체 기간으로 나누어 분석합니다.",
         hormoneAnalysisTitleInfluence: "약물 영향력 분석",
+        drugInfluenceDesc: "복용 중인 약물이 호르몬 수치에 미치는 영향을 데이터 기반으로 분석합니다.",
         hormoneAnalysisTitlePrediction: "미래 예측",
+        emaxAnalysisDesc: "Hill 모델을 사용하여 호르몬 반응도를 평가하고 테스토스테론 억제량을 예측합니다.",
+        bodyRatioAnalysisDesc: "신체 비율을 분석하여 변화 추이를 시각화합니다.",
+        
+        // Status messages
+        estrogen_optimal: "최적 범위입니다",
+        estrogen_above_target: "목표보다 높습니다",
+        estrogen_below_target: "목표보다 낮습니다",
+        estrogen_critical_high: "위험: 매우 높은 수치입니다",
+        testosterone_optimal: "최적 범위입니다",
+        testosterone_above_target: "목표보다 높습니다",
+        testosterone_below_target: "목표보다 낮습니다",
+        testosterone_critical_low: "위험: 매우 낮은 수치입니다",
+        no_target_set: "목표 미설정",
+        
+        // Hormone understanding
+        understandingHormones: "호르몬 수치 이해하기",
+        estrogenExplanation: "에스트로겐은 여성화 효과를 담당하는 주요 호르몬입니다. 피부 변화, 유방 발달, 지방 분포 변화 등에 영향을 미칩니다.",
+        testosteroneExplanation: "테스토스테론은 남성화 효과를 담당하는 주요 호르몬입니다. 근육량, 체모, 목소리 등에 영향을 미칩니다.",
+        
+        // Stability
+        stabilityAnalysisTitle: "호르몬 안정성 분석",
+        variationCoeff: "변동 계수",
+        stability: "안정성",
+        stability_stable: "안정적",
+        stability_moderate: "보통",
+        stability_unstable: "불안정",
+        
+        // Drug influence
+        drugInfluenceHowItWorks: "작동 원리",
+        drugInfluenceHowItWorksDesc: "약물 복용 전후의 호르몬 변화를 분석하여 각 약물의 영향력을 계산합니다. 복용량 변화가 큰 시기에 더 높은 가중치를 부여합니다.",
+        drugInfluenceConfidenceDesc: "신뢰도는 데이터의 양과 질을 나타냅니다. 샘플 수가 많고 단일 약물 변화 구간이 많을수록 높아집니다.",
+        samples: "샘플",
+        confidence: "신뢰도",
+        
+        // Body ratios
+        bodyRatioAnalysisTitle: "신체 비율 분석",
+        waistHipRatio: "허리-엉덩이 비율 (WHR)",
+        chestWaistRatio: "가슴-허리 비율",
+        shoulderHipRatio: "어깨-엉덩이 비율",
+        
         weeklyChange: "주간 변화량",
         monthlyAvgChange: "월간 평균 변화량",
         totalChange: "총 변화량",
@@ -139,6 +183,48 @@ const languages = {
         notEnoughData: "데이터 부족",
         dailyTSuppression: '일일 T 억제량',
         influenceAnalysisDesc: '이 정보는 실측 데이터에 기반한 예측치입니다. <br>수치에는 오차가 있을 수 있습니다.',
+        
+        // 추가된 호르몬 저널 키들
+        currentLevelsEvaluationTitle: "현재 수치 평가",
+        svcard_label_target: "목표",
+        hormoneLevelOptimal: "최적 범위입니다",
+        hormoneLevelAboveTarget: "목표보다 높습니다",
+        hormoneLevelBelowTarget: "목표보다 낮습니다",
+        hormoneLevelHigh: "높은 수치입니다",
+        hormoneLevelLow: "낮은 수치입니다",
+        hormoneLevelNoTarget: "목표가 설정되지 않았습니다",
+        healthAlertsTitle: "건강 주의사항",
+        healthAlertHighE2: "⚠️ 에스트로겐 수치가 매우 높습니다 (>300 pg/mL). 의료진과 상담을 권장합니다.",
+        healthAlertLowT: "⚠️ 테스토스테론 수치가 매우 낮습니다 (<0.05 ng/mL). 의료진과 상담을 권장합니다.",
+        predictionDisclaimer: "※ 예측 수치는 참고용이며, 개인차와 측정 오차가 있을 수 있습니다.",
+        hormoneExplanationTitle: "호르몬 수치 이해하기",
+        hormoneExplanationDesc: "아래는 각 호르몬의 의미와 측정 방법입니다.",
+        hormoneLevelsExplained: "호르몬 수치 설명",
+        estrogenLevelUnit: "pg/mL",
+        estrogenLevelExplanation: "에스트라디올(E2)은 여성화에 중요한 호르몬으로, 혈액 검사를 통해 측정됩니다.",
+        testosteroneLevelUnit: "ng/mL",
+        testosteroneLevelExplanation: "테스토스테론(T)은 남성화에 중요한 호르몬으로, 혈액 검사를 통해 측정됩니다.",
+        responseFactorExplanation: "개인의 호르몬 반응 민감도를 나타냅니다. 1.0에 가까울수록 표준적인 반응입니다.",
+        etRatioTitle: "E/T 비율",
+        etRatioMale: "남성형",
+        etRatioFemale: "여성형",
+        etRatioExplanation: "E/T 비율은 에스트로겐(E)과 테스토스테론(T)의 상대적 균형을 나타냅니다. 의학적 표준 공식: E2(pg/mL) ÷ T(ng/dL), 정상 범위: 0.04~0.1. 높을수록 여성화, 낮을수록 남성화를 의미합니다.",
+        bodyRatioTitle: "신체 비율 분석",
+        whrLabel: "WHR (허리-엉덩이 비율)",
+        chestWaistLabel: "가슴-허리 비율",
+        shoulderHipLabel: "어깨-엉덩이 비율",
+        drugInfluenceHow: "이 분석은 약물 복용량과 호르몬 변화를 비교하여, 각 약물이 호르몬 수치에 미치는 영향을 예측합니다. 복용량 변경이 명확한 구간에 더 높은 가중치를 부여합니다.",
+        drugInfluenceConfidence: "신뢰도는 분석에 사용된 데이터의 양과 질을 나타냅니다. 높을수록 더 정확한 예측입니다.",
+        drugInfluenceHowTitle: "분석 방법",
+        drugInfluenceConfidenceTitle: "신뢰도",
+        influenceSamplesLabel: "분석 구간",
+        hormoneStabilityTitle: "호르몬 안정성",
+        cvStabilityNote: "낮을수록 안정적 (< 10%: 매우 안정적)",
+        rfMessage_very_high: "매우 높은 반응도 - 호르몬에 매우 민감하게 반응합니다",
+        rfMessage_high: "높은 반응도 - 호르몬에 민감하게 반응합니다",
+        rfMessage_normal: "정상 반응도 - 표준적인 호르몬 반응입니다",
+        rfMessage_low: "낮은 반응도 - 호르몬에 둔감하게 반응합니다",
+        rfMessage_very_low: "매우 낮은 반응도 - 호르몬에 매우 둔감하게 반응합니다",
 
         // Input Tab
         formTitleNew: "측정 시작하기<br>현재 {week}주차", formTitleEdit: "측정 기록 수정 <br>{week}주차",
@@ -346,9 +432,53 @@ const languages = {
         rfMessage_negative: "Levels have increased. (Flare/Fluctuation) 📈",
 
         //hormon
+        currentLevelEvaluation: "Current Level Evaluation",
+        currentLevelEvaluationDesc: "Evaluates whether current hormone levels are appropriate compared to target values.",
         hormoneAnalysisTitleChange: "Level Change Analysis",
+        hormoneChangeAnalysisDesc: "Analyzes hormone level changes over time, divided into weekly, monthly, and total periods.",
         hormoneAnalysisTitleInfluence: "Medication Influence Analysis",
+        drugInfluenceDesc: "Data-driven analysis of how medications affect hormone levels.",
         hormoneAnalysisTitlePrediction: "Prediction",
+        emaxAnalysisDesc: "Uses the Hill model to evaluate hormone response and predict testosterone suppression.",
+        bodyRatioAnalysisDesc: "Analyzes and visualizes body ratio changes over time.",
+        
+        // Status messages
+        estrogen_optimal: "Optimal Range",
+        estrogen_above_target: "Above Target",
+        estrogen_below_target: "Below Target",
+        estrogen_critical_high: "Warning: Very High Level",
+        testosterone_optimal: "Optimal Range",
+        testosterone_above_target: "Above Target",
+        testosterone_below_target: "Below Target",
+        testosterone_critical_low: "Warning: Very Low Level",
+        no_target_set: "No Target Set",
+        
+        // Hormone understanding
+        understandingHormones: "Understanding Hormone Levels",
+        estrogenExplanation: "Estrogen is the primary hormone responsible for feminizing effects, influencing skin changes, breast development, and fat distribution.",
+        testosteroneExplanation: "Testosterone is the primary hormone responsible for masculinizing effects, influencing muscle mass, body hair, and voice.",
+        
+        // Stability
+        stabilityAnalysisTitle: "Hormone Stability Analysis",
+        variationCoeff: "Variation Coefficient",
+        stability: "Stability",
+        stability_stable: "Stable",
+        stability_moderate: "Moderate",
+        stability_unstable: "Unstable",
+        
+        // Drug influence
+        drugInfluenceHowItWorks: "How It Works",
+        drugInfluenceHowItWorksDesc: "Analyzes hormone changes before and after medication intake to calculate each drug's influence. Higher weight is given to periods with significant dosage changes.",
+        drugInfluenceConfidenceDesc: "Confidence indicates the quantity and quality of data. It increases with more samples and isolated single-drug change intervals.",
+        samples: "Samples",
+        confidence: "Confidence",
+        
+        // Body ratios
+        bodyRatioAnalysisTitle: "Body Ratio Analysis",
+        waistHipRatio: "Waist-Hip Ratio (WHR)",
+        chestWaistRatio: "Chest-Waist Ratio",
+        shoulderHipRatio: "Shoulder-Hip Ratio",
+        
         weeklyChange: "Weekly Change",
         monthlyAvgChange: "Monthly Avg. Change",
         totalChange: "Total Change",
@@ -360,6 +490,48 @@ const languages = {
         notEnoughData: "N/A",
         dailyTSuppression: 'Daily T Suppression',
         influenceAnalysisDesc: 'This is predictive data based on measurements. <br>Values may contain errors.',
+        
+        // Additional hormone journal keys
+        currentLevelsEvaluationTitle: "Current Level Evaluation",
+        svcard_label_target: "Target",
+        hormoneLevelOptimal: "Optimal range",
+        hormoneLevelAboveTarget: "Above target",
+        hormoneLevelBelowTarget: "Below target",
+        hormoneLevelHigh: "High level",
+        hormoneLevelLow: "Low level",
+        hormoneLevelNoTarget: "No target set",
+        healthAlertsTitle: "Health Alerts",
+        healthAlertHighE2: "⚠️ Estrogen level is very high (>300 pg/mL). Consult your healthcare provider.",
+        healthAlertLowT: "⚠️ Testosterone level is very low (<0.05 ng/mL). Consult your healthcare provider.",
+        predictionDisclaimer: "※ Predictions are for reference only. Individual variations and measurement errors may occur.",
+        hormoneExplanationTitle: "Understanding Hormone Levels",
+        hormoneExplanationDesc: "Below are the meanings and measurement methods for each hormone.",
+        hormoneLevelsExplained: "Hormone Level Explanation",
+        estrogenLevelUnit: "pg/mL",
+        estrogenLevelExplanation: "Estradiol (E2) is an important hormone for feminization, measured through blood tests.",
+        testosteroneLevelUnit: "ng/mL",
+        testosteroneLevelExplanation: "Testosterone (T) is an important hormone for masculinization, measured through blood tests.",
+        responseFactorExplanation: "Indicates individual hormone response sensitivity. Closer to 1.0 means standard response.",
+        etRatioTitle: "E/T Ratio",
+        etRatioMale: "Masculine",
+        etRatioFemale: "Feminine",
+        etRatioExplanation: "The E/T ratio represents the relative balance between Estrogen (E) and Testosterone (T). Medical standard formula: E2(pg/mL) ÷ T(ng/dL), Normal range: 0.04~0.1. Higher values indicate feminization, lower values indicate masculinization.",
+        bodyRatioTitle: "Body Ratio Analysis",
+        whrLabel: "WHR (Waist-Hip Ratio)",
+        chestWaistLabel: "Chest-Waist Ratio",
+        shoulderHipLabel: "Shoulder-Hip Ratio",
+        drugInfluenceHow: "This analysis compares medication dosages with hormone changes to predict each drug's effect on hormone levels. Intervals with clear dosage changes receive higher weights.",
+        drugInfluenceConfidence: "Confidence indicates the quantity and quality of data used in the analysis. Higher values mean more accurate predictions.",
+        drugInfluenceHowTitle: "Analysis Method",
+        drugInfluenceConfidenceTitle: "Confidence",
+        influenceSamplesLabel: "Analysis Intervals",
+        hormoneStabilityTitle: "Hormone Stability",
+        cvStabilityNote: "Lower is more stable (< 10%: very stable)",
+        rfMessage_very_high: "Very high response - highly sensitive to hormones",
+        rfMessage_high: "High response - sensitive to hormones",
+        rfMessage_normal: "Normal response - standard hormone reaction",
+        rfMessage_low: "Low response - less sensitive to hormones",
+        rfMessage_very_low: "Very low response - very insensitive to hormones",
 
         // Input Tab
         formTitleNew: "Start Measuring📏 <br>Current Week {week}", formTitleEdit: "Edit Measurement Record <br>Week {week}",
@@ -561,9 +733,53 @@ const languages = {
         rfMessage_negative: "数値が上昇しました。(フレア/変動) 📈",
 
         //hormon
+        currentLevelEvaluation: "現在の数値評価",
+        currentLevelEvaluationDesc: "目標値と比較して現在のホルモン数値が適切かを評価します。",
         hormoneAnalysisTitleChange: "数値変化分析",
+        hormoneChangeAnalysisDesc: "時間経過によるホルモン数値の変化を週間、月間、全期間に分けて分析します。",
         hormoneAnalysisTitleInfluence: "薬物影響分析",
+        drugInfluenceDesc: "服用中の薬物がホルモン数値に与える影響をデータに基づいて分析します。",
         hormoneAnalysisTitlePrediction: "将来予測",
+        emaxAnalysisDesc: "Hillモデルを使用してホルモン反応度を評価し、テストステロン抑制量を予測します。",
+        bodyRatioAnalysisDesc: "身体比率を分析し、変化の推移を可視化します。",
+        
+        // Status messages
+        estrogen_optimal: "最適範囲です",
+        estrogen_above_target: "目標より高いです",
+        estrogen_below_target: "目標より低いです",
+        estrogen_critical_high: "警告：非常に高い数値です",
+        testosterone_optimal: "最適範囲です",
+        testosterone_above_target: "目標より高いです",
+        testosterone_below_target: "目標より低いです",
+        testosterone_critical_low: "警告：非常に低い数値です",
+        no_target_set: "目標未設定",
+        
+        // Hormone understanding
+        understandingHormones: "ホルモン数値の理解",
+        estrogenExplanation: "エストロゲンは女性化効果を担当する主要ホルモンです。肌の変化、乳房の発達、脂肪分布の変化などに影響します。",
+        testosteroneExplanation: "テストステロンは男性化効果を担当する主要ホルモンです。筋肉量、体毛、声などに影響します。",
+        
+        // Stability
+        stabilityAnalysisTitle: "ホルモン安定性分析",
+        variationCoeff: "変動係数",
+        stability: "安定性",
+        stability_stable: "安定",
+        stability_moderate: "普通",
+        stability_unstable: "不安定",
+        
+        // Drug influence
+        drugInfluenceHowItWorks: "動作原理",
+        drugInfluenceHowItWorksDesc: "薬物服用前後のホルモン変化を分析し、各薬物の影響力を計算します。用量変化が大きい時期により高い重みを付与します。",
+        drugInfluenceConfidenceDesc: "信頼度はデータの量と質を示します。サンプル数が多く、単一薬物変化区間が多いほど高くなります。",
+        samples: "サンプル",
+        confidence: "信頼度",
+        
+        // Body ratios
+        bodyRatioAnalysisTitle: "身体比率分析",
+        waistHipRatio: "ウエスト-ヒップ比 (WHR)",
+        chestWaistRatio: "チェスト-ウエスト比",
+        shoulderHipRatio: "肩-ヒップ比",
+        
         weeklyChange: "週間変化量",
         monthlyAvgChange: "月間平均変化量",
         totalChange: "総変化量",
@@ -575,6 +791,48 @@ const languages = {
         notEnoughData: "データ不足",
         dailyTSuppression: '一日T抑制量',
         influenceAnalysisDesc: 'この情報は実測データに基づく予測です。<br>数値には誤差が含まれる場合があります。',
+        
+        // 追加されたホルモンジャーナルキー
+        currentLevelsEvaluationTitle: "現在の数値評価",
+        svcard_label_target: "目標",
+        hormoneLevelOptimal: "最適範囲です",
+        hormoneLevelAboveTarget: "目標より高いです",
+        hormoneLevelBelowTarget: "目標より低いです",
+        hormoneLevelHigh: "高い数値です",
+        hormoneLevelLow: "低い数値です",
+        hormoneLevelNoTarget: "目標が設定されていません",
+        healthAlertsTitle: "健康注意事項",
+        healthAlertHighE2: "⚠️ エストロゲン値が非常に高いです (>300 pg/mL)。医療機関への相談をお勧めします。",
+        healthAlertLowT: "⚠️ テストステロン値が非常に低いです (<0.05 ng/mL)。医療機関への相談をお勧めします。",
+        predictionDisclaimer: "※ 予測値は参考用であり、個人差と測定誤差がある場合があります。",
+        hormoneExplanationTitle: "ホルモン数値の理解",
+        hormoneExplanationDesc: "以下は各ホルモンの意味と測定方法です。",
+        hormoneLevelsExplained: "ホルモン数値の説明",
+        estrogenLevelUnit: "pg/mL",
+        estrogenLevelExplanation: "エストラジオール(E2)は女性化に重要なホルモンで、血液検査で測定されます。",
+        testosteroneLevelUnit: "ng/mL",
+        testosteroneLevelExplanation: "テストステロン(T)は男性化に重要なホルモンで、血液検査で測定されます。",
+        responseFactorExplanation: "個人のホルモン反応感度を示します。1.0に近いほど標準的な反応です。",
+        etRatioTitle: "E/T比",
+        etRatioMale: "男性型",
+        etRatioFemale: "女性型",
+        etRatioExplanation: "E/T比はエストロゲン(E)とテストステロン(T)の相対的バランスを示します。医学的標準式: E2(pg/mL) ÷ T(ng/dL)、正常範囲: 0.04~0.1。高いほど女性化、低いほど男性化を意味します。",
+        bodyRatioTitle: "身体比率分析",
+        whrLabel: "WHR (ウエスト・ヒップ比)",
+        chestWaistLabel: "胸囲・ウエスト比",
+        shoulderHipLabel: "肩幅・ヒップ比",
+        drugInfluenceHow: "この分析は薬物投与量とホルモン変化を比較し、各薬物がホルモン値に与える影響を予測します。投与量変更が明確な区間により高い重み付けを行います。",
+        drugInfluenceConfidence: "信頼度は分析に使用されたデータの量と質を示します。高いほど予測がより正確です。",
+        drugInfluenceHowTitle: "分析方法",
+        drugInfluenceConfidenceTitle: "信頼度",
+        influenceSamplesLabel: "分析区間",
+        hormoneStabilityTitle: "ホルモン安定性",
+        cvStabilityNote: "低いほど安定 (< 10%: 非常に安定)",
+        rfMessage_very_high: "非常に高い反応度 - ホルモンに非常に敏感に反応します",
+        rfMessage_high: "高い反応度 - ホルモンに敏感に反応します",
+        rfMessage_normal: "正常な反応度 - 標準的なホルモン反応です",
+        rfMessage_low: "低い反応度 - ホルモンに鈍感に反応します",
+        rfMessage_very_low: "非常に低い反応度 - ホルモンに非常に鈍感に反応します",
 
         // Input Tab
         formTitleNew: "測定開始📏<br>現在{week}週", formTitleEdit: "測定記録を編集<br>{week}週目",
@@ -959,9 +1217,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateAdvancedHormoneAnalytics() {
         if (measurements.length < 1) return null;
 
-        const analytics = { estrogenLevel: {}, testosteroneLevel: {}, influence: {}, emax: {} };
+        const analytics = { 
+            estrogenLevel: {}, 
+            testosteroneLevel: {}, 
+            influence: {}, 
+            emax: {},
+            etRatio: null,
+            stability: {},
+            bodyRatios: {}
+        };
 
-        // 1. 기본 수치 및 변화량 계산 (기존 로직 유지)
+        // 1. 기본 수치 및 변화량 계산
         const sortedMeas = [...measurements].sort((a, b) => a.timestamp - b.timestamp);
         const initial = sortedMeas[0];
         const latest = sortedMeas[sortedMeas.length - 1];
@@ -988,14 +1254,304 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 2. 약물 영향력 분석 (기존 로직 유지)
+        // 2. 호르몬 안정성 분석 (Coefficient of Variation - CV)
+        ['estrogenLevel', 'testosteroneLevel'].forEach(h => {
+            const recentData = sortedMeas.slice(-8).map(m => parseFloat(m[h])).filter(v => !isNaN(v));
+            if (recentData.length >= 3) {
+                const mean = recentData.reduce((sum, v) => sum + v, 0) / recentData.length;
+                const variance = recentData.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / recentData.length;
+                const stdDev = Math.sqrt(variance);
+                const cv = (stdDev / mean) * 100;
+                analytics.stability[h] = { cv, status: cv < 10 ? 'stable' : cv < 20 ? 'moderate' : 'unstable' };
+            }
+        });
+
+        // 3. E/T Ratio 계산 (자동 단위 변환 포함)
+        let latestE_pgml = parseFloat(latest.estrogenLevel);
+        let latestT_ngml = parseFloat(latest.testosteroneLevel);
+
+        // E2 단위 자동 감지 및 변환 (더 정교한 로직)
+        if (!isNaN(latestE_pgml)) {
+            const originalValue = latestE_pgml;
+            
+            // 단위별 일반적인 범위 정의 (MTF 기준)
+            const rangesE2 = {
+                'pg/mL': { min: 50, max: 300, extreme: 600 },    // 표준 단위
+                'ng/mL': { min: 0.05, max: 0.3, extreme: 0.6 },  // 드물게 사용
+                'pmol/L': { min: 180, max: 1100, extreme: 2200 } // SI 단위
+            };
+            
+            let detectedUnit = null;
+            let highProbability = false;
+            
+            // 1. 완벽한 정상 범위 내에 있는가?
+            for (const [unit, range] of Object.entries(rangesE2)) {
+                if (latestE_pgml >= range.min && latestE_pgml <= range.max) {
+                    detectedUnit = unit;
+                    highProbability = true;
+                    break;
+                }
+            }
+            
+            // 2. 정상은 아니지만 생물학적으로 가능한 범위인가?
+            if (!detectedUnit) {
+                for (const [unit, range] of Object.entries(rangesE2)) {
+                    if (latestE_pgml <= range.extreme) {
+                        detectedUnit = unit;
+                        break;
+                    }
+                }
+            }
+            
+            // 3. 감지된 단위에 따라 pg/mL로 변환
+            if (detectedUnit === 'ng/mL') {
+                latestE_pgml *= 1000;
+                console.warn(`E2 value ${originalValue} detected as ng/mL, converted to ${latestE_pgml} pg/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
+            } else if (detectedUnit === 'pmol/L') {
+                latestE_pgml /= 3.671; // pmol/L to pg/mL 변환 계수
+                console.warn(`E2 value ${originalValue} detected as pmol/L, converted to ${latestE_pgml.toFixed(1)} pg/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
+            } else if (detectedUnit === 'pg/mL') {
+                console.log(`E2 value ${originalValue} detected as pg/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
+            } else {
+                // 감지 실패 시 기본값 추정
+                if (latestE_pgml < 10) {
+                    latestE_pgml *= 1000; // ng/mL로 가정
+                    console.warn(`E2 value ${originalValue} unit detection failed, assuming ng/mL -> ${latestE_pgml} pg/mL`);
+                }
+            }
+        }
+
+        // T 단위 자동 감지 및 변환 (더 정교한 로직)
+        if (!isNaN(latestT_ngml)) {
+            const originalValue = latestT_ngml;
+            
+            // 단위별 일반적인 범위 정의
+            const ranges = {
+                'ng/dL': { min: 200, max: 1000, extreme: 2000 },  // 남성 일반 범위
+                'nmol/L': { min: 8, max: 35, extreme: 100 },      // SI 단위
+                'ng/mL': { min: 2, max: 10, extreme: 20 }         // 표준 단위
+            };
+            
+            let detectedUnit = null;
+            let highProbability = false;
+            
+            // 1. 완벽한 정상 범위 내에 있는가?
+            for (const [unit, range] of Object.entries(ranges)) {
+                if (latestT_ngml >= range.min && latestT_ngml <= range.max) {
+                    detectedUnit = unit;
+                    highProbability = true;
+                    break;
+                }
+            }
+            
+            // 2. 정상은 아니지만 생물학적으로 가능한 범위인가?
+            if (!detectedUnit) {
+                for (const [unit, range] of Object.entries(ranges)) {
+                    if (latestT_ngml <= range.extreme) {
+                        detectedUnit = unit;
+                        break;
+                    }
+                }
+            }
+            
+            // 3. 감지된 단위에 따라 ng/mL로 변환
+            if (detectedUnit === 'ng/dL') {
+                latestT_ngml /= 100;
+                console.warn(`T value ${originalValue} detected as ng/dL, converted to ${latestT_ngml} ng/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
+            } else if (detectedUnit === 'nmol/L') {
+                latestT_ngml *= 0.0347; // nmol/L to ng/mL 변환 계수
+                console.warn(`T value ${originalValue} detected as nmol/L, converted to ${latestT_ngml} ng/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
+            } else if (detectedUnit === 'ng/mL') {
+                console.log(`T value ${originalValue} detected as ng/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
+            } else {
+                // 감지 실패 시 기본값은 ng/dL로 가정 (한국 표준)
+                if (latestT_ngml > 50) {
+                    latestT_ngml /= 100;
+                    console.warn(`T value ${originalValue} unit detection failed, assuming ng/dL -> ${latestT_ngml} ng/mL`);
+                }
+            }
+        }
+
+        if (!isNaN(latestE_pgml) && !isNaN(latestT_ngml) && latestT_ngml > 0) {
+            // ⚠️ 중요: 의학적 표준 E/T 비율 공식
+            // E2 (pg/mL) ÷ T (ng/dL) - 단위 변환 없이 그대로!
+            // 정상 범위: 0.04 ~ 0.1
+            
+            // T를 ng/mL에서 ng/dL로 다시 변환 (× 100)
+            const latestT_ngdL = latestT_ngml * 100;
+            
+            // 표준 E/T 비율 계산
+            const ratio = latestE_pgml / latestT_ngdL;
+            
+            console.log(`📊 E/T Ratio (Medical Standard):
+                E2: ${latestE_pgml.toFixed(1)} pg/mL
+                T: ${latestT_ngdL.toFixed(1)} ng/dL
+                E/T = ${latestE_pgml.toFixed(1)} ÷ ${latestT_ngdL.toFixed(1)} = ${ratio.toFixed(3)}
+                Normal Range: 0.04 ~ 0.1`);
+            
+            analytics.etRatio = {
+                value: ratio,
+                position: Math.min(Math.max((ratio / 0.2) * 100, 0), 100), // 0-0.2 범위를 0-100%로 정규화
+                evaluation: ratio < 0.1 ? 'male_range' : ratio > 0.5 ? 'female_range' : 'transitioning',
+                isNormal: ratio >= 0.04 && ratio <= 0.1
+            };
+        }
+
+        // 백분위 계산 함수 (실제 통계 데이터 기반)
+        const calculatePercentile = (value, type, gender) => {
+            const stats = {
+                whr: {
+                    female: { p10: 0.67, p25: 0.70, p50: 0.75, p75: 0.80, p90: 0.85 },
+                    male: { p10: 0.85, p25: 0.90, p50: 0.95, p75: 1.00, p90: 1.05 }
+                },
+                chestWaist: {
+                    female: { p10: 0.95, p25: 1.00, p50: 1.10, p75: 1.20, p90: 1.30 },
+                    male: { p10: 1.20, p25: 1.30, p50: 1.40, p75: 1.50, p90: 1.60 }
+                },
+                shoulderHip: {
+                    female: { p10: 0.95, p25: 1.00, p50: 1.05, p75: 1.10, p90: 1.15 },
+                    male: { p10: 1.15, p25: 1.25, p50: 1.30, p75: 1.35, p90: 1.45 }
+                }
+            };
+            
+            const data = stats[type]?.[gender];
+            if (!data) return null;
+            
+            if (value <= data.p10) return { percentile: 10, text: '상위 10%' };
+            if (value <= data.p25) return { percentile: 25, text: '상위 25%' };
+            if (value <= data.p50) return { percentile: 50, text: '평균' };
+            if (value <= data.p75) return { percentile: 75, text: '하위 25%' };
+            if (value <= data.p90) return { percentile: 90, text: '하위 10%' };
+            return { percentile: 95, text: '하위 5%' };
+        };
+        
+        // 4. 신체 비율 분석 (어깨=너비, 나머지=둘레 인식)
+        
+        // WHR (허리-엉덩이 비율): 둘레 / 둘레
+        if (latest.waist && latest.hips) {
+            const waistCircum = parseFloat(latest.waist);
+            const hipCircum = parseFloat(latest.hips);
+            const whr = waistCircum / hipCircum;
+            
+            if (!isNaN(whr)) {
+                // WHR: 여성 0.7-0.8, 남성 0.9-1.0
+                const rawPosition = Math.min(Math.max(((whr - 0.7) / (1.0 - 0.7)) * 100, 0), 100);
+                
+                // 백분위 계산
+                const femalePercentile = calculatePercentile(whr, 'whr', 'female');
+                const malePercentile = calculatePercentile(whr, 'whr', 'male');
+                
+                analytics.bodyRatios.whr = {
+                    value: whr,
+                    position: 100 - rawPosition, // 반대로 (여성=오른쪽)
+                    percentiles: {
+                        female: femalePercentile,
+                        male: malePercentile
+                    }
+                };
+            }
+        }
+        
+        // Chest-Waist (가슴-허리 비율): 둘레 / 둘레
+        if (latest.chest && latest.waist) {
+            const chestCircum = parseFloat(latest.chest);
+            const waistCircum = parseFloat(latest.waist);
+            const cwr = chestCircum / waistCircum;
+            
+            if (!isNaN(cwr)) {
+                // Chest-Waist: 여성 1.0-1.2, 남성 1.3-1.5
+                const rawPosition = Math.min(Math.max(((cwr - 1.0) / (1.5 - 1.0)) * 100, 0), 100);
+                
+                // 백분위 계산
+                const femalePercentile = calculatePercentile(cwr, 'chestWaist', 'female');
+                const malePercentile = calculatePercentile(cwr, 'chestWaist', 'male');
+                
+                analytics.bodyRatios.chestWaist = {
+                    value: cwr,
+                    position: 100 - rawPosition, // 반대로 (여성=오른쪽)
+                    percentiles: {
+                        female: femalePercentile,
+                        male: malePercentile
+                    }
+                };
+            }
+        }
+        
+        // Shoulder-Hip (어깨-엉덩이 비율): 너비 vs 둘레 - 어깨 둘레로 추정 변환
+        if (latest.shoulder && latest.hips) {
+            const shoulderWidth = parseFloat(latest.shoulder);
+            const hipCircum = parseFloat(latest.hips);
+            
+            // ⚠️ 중요: 어깨는 "너비"이고 엉덩이는 "둘레"
+            // 어깨 너비를 어깨 둘레로 추정 변환: 어깨 둘레 ≈ 어깨 너비 × 2.8
+            const shoulderCircumEstimated = shoulderWidth * 2.8;
+            
+            // Shoulder/Hip 비율 (둘레 기준)
+            const shr = shoulderCircumEstimated / hipCircum;
+            
+            if (!isNaN(shr)) {
+                // Shoulder/Hip: 여성 1.0-1.1, 남성 1.25-1.35
+                const rawPosition = Math.min(Math.max(((shr - 1.0) / (1.35 - 1.0)) * 100, 0), 100);
+                
+                // 백분위 계산
+                const femalePercentile = calculatePercentile(shr, 'shoulderHip', 'female');
+                const malePercentile = calculatePercentile(shr, 'shoulderHip', 'male');
+                
+                analytics.bodyRatios.shoulderHip = {
+                    value: shr,
+                    position: 100 - rawPosition, // 반대로 (여성=오른쪽)
+                    percentiles: {
+                        female: femalePercentile,
+                        male: malePercentile
+                    },
+                    note: `어깨 너비 ${shoulderWidth}cm → 추정 둘레 ${shoulderCircumEstimated.toFixed(1)}cm`
+                };
+                
+                console.log(`Shoulder-Hip Ratio: Width ${shoulderWidth}cm → Est. Circumference ${shoulderCircumEstimated.toFixed(1)}cm / Hip ${hipCircum}cm = ${shr.toFixed(2)}`);
+            }
+        }
+
+        // 5. 약물 영향력 분석 (개선된 알고리즘)
         if (sortedMeas.length >= 2) {
             const standardMeds = ['estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen'];
             const otherMeds = [...new Set(sortedMeas.map(m => m.medicationOtherName).filter(n => n && n.trim() !== ''))];
             const allMedNames = [...standardMeds, ...otherMeds];
             const drugStats = {};
-            allMedNames.forEach(name => drugStats[name] = { eDeltaSum: 0, tDeltaSum: 0, doseSum: 0, count: 0 });
+            allMedNames.forEach(name => drugStats[name] = { 
+                eDeltaSum: 0, tDeltaSum: 0, doseSum: 0, count: 0, weightSum: 0 
+            });
 
+            // 먼저 모든 호르몬 변화를 수집하여 중앙값 계산 (이상치 필터링용)
+            const allEChanges = [];
+            const allTChanges = [];
+            for (let i = 1; i < sortedMeas.length; i++) {
+                const curr = sortedMeas[i];
+                const prev = sortedMeas[i - 1];
+                const days = (curr.timestamp - prev.timestamp) / 86400000;
+                if (days < 1) continue;
+
+                const dE = (!isNaN(parseFloat(curr.estrogenLevel)) && !isNaN(parseFloat(prev.estrogenLevel)))
+                    ? (parseFloat(curr.estrogenLevel) - parseFloat(prev.estrogenLevel)) : null;
+                const dT = (!isNaN(parseFloat(curr.testosteroneLevel)) && !isNaN(parseFloat(prev.testosteroneLevel)))
+                    ? (parseFloat(curr.testosteroneLevel) - parseFloat(prev.testosteroneLevel)) : null;
+                const wE = dE !== null ? Math.abs((dE / days) * 7) : null;
+                const wT = dT !== null ? Math.abs((dT / days) * 7) : null;
+
+                if (wE !== null) allEChanges.push(wE);
+                if (wT !== null) allTChanges.push(wT);
+            }
+
+            // 중앙값 계산
+            const getMedian = (arr) => {
+                if (arr.length === 0) return 0;
+                const sorted = [...arr].sort((a, b) => a - b);
+                const mid = Math.floor(sorted.length / 2);
+                return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+            };
+            const medianE = getMedian(allEChanges);
+            const medianT = getMedian(allTChanges);
+
+            // 본격적인 약물 영향력 계산
             for (let i = 1; i < sortedMeas.length; i++) {
                 const curr = sortedMeas[i];
                 const prev = sortedMeas[i - 1];
@@ -1009,36 +1565,85 @@ document.addEventListener('DOMContentLoaded', () => {
                 const wE = dE !== null ? (dE / days) * 7 : 0;
                 const wT = dT !== null ? (dT / days) * 7 : 0;
 
+                // 이상치 필터링 (중앙값의 5배 이상 변화는 측정 오류로 간주)
+                if (Math.abs(wE) > medianE * 5 || Math.abs(wT) > medianT * 5) {
+                    console.warn(`Outlier filtered at week ${i}: wE=${wE}, wT=${wT}`);
+                    continue;
+                }
+
+                // 각 약물의 복용량 변화 계산
+                const doseChanges = {};
                 allMedNames.forEach(drugName => {
-                    let dose = 0;
+                    let currDose = 0, prevDose = 0;
                     if (standardMeds.includes(drugName)) {
-                        dose = parseFloat(curr[drugName]) || 0;
+                        currDose = parseFloat(curr[drugName]) || 0;
+                        prevDose = parseFloat(prev[drugName]) || 0;
                     } else if (curr.medicationOtherName === drugName) {
-                        dose = parseFloat(curr.medicationOtherDose) || 0;
+                        currDose = parseFloat(curr.medicationOtherDose) || 0;
+                        if (prev.medicationOtherName === drugName) {
+                            prevDose = parseFloat(prev.medicationOtherDose) || 0;
+                        }
                     }
-                    if (dose > 0) {
-                        if (dE !== null) drugStats[drugName].eDeltaSum += (wE * dose);
-                        if (dT !== null) drugStats[drugName].tDeltaSum += (wT * dose);
-                        drugStats[drugName].doseSum += (dose * dose);
-                        drugStats[drugName].count++;
+                    doseChanges[drugName] = { curr: currDose, prev: prevDose, change: Math.abs(currDose - prevDose) };
+                });
+
+                // 단일 약물 변화 감지 (가중치 부여)
+                const significantChanges = Object.values(doseChanges).filter(d => d.change >= 0.5).length;
+
+                allMedNames.forEach(drugName => {
+                    const { curr, prev, change } = doseChanges[drugName];
+                    const doseAvg = (curr + prev) / 2;
+                    if (doseAvg === 0) return;
+
+                    // 기본 가중치 1.0
+                    let weight = 1.0;
+
+                    // 복용량 변화가 유의미한 경우 가중치 증가
+                    if (change >= 0.5) {
+                        weight *= 2.0;
                     }
+
+                    // 단일 약물만 변경된 경우 가중치 대폭 증가 (효과 분리)
+                    if (significantChanges === 1 && change >= 0.5) {
+                        weight *= 3.0;
+                    } else if (significantChanges >= 3) {
+                        // 여러 약물이 동시 변경된 경우 신뢰도 감소
+                        weight *= 0.3;
+                    }
+
+                    if (dE !== null) drugStats[drugName].eDeltaSum += (wE * weight);
+                    if (dT !== null) drugStats[drugName].tDeltaSum += (wT * weight);
+                    drugStats[drugName].doseSum += (doseAvg * weight);
+                    drugStats[drugName].weightSum += weight;
+                    drugStats[drugName].count++;
                 });
             }
 
             const influences = {};
             allMedNames.forEach(drug => {
-                if (drugStats[drug].count > 0 && drugStats[drug].doseSum > 0) {
+                if (drugStats[drug].count >= 2 && drugStats[drug].doseSum > 0) {
                     const scoreE = drugStats[drug].eDeltaSum / drugStats[drug].doseSum;
                     const scoreT = drugStats[drug].tDeltaSum / drugStats[drug].doseSum;
+                    
+                    // 신뢰도 계산 (0-1)
+                    const countFactor = Math.min(drugStats[drug].count / 10, 1);
+                    const weightFactor = Math.min(drugStats[drug].weightSum / 20, 1);
+                    const confidence = (countFactor * 0.6 + weightFactor * 0.4);
+                    
                     if (Math.abs(scoreE) > 0.01 || Math.abs(scoreT) > 0.01) {
-                        influences[drug] = { estrogen: scoreE, testosterone: scoreT };
+                        influences[drug] = { 
+                            estrogen: scoreE, 
+                            testosterone: scoreT, 
+                            confidence: confidence,
+                            samples: drugStats[drug].count
+                        };
                     }
                 }
             });
             analytics.influence = influences;
         }
 
-        // 3. 미래 예측 (음수 허용)
+        // 6. 미래 예측
         const predictDays = (current, target, weeklyRate) => {
             if (isNaN(target) || weeklyRate === 0 || weeklyRate === null) return null;
             const dailyRate = weeklyRate / 7;
@@ -1062,48 +1667,39 @@ document.addEventListener('DOMContentLoaded', () => {
             analytics.testosteroneLevel.daysToTarget = null;
         }
 
-        // ============================================================
-        // ★★★ 4. Emax / Hill 모델 기반 분석 및 반응도(RF) 계산 ★★★
-        // ============================================================
-        const latestE_pgml = parseFloat(latest.estrogenLevel);
-        const latestT_ngml = parseFloat(latest.testosteroneLevel);
-
-        // 파라미터 (문헌 기반)
+        // 7. Emax / Hill 모델 기반 분석 및 반응도(RF) 계산
         const E_max = 0.95;
-        const EC_50 = 135;
-        // 기저 테스토스테론 (T0) 설정: 사용자 초기 데이터가 유효하면 사용, 아니면 평균값(6.0ng/ml)
-        let T0 = 6.0;
-        if (!isNaN(parseFloat(initial.testosteroneLevel)) && parseFloat(initial.testosteroneLevel) > 2.0) {
+        const EC_50 = 175; // 개선된 값 (WPATH SOC 8 기반)
+        
+        // T0 설정 (성별 기반)
+        let T0 = 6.0; // 기본값 (남성)
+        if (biologicalSex === 'female') {
+            T0 = 0.4; // 여성
+        } else if (!isNaN(parseFloat(initial.testosteroneLevel)) && parseFloat(initial.testosteroneLevel) > 2.0) {
             T0 = parseFloat(initial.testosteroneLevel);
         }
 
         if (!isNaN(latestE_pgml)) {
-            // [A] 일일 T 억제량 (Predicted Daily Suppression Amount via Hill Model)
             const predictedSuppressionFraction = E_max * (latestE_pgml / (EC_50 + latestE_pgml));
-            const predictedSuppressedAmount = T0 * predictedSuppressionFraction; // 이론상 줄어들었어야 하는 양
-
-            // 화면 표시용 일일 T 억제량 (감소는 음수로 표시)
+            const predictedSuppressedAmount = T0 * predictedSuppressionFraction;
             analytics.emax.dailySuppression = -1 * predictedSuppressedAmount;
 
-            // [B] 실제 반응도 (Response Factor) 추정
             if (!isNaN(latestT_ngml)) {
-                // 실제 억제 비율 (현재 T가 T0보다 얼마나 줄었나?)
                 const actualSuppressionFraction = (T0 - latestT_ngml) / T0;
-
-                // RF 계산 (실제 억제율 / 예측 억제율)
                 let rf = 0;
                 let messageKey = 'rfMessage_normal';
 
                 if (actualSuppressionFraction < 0) {
-                    // T가 오히려 증가한 경우 (억제 안됨 / 플레어)
                     rf = actualSuppressionFraction;
                     messageKey = 'rfMessage_negative';
                 } else {
                     rf = actualSuppressionFraction / predictedSuppressionFraction;
 
-                    if (rf > 1.15) messageKey = 'rfMessage_high';       // 1.15배 이상 잘 억제됨
-                    else if (rf < 0.85) messageKey = 'rfMessage_low';   // 0.85배 미만으로 덜 억제됨
-                    else messageKey = 'rfMessage_normal';              // 그 사이
+                    if (rf > 1.3) messageKey = 'rfMessage_very_high';
+                    else if (rf > 1.15) messageKey = 'rfMessage_high';
+                    else if (rf < 0.7) messageKey = 'rfMessage_very_low';
+                    else if (rf < 0.85) messageKey = 'rfMessage_low';
+                    else messageKey = 'rfMessage_normal';
                 }
 
                 analytics.emax.rf = rf;
@@ -1114,6 +1710,42 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             analytics.emax.dailySuppression = null;
             analytics.emax.rf = null;
+        }
+
+        // 8. 현재 수치 평가 (간소화 - 목표치와 현재치 비교)
+        const targetE = parseFloat(targets.estrogenLevel);
+        const targetT = parseFloat(targets.testosteroneLevel);
+        
+        if (!isNaN(latestE_pgml)) {
+            if (!isNaN(targetE)) {
+                if (latestE_pgml > 300) {
+                    analytics.estrogenLevel.status = 'critical_high';
+                } else if (Math.abs(latestE_pgml - targetE) / targetE < 0.1) {
+                    analytics.estrogenLevel.status = 'optimal';
+                } else if (latestE_pgml > targetE) {
+                    analytics.estrogenLevel.status = 'above_target';
+                } else {
+                    analytics.estrogenLevel.status = 'below_target';
+                }
+            } else {
+                analytics.estrogenLevel.status = 'no_target';
+            }
+        }
+
+        if (!isNaN(latestT_ngml)) {
+            if (!isNaN(targetT)) {
+                if (latestT_ngml < 0.05) {
+                    analytics.testosteroneLevel.status = 'critical_low';
+                } else if (Math.abs(latestT_ngml - targetT) / targetT < 0.1) {
+                    analytics.testosteroneLevel.status = 'optimal';
+                } else if (latestT_ngml > targetT) {
+                    analytics.testosteroneLevel.status = 'above_target';
+                } else {
+                    analytics.testosteroneLevel.status = 'below_target';
+                }
+            } else {
+                analytics.testosteroneLevel.status = 'no_target';
+            }
         }
 
         return analytics;
@@ -1174,12 +1806,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Comparison Modal 'Flow View' Functions ---
     function openComparisonModal() {
-        const comparisonViewTemplate = document.getElementById('compare-flow-view');
-        if (!comparisonViewTemplate) return;
-
-        const contentHTML = comparisonViewTemplate.innerHTML;
-        const title = translate('comparisonModalTitle'); // 이 부분은 '최근 변화 하이라이트' 등으로 바꿀 수 있습니다.
-        openModal(title, contentHTML);
+        // 새로운 Body Briefing 모달 사용
+        try {
+            // 동적 import로 Body Briefing 모달 로드
+            import('./src/ui/body-briefing-modal.js').then(module => {
+                const BodyBriefingModal = module.BodyBriefingModal || module.default;
+                const userSettings = {
+                    mode: currentMode || 'mtf',
+                    biologicalSex: biologicalSex || 'male',
+                    language: currentLanguage || 'ko',
+                    targets: targets || {}
+                };
+                const modal = new BodyBriefingModal(measurements || [], userSettings);
+                modal.open();
+            }).catch(error => {
+                console.error('Failed to load Body Briefing modal:', error);
+                // 폴백: 기존 방식 사용
+                const comparisonViewTemplate = document.getElementById('compare-flow-view');
+                if (!comparisonViewTemplate) return;
+                const contentHTML = comparisonViewTemplate.innerHTML;
+                const title = translate('comparisonModalTitle');
+                openModal(title, contentHTML);
+            });
+        } catch (error) {
+            console.error('Error opening Body Briefing modal:', error);
+            // 폴백: 기존 방식 사용
+            const comparisonViewTemplate = document.getElementById('compare-flow-view');
+            if (!comparisonViewTemplate) return;
+            const contentHTML = comparisonViewTemplate.innerHTML;
+            const title = translate('comparisonModalTitle');
+            openModal(title, contentHTML);
+        }
+        return; // 기존 코드는 실행하지 않음
 
         // 모달이 열리면 상세 분석 뷰를 기본으로 렌더링
         renderDetailedAnalysisView();
@@ -1355,6 +2013,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const isLightMode = document.body.classList.contains('light-mode');
         const tickColor = isLightMode ? '#5c5c8a' : getCssVar('--text-dim2');
         const gridColor = isLightMode ? 'rgba(200, 200, 235, 0.5)' : getCssVar('--glass-border');
+
+        // 비교 차트 스크롤 기능
+        const maxPointsPerView = 20;
+        const minPointWidth = 45;
+        const chartWrapper = ctx.canvas.closest('.chart-wrapper');
+        
+        let chartInnerContainer = ctx.canvas.parentElement;
+        if (!chartInnerContainer || !chartInnerContainer.classList.contains('chart-inner-container')) {
+            chartInnerContainer = document.createElement('div');
+            chartInnerContainer.classList.add('chart-inner-container');
+            const parent = ctx.canvas.parentElement;
+            parent.insertBefore(chartInnerContainer, ctx.canvas);
+            chartInnerContainer.appendChild(ctx.canvas);
+        }
+        
+        if (measurements.length > maxPointsPerView) {
+            const neededWidth = measurements.length * minPointWidth;
+            if (chartWrapper) {
+                chartWrapper.style.overflowX = 'auto';
+                chartWrapper.style.overflowY = 'hidden';
+            }
+            chartInnerContainer.style.width = neededWidth + 'px';
+            chartInnerContainer.style.height = '280px';
+            ctx.canvas.style.width = '100%';
+            ctx.canvas.style.height = '100%';
+        } else {
+            if (chartWrapper) {
+                chartWrapper.style.overflowX = 'hidden';
+            }
+            chartInnerContainer.style.width = '100%';
+            chartInnerContainer.style.height = '280px';
+            ctx.canvas.style.width = '100%';
+            ctx.canvas.style.height = '100%';
+        }
 
         comparisonChartInstance = new Chart(ctx, {
             type: 'line',
@@ -1746,105 +2438,571 @@ document.addEventListener('DOMContentLoaded', () => {
                 return val > 0 ? `+${fixedVal}` : fixedVal;
             };
 
-            // --- 섹션 1: 수치 변화량 분석 (2열) ---
-            analysisHTML += `<h4 class="table-title">${translate('hormoneAnalysisTitleChange')}</h4><br>
-        <div class="sv-grid" style="grid-template-columns: 1fr 1fr;">
-            <!-- 에스트로겐 카드 -->
-            <div class="sv-card">
-                <h3>${translate('estrogenLevel').split('(')[0]}</h3>
-                <p class="analysis-card-subtitle">${translate('svcard_label_current', { value: formatValue(analytics.estrogenLevel.current, 'estrogenLevel') })}</p>
-                <div class="analysis-card-content">
-                    <div class="analysis-item"><span class="analysis-label">${translate('weeklyChange')}</span><span class="analysis-value">${formatChange(analytics.estrogenLevel.weeklyChange)}</span></div>
-                    <div class="analysis-item"><span class="analysis-label">${translate('monthlyAvgChange')}</span><span class="analysis-value">${formatChange(analytics.estrogenLevel.monthlyAvgChange)}</span></div>
-                    <div class="analysis-item"><span class="analysis-label">${translate('totalChange')}</span><span class="analysis-value">${formatChange(analytics.estrogenLevel.totalChange)}</span></div>
+            // ========================================
+            // 섹션 1: 현재 수치 평가 (Current Level Evaluation)
+            // ========================================
+            analysisHTML += `
+            <div class="hormone-section">
+                <div class="hormone-section-header">
+                    <h2 class="hormone-section-title">
+                        <span class="section-number">1</span>
+                        ${translate('currentLevelEvaluation')}
+                    </h2>
+                    <p class="hormone-section-desc">${translate('currentLevelEvaluationDesc')}</p>
                 </div>
-            </div>
-            <!-- 테스토스테론 카드 (일일 T 억제량 제거됨) -->
-            <div class="sv-card">
-                <h3>${translate('testosteroneLevel').split('(')[0]}</h3>
-                <p class="analysis-card-subtitle">${translate('svcard_label_current', { value: formatValue(analytics.testosteroneLevel.current, 'testosteroneLevel') })}</p>
-                <div class="analysis-card-content">
-                    <div class="analysis-item"><span class="analysis-label">${translate('weeklyChange')}</span><span class="analysis-value">${formatChange(analytics.testosteroneLevel.weeklyChange)}</span></div>
-                    <div class="analysis-item"><span class="analysis-label">${translate('monthlyAvgChange')}</span><span class="analysis-value">${formatChange(analytics.testosteroneLevel.monthlyAvgChange)}</span></div>
-                    <div class="analysis-item"><span class="analysis-label">${translate('totalChange')}</span><span class="analysis-value">${formatChange(analytics.testosteroneLevel.totalChange)}</span></div>
-                </div>
-            </div>
-        </div>`;
+                <div class="hormone-grid">`;
+            
+            // Estrogen 평가
+            if (analytics.estrogenLevel.current !== undefined) {
+                const targetE = parseFloat(targets.estrogenLevel);
+                const currentE = analytics.estrogenLevel.current;
+                let statusHTML = '';
+                let statusIcon = '';
+                
+                if (analytics.estrogenLevel.status === 'critical_high') {
+                    statusHTML = `<div class="status-badge danger-badge">⚠️ ${translate('estrogen_critical_high')}</div>`;
+                    statusIcon = '⚠️';
+                } else if (analytics.estrogenLevel.status === 'optimal') {
+                    statusHTML = `<div class="status-badge optimal-badge">✓ ${translate('estrogen_optimal')}</div>`;
+                    statusIcon = '✓';
+                } else if (analytics.estrogenLevel.status === 'above_target') {
+                    statusHTML = `<div class="status-badge above-badge">↑ ${translate('estrogen_above_target')}</div>`;
+                    statusIcon = '↑';
+                } else if (analytics.estrogenLevel.status === 'below_target') {
+                    statusHTML = `<div class="status-badge below-badge">↓ ${translate('estrogen_below_target')}</div>`;
+                    statusIcon = '↓';
+                } else {
+                    statusHTML = `<div class="status-badge neutral-badge">${translate('no_target_set')}</div>`;
+                    statusIcon = '—';
+                }
 
-            // --- 섹션 1.5: Emax / Hill 분석 (새로 추가된 독립 카드) ---
+                analysisHTML += `
+                <div class="hormone-card highlight-card">
+                    <div class="hormone-card-header">
+                        <h3 class="hormone-name">${translate('estrogenLevel').split('(')[0]}</h3>
+                    </div>
+                    <div class="hormone-current-value">${formatValue(currentE, 'estrogenLevel')}</div>
+                    ${!isNaN(targetE) ? `<div class="hormone-target">
+                        <span class="target-label">${translate('svcard_label_target')}</span>
+                        <span class="target-value">${formatValue(targetE, 'estrogenLevel')}</span>
+                    </div>` : ''}
+                    ${statusHTML}
+                </div>`;
+            }
+
+            // Testosterone 평가
+            if (analytics.testosteroneLevel.current !== undefined) {
+                const targetT = parseFloat(targets.testosteroneLevel);
+                const currentT = analytics.testosteroneLevel.current;
+                let statusHTML = '';
+                let statusIcon = '';
+                
+                if (analytics.testosteroneLevel.status === 'critical_low') {
+                    statusHTML = `<div class="status-badge danger-badge">⚠️ ${translate('testosterone_critical_low')}</div>`;
+                    statusIcon = '⚠️';
+                } else if (analytics.testosteroneLevel.status === 'optimal') {
+                    statusHTML = `<div class="status-badge optimal-badge">✓ ${translate('testosterone_optimal')}</div>`;
+                    statusIcon = '✓';
+                } else if (analytics.testosteroneLevel.status === 'above_target') {
+                    statusHTML = `<div class="status-badge above-badge">↑ ${translate('testosterone_above_target')}</div>`;
+                    statusIcon = '↑';
+                } else if (analytics.testosteroneLevel.status === 'below_target') {
+                    statusHTML = `<div class="status-badge below-badge">↓ ${translate('testosterone_below_target')}</div>`;
+                    statusIcon = '↓';
+                } else {
+                    statusHTML = `<div class="status-badge neutral-badge">${translate('no_target_set')}</div>`;
+                    statusIcon = '—';
+                }
+
+                analysisHTML += `
+                <div class="hormone-card highlight-card">
+                    <div class="hormone-card-header">
+                        <h3 class="hormone-name">${translate('testosteroneLevel').split('(')[0]}</h3>
+                    </div>
+                    <div class="hormone-current-value">${formatValue(currentT, 'testosteroneLevel')}</div>
+                    ${!isNaN(targetT) ? `<div class="hormone-target">
+                        <span class="target-label">${translate('svcard_label_target')}</span>
+                        <span class="target-value">${formatValue(targetT, 'testosteroneLevel')}</span>
+                    </div>` : ''}
+                    ${statusHTML}
+                </div>`;
+            }
+            
+            analysisHTML += `
+                </div>
+            </div>`;
+
+            // ========================================
+            // 섹션 2: E/T Ratio
+            // ========================================
+            if (analytics.etRatio) {
+                // E/T 비율 범위 표시
+                const maleRange = '< 5';
+                const femaleRange = '> 30';
+                
+                analysisHTML += `
+                <div class="hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">2</span>
+                            ${translate('etRatioTitle')}
+                        </h2>
+                        <p class="hormone-section-desc">${translate('etRatioExplanation')}</p>
+                    </div>
+                    <div class="hormone-card ratio-card">
+                        <div class="ratio-bar-container">
+                            <div class="ratio-icon-group">
+                                <span class="ratio-icon male">♂</span>
+                                <span class="ratio-percentile">${maleRange}</span>
+                            </div>
+                            <div class="ratio-bar">
+                                <div class="ratio-bar-fill" style="width: ${analytics.etRatio.position}%;"></div>
+                                <div class="ratio-bar-marker" style="left: ${analytics.etRatio.position}%;"></div>
+                            </div>
+                            <div class="ratio-icon-group">
+                                <span class="ratio-icon female">♀</span>
+                                <span class="ratio-percentile">${femaleRange}</span>
+                            </div>
+                        </div>
+                        <div class="ratio-value-display">
+                            <span class="ratio-number">${analytics.etRatio.value.toFixed(3)}</span>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            // ========================================
+            // 섹션 3: 수치 변화량 분석 (Level Change Analysis)
+            // ========================================
+            analysisHTML += `
+            <div class="hormone-section">
+                <div class="hormone-section-header">
+                    <h2 class="hormone-section-title">
+                        <span class="section-number">3</span>
+                        ${translate('hormoneAnalysisTitleChange')}
+                    </h2>
+                    <p class="hormone-section-desc">${translate('hormoneChangeAnalysisDesc')}</p>
+                </div>
+                
+                <div class="info-card">
+                    <h4 class="info-card-title">💡 ${translate('understandingHormones')}</h4>
+                    <div class="info-card-content">
+                        <p><strong>${translate('estrogenLevel').split('(')[0]}:</strong> ${translate('estrogenExplanation')}</p>
+                        <p><strong>${translate('testosteroneLevel').split('(')[0]}:</strong> ${translate('testosteroneExplanation')}</p>
+                    </div>
+                </div>
+
+                <div class="hormone-grid">
+                    <div class="hormone-card">
+                        <div class="hormone-card-header">
+                            <h3 class="hormone-name">${translate('estrogenLevel').split('(')[0]}</h3>
+                            <span class="hormone-current-mini">${formatValue(analytics.estrogenLevel.current, 'estrogenLevel')}</span>
+                        </div>
+                        <div class="change-metrics">
+                            <div class="change-item">
+                                <span class="change-label">${translate('weeklyChange')}</span>
+                                <span class="change-value ${analytics.estrogenLevel.weeklyChange > 0 ? 'positive' : analytics.estrogenLevel.weeklyChange < 0 ? 'negative' : ''}">${formatChange(analytics.estrogenLevel.weeklyChange)}</span>
+                            </div>
+                            <div class="change-item">
+                                <span class="change-label">${translate('monthlyAvgChange')}</span>
+                                <span class="change-value ${analytics.estrogenLevel.monthlyAvgChange > 0 ? 'positive' : analytics.estrogenLevel.monthlyAvgChange < 0 ? 'negative' : ''}">${formatChange(analytics.estrogenLevel.monthlyAvgChange)}</span>
+                            </div>
+                            <div class="change-item">
+                                <span class="change-label">${translate('totalChange')}</span>
+                                <span class="change-value ${analytics.estrogenLevel.totalChange > 0 ? 'positive' : analytics.estrogenLevel.totalChange < 0 ? 'negative' : ''}">${formatChange(analytics.estrogenLevel.totalChange)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hormone-card">
+                        <div class="hormone-card-header">
+                            <h3 class="hormone-name">${translate('testosteroneLevel').split('(')[0]}</h3>
+                            <span class="hormone-current-mini">${formatValue(analytics.testosteroneLevel.current, 'testosteroneLevel')}</span>
+                        </div>
+                        <div class="change-metrics">
+                            <div class="change-item">
+                                <span class="change-label">${translate('weeklyChange')}</span>
+                                <span class="change-value ${analytics.testosteroneLevel.weeklyChange > 0 ? 'positive' : analytics.testosteroneLevel.weeklyChange < 0 ? 'negative' : ''}">${formatChange(analytics.testosteroneLevel.weeklyChange)}</span>
+                            </div>
+                            <div class="change-item">
+                                <span class="change-label">${translate('monthlyAvgChange')}</span>
+                                <span class="change-value ${analytics.testosteroneLevel.monthlyAvgChange > 0 ? 'positive' : analytics.testosteroneLevel.monthlyAvgChange < 0 ? 'negative' : ''}">${formatChange(analytics.testosteroneLevel.monthlyAvgChange)}</span>
+                            </div>
+                            <div class="change-item">
+                                <span class="change-label">${translate('totalChange')}</span>
+                                <span class="change-value ${analytics.testosteroneLevel.totalChange > 0 ? 'positive' : analytics.testosteroneLevel.totalChange < 0 ? 'negative' : ''}">${formatChange(analytics.testosteroneLevel.totalChange)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+            // ========================================
+            // 섹션 4: Emax / Hill 분석
+            // ========================================
             if (analytics.emax && analytics.emax.dailySuppression !== null) {
                 const rfValue = analytics.emax.rf !== null ? analytics.emax.rf.toFixed(2) : '-';
                 const rfMessage = analytics.emax.messageKey ? translate(analytics.emax.messageKey) : '';
                 const suppressionValue = formatChange(analytics.emax.dailySuppression);
 
-                // 반응도에 따른 색상 스타일
                 let rfColorClass = '';
-                if (analytics.emax.messageKey === 'rfMessage_high') rfColorClass = 'positive-change';
-                else if (analytics.emax.messageKey === 'rfMessage_low' || analytics.emax.messageKey === 'rfMessage_negative') rfColorClass = 'negative-change';
+                let rfIcon = '📊';
+                if (analytics.emax.messageKey === 'rfMessage_very_high' || analytics.emax.messageKey === 'rfMessage_high') {
+                    rfColorClass = 'positive';
+                    rfIcon = '✓';
+                } else if (analytics.emax.messageKey === 'rfMessage_low' || analytics.emax.messageKey === 'rfMessage_very_low' || analytics.emax.messageKey === 'rfMessage_negative') {
+                    rfColorClass = 'negative';
+                    rfIcon = '⚠️';
+                }
 
                 analysisHTML += `
-            <div class="sv-card" style="margin-top: 20px; border-left: 4px solid var(--primary);">
-                <h3>${translate('emaxTitle')}</h3>
-                <div class="analysis-card-content">
-                    <div class="analysis-item">
-                        <span class="analysis-label">${translate('dailyTSuppression')} (Model)</span>
-                        <span class="analysis-value" style="color: var(--primary); font-weight:bold;">${suppressionValue}</span>
+                <div class="hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">4</span>
+                            ${translate('emaxTitle')}
+                        </h2>
+                        <p class="hormone-section-desc">${translate('emaxAnalysisDesc')}</p>
                     </div>
-                    <div class="analysis-item" style="flex-direction: column; align-items: flex-start; gap: 5px;">
-                         <div style="display:flex; justify-content:space-between; width:100%;">
-                            <span class="analysis-label">${translate('responseFactor')}</span>
-                            <span class="analysis-value ${rfColorClass}" style="font-weight:bold;">${rfValue}x</span>
-                         </div>
-                         <p class="description" style="margin: 0; font-size: 0.85em; width: 100%; text-align: right; color: var(--text-main);">${rfMessage}</p>
+                    <div class="hormone-card highlight-card emax-special">
+                        <div class="emax-metrics">
+                            <div class="emax-item">
+                                <div class="emax-label">${translate('dailyTSuppression')}</div>
+                                <div class="emax-value primary-color">${suppressionValue}</div>
+                                <div class="emax-unit">ng/mL / week</div>
+                            </div>
+                            <div class="emax-divider"></div>
+                            <div class="emax-item">
+                                <div class="emax-label">${translate('responseFactor')}</div>
+                                <div class="emax-value ${rfColorClass}">${rfIcon} ${rfValue}x</div>
+                                <div class="emax-message">${rfMessage}</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>`;
+                </div>`;
             }
 
-            // --- 섹션 2: 약물 영향력 분석 ---
-            if (analytics.influence) {
-                const influenceEntries = Object.entries(analytics.influence);
-                if (influenceEntries.length > 0) {
-                    analysisHTML += `<h4 class="table-title" style="margin-top: 30px;">${translate('hormoneAnalysisTitleInfluence')}</h4><br>
-                                 <p class="description" style="text-align: center; margin-top: -10px; margin-bottom: 30px;">${translate('influenceAnalysisDesc')}</p>
-                                 <div class="sv-grid drug-influence-grid">`;
+            // ========================================
+            // 섹션 5: 호르몬 안정성 분석 (Hormone Stability Analysis)
+            // ========================================
+            if (analytics.stability && (analytics.stability.estrogenLevel || analytics.stability.testosteroneLevel)) {
+                analysisHTML += `
+                <div class="hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">5</span>
+                            ${translate('stabilityAnalysisTitle')}
+                        </h2>
+                        <p class="hormone-section-desc">${translate('cvStabilityNote')}</p>
+                    </div>
+                    <div class="hormone-grid">`;
 
-                    analysisHTML += influenceEntries.map(([drug, effects]) => `
-                 <div class="sv-card">
-                     <h3>${translate(drug) || drug}</h3>
-                     <div class="analysis-card-content">
-                         <div class="analysis-item"><span class="analysis-label">E₂ ${translate('drugInfluence')}</span><span class="analysis-value ${effects.estrogen >= 0 ? 'positive-change' : 'negative-change'}">${effects.estrogen.toFixed(2)}</span></div>
-                         <div class="analysis-item"><span class="analysis-label">T ${translate('drugInfluence')}</span><span class="analysis-value ${effects.testosterone >= 0 ? 'positive-change' : 'negative-change'}">${effects.testosterone.toFixed(2)}</span></div>
-                     </div>
-                 </div>`).join('');
+                if (analytics.stability.estrogenLevel) {
+                    const cv = analytics.stability.estrogenLevel.cv.toFixed(1);
+                    let statusText = '';
+                    let statusIcon = '';
+                    let statusClass = '';
+                    
+                    if (analytics.stability.estrogenLevel.status === 'stable') {
+                        statusText = translate('stability_stable');
+                        statusIcon = '✓';
+                        statusClass = 'stable';
+                    } else if (analytics.stability.estrogenLevel.status === 'moderate') {
+                        statusText = translate('stability_moderate');
+                        statusIcon = '~';
+                        statusClass = 'moderate';
+                    } else {
+                        statusText = translate('stability_unstable');
+                        statusIcon = '⚠️';
+                        statusClass = 'unstable';
+                    }
 
-                    analysisHTML += `</div>`;
+                    analysisHTML += `
+                    <div class="hormone-card">
+                        <div class="hormone-card-header">
+                            <h3 class="hormone-name">${translate('estrogenLevel').split('(')[0]}</h3>
+                        </div>
+                        <div class="stability-display">
+                            <div class="stability-cv">
+                                <span class="stability-cv-value">${cv}%</span>
+                                <span class="stability-cv-label">${translate('variationCoeff')}</span>
+                            </div>
+                            <div class="stability-status ${statusClass}">
+                                ${statusIcon} ${statusText}
+                            </div>
+                        </div>
+                    </div>`;
                 }
+
+                if (analytics.stability.testosteroneLevel) {
+                    const cv = analytics.stability.testosteroneLevel.cv.toFixed(1);
+                    let statusText = '';
+                    let statusIcon = '';
+                    let statusClass = '';
+                    
+                    if (analytics.stability.testosteroneLevel.status === 'stable') {
+                        statusText = translate('stability_stable');
+                        statusIcon = '✓';
+                        statusClass = 'stable';
+                    } else if (analytics.stability.testosteroneLevel.status === 'moderate') {
+                        statusText = translate('stability_moderate');
+                        statusIcon = '~';
+                        statusClass = 'moderate';
+                    } else {
+                        statusText = translate('stability_unstable');
+                        statusIcon = '⚠️';
+                        statusClass = 'unstable';
+                    }
+
+                    analysisHTML += `
+                    <div class="hormone-card">
+                        <div class="hormone-card-header">
+                            <h3 class="hormone-name">${translate('testosteroneLevel').split('(')[0]}</h3>
+                        </div>
+                        <div class="stability-display">
+                            <div class="stability-cv">
+                                <span class="stability-cv-value">${cv}%</span>
+                                <span class="stability-cv-label">${translate('variationCoeff')}</span>
+                            </div>
+                            <div class="stability-status ${statusClass}">
+                                ${statusIcon} ${statusText}
+                            </div>
+                        </div>
+                    </div>`;
+                }
+
+                analysisHTML += `
+                    </div>
+                </div>`;
             }
 
-            // --- 섹션 3: 미래 예측 ---
+            // ========================================
+            // 섹션 6: 미래 예측 (Future Prediction)
+            // ========================================
             const getDayText = (val) => {
                 if (val === null) return '-';
                 return translate('daysUnit', { days: val });
             };
 
-            analysisHTML += `<h4 class="table-title" style="margin-top: 30px;">${translate('hormoneAnalysisTitlePrediction')}</h4><br>
-        <div class="sv-grid" style="grid-template-columns: 1fr 1fr;">
-             <div class="sv-card">
-                <h3>${translate('estrogenLevel').split('(')[0]}</h3>
-                <div class="analysis-card-content">
-                    <div class="analysis-item"><span class="analysis-label">${translate('predictedNextWeek')}</span><span class="analysis-value">${analytics.estrogenLevel.predictedNext ? analytics.estrogenLevel.predictedNext.toFixed(1) : '-'}</span></div>
-                    <div class="analysis-item"><span class="analysis-label">${translate('daysToTarget')} ${targets.estrogenLevel ? translate('targetLabelShort', { value: targets.estrogenLevel }) : ''}</span><span class="analysis-value">${getDayText(analytics.estrogenLevel.daysToTarget)}</span></div>
+            analysisHTML += `
+            <div class="hormone-section">
+                <div class="hormone-section-header">
+                    <h2 class="hormone-section-title">
+                        <span class="section-number">6</span>
+                        ${translate('hormoneAnalysisTitlePrediction')}
+                    </h2>
+                    <p class="hormone-section-desc">${translate('predictionDisclaimer')}</p>
                 </div>
-            </div>
-            <div class="sv-card">
-                <h3>${translate('testosteroneLevel').split('(')[0]}</h3>
-                 <div class="analysis-card-content">
-                    <div class="analysis-item"><span class="analysis-label">${translate('predictedNextWeek')}</span><span class="analysis-value">${analytics.testosteroneLevel.predictedNext ? analytics.testosteroneLevel.predictedNext.toFixed(1) : '-'}</span></div>
-                    <div class="analysis-item"><span class="analysis-label">${translate('daysToTarget')} ${targets.testosteroneLevel ? translate('targetLabelShort', { value: targets.testosteroneLevel }) : ''}</span><span class="analysis-value">${getDayText(analytics.testosteroneLevel.daysToTarget)}</span></div>
+                <div class="hormone-grid">
+                    <div class="hormone-card prediction-card">
+                        <div class="hormone-card-header">
+                            <h3 class="hormone-name">${translate('estrogenLevel').split('(')[0]}</h3>
+                        </div>
+                        <div class="prediction-display">
+                            <div class="prediction-item">
+                                <span class="prediction-label">📈 ${translate('predictedNextWeek')}</span>
+                                <span class="prediction-value">${analytics.estrogenLevel.predictedNext ? analytics.estrogenLevel.predictedNext.toFixed(1) : '-'}</span>
+                            </div>
+                            ${targets.estrogenLevel ? `
+                            <div class="prediction-item">
+                                <span class="prediction-label">🎯 ${translate('daysToTarget')}</span>
+                                <span class="prediction-value">${getDayText(analytics.estrogenLevel.daysToTarget)}</span>
+                                <span class="prediction-target">${translate('targetLabelShort', { value: targets.estrogenLevel })}</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="hormone-card prediction-card">
+                        <div class="hormone-card-header">
+                            <h3 class="hormone-name">${translate('testosteroneLevel').split('(')[0]}</h3>
+                        </div>
+                        <div class="prediction-display">
+                            <div class="prediction-item">
+                                <span class="prediction-label">📈 ${translate('predictedNextWeek')}</span>
+                                <span class="prediction-value">${analytics.testosteroneLevel.predictedNext ? analytics.testosteroneLevel.predictedNext.toFixed(1) : '-'}</span>
+                            </div>
+                            ${targets.testosteroneLevel ? `
+                            <div class="prediction-item">
+                                <span class="prediction-label">🎯 ${translate('daysToTarget')}</span>
+                                <span class="prediction-value">${getDayText(analytics.testosteroneLevel.daysToTarget)}</span>
+                                <span class="prediction-target">${translate('targetLabelShort', { value: targets.testosteroneLevel })}</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>`;
+            </div>`;
+
+            // ========================================
+            // 섹션 7: 약물 영향력 분석 (Drug Influence Analysis)
+            // ========================================
+            if (analytics.influence) {
+                const influenceEntries = Object.entries(analytics.influence);
+                if (influenceEntries.length > 0) {
+                    analysisHTML += `
+                    <div class="hormone-section">
+                        <div class="hormone-section-header">
+                            <h2 class="hormone-section-title">
+                                <span class="section-number">7</span>
+                                ${translate('hormoneAnalysisTitleInfluence')}
+                            </h2>
+                            <p class="hormone-section-desc">${translate('drugInfluenceDesc')}</p>
+                        </div>
+                        
+                        <div class="info-card-grid">
+                            <div class="info-card mini">
+                                <h4 class="info-card-title">ℹ️ ${translate('drugInfluenceHowItWorks')}</h4>
+                                <p class="info-card-text">${translate('drugInfluenceHowItWorksDesc')}</p>
+                            </div>
+                            <div class="info-card mini">
+                                <h4 class="info-card-title">📊 ${translate('drugInfluenceConfidence')}</h4>
+                                <p class="info-card-text">${translate('drugInfluenceConfidenceDesc')}</p>
+                            </div>
+                        </div>
+
+                        <div class="drug-grid">`;
+
+                    analysisHTML += influenceEntries.map(([drug, effects]) => {
+                        const confidencePercent = Math.round(effects.confidence * 100);
+                        let confidenceClass = '';
+                        if (confidencePercent >= 80) confidenceClass = 'high';
+                        else if (confidencePercent >= 50) confidenceClass = 'medium';
+                        else confidenceClass = 'low';
+                        
+                        return `
+                        <div class="drug-card">
+                            <div class="drug-card-header">
+                                <h3 class="drug-name">💊 ${translate(drug) || drug}</h3>
+                                <div class="drug-samples">${effects.samples} ${translate('samples')}</div>
+                            </div>
+                            <div class="drug-influences">
+                                <div class="drug-influence-item">
+                                    <span class="drug-hormone-label">E₂</span>
+                                    <span class="drug-influence-value ${effects.estrogen >= 0 ? 'positive' : 'negative'}">
+                                        ${effects.estrogen >= 0 ? '+' : ''}${effects.estrogen.toFixed(2)}
+                                    </span>
+                                    <span class="drug-influence-unit">pg/mL / mg</span>
+                                </div>
+                                <div class="drug-influence-item">
+                                    <span class="drug-hormone-label">T</span>
+                                    <span class="drug-influence-value ${effects.testosterone >= 0 ? 'positive' : 'negative'}">
+                                        ${effects.testosterone >= 0 ? '+' : ''}${effects.testosterone.toFixed(2)}
+                                    </span>
+                                    <span class="drug-influence-unit">ng/mL / mg</span>
+                                </div>
+                            </div>
+                            <div class="drug-confidence ${confidenceClass}">
+                                <span class="confidence-label">${translate('confidence')}</span>
+                                <span class="confidence-value">${confidencePercent}%</span>
+                            </div>
+                        </div>`;
+                    }).join('');
+
+                    analysisHTML += `
+                        </div>
+                    </div>`;
+                }
+            }
+
+            // ========================================
+            // 섹션 8: 신체 비율 분석 (Body Ratio Analysis)
+            // ========================================
+            if (analytics.bodyRatios && (analytics.bodyRatios.whr || analytics.bodyRatios.chestWaist || analytics.bodyRatios.shoulderHip)) {
+                analysisHTML += `
+                <div class="hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">8</span>
+                            ${translate('bodyRatioAnalysisTitle')}
+                        </h2>
+                        <p class="hormone-section-desc">${translate('bodyRatioAnalysisDesc')}</p>
+                    </div>
+                    <div class="body-ratio-container">`;
+
+                if (analytics.bodyRatios.whr) {
+                    const malePercent = analytics.bodyRatios.whr.percentiles?.male?.text || '-';
+                    const femalePercent = analytics.bodyRatios.whr.percentiles?.female?.text || '-';
+                    
+                    analysisHTML += `
+                    <div class="body-ratio-card">
+                        <h3 class="body-ratio-name">📏 ${translate('waistHipRatio')}</h3>
+                        <div class="ratio-bar-container">
+                            <div class="ratio-icon-group">
+                                <span class="ratio-icon male">♂</span>
+                                <span class="ratio-percentile">${malePercent}</span>
+                            </div>
+                            <div class="ratio-bar">
+                                <div class="ratio-bar-fill" style="width: ${analytics.bodyRatios.whr.position}%;"></div>
+                                <div class="ratio-bar-marker" style="left: ${analytics.bodyRatios.whr.position}%;"></div>
+                            </div>
+                            <div class="ratio-icon-group">
+                                <span class="ratio-icon female">♀</span>
+                                <span class="ratio-percentile">${femalePercent}</span>
+                            </div>
+                        </div>
+                        <div class="ratio-value-display">
+                            <span class="ratio-number">${analytics.bodyRatios.whr.value.toFixed(2)}</span>
+                        </div>
+                    </div>`;
+                }
+
+                if (analytics.bodyRatios.chestWaist) {
+                    const malePercent = analytics.bodyRatios.chestWaist.percentiles?.male?.text || '-';
+                    const femalePercent = analytics.bodyRatios.chestWaist.percentiles?.female?.text || '-';
+                    
+                    analysisHTML += `
+                    <div class="body-ratio-card">
+                        <h3 class="body-ratio-name">📏 ${translate('chestWaistRatio')}</h3>
+                        <div class="ratio-bar-container">
+                            <div class="ratio-icon-group">
+                                <span class="ratio-icon male">♂</span>
+                                <span class="ratio-percentile">${malePercent}</span>
+                            </div>
+                            <div class="ratio-bar">
+                                <div class="ratio-bar-fill" style="width: ${analytics.bodyRatios.chestWaist.position}%;"></div>
+                                <div class="ratio-bar-marker" style="left: ${analytics.bodyRatios.chestWaist.position}%;"></div>
+                            </div>
+                            <div class="ratio-icon-group">
+                                <span class="ratio-icon female">♀</span>
+                                <span class="ratio-percentile">${femalePercent}</span>
+                            </div>
+                        </div>
+                        <div class="ratio-value-display">
+                            <span class="ratio-number">${analytics.bodyRatios.chestWaist.value.toFixed(2)}</span>
+                        </div>
+                    </div>`;
+                }
+
+                if (analytics.bodyRatios.shoulderHip) {
+                    const malePercent = analytics.bodyRatios.shoulderHip.percentiles?.male?.text || '-';
+                    const femalePercent = analytics.bodyRatios.shoulderHip.percentiles?.female?.text || '-';
+                    
+                    analysisHTML += `
+                    <div class="body-ratio-card">
+                        <h3 class="body-ratio-name">📏 ${translate('shoulderHipRatio')}</h3>
+                        <div class="ratio-bar-container">
+                            <div class="ratio-icon-group">
+                                <span class="ratio-icon male">♂</span>
+                                <span class="ratio-percentile">${malePercent}</span>
+                            </div>
+                            <div class="ratio-bar">
+                                <div class="ratio-bar-fill" style="width: ${analytics.bodyRatios.shoulderHip.position}%;"></div>
+                                <div class="ratio-bar-marker" style="left: ${analytics.bodyRatios.shoulderHip.position}%;"></div>
+                            </div>
+                            <div class="ratio-icon-group">
+                                <span class="ratio-icon female">♀</span>
+                                <span class="ratio-percentile">${femalePercent}</span>
+                            </div>
+                        </div>
+                        <div class="ratio-value-display">
+                            <span class="ratio-number">${analytics.bodyRatios.shoulderHip.value.toFixed(2)}</span>
+                        </div>
+                    </div>`;
+                }
+
+                analysisHTML += `
+                    </div>
+                </div>`;
+            }
         }
         analysisEl.innerHTML = analysisHTML;
 
@@ -1975,6 +3133,70 @@ document.addEventListener('DOMContentLoaded', () => {
                 onClick: (event) => onChartClick(event, chartInstanceProvider())
             }
         };
+
+        // 호르몬 차트들 스크롤 기능
+        const maxPointsPerView = 20;
+        const minPointWidth = 42;
+        const medicationWrapper = medicationCtx.canvas.closest('.chart-wrapper');
+        const hormoneWrapper = hormoneCtx.canvas.closest('.chart-wrapper');
+        
+        // Medication 차트 컨테이너 설정
+        let medInnerContainer = medicationCtx.canvas.parentElement;
+        if (!medInnerContainer || !medInnerContainer.classList.contains('chart-inner-container')) {
+            medInnerContainer = document.createElement('div');
+            medInnerContainer.classList.add('chart-inner-container');
+            const parent = medicationCtx.canvas.parentElement;
+            parent.insertBefore(medInnerContainer, medicationCtx.canvas);
+            medInnerContainer.appendChild(medicationCtx.canvas);
+        }
+        
+        // Hormone 차트 컨테이너 설정
+        let hormoneInnerContainer = hormoneCtx.canvas.parentElement;
+        if (!hormoneInnerContainer || !hormoneInnerContainer.classList.contains('chart-inner-container')) {
+            hormoneInnerContainer = document.createElement('div');
+            hormoneInnerContainer.classList.add('chart-inner-container');
+            const parent = hormoneCtx.canvas.parentElement;
+            parent.insertBefore(hormoneInnerContainer, hormoneCtx.canvas);
+            hormoneInnerContainer.appendChild(hormoneCtx.canvas);
+        }
+        
+        if (measurements.length > maxPointsPerView) {
+            const neededWidth = measurements.length * minPointWidth;
+            
+            if (medicationWrapper) {
+                medicationWrapper.style.overflowX = 'auto';
+                medicationWrapper.style.overflowY = 'hidden';
+            }
+            medInnerContainer.style.width = neededWidth + 'px';
+            medInnerContainer.style.height = '230px';
+            medicationCtx.canvas.style.width = '100%';
+            medicationCtx.canvas.style.height = '100%';
+            
+            if (hormoneWrapper) {
+                hormoneWrapper.style.overflowX = 'auto';
+                hormoneWrapper.style.overflowY = 'hidden';
+            }
+            hormoneInnerContainer.style.width = neededWidth + 'px';
+            hormoneInnerContainer.style.height = '230px';
+            hormoneCtx.canvas.style.width = '100%';
+            hormoneCtx.canvas.style.height = '100%';
+        } else {
+            if (medicationWrapper) {
+                medicationWrapper.style.overflowX = 'hidden';
+            }
+            medInnerContainer.style.width = '100%';
+            medInnerContainer.style.height = '230px';
+            medicationCtx.canvas.style.width = '100%';
+            medicationCtx.canvas.style.height = '100%';
+            
+            if (hormoneWrapper) {
+                hormoneWrapper.style.overflowX = 'hidden';
+            }
+            hormoneInnerContainer.style.width = '100%';
+            hormoneInnerContainer.style.height = '230px';
+            hormoneCtx.canvas.style.width = '100%';
+            hormoneCtx.canvas.style.height = '100%';
+        }
 
         medicationChartInstance = new Chart(medicationCtx, { type: 'line', data: { labels, datasets: allDatasets }, options: chartOptions(() => medicationChartInstance) });
         hormoneChartInstance = new Chart(hormoneCtx, { type: 'line', data: { labels, datasets: hormoneDatasets }, options: chartOptions(() => hormoneChartInstance) });
@@ -2284,41 +3506,58 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderShortcutCard() {
         if (!svCardShortcut) return;
 
-        svCardShortcut.className = 'sv-card sv-card--clickable'; // 기본 클래스 + 클릭 가능 클래스
-        svCardShortcut.classList.add('sv-card-with-image', 'sv-card-image-write');
-        let contentHTML = '';
+        try {
+            svCardShortcut.className = 'sv-card sv-card--clickable'; // 기본 클래스 + 클릭 가능 클래스
+            svCardShortcut.classList.add('sv-card-with-image', 'sv-card-image-write');
+            let contentHTML = '';
 
-        if (measurements.length === 0) {
-            svCardShortcut.classList.add('sv-card--new');
-            contentHTML = translate('svcard_shortcut_new');
-        } else {
-            const lastMeasurement = measurements[measurements.length - 1];
-            const lastTimestamp = lastMeasurement.timestamp;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            const nextMeasurementDate = new Date(lastTimestamp);
-            nextMeasurementDate.setDate(nextMeasurementDate.getDate() + 7);
-
-            const diffTime = nextMeasurementDate - today;
-            const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-            if (daysUntil <= 0) {
-                svCardShortcut.classList.add('sv-card--dday');
-                if (daysUntil === 0) {
-                    contentHTML = translate('svcard_shortcut_dday');
-                } else {
-                    contentHTML = translate('svcard_shortcut_overdue', { days: Math.abs(daysUntil) });
-                }
+            if (!measurements || measurements.length === 0) {
+                svCardShortcut.classList.add('sv-card--new');
+                contentHTML = translate('svcard_shortcut_new');
             } else {
-                if (daysUntil <= 1) svCardShortcut.classList.add('sv-card--countdown-red');
-                else if (daysUntil <= 3) svCardShortcut.classList.add('sv-card--countdown-yellow');
-                else svCardShortcut.classList.add('sv-card--countdown-green');
-                contentHTML = translate('svcard_shortcut_countdown', { days: daysUntil });
-            }
-        }
+                const lastMeasurement = measurements[measurements.length - 1];
+                
+                // 더 강력한 타임스탬프 처리
+                let lastTimestamp = lastMeasurement.timestamp;
+                if (!lastTimestamp || isNaN(new Date(lastTimestamp).getTime())) {
+                    // timestamp가 없거나 유효하지 않으면 date 필드 사용
+                    if (lastMeasurement.date) {
+                        lastTimestamp = new Date(lastMeasurement.date).getTime();
+                    } else {
+                        // 그래도 없으면 현재 시간 사용
+                        lastTimestamp = Date.now();
+                    }
+                }
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
 
-        svCardShortcut.innerHTML = `<div class="shortcut-content">${contentHTML}</div>`;
+                const nextMeasurementDate = new Date(lastTimestamp);
+                nextMeasurementDate.setDate(nextMeasurementDate.getDate() + 7);
+
+                const diffTime = nextMeasurementDate - today;
+                const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (daysUntil <= 0) {
+                    svCardShortcut.classList.add('sv-card--dday');
+                    if (daysUntil === 0) {
+                        contentHTML = translate('svcard_shortcut_dday');
+                    } else {
+                        contentHTML = translate('svcard_shortcut_overdue', { days: Math.abs(daysUntil) });
+                    }
+                } else {
+                    if (daysUntil <= 1) svCardShortcut.classList.add('sv-card--countdown-red');
+                    else if (daysUntil <= 3) svCardShortcut.classList.add('sv-card--countdown-yellow');
+                    else svCardShortcut.classList.add('sv-card--countdown-green');
+                    contentHTML = translate('svcard_shortcut_countdown', { days: daysUntil });
+                }
+            }
+
+            svCardShortcut.innerHTML = `<div class="shortcut-content">${contentHTML}</div>`;
+        } catch (error) {
+            console.error('Error in renderShortcutCard:', error);
+            svCardShortcut.innerHTML = `<div class="shortcut-content">${translate('svcard_shortcut_new')}</div>`;
+        }
     }
 
 
@@ -2573,6 +3812,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Force chart redraw which should pick up new CSS variable colors
             renderChart(); // Re-rendering might be necessary if colors don't update automatically
         }
+        // Re-render chart selector to update button colors for new theme
+        renderChartSelector();
     }
 
     function handleThemeChange(event) {
@@ -3287,22 +4528,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const metricButtonColors = {};
+    
+    // 미리 정의된 색상 팔레트 (다크/라이트 모드 최적화)
+    const colorPalette = {
+        dark: {
+            active: [
+                '#FF6B9D', '#FF8C69', '#FFAA44', '#FFD93D', '#A8E855',
+                '#4ADE80', '#34D399', '#36CFC9', '#22D3EE', '#60A5FA',
+                '#818CF8', '#A78BFA', '#C084FC', '#E879F9', '#F472B6'
+            ],
+            inactive: [
+                '#FF6B9D', '#FF8C69', '#FFAA44', '#FFD93D', '#A8E855',
+                '#4ADE80', '#34D399', '#36CFC9', '#22D3EE', '#60A5FA',
+                '#818CF8', '#A78BFA', '#C084FC', '#E879F9', '#F472B6'
+            ]
+        },
+        light: {
+            active: [
+                '#E91E63', '#FF5722', '#FF9800', '#FFC107', '#8BC34A',
+                '#4CAF50', '#009688', '#00BCD4', '#03A9F4', '#2196F3',
+                '#3F51B5', '#673AB7', '#9C27B0', '#E91E63', '#F06292'
+            ],
+            inactive: [
+                '#E91E63', '#FF5722', '#FF9800', '#FFC107', '#8BC34A',
+                '#4CAF50', '#009688', '#00BCD4', '#03A9F4', '#2196F3',
+                '#3F51B5', '#673AB7', '#9C27B0', '#E91E63', '#F06292'
+            ]
+        }
+    };
+    
     // script.js 에서 renderChartSelector 함수를 찾아 교체
     function renderChartSelector() {
         if (!chartSelector) return;
         const availableKeys = getFilteredChartKeys();
         chartSelector.innerHTML = '';
+        
+        const isLightMode = document.body.classList.contains('light-mode');
+        const palette = isLightMode ? colorPalette.light : colorPalette.dark;
+        
         availableKeys.forEach((key, index) => {
             const button = document.createElement('button');
             button.classList.add('chart-select-button');
             button.dataset.metric = key;
             button.textContent = translate(key).split('(')[0].trim();
 
-            const hue = (index * (360 / Math.min(availableKeys.length, 15))) % 360;
-
-            // 두 가지 색상 정의: 활성(선명), 비활성(채도 낮춤)
-            const activeColor = `hsl(${hue}, 75%, 58%)`;
-            const inactiveColor = `hsl(${hue}, 50%, 70%)`;
+            const colorIndex = index % palette.active.length;
+            const activeColor = palette.active[colorIndex];
+            const inactiveColor = palette.inactive[colorIndex];
 
             // metricButtonColors 객체에 두 색상 모두 저장
             metricButtonColors[key] = { active: activeColor, inactive: inactiveColor };
@@ -3314,7 +4586,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.style.color = '#ffffff';
             } else {
                 button.classList.remove('active');
-                button.style.backgroundColor = ''; // 비활성 시 배경 없음
+                // 비활성 버튼에 반투명 배경 추가 (콘트라스트 개선)
+                const inactiveBgOpacity = isLightMode ? 0.15 : 0.1;
+                const inactiveBgColor = activeColor + Math.floor(inactiveBgOpacity * 255).toString(16).padStart(2, '0');
+                button.style.backgroundColor = inactiveBgColor;
                 button.style.borderColor = inactiveColor;
                 button.style.color = inactiveColor;
             }
@@ -3330,12 +4605,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const button = event.target;
         const colors = metricButtonColors[metric]; // 저장된 색상 객체 가져오기
+        const isLightMode = document.body.classList.contains('light-mode');
 
         if (selectedMetrics.includes(metric)) {
             // --- 비활성화 로직 ---
             selectedMetrics = selectedMetrics.filter(m => m !== metric);
             button.classList.remove('active');
-            button.style.backgroundColor = '';
+            // 비활성 버튼에 반투명 배경 추가 (콘트라스트 개선)
+            const inactiveBgOpacity = isLightMode ? 0.15 : 0.1;
+            const inactiveBgColor = colors.active + Math.floor(inactiveBgOpacity * 255).toString(16).padStart(2, '0');
+            button.style.backgroundColor = inactiveBgColor;
             button.style.borderColor = colors.inactive;
             button.style.color = colors.inactive;
         } else {
@@ -3420,12 +4699,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 label: translatedLabel,
                 data: measurements.map(m => m[metric] !== undefined && m[metric] !== null && m[metric] !== '' ? parseFloat(m[metric]) : NaN),
                 borderColor: color,
-                backgroundColor: color + '33', // 이제 color가 문자열이므로 정상 동작합니다.
-                fill: false, tension: 0.1, pointRadius: 3, pointHoverRadius: 5, spanGaps: true, borderWidth: 2,
+                backgroundColor: color + '33',
+                fill: false, 
+                tension: 0.1, 
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                spanGaps: true, 
+                borderWidth: 2,
                 parsing: { xAxisKey: 'x', yAxisKey: 'y' }
             };
         });
         if (chartInstance) { chartInstance.destroy(); }
+
+        // 차트 스크롤 기능
+        const maxPointsPerView = 20;
+        const minPointWidth = 40;
+        const chartWrapper = ctx.canvas.closest('.chart-wrapper');
+        
+        // 차트를 감싸는 내부 div가 있는지 확인하고 없으면 생성
+        let chartInnerContainer = ctx.canvas.parentElement;
+        if (!chartInnerContainer || !chartInnerContainer.classList.contains('chart-inner-container')) {
+            chartInnerContainer = document.createElement('div');
+            chartInnerContainer.classList.add('chart-inner-container');
+            const parent = ctx.canvas.parentElement;
+            parent.insertBefore(chartInnerContainer, ctx.canvas);
+            chartInnerContainer.appendChild(ctx.canvas);
+        }
+        
+        if (measurements.length > maxPointsPerView) {
+            const neededWidth = measurements.length * minPointWidth;
+            // 외부 wrapper에 스크롤 설정
+            if (chartWrapper) {
+                chartWrapper.style.overflowX = 'auto';
+                chartWrapper.style.overflowY = 'hidden';
+            }
+            // 내부 컨테이너의 너비를 고정
+            chartInnerContainer.style.width = neededWidth + 'px';
+            chartInnerContainer.style.height = '230px';
+            // 캔버스는 100%로 설정하여 컨테이너에 맞춤
+            ctx.canvas.style.width = '100%';
+            ctx.canvas.style.height = '100%';
+        } else {
+            if (chartWrapper) {
+                chartWrapper.style.overflowX = 'hidden';
+            }
+            chartInnerContainer.style.width = '100%';
+            chartInnerContainer.style.height = '230px';
+            ctx.canvas.style.width = '100%';
+            ctx.canvas.style.height = '100%';
+        }
 
         chartInstance = new Chart(ctx, {
             type: 'line',
@@ -3619,6 +4941,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // 증상 데이터 가져오기
+        const symptomsContainer = document.getElementById('symptoms-container');
+        let symptoms = [];
+        if (symptomsContainer && window.symptomSelector) {
+            try {
+                symptoms = window.symptomSelector.getSymptoms();
+            } catch (error) {
+                console.error('Error getting symptoms:', error);
+            }
+        }
+        collectedData.symptoms = symptoms.length > 0 ? symptoms : null;
+
         const editIndexValue = editIndexInput.value;
 
         if (editIndexValue !== '') { // --- 수정 모드 ---
@@ -3695,6 +5029,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.classList.remove('invalid-input');
                 }
             });
+            // 증상 데이터 로드
+            if (window.symptomSelector && measurementToEdit.symptoms) {
+                try {
+                    window.symptomSelector.setSymptoms(measurementToEdit.symptoms);
+                } catch (error) {
+                    console.error('Error loading symptoms:', error);
+                }
+            } else if (window.symptomSelector) {
+                window.symptomSelector.reset();
+            }
+            
             editIndexInput.value = index;
             updateFormTitle();
             if (saveUpdateBtn) saveUpdateBtn.textContent = translate('edit');
@@ -3716,6 +5061,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (form) form.reset();
         form.querySelectorAll('.invalid-input').forEach(el => el.classList.remove('invalid-input'));
         editIndexInput.value = '';
+        
+        // 증상 선택기 리셋
+        if (window.symptomSelector) {
+            try {
+                window.symptomSelector.reset();
+            } catch (error) {
+                console.error('Error resetting symptom selector:', error);
+            }
+        }
+        
         updateFormTitle();
         if (saveUpdateBtn) saveUpdateBtn.textContent = translate('saveRecord');
         if (cancelEditBtn) cancelEditBtn.style.display = 'none';
@@ -3795,12 +5150,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Language Change
     function handleLanguageChange(event) {
         currentLanguage = event.target.value; console.log("DEBUG: Language changed to", currentLanguage);
+        
+        // 증상 선택기 언어 업데이트
+        if (window.symptomSelector) {
+            try {
+                window.symptomSelector.setLanguage(currentLanguage);
+            } catch (error) {
+                console.error('Error updating symptom selector language:', error);
+            }
+        }
+        
         saveSettingsToStorage(); applyLanguageToUI(); showPopup('popupSettingsSaved');
     }
 
     // Handle Mode Change
     function handleModeChange(event) {
         currentMode = event.target.value; console.log("DEBUG: Mode changed to", currentMode);
+        
+        // 증상 선택기 모드 업데이트
+        if (window.symptomSelector) {
+            try {
+                window.symptomSelector.setMode(currentMode);
+            } catch (error) {
+                console.error('Error updating symptom selector mode:', error);
+            }
+        }
+        
         saveSettingsToStorage(); applyModeToUI(); showPopup('popupSettingsSaved');
     }
 
@@ -4396,8 +5771,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Forms
         if (form) form.addEventListener('submit', handleFormSubmit);
-        if (form) form.addEventListener('submit', handleFormSubmit);
         if (targetForm) targetForm.addEventListener('submit', handleTargetFormSubmit);
+        
+        // Symptom Selector 초기화
+        window.symptomSelector = null;
+        try {
+            import('./src/ui/symptom-selector.js').then(module => {
+                const SymptomSelector = module.SymptomSelector || module.default;
+                window.symptomSelector = new SymptomSelector('symptoms-container', currentMode || 'mtf', currentLanguage || 'ko');
+                console.log('✅ Symptom Selector initialized');
+            }).catch(error => {
+                console.error('Failed to load Symptom Selector:', error);
+            });
+        } catch (error) {
+            console.error('Error initializing Symptom Selector:', error);
+        }
 
         // Buttons
         if (cancelEditBtn) cancelEditBtn.addEventListener('click', cancelEdit);

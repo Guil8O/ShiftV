@@ -1,0 +1,294 @@
+/**
+ * ShiftV CSS Variables
+ * 
+ * 모든 CSS 변수를 중앙 집중식으로 관리
+ * @file variables.css
+ */
+
+:root {
+    /* ==================== */
+    /* Color Scheme */
+    /* ==================== */
+    color-scheme: light dark;
+
+    /* ==================== */
+    /* Typography */
+    /* ==================== */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-size-xs: 0.75rem;      /* 12px */
+    --font-size-sm: 0.875rem;     /* 14px */
+    --font-size-base: 1rem;       /* 16px */
+    --font-size-lg: 1.125rem;     /* 18px */
+    --font-size-xl: 1.25rem;      /* 20px */
+    --font-size-2xl: 1.5rem;      /* 24px */
+    --font-size-3xl: 1.875rem;    /* 30px */
+    --font-size-4xl: 2.25rem;     /* 36px */
+    
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+
+    /* ==================== */
+    /* Spacing */
+    /* ==================== */
+    --spacing-xs: 0.25rem;   /* 4px */
+    --spacing-sm: 0.5rem;    /* 8px */
+    --spacing-md: 1rem;      /* 16px */
+    --spacing-lg: 1.5rem;    /* 24px */
+    --spacing-xl: 2rem;      /* 32px */
+    --spacing-2xl: 3rem;     /* 48px */
+    --spacing-3xl: 4rem;     /* 64px */
+
+    /* ==================== */
+    /* Border Radius */
+    /* ==================== */
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+    --radius-3xl: 30px;
+    --radius-full: 9999px;
+
+    /* ==================== */
+    /* Transitions */
+    /* ==================== */
+    --transition-fast: all 0.15s ease-out;
+    --transition-medium: all 0.3s ease-out;
+    --transition-slow: all 0.5s ease-out;
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* ==================== */
+    /* Shadows */
+    /* ==================== */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+    /* ==================== */
+    /* Z-Index Scale */
+    /* ==================== */
+    --z-index-dropdown: 1000;
+    --z-index-sticky: 1020;
+    --z-index-fixed: 1030;
+    --z-index-modal-backdrop: 1040;
+    --z-index-modal: 1050;
+    --z-index-popover: 1060;
+    --z-index-tooltip: 1070;
+
+    /* ==================== */
+    /* Dark Mode Colors (Default) */
+    /* ==================== */
+    --bg-main: #1a1a3a;
+    --bg-secondary: #2a2a60;
+    --bg-tertiary: #1e1e48;
+    
+    --text-main: #f0f0ff;
+    --text-dim: #a8a8d8;
+    --text-dim2: #8888b8;
+    --text-inverse: #1a1a3a;
+    
+    --primary: #ff8fcd;
+    --primary-hover: #ffb0dd;
+    --primary-active: #ff6fbd;
+    
+    --accent: #ff60a8;
+    --accent-hover: #ff80b8;
+    --accent-active: #ff40a8;
+    
+    --success: #55f0d0;
+    --success-hover: #75ffe0;
+    --success-active: #35e0c0;
+    
+    --warning: #ffcc66;
+    --warning-hover: #ffdd88;
+    --warning-active: #ffbb44;
+    --warning-text: #ffddaa;
+    
+    --danger: #ff5577;
+    --danger-hover: #ff7799;
+    --danger-active: #ff3355;
+    
+    --info: #66aaff;
+    --info-hover: #88bbff;
+    --info-active: #4499ff;
+
+    /* ==================== */
+    /* Glass Morphism */
+    /* ==================== */
+    --glass-bg: rgba(42, 42, 98, 0.4);
+    --glass-bg-light: rgba(182, 182, 212, 0.5);
+    --glass-border: rgba(180, 180, 255, 0.2);
+    --glass-shadow: 
+        0 8px 32px 0 rgba(0, 0, 0, 0.15),
+        0 1px 2px 0 rgba(255, 255, 255, 0.1) inset;
+    --glass-shadow-floating: 
+        0 20px 50px rgba(0, 0, 0, 0.25),
+        0 10px 20px rgba(0, 0, 0, 0.15);
+    --glass-glow: rgba(255, 120, 200, 0.2);
+    --glass-blur: blur(20px);
+
+    /* ==================== */
+    /* Modal */
+    /* ==================== */
+    --modal-bg: rgba(42, 42, 98, 0.6);
+    --modal-border: var(--glass-border);
+    --modal-radius: 24px;
+    --modal-floating-margin: 16px;
+    --modal-backdrop: rgba(0, 0, 0, 0.6);
+
+    /* ==================== */
+    /* Input */
+    /* ==================== */
+    --input-bg: rgba(255, 255, 255, 0.05);
+    --input-border: rgba(180, 180, 255, 0.15);
+    --input-focus-border: var(--primary);
+    --input-focus-glow: rgba(255, 143, 205, 0.3);
+    --input-placeholder: var(--text-dim);
+    --input-disabled-bg: rgba(255, 255, 255, 0.02);
+    --input-disabled-text: var(--text-dim2);
+
+    /* ==================== */
+    /* Tab Bar */
+    /* ==================== */
+    --tab-bar-bg: rgba(30, 30, 72, 0.4);
+    --tab-active-bg: var(--accent);
+    --tab-active-text: #1a1a3a;
+    --tab-inactive-text: var(--text-dim);
+    --tab-hover-bg: rgba(255, 255, 255, 0.05);
+
+    /* ==================== */
+    /* Table */
+    /* ==================== */
+    --table-header-bg: rgba(122, 11, 192, 0.2);
+    --table-row-stripe-bg: rgba(255, 255, 255, 0.03);
+    --table-row-hover-bg: rgba(122, 11, 192, 0.3);
+    --table-border: var(--glass-border);
+
+    /* ==================== */
+    /* Chart */
+    /* ==================== */
+    --chart-button-bg: rgba(255, 255, 255, 0.05);
+    --chart-wrapper-bg: rgba(0, 0, 0, 0.15);
+    --chart-grid-color: rgba(255, 255, 255, 0.1);
+    --chart-tooltip-bg: var(--glass-bg);
+
+    /* ==================== */
+    /* Gradients */
+    /* ==================== */
+    --bg-gradient-dark: linear-gradient(135deg, #1e1e48 0%, #2a2a60 50%, #151532 100%);
+    --bg-gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    --bg-gradient-success: linear-gradient(135deg, var(--success) 0%, #35e0c0 100%);
+    --bg-gradient-danger: linear-gradient(135deg, var(--danger) 0%, #ff3355 100%);
+}
+
+/* ==================== */
+/* Light Mode */
+/* ==================== */
+body.light-mode {
+    --bg-main: #fdeef5;
+    --bg-secondary: #f5e5ed;
+    --bg-tertiary: #dfe9f3;
+    
+    --text-main: #2c2c58;
+    --text-dim: #525273;
+    --text-dim2: #383858;
+    --text-inverse: #ffffff;
+    
+    --primary: #ff6f91;
+    --primary-hover: #ff8fa9;
+    --primary-active: #e04f7d;
+    
+    --accent: #e04f9e;
+    --accent-hover: #f06fae;
+    --accent-active: #c03f8e;
+    
+    --success: #008060;
+    --success-hover: #00a080;
+    --success-active: #006040;
+    
+    --warning: #ff9800;
+    --warning-hover: #ffb020;
+    --warning-active: #e08000;
+    --warning-text: #8B0000;
+    
+    --danger: #dc143c;
+    --danger-hover: #ff1744;
+    --danger-active: #b71c1c;
+    
+    --info: #2196f3;
+    --info-hover: #42a5f5;
+    --info-active: #1976d2;
+
+    /* Glass Morphism - Light Mode */
+    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-bg-light: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 111, 145, 0.3);
+    --glass-shadow: 
+        0 8px 24px rgba(140, 140, 160, 0.15),
+        0 1px 2px rgba(255, 255, 255, 0.8) inset;
+    --glass-shadow-floating: 
+        0 20px 40px rgba(100, 100, 120, 0.15);
+    --glass-glow: rgba(255, 111, 145, 0.2);
+
+    /* Modal - Light Mode */
+    --modal-bg: rgba(253, 238, 245, 0.85);
+    --modal-border: rgba(255, 111, 145, 0.3);
+    --modal-backdrop: rgba(0, 0, 0, 0.4);
+
+    /* Input - Light Mode */
+    --input-bg: rgba(255, 255, 255, 0.6);
+    --input-border: rgba(222, 180, 200, 0.5);
+    --input-focus-border: var(--primary);
+    --input-focus-glow: rgba(255, 111, 145, 0.3);
+
+    /* Tab Bar - Light Mode */
+    --tab-bar-bg: rgba(255, 255, 255, 0.4);
+    --tab-active-bg: rgba(255, 96, 168, 0.2);
+    --tab-active-text: #ffffff;
+
+    /* Table - Light Mode */
+    --table-header-bg: rgba(255, 143, 171, 0.2);
+    --table-row-stripe-bg: rgba(0, 0, 0, 0.02);
+    --table-row-hover-bg: rgba(255, 111, 145, 0.1);
+
+    /* Chart - Light Mode */
+    --chart-button-bg: rgba(0, 0, 0, 0.05);
+    --chart-wrapper-bg: rgba(0, 0, 0, 0.03);
+    --chart-grid-color: rgba(0, 0, 0, 0.1);
+
+    /* Gradients - Light Mode */
+    --bg-gradient-light: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    --bg-gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+}
+
+/* ==================== */
+/* High Contrast Mode */
+/* ==================== */
+@media (prefers-contrast: high) {
+    :root {
+        --text-main: #ffffff;
+        --bg-main: #000000;
+        --glass-border: rgba(255, 255, 255, 0.5);
+    }
+}
+
+/* ==================== */
+/* Reduced Motion */
+/* ==================== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

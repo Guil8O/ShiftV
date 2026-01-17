@@ -562,12 +562,12 @@ export class FTMAnalyzer {
    * 목소리 변화 추적 (증상 데이터 기반)
    */
   analyzeVoiceChange() {
-    // 증상 데이터에서 'voice_cracking_deepening' 찾기
+    // 증상 데이터에서 'voice_change' 찾기
     const voiceChanges = [];
     
     this.measurements.forEach((measurement, index) => {
       if (measurement.symptoms) {
-        const voiceSymptom = measurement.symptoms.find(s => s.id === 'voice_cracking_deepening');
+        const voiceSymptom = measurement.symptoms.find(s => s.id === 'voice_change');
         if (voiceSymptom) {
           voiceChanges.push({
             week: index + 1,

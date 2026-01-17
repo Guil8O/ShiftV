@@ -1,0 +1,32 @@
+{
+  "ko": [
+    "menstruationPain",
+    "medicationsDescription",
+    "medicationsLabel",
+    "menstruationActive",
+    "medicationsEmptyState",
+    "addMedication",
+    "menstruationLabel",
+    "cyclePainLabel"
+  ],
+  "en": [
+    "menstruationPain",
+    "medicationsDescription",
+    "medicationsLabel",
+    "menstruationActive",
+    "medicationsEmptyState",
+    "addMedication",
+    "menstruationLabel",
+    "cyclePainLabel"
+  ],
+  "ja": [
+    "menstruationPain",
+    "medicationsDescription",
+    "medicationsLabel",
+    "menstruationActive",
+    "medicationsEmptyState",
+    "addMedication",
+    "menstruationLabel",
+    "cyclePainLabel"
+  ]
+}

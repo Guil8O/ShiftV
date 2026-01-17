@@ -623,16 +623,16 @@ export const SYMPTOM_DATABASE = {
   MENTAL_NEUROLOGICAL: {
     category: '정신 / 신경계',
     symptoms: [
-      { id: 'depression_lethargy', ko: '우울감 / 무기력', en: 'Depression / Lethargy', ja: '抑うつ感 / 無気力' },
+      { id: 'depression', ko: '우울감 / 무기력', en: 'Depression / Lethargy', ja: '抑うつ感 / 無気力' },
       { id: 'mood_swings', ko: '급격한 감정 기복 / 짜증', en: 'Mood Swings / Irritability', ja: '急激な感情の起伏 / いらつき' },
       { id: 'aggression', ko: '공격성 증가 / 분노 조절 어려움', en: 'Increased Aggression / Anger Issues', ja: '攻撃性の増加 / 怒りのコントロール困難' },
-      { id: 'anxiety_restlessness', ko: '불안 / 초조함', en: 'Anxiety / Restlessness', ja: '不安 / 焦燥感' },
+      { id: 'anxiety', ko: '불안 / 초조함', en: 'Anxiety / Restlessness', ja: '不安 / 焦燥感' },
       { id: 'brain_fog', ko: '머리가 멍하고 맑지 않음', en: 'Brain Fog', ja: '頭がぼーっとする' },
       { id: 'insomnia', ko: '불면증 / 얕은 수면', en: 'Insomnia / Shallow Sleep', ja: '不眠症 / 浅い睡眠' },
       { id: 'hypersomnia', ko: '과수면 / 쏟아지는 잠', en: 'Hypersomnia / Excessive Sleepiness', ja: '過眠 / 眠気がひどい' },
       { id: 'tremor', ko: '손 떨림', en: 'Tremor', ja: '手の震え' },
       { id: 'vision_impairment', ko: '시야 흐림 / 눈부심', en: 'Vision Impairment / Photophobia', ja: '視界のぼやけ / 光過敏' },
-      { id: 'raynauds_paresthesia', ko: '수족냉증 / 손발 저림', en: 'Raynaud\'s / Paresthesia', ja: '手足の冷え / しびれ' },
+      { id: 'paresthesia', ko: '수족냉증 / 손발 저림', en: 'Raynaud\'s / Paresthesia', ja: '手足の冷え / しびれ' },
     ]
   },
   SKIN_HAIR: {
@@ -640,12 +640,13 @@ export const SYMPTOM_DATABASE = {
     symptoms: [
       { id: 'cystic_acne', ko: '화농성/염증성 여드름', en: 'Cystic Acne', ja: '化膿性/炎症性ニキビ' },
       { id: 'comedones', ko: '좁쌀 여드름', en: 'Comedones', ja: 'コメドニキビ' },
-      { id: 'flushing_erythema', ko: '얼굴 붉어짐 / 홍조', en: 'Flushing / Erythema', ja: '顔の赤み / ほてり' },
+      { id: 'flushing', ko: '얼굴 붉어짐 / 홍조', en: 'Flushing / Erythema', ja: '顔の赤み / ほてり' },
       { id: 'xeroderma', ko: '피부 건조 / 각질', en: 'Xeroderma / Flaky Skin', ja: '皮膚乾燥 / 角質' },
       { id: 'seborrhea', ko: '지성 피부 / 피지 폭발', en: 'Oily Skin / Seborrhea', ja: '脂性肌 / 皮脂の増加' },
-      { id: 'skin_atrophy_bruising', ko: '피부 얇아짐 / 멍이 잘 듦', en: 'Skin Atrophy / Easy Bruising', ja: '皮膚が薄くなる / あざができやすい' },
-      { id: 'alopecia_mpb', ko: 'M자/정수리 탈모 진행', en: 'Alopecia / Male Pattern Baldness', ja: 'M字/頭頂部の脱毛進行' },
+      { id: 'skin_atrophy', ko: '피부 얇아짐 / 멍이 잘 듦', en: 'Skin Atrophy / Easy Bruising', ja: '皮膚が薄くなる / あざができやすい' },
+      { id: 'male_pattern_baldness', ko: 'M자/정수리 탈모 진행', en: 'Alopecia / Male Pattern Baldness', ja: 'M字/頭頂部の脱毛進行' },
       { id: 'hair_thinning', ko: '머리카락 가늘어짐', en: 'Hair Thinning', ja: '髪の毛が細くなる' },
+      { id: 'hair_growth', ko: '발모 / 모발 성장', en: 'Hair Growth / Regrowth', ja: '発毛 / 毛髪の成長' },
       { id: 'facial_hirsutism', ko: '수염 / 턱수염 증가', en: 'Facial Hirsutism', ja: 'ひげ / 顎ひげの増加' },
       { id: 'body_hirsutism', ko: '몸털(가슴, 배) 증가', en: 'Body Hirsutism (Chest, Abdomen)', ja: '体毛（胸、腹）の増加' },
       { id: 'body_hair_reduction', ko: '체모 감소 / 부드러워짐', en: 'Body Hair Reduction / Softening', ja: '体毛の減少 / 柔らかくなる' },
@@ -654,21 +655,36 @@ export const SYMPTOM_DATABASE = {
   SYSTEMIC_BODY_SHAPE: {
     category: '전신 / 체형',
     symptoms: [
-      { id: 'edema_moon_face', ko: '얼굴/몸 붓기 (수분 정체)', en: 'Edema / Moon Face (Water Retention)', ja: '顔/体のむくみ（水分貯留）' },
+      { id: 'edema', ko: '얼굴/몸 붓기 (수분 정체)', en: 'Edema / Moon Face (Water Retention)', ja: '顔/体のむくみ（水分貯留）' },
       { id: 'weight_gain', ko: '급격한 체중 증가', en: 'Rapid Weight Gain', ja: '急激な体重増加' },
+      { id: 'weight_loss', ko: '체중 감소', en: 'Weight Loss', ja: '体重減少' },
+      { id: 'fat_loss', ko: '체지방 감소', en: 'Body Fat Loss', ja: '体脂肪の減少' },
       { id: 'hyperphagia', ko: '식욕 폭발', en: 'Hyperphagia / Increased Appetite', ja: '食欲増加' },
-      { id: 'sarcopenia_weakness', ko: '근육 빠짐 / 근력 약화', en: 'Sarcopenia / Muscle Weakness', ja: '筋肉減少 / 筋力低下' },
+      { id: 'sarcopenia', ko: '근육 빠짐 / 근력 약화', en: 'Sarcopenia / Muscle Weakness', ja: '筋肉減少 / 筋力低下' },
       { id: 'chronic_fatigue', ko: '비정상적 피로감', en: 'Chronic Fatigue', ja: '異常な疲労感' },
       { id: 'odor_change', ko: '체취 변화 (남성적/여성적)', en: 'Body Odor Change (Masculine/Feminine)', ja: '体臭の変化（男性化/女性化）' },
       { id: 'hyperhidrosis', ko: '땀 과다 분비', en: 'Hyperhidrosis / Excessive Sweating', ja: '多汗 / 過剰な発汗' },
-      { id: 'voice_cracking_deepening', ko: '목소리 갈라짐 / 굵어짐', en: 'Voice Cracking / Deepening', ja: '声変わり / 声が低くなる' },
+      { id: 'voice_change', ko: '목소리 갈라짐 / 굵어짐', en: 'Voice Cracking / Deepening', ja: '声変わり / 声が低くなる' },
+    ]
+  },
+  MUSCULOSKELETAL: {
+    category: '근골격계',
+    symptoms: [
+      { id: 'joint_pain', ko: '관절통', en: 'Joint Pain', ja: '関節痛' },
+      { id: 'headache', ko: '두통', en: 'Headache', ja: '頭痛' },
+    ]
+  },
+  DIGESTIVE_METABOLIC: {
+    category: '소화 / 대사',
+    symptoms: [
+      { id: 'nausea', ko: '메스꺼움 / 구역감', en: 'Nausea', ja: '吐き気' },
     ]
   },
   BREAST_CHEST: {
     category: '가슴 / 유방',
     symptoms: [
-      { id: 'breast_budding_mastalgia', ko: '가슴 몽우리 / 유륜 통증', en: 'Breast Budding / Mastalgia', ja: '乳房のしこり / 乳輪の痛み' },
-      { id: 'gynecomastia_enlargement', ko: '가슴 커짐 / 여유증', en: 'Gynecomastia / Breast Enlargement', ja: '乳房の肥大 / 女性化乳房' },
+      { id: 'breast_budding', ko: '가슴 몽우리 / 유륜 통증', en: 'Breast Budding / Mastalgia', ja: '乳房のしこり / 乳輪の痛み' },
+      { id: 'gynecomastia', ko: '가슴 커짐 / 여유증', en: 'Gynecomastia / Breast Enlargement', ja: '乳房の肥大 / 女性化乳房' },
       { id: 'breast_atrophy', ko: '가슴 작아짐 / 처짐', en: 'Breast Atrophy / Sagging', ja: '乳房の萎縮 / たるみ' },
     ]
   },
@@ -690,9 +706,9 @@ export const SYMPTOM_DATABASE = {
   INTERNAL_CIRCULATORY: {
     category: '내장 / 순환기 (※ 위험 신호)',
     symptoms: [
-      { id: 'palpitation_tachycardia', ko: '가슴 두근거림 / 빈맥', en: 'Palpitation / Tachycardia', ja: '動悸 / 頻脈' },
+      { id: 'palpitation', ko: '가슴 두근거림 / 빈맥', en: 'Palpitation / Tachycardia', ja: '動悸 / 頻脈' },
       { id: 'dyspnea', ko: '숨 가쁨 / 호흡 곤란', en: 'Dyspnea / Shortness of Breath', ja: '息切れ / 呼吸困難' },
-      { id: 'dvt_suspicion', ko: '종아리/다리 붓고 아픔 (혈전 의심)', en: 'Calf/Leg Swelling & Pain (DVT Suspicion)', ja: 'ふくらはぎ/脚の腫れと痛み（血栓疑い）' },
+      { id: 'dvt_symptoms', ko: '종아리/다리 붓고 아픔 (혈전 의심)', en: 'Calf/Leg Swelling & Pain (DVT Suspicion)', ja: 'ふくらはぎ/脚の腫れと痛み（血栓疑い）' },
       { id: 'jaundice', ko: '눈/피부가 노랗게 변함 (간 독성 신호)', en: 'Jaundice (Liver Toxicity Sign)', ja: '目/皮膚が黄色くなる（肝毒性の兆候）' },
       { id: 'ruq_pain', ko: '오른쪽 윗배 뻐근함 (간 비대 의심)', en: 'RUQ Pain (Suspected Liver Enlargement)', ja: '右上腹部の張り（肝肥大疑い）' },
     ]

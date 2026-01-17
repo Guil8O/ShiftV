@@ -18,6 +18,103 @@ export class HealthEvaluator {
     this.mode = mode;
     this.biologicalSex = biologicalSex;
   }
+
+  normalizeUnit(metric, value, fromUnit) {
+    if (value === null || value === undefined || value === '') return null;
+    const num = typeof value === 'number' ? value : parseFloat(value);
+    if (Number.isNaN(num)) return null;
+
+    const unit = (fromUnit || '').toString().trim().toLowerCase();
+
+    const round = (n, decimals) => {
+      if (n === null || n === undefined || Number.isNaN(n)) return null;
+      const factor = Math.pow(10, decimals);
+      return Math.round(n * factor) / factor;
+    };
+
+    const decimalsByMetric = {
+      estrogenLevel: 1,
+      testosteroneLevel: 1,
+      weight: 2,
+      height: 1
+    };
+    const decimals = decimalsByMetric[metric] ?? 2;
+
+    let normalized = num;
+
+    if (metric === 'testosteroneLevel') {
+      // Standard: ng/dL
+      if (unit === 'nmol/l') {
+        normalized = num * 28.85;
+      } else if (unit === 'ng/ml') {
+        normalized = num * 100;
+      } else if (unit === 'ng/dl' || unit === 'ng/dl.') {
+        normalized = num;
+      }
+
+      return round(normalized, decimals);
+    }
+
+    if (metric === 'estrogenLevel') {
+      // Standard: pg/mL
+      if (unit === 'pmol/l') {
+        normalized = num * 0.2724;
+      } else if (unit === 'ng/ml') {
+        normalized = num * 1000;
+      } else if (unit === 'pg/ml' || unit === 'pg/ml.') {
+        normalized = num;
+      }
+
+      return round(normalized, decimals);
+    }
+
+    if (metric === 'weight') {
+      // Standard: kg
+      if (unit === 'lbs' || unit === 'lb' || unit === 'pound' || unit === 'pounds') {
+        normalized = num * 0.45359237;
+      } else if (unit === 'kg') {
+        normalized = num;
+      }
+
+      return round(normalized, decimals);
+    }
+
+    if (metric === 'height') {
+      // Standard: cm
+      if (unit === 'm') {
+        normalized = num * 100;
+      } else if (unit === 'in' || unit === 'inch' || unit === 'inches') {
+        normalized = num * 2.54;
+      } else if (unit === 'cm') {
+        normalized = num;
+      }
+
+      return round(normalized, decimals);
+    }
+
+    return round(normalized, decimals);
+  }
+
+  /*
+   * Example: input processing (UI -> 저장)
+   *
+   * const evaluator = new HealthEvaluator(measurements, mode, biologicalSex);
+   * const normalizedE2 = evaluator.normalizeUnit('estrogenLevel', rawEstrogenValue, estrogenUnit); // 'pmol/L' -> 표준 pg/mL
+   * const normalizedT  = evaluator.normalizeUnit('testosteroneLevel', rawTestosteroneValue, testosteroneUnit); // 'nmol/L' -> 표준 ng/dL
+   * const normalizedWt = evaluator.normalizeUnit('weight', rawWeightValue, weightUnit); // 'lbs' -> 표준 kg
+   *
+   * measurement.estrogenLevel = normalizedE2;
+   * measurement.testosteroneLevel = normalizedT;
+   * measurement.weight = normalizedWt;
+   */
+
+  /*
+   * Example: DoctorEngine 측(분석 시작 전)에서 방어적으로 정규화
+   *
+   * // const latest = measurements[measurements.length - 1];
+   * // latest.estrogenLevel = this.healthEvaluator.normalizeUnit('estrogenLevel', latest.estrogenLevel, latest.estrogenUnit);
+   * // latest.testosteroneLevel = this.healthEvaluator.normalizeUnit('testosteroneLevel', latest.testosteroneLevel, latest.testosteroneUnit);
+   */
   
   // ========================================
   // 2. 전체 건강 평가
@@ -589,7 +686,7 @@ export class HealthEvaluator {
         evaluation.testosterone = {
           value: tLevel,
           status,
-          targetRange: '< 50 ng/ml',
+          targetRange: '< 50 ng/dL',
           recommendation
         };
       }
@@ -618,7 +715,7 @@ export class HealthEvaluator {
         evaluation.testosterone = {
           value: tLevel,
           status,
-          targetRange: '300-700 ng/ml',
+          targetRange: '300-700 ng/dL',
           recommendation
         };
       }

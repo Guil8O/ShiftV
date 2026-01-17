@@ -5,7 +5,49 @@
  */
 
 import { DoctorEngine } from '../doctor-module/core/doctor-engine.js';
-import { translate, translateUI } from '../translations.js';
+import { translate, translateUI, getCurrentLanguage } from '../translations.js';
+import { SYMPTOM_DATABASE } from '../doctor-module/data/symptom-database.js';
+import { MEDICATION_DATABASE, getAllMedications } from '../doctor-module/data/medication-database.js';
+
+const ensureAverageLinePluginRegistered = () => {
+  if (typeof Chart === 'undefined') return;
+  const pluginId = 'shiftvAverageLines';
+  const alreadyRegistered = Chart?.registry?.plugins?.get?.(pluginId);
+  if (alreadyRegistered) return;
+
+  Chart.register({
+    id: pluginId,
+    afterDatasetsDraw(chart) {
+      const yScale = Object.values(chart.scales || {}).find(s => s?.axis === 'y') || chart.scales?.y;
+      if (!yScale) return;
+      const { ctx, chartArea } = chart;
+      if (!ctx || !chartArea) return;
+
+      chart.data.datasets.forEach((dataset, datasetIndex) => {
+        const meta = chart.getDatasetMeta(datasetIndex);
+        if (!meta || !chart.isDatasetVisible(datasetIndex)) return;
+
+        const targetValue = Number(dataset?._targetValue);
+        if (!Number.isFinite(targetValue)) return;
+        const y = yScale.getPixelForValue(targetValue);
+        if (!Number.isFinite(y)) return;
+
+        ctx.save();
+        ctx.setLineDash([6, 4]);
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = dataset.borderColor || 'rgba(255,255,255,0.6)';
+        ctx.globalAlpha = 0.6;
+
+        ctx.beginPath();
+        ctx.moveTo(chartArea.left, y);
+        ctx.lineTo(chartArea.right, y);
+        ctx.stroke();
+
+        ctx.restore();
+      });
+    }
+  });
+};
 
 // ========================================
 // 1. Body Briefing Modal 클래스
@@ -17,6 +59,12 @@ export class BodyBriefingModal {
     this.userSettings = userSettings;
     this.doctorEngine = new DoctorEngine(measurements, userSettings);
     this.modalContent = null; // 모달 컨텐츠 컨테이너 참조 저장
+    this._isDetailLegendBound = false;
+    this._selectedWeekIndex = null;
+    this._symptomLabelById = null;
+    this._medicationLabelById = null;
+    this._detailZoomLevel = 0;
+    this._detailZoomBound = false;
   }
   
   // ========================================
@@ -203,36 +251,30 @@ export class BodyBriefingModal {
   }
   
   /**
-   * 진행 바 HTML 생성 (시작-전주-현재-목표)
+   * 진행 바 HTML 생성 (상하 분산 배치 및 충돌 방지)
    */
   createProgressBarHTML(data) {
     const { initialValue, prevValue, currentValue, targetValue, metric } = data;
     
-    // 값 배열 생성
-    let values = [
-      { key: 'initial', value: initialValue, text: translate('labelInitial') },
-      { key: 'prev', value: prevValue, text: translate('labelPrev') },
-      { key: 'current', value: currentValue, text: translate('labelCurrent') },
-      { key: 'target', value: targetValue, text: translate('labelTarget') }
+    // 1. 데이터 그룹화 (Top: Current, Prev / Bottom: Initial, Target)
+    const topItems = [
+      { key: 'current', value: currentValue, text: translate('labelCurrent'), isCurrent: true, group: 'top' },
+      { key: 'prev', value: prevValue, text: translate('labelPrev'), group: 'top' }
     ].filter(v => v.value !== null && !isNaN(v.value));
+
+    const bottomItems = [
+      { key: 'initial', value: initialValue, text: translate('labelInitial'), group: 'bottom' },
+      { key: 'target', value: targetValue, text: translate('labelTarget'), group: 'bottom' }
+    ].filter(v => v.value !== null && !isNaN(v.value));
+
+    const allValues = [...topItems, ...bottomItems];
     
-    if (values.length < 2 || (values.length > 0 && !values.find(v => v.key === 'current'))) {
+    if (allValues.length < 2) {
       return '<div class="progress-bar-placeholder">-</div>';
     }
     
-    // 동일 값 처리
-    const TOLERANCE = 0.01;
-    if (initialValue !== null && targetValue !== null && Math.abs(initialValue - targetValue) < TOLERANCE) {
-      values = values.filter(v => v.key !== 'initial' && v.key !== 'target');
-      values.push({ key: 'initialTarget', value: initialValue, text: translate('initialTargetSame') });
-    }
-    if (prevValue !== null && currentValue !== null && Math.abs(prevValue - currentValue) < TOLERANCE) {
-      values = values.filter(v => v.key !== 'prev' && v.key !== 'current');
-      values.push({ key: 'prevCurrent', value: currentValue, text: translate('prevCurrentSame'), isCurrent: true });
-    }
-    
-    // 범위 계산
-    const numericValues = values.map(v => v.value);
+    // 2. 범위 계산
+    const numericValues = allValues.map(v => v.value);
     const min = Math.min(...numericValues);
     const max = Math.max(...numericValues);
     const range = max - min;
@@ -243,52 +285,122 @@ export class BodyBriefingModal {
     if (displayRange === 0) return '<div class="progress-bar-placeholder">-</div>';
     const calcPercent = (val) => ((val - displayMin) / displayRange) * 100;
     
-    // 위치 계산
-    values.forEach(v => {
-      v.pos = calcPercent(v.value);
-      v.staggerClass = '';
-    });
-    values.sort((a, b) => a.pos - b.pos);
+    // 3. 포지션 계산
+    allValues.forEach(v => v.pos = calcPercent(v.value));
     
-    // 라벨 겹침 처리
-    for (let i = 1; i < values.length; i++) {
-      const prev = values[i - 1];
-      const curr = values[i];
-      if (curr.pos - prev.pos < 15) {
-        prev.staggerClass = 'stagger-left';
-        curr.staggerClass = 'stagger-right';
+    // 4. 충돌 감지 (그룹별)
+    const ITEM_WIDTH_PERCENT = 18; // 예상 너비
+    
+    const calculateLevels = (items) => {
+      items.sort((a, b) => a.pos - b.pos);
+      const levels = [];
+      items.forEach(item => {
+        let level = 0;
+        const startPos = item.pos - (ITEM_WIDTH_PERCENT / 2);
+        while (true) {
+          if (levels[level] === undefined || levels[level] + 2 < startPos) {
+            break;
+          }
+          level++;
+        }
+        item.level = level;
+        levels[level] = item.pos + (ITEM_WIDTH_PERCENT / 2);
+      });
+      return items.length > 0 ? Math.max(...items.map(i => i.level)) : 0;
+    };
+
+    const maxLevelTop = calculateLevels(topItems);
+    const maxLevelBottom = calculateLevels(bottomItems);
+    
+    // 5. 높이 및 레이아웃 계산
+    const WRAPPER_HEIGHT = 140; // 고정 높이 (상하 여유)
+    const TRACK_Y_CENTER = WRAPPER_HEIGHT / 2; // 중앙 (70px)
+    
+    // 6. SVG 지시선 생성
+    const svgLines = allValues.map(v => {
+      // 레벨이 0이면(가장 가까우면) 지시선 생략
+      if (v.level === 0) return '';
+      
+      const x = v.pos;
+      let y1, y2;
+      
+      if (v.group === 'top') {
+        // Top: 라벨 밑(y1) -> 트랙 위(y2)
+        // Level 1: margin-bottom 55px. Label Height ~40px. 
+        // Label Bottom Y = Center(70) - 55 = 15.
+        // Track Top Y = Center(70) - 5 = 65.
+        y1 = TRACK_Y_CENTER - 55; 
+        y2 = TRACK_Y_CENTER - 10;
+      } else {
+        // Bottom: 라벨 위(y1) -> 트랙 아래(y2)
+        // Level 1 (if exists, but user said fixed 12px for bottom, assuming level 0 mostly)
+        // Let's assume standard logic applies if needed
+        const marginBottom = 15 + (v.level * 40); // Not used for bottom fixed
+        // But for Bottom, margin-top: 15px.
+        // Label Top Y = Center(70) + 15 = 85.
+        // Track Bottom Y = Center(70) + 10 = 80.
+        // No line needed for Level 0 Bottom.
+        return ''; 
       }
-    }
+      
+      return `<line x1="${x}%" y1="${y1}" x2="${x}%" y2="${y2}" 
+              stroke="var(--glass-border)" stroke-width="1" stroke-dasharray="3,3" />`;
+    }).join('');
     
-    // 위치 계산
+    // 7. 라벨 HTML 생성
+    const unit = metric ? this.getMetricUnit(metric) : '';
+    const labelsHTML = allValues.map(v => {
+      const isCurrentClass = v.isCurrent ? 'current' : '';
+      let style = `left: ${v.pos}%;`;
+      
+      if (v.group === 'top') {
+        // Top Label Style
+        if (v.level > 0) {
+           style += `bottom: calc(50% + 55px) !important;`; // 겹침 발생 시 높이 띄움 (중앙 기준)
+        } else {
+           style += `bottom: calc(50% + 15px);`; // 기본 높이 (중앙 기준)
+        }
+      } else {
+        // Bottom Label Style
+        style += `top: calc(50% + 15px);`; // 고정 (중앙 기준)
+      }
+      
+      return `
+        <div class="progress-bar-label ${isCurrentClass} ${v.group}-label" style="${style}">
+          <span class="label">${v.text}</span>
+          <span class="value">${v.value}${unit}</span>
+        </div>
+      `;
+    }).join('');
+    
+    // 8. 트랙 및 범위 바
     const pCurrent = calcPercent(currentValue);
     const pInitial = initialValue !== null ? calcPercent(initialValue) : null;
     const pPrev = prevValue !== null ? calcPercent(prevValue) : null;
     const pTarget = targetValue !== null ? calcPercent(targetValue) : null;
     
-    // 범위 바 생성
     const initialToCurrent = pInitial !== null ? `<div class="progress-bar-range range-initial" style="left: ${Math.min(pInitial, pCurrent)}%; width: ${Math.abs(pCurrent - pInitial)}%;"></div>` : '';
     const prevToCurrent = pPrev !== null ? `<div class="progress-bar-range range-prev" style="left: ${Math.min(pPrev, pCurrent)}%; width: ${Math.abs(pCurrent - pPrev)}%;"></div>` : '';
     const currentToTarget = pTarget !== null ? `<div class="progress-bar-range range-target" style="left: ${Math.min(pCurrent, pTarget)}%; width: ${Math.abs(pTarget - pCurrent)}%;"></div>` : '';
     
-    // 라벨 생성
-    const unit = metric ? this.getMetricUnit(metric) : '';
-    const labelsHTML = values.map(v => {
-      const isCurrentClass = v.key === 'current' || v.isCurrent ? 'current' : '';
-      return `<div class="progress-bar-label ${isCurrentClass} ${v.staggerClass}" style="left: ${v.pos}%;">
-        <span>${v.value}${unit}</span><br>${v.text}
-      </div>`;
-    }).join('');
-    
     return `
-      <div class="progress-bar-container">
-        <div class="progress-bar-track"></div>
-        ${initialToCurrent}
-        ${prevToCurrent}
-        ${currentToTarget}
-        <div class="progress-bar-marker" style="left: ${pCurrent}%;"></div>
+      <div class="progress-bar-wrapper" style="height: ${WRAPPER_HEIGHT}px;">
+        <svg class="leader-lines-svg" style="width: 100%; height: 100%;">
+          ${svgLines}
+        </svg>
+        
+        <div class="labels-container">
+          ${labelsHTML}
+        </div>
+        
+        <div class="progress-bar-track-container">
+          <div class="progress-bar-track"></div>
+          ${initialToCurrent}
+          ${prevToCurrent}
+          ${currentToTarget}
+          <div class="progress-bar-marker" style="left: ${pCurrent}%;"></div>
+        </div>
       </div>
-      <div class="progress-bar-labels">${labelsHTML}</div>
     `;
   }
   
@@ -431,7 +543,7 @@ export class BodyBriefingModal {
     };
     
     const data = stats[type]?.[gender];
-    if (!data) return '상위 50%';
+    if (!data) return translate('percentileRank', { value: 50 });
     
     // 상위% 계산 (값이 낮을수록 상위%)
     let percentile = 50; // 기본값
@@ -452,7 +564,7 @@ export class BodyBriefingModal {
       percentile = 100 - percentile;
     }
     
-    return `상위 ${percentile}%`;
+    return translate('percentileRank', { value: percentile });
   }
   
   /**
@@ -465,6 +577,7 @@ export class BodyBriefingModal {
     const items = Object.keys(predictions).map(metric => {
       const prediction = predictions[metric];
       if (!prediction) return null;
+      const unit = this.getMetricUnit(metric);
       
       // 현재 수치
       const currentValue = prediction.current || this.getCurrentValue(metric);
@@ -481,6 +594,9 @@ export class BodyBriefingModal {
       
       // 전주 변화량
       const weeklyChange = prediction.weeklyChange || this.calculateWeeklyChange(metric);
+      const weeklyChangeText = weeklyChange
+        ? `${parseFloat(weeklyChange) > 0 ? '+' : ''}${weeklyChange} ${unit}`
+        : '-';
       
       // 목표 달성률 계산 (현재값에서 목표값까지의 진행률)
       const targetValue = this.userSettings.targets && this.userSettings.targets[metric] ? this.userSettings.targets[metric] : null;
@@ -500,32 +616,54 @@ export class BodyBriefingModal {
           }
         }
       }
+
+      const monthlyChangeText = monthlyChange
+        ? `${parseFloat(monthlyChange) > 0 ? '+' : ''}${monthlyChange} ${unit}`
+        : `-0.00 ${unit}`;
+      const predictedValueText = predictedValue ? `${predictedValue} ${unit}` : '-';
       
       return `
-        <div class="prediction-item">
-          <div class="prediction-left">
+        <div class="prediction-item" tabindex="0">
+          <!-- Main Column (Left on Desktop, Top on Mobile) -->
+          <div class="prediction-main-col">
             <div class="prediction-metric-name">${this.getMetricName(metric)}</div>
-            <div class="prediction-main">
-              <span class="current-value">${currentValue} ${this.getMetricUnit(metric)}</span>
-              ${predictedValue ? `<span class="prediction-arrow">→</span><span class="prediction-value">${predictedValue} ${this.getMetricUnit(metric)}</span>` : ''}
+            
+            <div class="prediction-values-container">
+              <div class="prediction-value-item current">
+                <span class="prediction-label">${translate('labelCurrent')}:</span>
+                <span class="prediction-value-text">${currentValue} ${unit}</span>
+              </div>
+              <div class="prediction-value-item predicted">
+                <span class="prediction-label">${translate('predictedNextWeek')}:</span>
+                <span class="prediction-value-text highlight">${predictedValueText}</span>
+              </div>
             </div>
+
             ${targetProgress !== null ? `
-              <div class="prediction-progress">
-                <div class="prediction-progress-label">${translate('labelTarget')} ${targetProgress.toFixed(0)}%</div>
+              <div class="prediction-progress-container">
                 <div class="prediction-progress-bar">
                   <div class="prediction-progress-fill" style="width: ${targetProgress}%"></div>
+                  <span class="prediction-progress-text">${translate('labelTarget')} ${targetProgress.toFixed(0)}%</span>
                 </div>
               </div>
-            ` : ''}
+            ` : '<div class="prediction-progress-placeholder"></div>'}
           </div>
-          <div class="prediction-right">
-            <div class="change-item">
-              <span class="change-label">${translate('briefingMonthlyAvg')}</span>
-              <span class="change-value ${monthlyChange && parseFloat(monthlyChange) > 0 ? 'positive' : monthlyChange && parseFloat(monthlyChange) < 0 ? 'negative' : ''}">${monthlyChange ? `${parseFloat(monthlyChange) > 0 ? '+' : ''}${monthlyChange} ${this.getMetricUnit(metric)}` : '-0.00 ${this.getMetricUnit(metric)}'}</span>
+
+          <!-- Divider (Vertical on Desktop, Horizontal on Mobile) -->
+          <div class="prediction-divider"></div>
+
+          <!-- Stats Column (Right on Desktop, Bottom on Mobile) -->
+          <div class="prediction-stats-col">
+            <div class="prediction-stat-item monthly">
+              <span class="prediction-stat-label">${translate('briefingMonthlyAvg')}</span>
+              <span class="prediction-stat-value ${monthlyChange && parseFloat(monthlyChange) > 0 ? 'positive' : monthlyChange && parseFloat(monthlyChange) < 0 ? 'negative' : ''}">${monthlyChangeText}</span>
             </div>
-            <div class="change-item">
-              <span class="change-label">${translate('briefingPreviousWeek')}</span>
-              <span class="change-value ${weeklyChange && parseFloat(weeklyChange) > 0 ? 'positive' : weeklyChange && parseFloat(weeklyChange) < 0 ? 'negative' : ''}">${weeklyChange ? `${parseFloat(weeklyChange) > 0 ? '+' : ''}${weeklyChange} ${this.getMetricUnit(metric)}` : '-'}</span>
+            
+            <div class="prediction-stat-divider"></div>
+            
+            <div class="prediction-stat-item weekly">
+              <span class="prediction-stat-label">${translate('briefingPreviousWeek')}</span>
+              <span class="prediction-stat-value ${weeklyChange && parseFloat(weeklyChange) > 0 ? 'positive' : weeklyChange && parseFloat(weeklyChange) < 0 ? 'negative' : ''}">${weeklyChangeText}</span>
             </div>
           </div>
         </div>
@@ -657,37 +795,105 @@ export class BodyBriefingModal {
     
     if (this.measurements.length < 1) return;
     
-    // 필터 키 목록 (기본적으로 모든 측정 항목)
-    const filterKeys = ['weight', 'waist', 'hips', 'chest', 'shoulder', 'thigh', 'arm', 'muscleMass', 'bodyFatPercentage'];
-    
     const labels = this.measurements.map(m => `${m.week}주차`);
-    
-    // 데이터셋 생성
-    const datasets = filterKeys.map((filterKey, index) => {
-      const colors = [
-        'hsl(330, 70%, 60%)', // weight
-        'hsl(280, 70%, 60%)', // waist
-        'hsl(240, 70%, 60%)', // hips
-        'hsl(200, 70%, 60%)', // chest
-        'hsl(160, 70%, 60%)', // shoulder
-        'hsl(120, 70%, 60%)', // thigh
-        'hsl(80, 70%, 60%)',  // arm
-        'hsl(40, 70%, 60%)',  // muscleMass
-        'hsl(0, 70%, 60%)'    // bodyFatPercentage
-      ];
-      
-      const metricColor = colors[index % colors.length];
-      
+
+    const numericCandidates = [
+      'height',
+      'weight',
+      'shoulder',
+      'neck',
+      'chest',
+      'cupSize',
+      'waist',
+      'hips',
+      'thigh',
+      'calf',
+      'arm',
+      'muscleMass',
+      'bodyFatPercentage',
+      'libido',
+      'estrogenLevel',
+      'testosteroneLevel'
+    ];
+
+    const hasAnyFiniteNumber = (key) => this.measurements.some(m => Number.isFinite(Number(m?.[key])));
+    const numericKeys = numericCandidates.filter(hasAnyFiniteNumber);
+
+    const symptomIds = [...new Set(
+      this.measurements
+        .flatMap(m => Array.isArray(m?.symptoms) ? m.symptoms : [])
+        .map(s => s?.id)
+        .filter(Boolean)
+    )];
+
+    const medKeyToMeta = new Map();
+    this.measurements
+      .flatMap(m => Array.isArray(m?.medications) ? m.medications : [])
+      .forEach(med => {
+        const id = med?.id || med?.medicationId;
+        if (!id) return;
+        const unit = med?.unit || '';
+        const key = `${id}__${unit}`;
+        if (medKeyToMeta.has(key)) return;
+        medKeyToMeta.set(key, { id, unit });
+      });
+
+    const medSeries = [...medKeyToMeta.values()];
+
+    const seriesDefs = [
+      ...numericKeys.map(key => ({ kind: 'metric', key })),
+      ...symptomIds.map(id => ({ kind: 'symptom', id })),
+      ...medSeries.map(({ id, unit }) => ({ kind: 'medication', id, unit }))
+    ];
+
+    const makeColor = (index) => `hsl(${(index * 37) % 360}, 70%, 60%)`;
+
+    const defaultIndex = Math.max(0, seriesDefs.findIndex(d => d.kind === 'metric' && d.key === 'weight'));
+
+    const datasets = seriesDefs.map((def, index) => {
+      const metricColor = makeColor(index);
+      const data = def.kind === 'metric'
+        ? this.measurements.map(m => {
+          const n = Number(m?.[def.key]);
+          return Number.isFinite(n) ? n : null;
+        })
+        : def.kind === 'symptom'
+          ? this.measurements.map(m => {
+            const found = Array.isArray(m?.symptoms) ? m.symptoms.find(s => s?.id === def.id) : null;
+            const sev = Number(found?.severity);
+            return Number.isFinite(sev) ? sev : null;
+          })
+          : this.measurements.map(m => {
+            const found = Array.isArray(m?.medications)
+              ? m.medications.find(x => (x?.id || x?.medicationId) === def.id && (x?.unit || '') === (def.unit || ''))
+              : null;
+            const dose = Number(found?.dose);
+            return Number.isFinite(dose) ? dose : null;
+          });
+
+      const label = def.kind === 'metric'
+        ? this.getMetricName(def.key)
+        : def.kind === 'symptom'
+          ? this.getSymptomName(def.id)
+          : `${this.getMedicationName(def.id)}${def.unit ? ` (${def.unit})` : ''}`;
+
+      const targetValue = def.kind === 'metric'
+        ? Number(this.userSettings?.targets?.[def.key])
+        : NaN;
+
       return {
-        label: this.getMetricName(filterKey),
-        data: this.measurements.map(m => m[filterKey] ?? null),
+        label,
+        data,
         borderColor: metricColor,
         backgroundColor: metricColor + '33',
         tension: 0.1,
         borderWidth: 2.5,
         pointRadius: 4,
         pointHoverRadius: 6,
-        spanGaps: true
+        spanGaps: true,
+        hidden: index !== defaultIndex,
+        _series: def,
+        _targetValue: Number.isFinite(targetValue) ? targetValue : undefined
       };
     });
     
@@ -696,6 +902,40 @@ export class BodyBriefingModal {
     const tickColor = isLightMode ? '#5c5c8a' : 'rgba(255, 255, 255, 0.6)';
     const gridColor = isLightMode ? 'rgba(200, 200, 235, 0.5)' : 'rgba(255, 255, 255, 0.1)';
     
+    ensureAverageLinePluginRegistered();
+
+    const wrapper = canvas.parentElement;
+    if (wrapper) {
+      const container = this.ensureChartWrapperContainer(wrapper);
+      let inner = wrapper.querySelector('.chart-inner-container');
+      if (!inner) {
+        inner = document.createElement('div');
+        inner.classList.add('chart-inner-container');
+        wrapper.insertBefore(inner, canvas);
+        inner.appendChild(canvas);
+      }
+
+      const maxPointsPerView = 10;
+      const minPointWidth = 70;
+      const pointCount = labels.length;
+      const neededWidth = pointCount * minPointWidth;
+
+      if (pointCount > maxPointsPerView) {
+        wrapper.style.overflowX = 'auto';
+        wrapper.style.overflowY = 'hidden';
+        inner.style.width = neededWidth + 'px';
+      } else {
+        wrapper.style.overflowX = 'hidden';
+        inner.style.width = '100%';
+      }
+      inner.style.height = '280px';
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+
+      this.applyDetailZoom(wrapper, inner, pointCount);
+      this.ensureDetailZoomControls(container, wrapper, inner, pointCount);
+    }
+
     // 차트 생성
     this.detailChartInstance = new Chart(ctx, {
       type: 'line',
@@ -708,13 +948,7 @@ export class BodyBriefingModal {
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: true,
-            position: 'top',
-            labels: {
-              color: tickColor,
-              usePointStyle: true,
-              padding: 15
-            }
+            display: false
           },
           tooltip: {
             mode: 'index',
@@ -750,9 +984,124 @@ export class BodyBriefingModal {
           mode: 'nearest',
           axis: 'x',
           intersect: false
+        },
+        onClick: (event) => {
+          if (!this.detailChartInstance) return;
+          const points = this.detailChartInstance.getElementsAtEventForMode(event, 'nearest', { intersect: false }, true);
+          if (!points || points.length === 0) return;
+          const index = points[0]?.index;
+          if (!Number.isFinite(index)) return;
+          this._selectedWeekIndex = index;
+          this.renderSelectedWeekData(index);
+        },
+        onHover: (event, elements) => {
+          const canvasEl = event?.native?.target;
+          if (!canvasEl) return;
+          canvasEl.style.cursor = elements && elements.length > 0 ? 'pointer' : 'default';
         }
       }
     });
+
+    this.renderDetailSeriesButtons();
+  }
+
+  applyDetailZoom(wrapper, inner, pointCount) {
+    if (!wrapper || !inner || !this.detailChartInstance) return;
+
+    const level = Math.max(0, Math.min(4, Number(this._detailZoomLevel) || 0));
+    this._detailZoomLevel = level;
+
+    const basePointWidth = 70;
+    const stepWidths = [basePointWidth, 60, 50, 40];
+    const wrapperWidth = wrapper.clientWidth || 0;
+    const availableWidth = Math.max(0, wrapperWidth - 20);
+
+    if (level >= 4 || pointCount <= 1) {
+      wrapper.style.overflowX = 'hidden';
+      wrapper.style.overflowY = 'hidden';
+      inner.style.width = '100%';
+    } else {
+      const pointWidth = stepWidths[level] || basePointWidth;
+      const neededWidth = pointCount * pointWidth;
+      if (neededWidth > availableWidth && availableWidth > 0) {
+        wrapper.style.overflowX = 'auto';
+        wrapper.style.overflowY = 'hidden';
+        inner.style.width = neededWidth + 'px';
+      } else {
+        wrapper.style.overflowX = 'hidden';
+        wrapper.style.overflowY = 'hidden';
+        inner.style.width = '100%';
+      }
+    }
+
+    const hideDetails = level >= 3;
+    this.detailChartInstance.data.datasets.forEach(ds => {
+      ds.pointRadius = hideDetails ? 0 : 4;
+      ds.pointHoverRadius = hideDetails ? 0 : 6;
+    });
+    if (this.detailChartInstance.options?.scales?.x?.ticks) {
+      this.detailChartInstance.options.scales.x.ticks.display = !hideDetails;
+    }
+    this.detailChartInstance.update('none');
+  }
+
+  ensureChartWrapperContainer(wrapper) {
+    const parent = wrapper.parentElement;
+    if (!parent) return wrapper;
+    if (parent.classList.contains('chart-wrapper-container')) return parent;
+
+    const container = document.createElement('div');
+    container.className = 'chart-wrapper-container';
+    parent.insertBefore(container, wrapper);
+    container.appendChild(wrapper);
+    return container;
+  }
+
+  ensureDetailZoomControls(container, wrapper, inner, pointCount) {
+    if (!container || !wrapper) return;
+
+    const stale = wrapper.querySelector('.chart-zoom-controls');
+    if (stale) stale.remove();
+
+    let controls = container.querySelector('.chart-zoom-controls');
+    if (!controls) {
+      controls = document.createElement('div');
+      controls.className = 'chart-zoom-controls';
+      controls.innerHTML = `
+        <button type="button" class="chart-zoom-btn zoom-in" aria-label="Zoom in">+</button>
+        <button type="button" class="chart-zoom-btn zoom-out" aria-label="Zoom out">−</button>
+      `;
+      container.appendChild(controls);
+    }
+
+    const updateState = () => {
+      const level = Math.max(0, Math.min(4, Number(this._detailZoomLevel) || 0));
+      const inBtn = controls.querySelector('.zoom-in');
+      const outBtn = controls.querySelector('.zoom-out');
+      if (inBtn) inBtn.disabled = level <= 0;
+      if (outBtn) outBtn.disabled = level >= 4;
+    };
+
+    updateState();
+
+    if (this._detailZoomBound) return;
+    this._detailZoomBound = true;
+
+    controls.addEventListener('click', (e) => {
+      const btn = e.target.closest('.chart-zoom-btn');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      const isIn = btn.classList.contains('zoom-in');
+      const isOut = btn.classList.contains('zoom-out');
+      if (!isIn && !isOut) return;
+
+      const next = (Number(this._detailZoomLevel) || 0) + (isOut ? 1 : -1);
+      this._detailZoomLevel = Math.max(0, Math.min(4, next));
+      this.applyDetailZoom(wrapper, inner, pointCount);
+      updateState();
+    }, { passive: false });
   }
   
   // ========================================
@@ -806,22 +1155,265 @@ export class BodyBriefingModal {
   $(selector) {
     return this.modalContent ? this.modalContent.querySelector(selector) : null;
   }
+
+  getSymptomName(symptomId) {
+    if (!this._symptomLabelById) {
+      const map = new Map();
+      Object.values(SYMPTOM_DATABASE || {}).forEach(group => {
+        const symptoms = group?.symptoms;
+        if (!Array.isArray(symptoms)) return;
+        symptoms.forEach(s => {
+          if (!s?.id) return;
+          map.set(s.id, {
+            ko: s.ko,
+            en: s.en,
+            ja: s.ja
+          });
+        });
+      });
+      this._symptomLabelById = map;
+    }
+
+    const record = this._symptomLabelById.get(symptomId);
+    if (!record) return symptomId;
+    const lang = getCurrentLanguage();
+    return (lang === 'ja' ? record.ja : lang === 'en' ? record.en : record.ko) || record.ko || record.en || record.ja || symptomId;
+  }
+
+  getMedicationName(medId) {
+    const lang = getCurrentLanguage();
+
+    if (!this._medicationLabelById) {
+      const map = new Map();
+      if (MEDICATION_DATABASE && typeof MEDICATION_DATABASE === 'object') {
+        Object.values(MEDICATION_DATABASE).forEach(group => {
+          const items = group?.items;
+          if (!Array.isArray(items)) return;
+          items.forEach(item => {
+            if (!item?.id) return;
+            map.set(item.id, { ko: item.ko, en: item.en, ja: item.ja });
+          });
+        });
+      }
+
+      const all = getAllMedications();
+      (Array.isArray(all) ? all : []).forEach(m => {
+        if (!m?.id || map.has(m.id)) return;
+        map.set(m.id, { names: m.names });
+      });
+
+      this._medicationLabelById = map;
+    }
+
+    const record = this._medicationLabelById.get(medId);
+    if (!record) return medId;
+
+    if (record.ko || record.en || record.ja) {
+      return (lang === 'ja' ? record.ja : lang === 'en' ? record.en : record.ko) || record.ko || record.en || record.ja || medId;
+    }
+
+    const names = record.names;
+    if (!Array.isArray(names) || names.length === 0) return medId;
+    if (lang === 'ko') return names.find(n => /[가-힣]/.test(n)) || names[0];
+    if (lang === 'ja') return names.find(n => /[ぁ-んァ-ン一-龯]/.test(n)) || names.find(n => /[A-Za-z]/.test(n)) || names[0];
+    return names.find(n => /[A-Za-z]/.test(n)) || names[0];
+  }
+
+  renderDetailSeriesButtons() {
+    const legendEl = this.$('#briefing-legend-controls');
+    if (!legendEl || !this.detailChartInstance) return;
+
+    const scrollPositions = {};
+    legendEl.querySelectorAll('.legend-list[data-group]').forEach(list => {
+      const key = list.getAttribute('data-group');
+      if (key) scrollPositions[key] = list.scrollTop;
+    });
+
+    const datasets = this.detailChartInstance.data.datasets;
+    const allVisible = datasets.length > 0 && datasets.every((_, i) => this.detailChartInstance.isDatasetVisible(i));
+    const toggleAllText = allVisible ? translate('deselectAll') : translate('selectAll');
+
+    const groups = {
+      metric: [],
+      symptom: [],
+      medication: []
+    };
+
+    datasets.forEach((dataset, index) => {
+      const kind = dataset?._series?.kind;
+      const groupKey = kind === 'symptom' ? 'symptom' : kind === 'medication' ? 'medication' : 'metric';
+      groups[groupKey].push({ dataset, index });
+    });
+
+    const renderButtons = (items) => items.map(({ dataset, index }) => {
+      const color = dataset.borderColor;
+      const isActive = this.detailChartInstance.isDatasetVisible(index);
+      const inactive = isActive ? '' : 'inactive';
+      const bg = isActive ? color : 'transparent';
+      const fg = isActive ? 'white' : 'var(--text-dim)';
+      return `<button class="legend-button ${inactive}" data-dataset-index="${index}" style="background-color: ${bg}; border-color: ${color}; color: ${fg};">${dataset.label}</button>`;
+    }).join('');
+
+    legendEl.innerHTML = `
+      <div class="briefing-legend-toolbar">
+        <button class="legend-button" data-action="toggle-all" style="background-color: var(--accent); border-color: var(--accent); color: white;">${toggleAllText}</button>
+      </div>
+      <div class="briefing-legend-grid">
+        <div class="legend-group-card">
+          <h5 class="legend-group-title">${translate('briefingGroupMeasurements')}</h5>
+          <div class="legend-list" data-group="metric">${renderButtons(groups.metric)}</div>
+          <div class="legend-group-toolbar">
+            <button class="legend-button legend-group-toggle" data-group="metric" data-action="toggle-group" style="background-color: var(--glass-bg); border-color: var(--glass-border); color: var(--text-dim); margin-top: 8px; width: 100%;">${groups.metric.every(({ dataset, index }) => this.detailChartInstance.isDatasetVisible(index)) ? translate('deselectAll') : translate('selectAll')}</button>
+          </div>
+        </div>
+        <div class="legend-group-card">
+          <h5 class="legend-group-title">${translate('briefingGroupSymptoms')}</h5>
+          <div class="legend-list" data-group="symptom">${renderButtons(groups.symptom)}</div>
+          <div class="legend-group-toolbar">
+            <button class="legend-button legend-group-toggle" data-group="symptom" data-action="toggle-group" style="background-color: var(--glass-bg); border-color: var(--glass-border); color: var(--text-dim); margin-top: 8px; width: 100%;">${groups.symptom.every(({ dataset, index }) => this.detailChartInstance.isDatasetVisible(index)) ? translate('deselectAll') : translate('selectAll')}</button>
+          </div>
+        </div>
+        <div class="legend-group-card">
+          <h5 class="legend-group-title">${translate('briefingGroupMedications')}</h5>
+          <div class="legend-list" data-group="medication">${renderButtons(groups.medication)}</div>
+          <div class="legend-group-toolbar">
+            <button class="legend-button legend-group-toggle" data-group="medication" data-action="toggle-group" style="background-color: var(--glass-bg); border-color: var(--glass-border); color: var(--text-dim); margin-top: 8px; width: 100%;">${groups.medication.every(({ dataset, index }) => this.detailChartInstance.isDatasetVisible(index)) ? translate('deselectAll') : translate('selectAll')}</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    legendEl.querySelectorAll('.legend-list[data-group]').forEach(list => {
+      const key = list.getAttribute('data-group');
+      const pos = key ? scrollPositions[key] : undefined;
+      if (key && typeof pos === 'number') list.scrollTop = pos;
+    });
+
+    if (!this._isDetailLegendBound) {
+      this._isDetailLegendBound = true;
+      legendEl.addEventListener('click', (e) => {
+        const button = e.target.closest('.legend-button');
+        if (!button || !this.detailChartInstance) return;
+
+        const action = button.dataset.action;
+        if (action === 'toggle-all') {
+          const ds = this.detailChartInstance.data.datasets;
+          const isAllVisible = ds.length > 0 && ds.every((_, i) => this.detailChartInstance.isDatasetVisible(i));
+          ds.forEach((_, i) => {
+            this.detailChartInstance.setDatasetVisibility(i, !isAllVisible);
+          });
+          this.detailChartInstance.update();
+          this.renderDetailSeriesButtons();
+          if (Number.isFinite(this._selectedWeekIndex)) {
+            this.renderSelectedWeekData(this._selectedWeekIndex);
+          }
+          return;
+        } else if (action === 'toggle-group') {
+          const group = button.dataset.group;
+          const datasets = this.detailChartInstance.data.datasets;
+          const groupIndices = datasets
+            .map((ds, idx) => ({ ds, idx }))
+            .filter(({ ds }) => ds._series?.kind === group)
+            .map(({ idx }) => idx);
+          if (groupIndices.length === 0) return;
+          const allVisible = groupIndices.every(i => this.detailChartInstance.isDatasetVisible(i));
+          groupIndices.forEach(i => {
+            this.detailChartInstance.setDatasetVisibility(i, !allVisible);
+          });
+          this.detailChartInstance.update();
+          this.renderDetailSeriesButtons();
+          if (Number.isFinite(this._selectedWeekIndex)) {
+            this.renderSelectedWeekData(this._selectedWeekIndex);
+          }
+          return;
+        }
+
+        const datasetIndex = parseInt(button.dataset.datasetIndex, 10);
+        if (Number.isNaN(datasetIndex)) return;
+        const isVisible = this.detailChartInstance.isDatasetVisible(datasetIndex);
+        this.detailChartInstance.setDatasetVisibility(datasetIndex, !isVisible);
+        this.detailChartInstance.update();
+        this.renderDetailSeriesButtons();
+
+        if (Number.isFinite(this._selectedWeekIndex)) {
+          this.renderSelectedWeekData(this._selectedWeekIndex);
+        }
+      });
+    }
+  }
+
+  renderSelectedWeekData(index) {
+    const titleEl = this.$('#briefing-selected-week-data-title');
+    const contentEl = this.$('#briefing-selected-week-data-content');
+    const placeholderEl = this.$('#briefing-data-placeholder');
+    if (!contentEl || !placeholderEl || !this.measurements[index]) return;
+
+    const m = this.measurements[index];
+    const weekValue = Number.isFinite(Number(m.week)) ? Number(m.week) : index;
+    if (titleEl) titleEl.textContent = translate('selectedWeekDataTitle', { week: weekValue });
+
+    const numericKeys = [
+      'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm',
+      'muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel'
+    ];
+
+    const items = [];
+
+    numericKeys.forEach(key => {
+      const n = Number(m?.[key]);
+      if (!Number.isFinite(n)) return;
+      const label = translate(key).split('(')[0].trim();
+      const unitMatch = translate(key).match(/\(([^)]+)\)/);
+      const unit = unitMatch ? unitMatch[1] : '';
+      items.push({ label, value: unit ? `${n}${unit}` : `${n}` });
+    });
+
+    const symptomsText = Array.isArray(m.symptoms) && m.symptoms.length > 0
+      ? m.symptoms
+        .filter(s => s && s.id)
+        .map(s => {
+          const sev = Number.isFinite(Number(s.severity)) ? Number(s.severity) : null;
+          return sev ? `${this.getSymptomName(s.id)}(${sev})` : this.getSymptomName(s.id);
+        })
+        .join('\n')
+      : '-';
+
+    const medsText = Array.isArray(m.medications) && m.medications.length > 0
+      ? m.medications
+        .filter(x => x && (x.id || x.medicationId))
+        .map(x => {
+          const id = x.id || x.medicationId;
+          const dose = Number.isFinite(Number(x.dose)) ? Number(x.dose) : null;
+          const unit = x.unit || '';
+          if (dose === null) return `${this.getMedicationName(id)}`;
+          return `${this.getMedicationName(id)} ${dose}${unit}`;
+        })
+        .join('\n')
+      : '-';
+
+    items.push({ label: translate('symptoms'), value: symptomsText });
+    items.push({ label: translate('medications'), value: medsText });
+
+    contentEl.innerHTML = items
+      .map(({ label, value }) => {
+        const safeValue = String(value ?? '-');
+        return `
+          <div class="data-item">
+            <span class="data-item-label">${label}</span>
+            <span class="data-item-value">${safeValue}</span>
+          </div>
+        `;
+      })
+      .join('');
+
+    contentEl.style.display = 'grid';
+    placeholderEl.style.display = 'none';
+  }
   
   getMetricName(metric) {
-    const names = {
-      weight: translate('metricWeight'),
-      waist: translate('metricWaist'),
-      hips: translate('metricHips'),
-      chest: translate('metricChest'),
-      shoulder: translate('metricShoulder'),
-      thigh: translate('metricThigh'),
-      arm: translate('metricArm'),
-      muscleMass: translate('metricMuscleMass'),
-      bodyFatPercentage: translate('metricBodyFatPercentage'),
-      estrogenLevel: translate('estrogenLevel'),
-      testosteroneLevel: translate('testosteroneLevel')
-    };
-    return names[metric] || metric;
+    const label = translate(metric);
+    if (!label || label === metric) return metric;
+    return label.split('(')[0].trim();
   }
   
   getMetricUnit(metric) {

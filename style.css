@@ -1,4 +1,5 @@
 /* --- ShiftV Liquid Glass Redesign --- */
+@import url('src/styles/variables.css');
 
 :root {
     /* --- Color Scheme --- */
@@ -166,8 +167,8 @@ body {
     overscroll-behavior-y: none;
 
     /* ▼▼▼ 추가된 부분: 배경과 텍스트 색상을 5초 동안 부드럽게 전환 ▼▼▼ */
-    transition: background-color 5s ease-in-out, color 5s ease-in-out;
-    transition: background-image 5s ease-in-out, color 5s ease-in-out;
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+    transition: background-image 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 .app-wrapper {
@@ -287,7 +288,7 @@ hr.divider {
     box-shadow: 0 8px 32px 0 var(--glass-shadow);
     backdrop-filter: blur(12px) saturate(150%);
     -webkit-backdrop-filter: blur(12px) saturate(150%);
-    transition: background-color 5s ease-in-out, border-color 5s ease-in-out, box-shadow 5s ease-in-out;
+    transition: background-color 0.5s ease-in-out, border-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
 }
 
 .glass-section {
@@ -323,7 +324,7 @@ hr.divider {
     box-shadow: 4px 0 24px rgba(0,0,0,0.05);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    transition: background-color 5s ease-in-out, color 5s ease-in-out, width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out, width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     
     /* 부드러운 애니메이션 */
     z-index: 200;
@@ -503,7 +504,7 @@ select {
     color: var(--text-main);
     width: 100%;
     transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out,
-        background-color 5s ease-in-out, color 5s ease-in-out;
+        background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 body.dark-mode select,
@@ -532,6 +533,21 @@ input.invalid-input {
     gap: 10px;
 }
 
+/* Input with Unit */
+.input-with-unit {
+    display: flex;
+    gap: 10px;
+}
+
+.input-with-unit input {
+    flex: 2;
+}
+
+.input-with-unit .unit-select {
+    flex: 1;
+    min-width: 100px; /* Ensure dropdown is usable */
+}
+
 /* --- Buttons --- */
 .button-group {
     text-align: center;
@@ -550,7 +566,7 @@ input.invalid-input {
     font-size: 1em;
     font-weight: 600;
     transition: opacity 0.4s ease, bottom 0.4s ease,
-        background-color 5s ease-in-out, border-color 5s ease-in-out, box-shadow 5s ease-in-out, color 5s ease-in-out;
+        background-color 0.5s ease-in-out, border-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out, color 0.5s ease-in-out;
     background-color: var(--glass-bg);
     color: var(--text-dim);
     border-color: var(--glass-border);
@@ -585,7 +601,7 @@ p.description,
 .version-info,
 .form-group label,
 .progress-bar-label {
-    transition: color 5s ease-in-out;
+    transition: color 0.5s ease-in-out;
 }
 
 #cancel-edit-button,
@@ -881,6 +897,37 @@ p.description,
     white-space: nowrap;
 }
 
+#my-history-table-container td.wrap-cell,
+#history-table-container td.wrap-cell {
+    white-space: nowrap;
+    text-align: center;
+    line-height: 1.35;
+    word-break: keep-all;
+    overflow-wrap: normal;
+    max-width: none;
+}
+
+#my-history-table-container th.col-symptoms,
+#history-table-container th.col-symptoms,
+#my-history-table-container td.col-symptoms,
+#history-table-container td.col-symptoms {
+    min-width: 420px;
+}
+
+#my-history-table-container th.col-medications,
+#history-table-container th.col-medications,
+#my-history-table-container td.col-medications,
+#history-table-container td.col-medications {
+    min-width: 420px;
+}
+
+#my-history-table-container td.action-col,
+#history-table-container td.action-col {
+    vertical-align: middle;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 #my-history-table-container th,
 #my-history-table-container td,
 #history-table-container th,
@@ -1090,15 +1137,39 @@ p.description,
 
 .progress-bar-label {
     position: absolute;
-    bottom: 0;
-    /* 상하 위치는 기본값으로 유지 */
+    /* Badge Style & Fit Content */
+    height: auto !important;
+    width: max-content;
+    min-width: 50px;
+    padding: 6px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 5;
+
+    /* Positioning */
     transform: translateX(-50%);
-    /* 기본적으로 중앙 정렬 */
     font-size: 0.7em;
     color: var(--text-dim);
     text-align: center;
     white-space: nowrap;
-    transition: transform 0.2s ease-out;
+    transition: transform 0.2s ease-out, bottom 0.3s ease-out;
+}
+
+.progress-bar-label.top-label {
+    top: auto !important;
+    bottom: calc(50% + 15px); /* Default position above center */
+}
+
+.progress-bar-label.bottom-label {
+    bottom: auto !important;
+    top: calc(50% + 15px); /* Default position below center */
 }
 
 /* 왼쪽으로 밀어내는 스타일 */
@@ -1265,7 +1336,7 @@ p.description,
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     transition: opacity 0.4s ease, bottom 0.4s ease,
-        background-color 5s ease-in-out, border-color 5s ease-in-out, box-shadow 5s ease-in-out;
+        background-color 0.5s ease-in-out, border-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
 }
 
 .popup.show {
@@ -1579,7 +1650,7 @@ body.mode-mtf .ftm-only {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    transition: background-color 5s ease-in-out, color 5s ease-in-out;
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
     /* 
       Grid 아이템이 비정상적으로 커지는 것을 방지합니다. 
       Grid와 Flexbox에서 모두 유용한 트릭입니다.
@@ -1616,7 +1687,7 @@ body.mode-mtf .ftm-only {
     align-items: center;
     text-align: center;
     color: var(--text-dim);
-    transition: color 5s ease-in-out, color 5s ease-in-out;
+    transition: color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 .sv-card-widget {
@@ -1634,27 +1705,27 @@ body.mode-mtf .ftm-only {
 /* 동적 색상 클래스 (주간 가이드 카드 제외) */
 .sv-card--new:not(#sv-card-guide) {
     background-color: rgba(52, 152, 219, 0.2);
-    transition: background-color 5s ease-in-out, color 5s ease-in-out;
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 .sv-card--dday:not(#sv-card-guide) {
     background-color: rgba(231, 76, 60, 0.3);
-    transition: background-color 5s ease-in-out, color 5s ease-in-out;
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 .sv-card--countdown-green:not(#sv-card-guide) {
     background-color: rgba(46, 204, 113, 0.2);
-    transition: background-color 5s ease-in-out, color 5s ease-in-out;
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 .sv-card--countdown-yellow:not(#sv-card-guide) {
     background-color: rgba(241, 196, 15, 0.2);
-    transition: background-color 5s ease-in-out, color 5s ease-in-out;
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 .sv-card--countdown-red:not(#sv-card-guide) {
     background-color: rgba(230, 126, 34, 0.3);
-    transition: background-color 5s ease-in-out, color 5s ease-in-out;
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 /* 데스크탑 레이아웃 (3열) */
@@ -1947,11 +2018,192 @@ body.modal-open {
     border-radius: 50%;
     background-color: var(--glass-border);
     transition: background-color var(--transition-fast), transform var(--transition-fast);
+    cursor: pointer;
 }
 
 .carousel-dot.active {
     background-color: var(--primary);
     transform: scale(1.2);
+}
+
+.carousel-item.sv-metric-slide {
+    align-items: flex-start;
+    text-align: left;
+    padding: 0 10px;
+}
+
+.sv-metric-title {
+    font-size: 1.05em;
+    font-weight: 600;
+    margin: 0;
+}
+
+.sv-metric-value {
+    font-size: 2.1em;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 8px 0 6px 0;
+}
+
+.sv-metric-change {
+    font-weight: 600;
+    margin: 0;
+}
+
+.carousel-item.sv-hormone-slide {
+    align-items: stretch;
+    text-align: left;
+    padding: 0 10px;
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+.sv-hormone-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sv-hormone-label {
+    font-weight: 700;
+    font-size: 0.95em;
+    color: var(--text-main);
+}
+
+.sv-hormone-meta {
+    display: flex;
+    gap: 10px;
+    color: var(--text-dim);
+    font-size: 0.85em;
+    flex-wrap: wrap;
+}
+
+/* --- SV Action Guide Widget Slides --- */
+.sv-action-slide {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 8px 10px 12px;
+    text-align: left;
+    gap: 6px;
+}
+
+.sv-action-category {
+    width: 100%;
+    font-size: 0.9em;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.sv-action-items {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sv-action-item {
+    width: 100%;
+    padding: 4px 6px;
+    border-radius: var(--radius-s);
+    background-color: rgba(0, 0, 0, 0.08);
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+
+.light-mode .sv-action-item {
+    background-color: color-mix(in srgb, #ffffff 60%, transparent);
+}
+
+.sv-action-item-title {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sv-action-item-reason,
+.sv-action-item-detail {
+    margin-top: 2px;
+    font-size: 0.75em;
+    line-height: 1.4;
+    color: var(--text-dim);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.sv-action-empty {
+    width: 100%;
+    font-size: 0.85em;
+    color: var(--text-dim);
+    text-align: center;
+}
+
+/* --- SV Hormone Journal Widget Slides --- */
+.sv-hormone-summary-slide {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 8px 10px 12px;
+    text-align: left;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.sv-slide-title {
+    width: 100%;
+    font-size: 0.9em;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.sv-hormone-widget-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+}
+
+.sv-hormone-mini-card {
+    padding: 10px 10px 8px;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+
+.sv-hormone-mini-card .hormone-name {
+    font-size: 0.85em;
+}
+
+.sv-hormone-mini-card .hormone-current-value {
+    font-size: 1.5em;
+    font-weight: 800;
+    margin: 5px 0;
+}
+
+.sv-hormone-mini-card .hormone-target {
+    margin-top: 0px;
+    font-size: 0.75em;
+    margin-bottom: 0px;
+}
+
+.sv-hormone-mini-card .status-badge {
+    margin-top: 6px;
+    font-size: 0.7em;
+    padding: 4px 8px;
+    text-align: center;
+}
+
+.sv-ratio-mini {
+    gap: 6px;
+}
+
+.sv-ratio-mini .ratio-number {
+    font-size: 1.4em;
 }
 
 /* --- Keeps List Modal Styles --- */
@@ -2164,7 +2416,7 @@ body.modal-open {
 .setting-item label {
     font-weight: 500;
     color: var(--text-main);
-    transition: color 5s ease-in-out;
+    transition: color 0.5s ease-in-out;
 }
 
 .switch {
@@ -2188,10 +2440,10 @@ body.modal-open {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--input-bg) 5s ease-in-out;
+    background-color: var(--input-bg) 0.5s ease-in-out;
     border: 1px solid var(--input-border);
-    transition: var(--transition-fast) 5s ease-in-out;
-    transition: color 5s ease-in-out, background-color 5s ease-in-out, ;
+    transition: var(--transition-fast) 0.5s ease-in-out;
+    transition: color 0.5s ease-in-out, background-color 0.5s ease-in-out, ;
 }
 
 .slider:before {
@@ -2202,9 +2454,9 @@ body.modal-open {
     left: 3px;
     bottom: 3px;
     background-color: var(--text-dim);
-    transition: var(--transition-fast) 5s ease-in-out;
+    transition: var(--transition-fast) 0.5s ease-in-out;
 
-    transition: background-color 5s ease-in-out, ;
+    transition: background-color 0.5s ease-in-out, ;
 }
 
 .slider.round {
@@ -2339,6 +2591,39 @@ input:checked+.slider:before {
     /* JavaScript에서 동적으로 overflow 설정 */
 }
 
+.chart-wrapper-container {
+    position: relative;
+}
+
+.chart-zoom-controls {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.chart-zoom-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background-color: var(--glass-bg);
+    color: var(--text-main);
+    font-weight: 700;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.chart-zoom-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 /* 차트 내부 컨테이너 (Chart.js 크기 제어용) */
 .chart-inner-container {
     position: relative;
@@ -2431,18 +2716,46 @@ input:checked+.slider:before {
 }
 
 .comparison-filter-controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    /* 이 줄을 추가하세요 */
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    align-items: start;
     padding-bottom: 15px;
     margin-bottom: 15px;
     border-bottom: 1px solid var(--glass-border);
     flex-shrink: 0;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 /* 필터 버튼 스타일 재사용 */
+
+.comparison-filter-button {
+    border: none;
+    padding: 8px 16px;
+    background-color: var(--glass-bg);
+    color: var(--text-dim);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
+    font-size: 0.85em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.comparison-filter-button:hover {
+    background-color: var(--input-focus-border);
+    color: var(--tab-active-text);
+    border-color: var(--primary);
+}
+
+.comparison-filter-button.active {
+    background-color: var(--accent);
+    color: var(--tab-active-text);
+    border-color: var(--accent);
+    font-weight: 600;
+}
 
 /* 비교 모달의 차트는 더 크게 표시 */
 .comparison-report-container .chart-section {
@@ -2728,6 +3041,15 @@ body.light-mode .modal-tab-btn.active {
     }
 }
 
+@media (hover: none) {
+    .carousel-nav-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0.7;
+    }
+}
+
 /* 카드에 마우스를 올렸을 때 버튼이 나타나도록 함 */
 .carousel-container:hover .carousel-nav-btn {
     opacity: 0.7;
@@ -2768,10 +3090,7 @@ body.light-mode .modal-tab-btn.active {
 
 /* 호르몬 모달 범주 버튼 컨테이너 */
 .hormone-legend-controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
+    display: block;
     margin-bottom: 15px;
     /* 차트와의 간격 */
 }
@@ -2793,6 +3112,96 @@ body.light-mode .modal-tab-btn.active {
     /* JS가 지정한 배경색을 투명으로 덮어쓰기 */
     color: var(--text-dim) !important;
     /* JS가 지정한 글씨색을 희미하게 덮어쓰기 */
+}
+
+.briefing-legend-toolbar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.briefing-legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+:root {
+    --legend-card-bg: rgba(0, 0, 0, 0.15);
+    --legend-card-border: var(--glass-border);
+}
+
+.light-mode {
+    --legend-card-bg: rgba(255, 255, 255, 0.65);
+    --legend-card-border: rgba(0, 0, 0, 0.08);
+}
+
+.legend-group-card {
+    background-color: var(--legend-card-bg);
+    border: 1px solid var(--legend-card-border);
+    border-radius: var(--radius-m);
+    padding: 10px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hormone Journal Modal: keep legend compact (no 400px tall card) */
+#hormone-modal-overlay .briefing-legend-grid {
+    grid-template-columns: 1fr;
+}
+
+#hormone-modal-overlay .legend-group-card {
+    height: auto;
+    max-height: none;
+}
+
+#hormone-modal-overlay .legend-list {
+    overflow-y: visible;
+}
+
+#hormone-modal-overlay .briefing-legend-toolbar {
+    margin-bottom: 10px;
+}
+
+.legend-group-title {
+    color: var(--text-main);
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    text-align: center;
+}
+
+.legend-list {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-y: auto;
+    padding-bottom: 4px;
+    flex-grow: 1;
+}
+
+.legend-button {
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+@media (max-width: 900px) {
+    .briefing-legend-grid {
+        grid-template-columns: 1fr;
+    }
+    .legend-group-card {
+        height: 320px;
+    }
 }
 
 /* 클릭 가능한 카드에 아이콘을 넣기 위한 사전 작업 */
@@ -2848,19 +3257,19 @@ body.light-mode .modal-tab-btn.active {
 .sv-card::before {
     content: '';
     position: absolute;
-    bottom: -45px;
+    bottom: 16px;
     /* 아래쪽으로 살짝 이동 */
-    right: -10px;
+    right: 16px;
     /* ★★★ 핵심: left 대신 right 기준으로 위치 지정 */
-    width: 260px;
-    height: 260px;
+    width: 100px;
+    height: 100px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: bottom right;
     /* 이미지 자체도 우측 하단 정렬 */
-    opacity: 0;
+    opacity: 0.5;
     transition: opacity 0.5s ease-in-out;
-    z-index: 0;
+    z-index: 1;
     pointer-events: none;
     /* 마스크도 우측 기준에 맞게 수정 */
     mask-image: linear-gradient(to top, black 70%, transparent 100%), linear-gradient(to left, black 70%, transparent 100%);
@@ -2871,7 +3280,7 @@ body.light-mode .modal-tab-btn.active {
 
 /* 이미지가 있는 카드에만 적용 */
 .sv-card.sv-card-with-image::before {
-    opacity: 0.5;
+    opacity: 0.4;
     /* 기본 투명도 */
 }
 
@@ -2902,7 +3311,8 @@ body.light-mode .modal-tab-btn.active {
 
 /* 카드에 마우스를 올렸을 때 이미지 더 선명하게 (선택사항) */
 .sv-card.sv-card-with-image:hover::before {
-    opacity: 0.9;
+    opacity: 0.6;
+    z-index: 0;
 }
 
 
@@ -3081,6 +3491,11 @@ body.light-mode .modal-tab-btn.active {
     }
 }
 
+.hormone-grid.sv-hormone-widget-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
 /* Hormone Card Base */
 .hormone-card {
     background: var(--glass-bg);
@@ -3100,7 +3515,6 @@ body.light-mode .modal-tab-btn.active {
 
 /* Highlight Card (for important data) */
 .highlight-card {
-    border: 2px solid var(--primary);
     box-shadow: var(--elevation-2), 0 0 20px rgba(255, 143, 205, 0.15);
     text-align: center;
 }
@@ -3114,7 +3528,14 @@ body.light-mode .modal-tab-btn.active {
 
 .highlight-card .hormone-card-header {
     justify-content: center;
+    margin-bottom: 0px;
 }
+
+.hormone-card.highlight-card.sv-hormone-mini-card {
+    padding: 7px;
+}
+
+
 
 .hormone-name {
     font-size: 1.15em;
@@ -3202,6 +3623,7 @@ body.light-mode .modal-tab-btn.active {
     border-color: var(--glass-border);
     background: var(--container-bg-subtle);
     color: var(--text-dim);
+    text-align: center;
 }
 
 @keyframes pulse {
@@ -3636,6 +4058,54 @@ body.light-mode .modal-tab-btn.active {
     width: 100%;
 }
 
+/* E/T Ratio Widget Horizontal Layout */
+.sv-ratio-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 4px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.sv-ratio-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    min-width: 40px;
+}
+
+.sv-ratio-bar-wrapper {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.sv-ratio-bar-wrapper .ratio-bar {
+    width: 100%;
+    height: 12px;
+    margin: 0;
+    border-radius: 6px;
+    opacity: 0.8;
+}
+
+.sv-ratio-group .ratio-percentile {
+    font-size: 0.65em;
+    margin-top: 4px;
+    white-space: nowrap;
+}
+
+/* Adjust marker size for the widget */
+.sv-ratio-bar-wrapper .ratio-bar-marker {
+    width: 16px;
+    height: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+
 .ratio-icon-group {
     display: flex;
     flex-direction: column;
@@ -3710,18 +4180,14 @@ body.light-mode .modal-tab-btn.active {
 
 /* 1. '주간 가이드' 카드 기본 스타일 */
 #sv-card-guide {
-    border-width: 3px;
-    /* 요청사항: 테두리 두껍게 */
     background-color: var(--glass-bg) !important;
     /* 다른 스타일에 의해 배경색이 덮어씌워지지 않도록 !important 추가 */
     transition: border-color 0.5s ease;
     /* 테두리 색상 애니메이션 */
-    justify-content: flex-end;
-    /* 컨텐츠(텍스트)를 카드 하단으로 정렬 */
-    align-items: center;
-    /* 컨텐츠를 중앙 정렬 */
+    justify-content: flex-start;
+    align-items: stretch;
     min-height: 220px;
-    transition: background-color 5s ease-in-out, color 5s ease-in-out;
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 /* 2. 상태에 따른 테두리 색상 변경 */
@@ -3748,9 +4214,9 @@ body.light-mode .modal-tab-btn.active {
 
 /* 3. '주간 가이드' 카드 제목(h3) 위치 */
 #sv-card-guide h3 {
-    position: absolute;
-    top: 20px;
-    left: 20px;
+    position: relative;
+    top: auto;
+    left: auto;
     z-index: 2;
     font-size: 1em;
 }
@@ -3770,7 +4236,7 @@ body.light-mode .modal-tab-btn.active {
     /* 이미지에 나온 것처럼 부드러운 네온 효과 추가 */
     text-shadow: 0 0 15px var(--bg-main), 0 0 15px var(--bg-main), 0 0 15px var(--bg-main), 0 0 15px var(--bg-main);
     margin-bottom: 20px;
-    transition: text-shadow 5s ease-in-out, color 5s ease-in-out;
+    transition: text-shadow 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 #sv-card-keeps .sv-card-content,
@@ -3779,7 +4245,7 @@ body.light-mode .modal-tab-btn.active {
     position: relative;
     z-index: 3;
     text-shadow: 0 0 15px var(--bg-main), 0 0 15px var(--bg-main);
-    transition: text-shadow 5s ease-in-out, color 5s ease-in-out;
+    transition: text-shadow 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 /* 5. 이미지(::before)의 z-index를 텍스트(z-index:1)보다 낮게 설정 */
@@ -3994,15 +4460,125 @@ body.light-mode .modal-tab-btn.active {
     opacity: 0.5;
 }
 
+/* ============================================
+   약물 선택 시스템 스타일
+   ============================================ */
+
+.medications-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.medication-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.medication-item:hover {
+    background: var(--glass-hover);
+    border-color: var(--primary);
+}
+
+.medication-select {
+    flex: 2;
+    min-width: 220px;
+    padding: 10px 15px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.medication-dose-input {
+    flex: 1;
+    min-width: 100px;
+}
+
+.medication-unit-select {
+    flex: 0;
+    min-width: 90px;
+    padding: 10px 12px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.remove-medication-btn {
+    padding: 8px 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    color: #ef4444;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.remove-medication-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+    transform: scale(1.1);
+}
+
+.medications-empty-state {
+    padding: 30px;
+    text-align: center;
+    color: var(--text-secondary);
+    border: 2px dashed var(--glass-border);
+    border-radius: 12px;
+    margin-top: 15px;
+}
+
+.medications-empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+}
+
 /* 모바일 반응형 */
 @media (max-width: 768px) {
     .symptom-item {
         flex-direction: column;
         align-items: stretch;
     }
+
+    .medication-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
     
     .symptom-select {
         min-width: unset;
+        width: 100%;
+    }
+
+    .medication-select {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .medication-dose-input {
+        width: 100%;
+    }
+
+    .medication-unit-select {
         width: 100%;
     }
     
@@ -4375,6 +4951,527 @@ body.light-mode .modal-tab-btn.active {
     color: var(--danger);
 }
 
+/* Body Briefing Modal - 호르몬 저널 스타일과 톤 정렬 (테마 변수 기반) */
+#briefing-summary-view .target-achievement-item,
+#briefing-summary-view .body-ratio-item {
+    background: var(--glass-bg);
+    border: 1.5px solid var(--glass-border);
+    backdrop-filter: blur(var(--blur-standard, 20px));
+    -webkit-backdrop-filter: blur(var(--blur-standard, 20px));
+    box-shadow: var(--elevation-1, var(--glass-shadow));
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
+}
+
+#briefing-summary-view .prediction-item {
+    background: var(--glass-bg);
+    border: 1.5px solid var(--glass-border);
+    backdrop-filter: blur(var(--blur-standard, 20px));
+    -webkit-backdrop-filter: blur(var(--blur-standard, 20px));
+    box-shadow: var(--elevation-1, var(--glass-shadow));
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 6fr 1px 4fr; /* Desktop Grid: Main Divider Stats */
+    align-items: stretch;
+    min-height: 160px; /* 데스크톱 카드 높이 확보 */
+}
+
+/* --- Target Achievement Item Styles --- */
+#briefing-summary-view .target-achievement-item {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#briefing-summary-view .target-achievement-item .metric-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#briefing-summary-view .target-achievement-item .metric-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+#briefing-summary-view .target-achievement-item .status-message {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* Progress Bar Wrapper */
+#briefing-summary-view .target-achievement-item .progress-bar-wrapper {
+    position: relative;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* SVG Layer */
+#briefing-summary-view .target-achievement-item .leader-lines-svg {
+    position: absolute;
+    bottom: 10px; /* Track Height 위 */
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible; /* 선이 짤리지 않게 */
+}
+
+/* Labels Container */
+#briefing-summary-view .target-achievement-item .labels-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* 클릭 통과 */
+    z-index: 2;
+}
+
+/* Individual Label - Badge Style */
+#briefing-summary-view .target-achievement-item .progress-bar-label {
+    position: absolute;
+    transform: translateX(-50%);
+    text-align: center;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    
+    /* Fit Content & Prevent Stretching */
+    width: max-content;
+    min-width: 50px;
+    height: auto !important;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    line-height: 1.2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 5;
+}
+
+/* Top Label Positioning */
+#briefing-summary-view .target-achievement-item .progress-bar-label.top-label {
+    bottom: 50%;
+    margin-bottom: 15px; /* Default Level 0 spacing */
+    top: auto;
+}
+
+/* Bottom Label Positioning */
+#briefing-summary-view .target-achievement-item .progress-bar-label.bottom-label {
+    top: 50%;
+    margin-top: 15px; /* Fixed spacing */
+    bottom: auto;
+}
+
+#briefing-summary-view .target-achievement-item .progress-bar-label .value {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--text-main);
+}
+
+#briefing-summary-view .target-achievement-item .progress-bar-label .label {
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+/* Current Label Highlight */
+#briefing-summary-view .target-achievement-item .progress-bar-label.current {
+    background: var(--glass-bg);
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.2);
+}
+
+#briefing-summary-view .target-achievement-item .progress-bar-label.current .value {
+    color: var(--primary);
+}
+
+#briefing-summary-view .target-achievement-item .progress-bar-label.current .label {
+    color: var(--primary);
+    opacity: 0.8;
+}
+
+/* Track Container - Centered */
+#briefing-summary-view .target-achievement-item .progress-bar-track-container {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 10px;
+    z-index: 3;
+}
+
+#briefing-summary-view .target-achievement-item .progress-bar-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* Ranges */
+#briefing-summary-view .target-achievement-item .progress-bar-range {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    border-radius: 5px;
+    opacity: 0.7;
+}
+
+#briefing-summary-view .target-achievement-item .range-initial {
+    background: linear-gradient(90deg, #666, #888);
+}
+
+#briefing-summary-view .target-achievement-item .range-prev {
+    background: linear-gradient(90deg, #888, var(--primary));
+}
+
+#briefing-summary-view .target-achievement-item .range-target {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+/* Marker */
+#briefing-summary-view .target-achievement-item .progress-bar-marker {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+/* --- Body Ratio Item Styles --- */
+#briefing-summary-view .body-ratio-item {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#briefing-summary-view .body-ratio-item .ratio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#briefing-summary-view .body-ratio-item .ratio-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent); /* Pink/Purple */
+}
+
+#briefing-summary-view .body-ratio-item .ratio-value-display .ratio-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Ratio Bar Container */
+#briefing-summary-view .body-ratio-item .ratio-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 5px 0;
+}
+
+#briefing-summary-view .body-ratio-item .ratio-icon-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 40px;
+}
+
+#briefing-summary-view .body-ratio-item .ratio-icon {
+    font-size: 18px;
+}
+
+#briefing-summary-view .body-ratio-item .ratio-icon.male {
+    color: #60a5fa; /* Blue */
+}
+
+#briefing-summary-view .body-ratio-item .ratio-icon.female {
+    color: #f472b6; /* Pink */
+}
+
+#briefing-summary-view .body-ratio-item .ratio-percentile {
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+#briefing-summary-view .body-ratio-item .ratio-bar {
+    flex: 1;
+    height: 12px;
+    background: linear-gradient(90deg, #60a5fa, #f472b6); /* Blue to Pink gradient */
+    border-radius: 6px;
+    position: relative;
+}
+
+#briefing-summary-view .body-ratio-item .ratio-bar-marker {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
+    z-index: 5;
+}
+
+#briefing-summary-view .body-ratio-item .ratio-evaluation {
+    font-size: 13px;
+    color: var(--text-main);
+    padding-top: 5px;
+    border-top: 1px solid var(--glass-border);
+}
+
+#briefing-summary-view .prediction-item:hover {
+    border-color: var(--primary);
+    box-shadow: var(--elevation-1, var(--glass-shadow)), 0 0 0 1px var(--glass-glow);
+    transform: translateY(-1px);
+}
+
+#briefing-summary-view .prediction-item:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+    border-color: var(--primary);
+    box-shadow: var(--elevation-1, var(--glass-shadow)), 0 0 0 1px var(--glass-glow);
+}
+
+/* Prediction Main Column (Left) */
+#briefing-summary-view .prediction-item .prediction-main-col {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+#briefing-summary-view .prediction-item .prediction-metric-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    opacity: 0.9;
+}
+
+#briefing-summary-view .prediction-item .prediction-values-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#briefing-summary-view .prediction-item .prediction-value-item {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+#briefing-summary-view .prediction-item .prediction-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+#briefing-summary-view .prediction-item .prediction-value-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+#briefing-summary-view .prediction-item .prediction-value-text.highlight {
+    font-size: 18px;
+    color: var(--primary); /* Pink emphasis */
+    font-weight: 700;
+}
+
+/* Progress Bar */
+#briefing-summary-view .prediction-item .prediction-progress-container {
+    width: 100%;
+    margin-top: auto; /* 하단 붙이기 */
+}
+
+#briefing-summary-view .prediction-item .prediction-progress-bar {
+    width: 100%;
+    height: 24px; /* 두꺼운 바 */
+    background: var(--primary); /* Pink background as base? No, usually bg is light */
+    background: rgba(255, 111, 145, 0.2); /* Light pink bg */
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+#briefing-summary-view .prediction-item .prediction-progress-fill {
+    height: 100%;
+    background: var(--primary); /* Pink fill */
+    border-radius: 12px;
+    transition: width 0.3s ease;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+#briefing-summary-view .prediction-item .prediction-progress-text {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: #fff; /* White text inside bar */
+    z-index: 2;
+    font-weight: 700;
+    text-shadow: 0 0 2px rgba(0,0,0,0.2);
+}
+
+/* Vertical Divider */
+#briefing-summary-view .prediction-item .prediction-divider {
+    width: 1px;
+    background: var(--glass-border);
+    margin: 20px 0; /* 상하 여백 */
+}
+
+/* Stats Column (Right) */
+#briefing-summary-view .prediction-item .prediction-stats-col {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    justify-content: center;
+    gap: 0;
+}
+
+#briefing-summary-view .prediction-item .prediction-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 1;
+}
+
+#briefing-summary-view .prediction-item .prediction-stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+#briefing-summary-view .prediction-item .prediction-stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+#briefing-summary-view .prediction-item .prediction-stat-value.positive {
+    color: var(--positive);
+}
+
+#briefing-summary-view .prediction-item .prediction-stat-value.negative {
+    color: var(--danger);
+}
+
+#briefing-summary-view .prediction-item .prediction-stat-divider {
+    height: 1px;
+    width: 80%;
+    background: var(--glass-border);
+    margin: 10px auto;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 767.98px) {
+    #briefing-summary-view .target-achievement-item,
+    #briefing-summary-view .body-ratio-item {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    #briefing-summary-view .prediction-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        min-height: auto;
+    }
+
+    /* Main Column Mobile */
+    #briefing-summary-view .prediction-item .prediction-main-col {
+        padding: 16px;
+        gap: 16px;
+    }
+
+    #briefing-summary-view .prediction-item .prediction-values-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    #briefing-summary-view .prediction-item .prediction-value-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    #briefing-summary-view .prediction-item .prediction-value-item.predicted {
+        align-items: flex-end;
+        text-align: right;
+    }
+
+    /* Divider Mobile (Horizontal) */
+    #briefing-summary-view .prediction-item .prediction-divider {
+        width: 100%;
+        height: 1px;
+        margin: 0;
+    }
+
+    /* Stats Column Mobile */
+    #briefing-summary-view .prediction-item .prediction-stats-col {
+        flex-direction: row;
+        padding: 16px;
+        gap: 0;
+    }
+
+    #briefing-summary-view .prediction-item .prediction-stat-item {
+        align-items: center; /* Center alignment for mobile stats as well? Image shows Left/Right split */
+    }
+
+    #briefing-summary-view .prediction-item .prediction-stat-item.monthly {
+        align-items: flex-start;
+        padding-left: 10px;
+    }
+    
+    #briefing-summary-view .prediction-item .prediction-stat-item.weekly {
+        align-items: flex-end;
+        padding-right: 10px;
+    }
+
+    #briefing-summary-view .prediction-item .prediction-stat-divider {
+        display: none; /* Hide horizontal divider inside stats col */
+    }
+}
+
 /* Alerts Container */
 .alerts-container {
     display: flex;
@@ -4469,9 +5566,51 @@ body.light-mode .modal-tab-btn.active {
     position: relative;
     display: flex;
     align-items: center;
+    z-index: 1;
+}
+
+.roadmap-progress-segments {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.9;
+}
+
+.roadmap-progress-segment {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    border-radius: 18px;
+}
+
+.roadmap-progress-segment.positive {
+    background: rgba(16, 185, 129, 0.22);
+}
+
+.roadmap-progress-segment.negative {
+    background: repeating-linear-gradient(
+        135deg,
+        rgba(239, 68, 68, 0.32),
+        rgba(239, 68, 68, 0.32) 8px,
+        rgba(239, 68, 68, 0.14) 8px,
+        rgba(239, 68, 68, 0.14) 16px
+    );
+}
+
+.roadmap-progress-segment.break {
+    opacity: 0.65;
+    filter: grayscale(0.1);
 }
 
 /* Weekly Change Ticks */
+.roadmap-progress-ticks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+}
+
 .weekly-tick {
     position: absolute;
     width: 4px;
@@ -4487,6 +5626,53 @@ body.light-mode .modal-tab-btn.active {
     background: #ef4444;
 }
 
+.roadmap-progress-trajectory {
+    position: absolute;
+    inset: 6px 10px;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.roadmap-progress-trajectory path.rollback {
+    stroke: rgba(239, 68, 68, 0.85);
+    stroke-width: 1.8;
+}
+
+.roadmap-progress-trajectory path {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.8);
+    stroke-width: 1.2;
+}
+
+.light-mode .roadmap-progress-trajectory path {
+    stroke: rgba(30, 30, 60, 0.7);
+}
+
+.roadmap-progress-marker {
+    position: absolute;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    background: var(--glass-bg);
+    border: 2px solid var(--text-main);
+}
+
+.roadmap-progress-marker.start {
+    left: 6px;
+}
+
+.roadmap-progress-marker.target {
+    left: calc(100% - 6px);
+}
+
+.roadmap-progress-marker.current {
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+    border-color: var(--primary);
+}
+
 .roadmap-progress-labels {
     display: flex;
     justify-content: space-between;
@@ -4500,6 +5686,72 @@ body.light-mode .modal-tab-btn.active {
     font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.roadmap-progress-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: center;
+}
+
+.roadmap-standout {
+    margin: 10px 0 16px 0;
+    padding: 12px;
+    background: color-mix(in srgb, var(--glass-bg) 70%, transparent);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+}
+
+.roadmap-standout h4 {
+    margin: 0 0 10px 0;
+    font-size: 0.95em;
+    color: var(--text-main);
+}
+
+.roadmap-standout-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.roadmap-standout-list .change-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.roadmap-detail-switcher {
+    margin-top: 10px;
+}
+
+.roadmap-date-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: end;
+}
+
+.date-selector-field label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+}
+
+.date-selector-field select {
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .roadmap-date-compare {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Timeline Container */
@@ -4549,6 +5801,16 @@ body.light-mode .modal-tab-btn.active {
 .timeline-item.achievement::after {
     background: var(--accent);
     border-color: var(--accent);
+}
+
+.timeline-item.milestone::after {
+    background: color-mix(in srgb, var(--accent) 60%, transparent);
+    border-color: var(--accent);
+}
+
+.timeline-item.warning::after {
+    background: rgba(239, 68, 68, 0.8);
+    border-color: rgba(239, 68, 68, 0.9);
 }
 
 .timeline-item .timeline-week {
@@ -4644,6 +5906,7 @@ body.light-mode .modal-tab-btn.active {
     background: var(--bg-primary);
     border: 1px solid var(--glass-border);
     border-radius: 8px;
+    margin-bottom: 8px;
 }
 
 .comparison-result-item .metric-name {
@@ -4671,6 +5934,248 @@ body.light-mode .modal-tab-btn.active {
     color: #ef4444;
 }
 
+.roadmap-deltas {
+    display: grid;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.delta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.delta-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+.delta {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-main);
+}
+
+.delta.muted {
+    color: var(--text-dim);
+}
+
+.delta.positive {
+    color: #10b981;
+}
+
+.delta.negative {
+    color: #ef4444;
+}
+
+.roadmap-change-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.roadmap-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--text-dim);
+    font-weight: 700;
+    font-size: 12px;
+}
+
+:root {
+    --action-guide-surface: rgba(17, 24, 39, 0.28);
+    --action-guide-surface-soft: rgba(255, 255, 255, 0.03);
+    --action-guide-border: rgba(255, 255, 255, 0.06);
+    --action-guide-motivation-bg: rgba(236, 72, 153, 0.10);
+}
+
+body.light-mode {
+    --action-guide-surface: rgba(255, 255, 255, 0.72);
+    --action-guide-surface-soft: rgba(255, 255, 255, 0.6);
+    --action-guide-border: rgba(0, 0, 0, 0.08);
+    --action-guide-motivation-bg: rgba(224, 79, 158, 0.12);
+}
+
+.action-guide {
+    display: grid;
+    gap: 14px;
+}
+
+.action-guide-hero {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(99, 102, 241, 0.10));
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 14px 14px;
+}
+
+.action-guide-hero-title {
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 10px;
+    letter-spacing: 0.2px;
+}
+
+.action-guide-hero-main {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.action-guide-dday {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--text-main);
+}
+
+.action-guide-next-date {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+.action-guide-hero-sub {
+    margin-top: 10px;
+    color: var(--text-dim);
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.action-guide-section {
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    border-radius: 16px;
+    padding: 14px;
+}
+
+.action-guide-section-title {
+    font-weight: 900;
+    color: var(--text-main);
+    margin-bottom: 10px;
+}
+
+.action-guide-category {
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 12px;
+    background: var(--action-guide-surface-soft);
+    margin-bottom: 10px;
+}
+
+.action-guide-category:last-child {
+    margin-bottom: 0;
+}
+
+.action-guide-category-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 900;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.action-guide-item {
+    display: grid;
+    gap: 4px;
+    padding: 10px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--action-guide-border);
+    background: var(--action-guide-surface);
+    margin-top: 8px;
+}
+
+.action-guide-item-title {
+    font-weight: 800;
+    color: var(--text-main);
+    font-size: 13px;
+}
+
+.action-guide-item-reason {
+    font-weight: 600;
+    color: var(--text-dim);
+    font-size: 12px;
+}
+
+.action-guide-item-detail {
+    color: var(--text-dim);
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.action-guide-feedback {
+    border: 1px solid var(--action-guide-border);
+    background: var(--action-guide-surface);
+    border-radius: 14px;
+    padding: 12px;
+    margin-top: 10px;
+}
+
+.action-guide-feedback:first-child {
+    margin-top: 0;
+}
+
+.action-guide-feedback.improving {
+    border-color: rgba(34, 197, 94, 0.22);
+    box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.10) inset;
+}
+
+.action-guide-feedback.declining {
+    border-color: rgba(239, 68, 68, 0.22);
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.10) inset;
+}
+
+.action-guide-feedback-title {
+    font-weight: 900;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.action-guide-feedback-tip {
+    font-weight: 600;
+    color: var(--text-dim);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.action-guide-motivation-list {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.action-guide-motivation-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--action-guide-border);
+    background: var(--action-guide-surface);
+    font-weight: 800;
+    color: var(--text-main);
+    font-size: 12px;
+}
+
+.action-guide-motivation-message {
+    border: 1px solid var(--action-guide-border);
+    background: var(--action-guide-motivation-bg);
+    border-radius: 14px;
+    padding: 12px;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.45;
+}
+
 /* Date Selector */
 .date-selector-container {
     margin-bottom: 15px;
@@ -4692,6 +6197,39 @@ body.light-mode .modal-tab-btn.active {
     border-radius: 8px;
     color: var(--text-primary);
     font-size: 14px;
+}
+
+.roadmap-compare-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 14px 0;
+}
+
+.roadmap-action-btn {
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.roadmap-action-btn:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--glass-border) 60%, var(--accent));
+}
+
+.roadmap-action-btn:active {
+    transform: translateY(0);
+}
+
+.roadmap-action-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
 }
 
 /* Responsive */

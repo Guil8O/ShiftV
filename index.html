@@ -79,7 +79,7 @@
                     height="24px">
                     <path d="M0 0h24v24H0V0z" fill="none" />
                     <path
-                        d="M14.06 9.94L12 12l2.06 2.06.94-.94-1.12-1.12.94-.94-1.76-1.76zm4.48-4.48L19.59 4.4l-9.19 9.19-4.24-4.24 1.06-1.06 3.18 3.18L18.54 5.46zm-5.21 8.87L12 15.7l-1.41-1.41-1.12 1.12 2.54 2.54 4.9-4.9-1.12-1.12zM20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H4V4h16v16z" />
+                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                 </svg>
                 <span>기록하기</span>
             </button>
@@ -195,17 +195,47 @@
                                                     data-lang-key="bodyFatPercentage">체지방률 (%)</label><input
                                                     type="number" id="bodyFatPercentage" name="bodyFatPercentage"
                                                     step="0.1" min="0" placeholder="%"></div>
-                                            <div class="form-group"><label for="estrogenLevel"
-                                                    data-lang-key="estrogenLevel">에스트로겐 수치 (pg/ml)</label><input
-                                                    type="number" id="estrogenLevel" name="estrogenLevel" step="0.1"
-                                                    min="0" placeholder="pg/ml"></div>
-                                            <div class="form-group"><label for="testosteroneLevel"
-                                                    data-lang-key="testosteroneLevel">테스토스테론 수치 (ng/ml)</label><input
-                                                    type="number" id="testosteroneLevel" name="testosteroneLevel"
-                                                    step="0.1" min="0" placeholder="ng/ml"></div>
+                                            
+                                            <!-- Hormone Levels with Unit Select -->
+                                            <div class="form-group">
+                                                <label for="estrogenLevel" data-lang-key="estrogenLevel">에스트로겐 수치</label>
+                                                <div class="input-with-unit">
+                                                    <input type="number" id="estrogenLevel" name="estrogenLevel" step="0.1" min="0" placeholder="Value">
+                                                    <select id="estrogenUnit" class="unit-select" data-persist="estrogenUnit">
+                                                        <option value="pg/ml">pg/mL</option>
+                                                        <option value="pmol/L">pmol/L</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="testosteroneLevel" data-lang-key="testosteroneLevel">테스토스테론 수치</label>
+                                                <div class="input-with-unit">
+                                                    <input type="number" id="testosteroneLevel" name="testosteroneLevel" step="0.1" min="0" placeholder="Value">
+                                                    <select id="testosteroneUnit" class="unit-select" data-persist="testosteroneUnit">
+                                                        <option value="ng/dl">ng/dL</option>
+                                                        <option value="nmol/L">nmol/L</option>
+                                                        <option value="ng/ml">ng/mL</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
                                             <div class="form-group"><label for="libido" data-lang-key="libido">성욕
                                                     (회/주)</label><input type="number" id="libido" name="libido"
                                                     step="0.1" min="0" placeholder="number"></div>
+
+                                            <div id="cycle-tracker-group" class="form-group" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--glass-border);">
+                                                <label style="display: flex; align-items: center; gap: 10px;">
+                                                    <input type="checkbox" id="menstruationActive" name="menstruationActive">
+                                                    <span data-lang-key="menstruationLabel">월경 발생 여부</span>
+                                                </label>
+                                                <div id="menstruation-pain-group" style="display: none; margin-top: 10px;">
+                                                    <label data-lang-key="cyclePainLabel">강도 (1-5)</label>
+                                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                                        <input type="range" id="menstruationPain" name="menstruationPain" min="1" max="5" value="1" style="flex: 1;">
+                                                        <span id="menstruationPainValue" style="width: 30px; text-align: center;">1</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             
                                             <!-- 증상 선택 시스템 (새로운 구조) -->
                                             <div class="form-group form-group-full-width">
@@ -229,42 +259,14 @@
                                     <summary class="accordion-title" data-lang-key="categoryMedication">마법</summary>
                                     <div class="accordion-content">
                                         <div class="input-grid">
-                                            <!-- 마법 관련 입력 필드들 -->
-                                            <div class="form-group mtf-only"><label for="estradiol"
-                                                    data-lang-key="estradiol">에스트라디올 (mg)</label><input type="number"
-                                                    id="estradiol" name="estradiol" step="0.01" min="0" placeholder="mg">
-                                            </div>
-                                            <div class="form-group mtf-only"><label for="progesterone"
-                                                    data-lang-key="progesterone">프로게스테론 (mg)</label><input type="number"
-                                                    id="progesterone" name="progesterone" step="0.01" min="0"
-                                                    placeholder="mg">
-                                            </div>
-                                            <div class="form-group mtf-only"><label for="antiAndrogen"
-                                                    data-lang-key="antiAndrogen">항안드로겐 (mg)</label><input type="number"
-                                                    id="antiAndrogen" name="antiAndrogen" step="0.01" min="0"
-                                                    placeholder="mg">
-                                            </div>
-                                            <div class="form-group ftm-only"><label for="testosterone"
-                                                    data-lang-key="testosterone">테스토스테론 (mg)</label><input type="number"
-                                                    id="testosterone" name="testosterone" step="0.01" min="0"
-                                                    placeholder="mg">
-                                            </div>
-                                            <div class="form-group ftm-only"><label for="antiEstrogen"
-                                                    data-lang-key="antiEstrogen">항에스트로겐 (mg)</label><input type="number"
-                                                    id="antiEstrogen" name="antiEstrogen" step="0.01" min="0"
-                                                    placeholder="mg">
-                                            </div>
-                                            <div class="form-group mtf-only"></div>
-                                            <div class="form-group"><label for="medicationOtherName"
-                                                    data-lang-key="medicationOtherName">기타 마법 이름</label><input
-                                                    type="text" id="medicationOtherName" name="medicationOtherName"
-                                                    placeholder="(기타)" data-lang-key="medicationOtherNamePlaceholder">
-                                            </div>
-                                            <div class="form-group"><label for="medicationOtherDose"
-                                                    data-lang-key="medicationOtherDose">기타 마법 용량 (mg)</label><input
-                                                    type="number" id="medicationOtherDose" name="medicationOtherDose"
-                                                    step="0.01" min="0" placeholder="mg"
-                                                    data-lang-key="unitMgPlaceholder">
+                                            <!-- 약물 선택 시스템 -->
+                                            <div class="form-group form-group-full-width">
+                                                <label data-lang-key="medicationsLabel">약물 선택</label>
+                                                <p class="description" data-lang-key="medicationsDescription">자주 투여하는 약물은 목록으로 추가해두면 다음 기록 때 자동으로 유지됩니다.</p>
+                                                <div id="medications-container" class="medications-container"></div>
+                                                <button type="button" id="add-medication-btn" class="glass-button add-btn" data-lang-key="addMedication">
+                                                    <span>➕</span> 약물 추가
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -321,8 +323,20 @@
                         </div>
 
                         <!-- 2. 가이드 카드 -->
-                        <div id="sv-card-guide" class="sv-card sv-card-widget">
-                            <!-- 내용은 JS로 채워짐 -->
+                        <div id="sv-card-guide" class="sv-card sv-card-widget carousel-container">
+                            <h3 id="sv-card-guide-title">
+                                <!-- JS에서 제목 채움 -->
+                            </h3>
+                            <div class="carousel-wrapper">
+                                <div id="sv-card-guide-content" class="carousel-content">
+                                    <!-- JS에서 캐러셀 아이템 채움 -->
+                                </div>
+                                <button class="carousel-nav-btn prev" aria-label="Previous">‹</button>
+                                <button class="carousel-nav-btn next" aria-label="Next">›</button>
+                            </div>
+                            <div id="sv-card-guide-dots" class="carousel-dots">
+                                <!-- JS에서 페이지 점 채움 -->
+                            </div>
                         </div>
 
                         <!-- 3. 목표 달성도 카드 -->
@@ -331,8 +345,20 @@
                         </div>
 
                         <!-- 4. 호르몬 주기 예측 카드 -->
-                        <div id="sv-card-hormones" class="sv-card">
-                            <!-- 내용은 JS로 채워짐 -->
+                        <div id="sv-card-hormones" class="sv-card carousel-container">
+                            <h3 id="sv-card-hormones-title">
+                                <!-- JS에서 제목 채움 -->
+                            </h3>
+                            <div class="carousel-wrapper">
+                                <div id="sv-card-hormones-content" class="carousel-content">
+                                    <!-- JS에서 캐러셀 아이템 채움 -->
+                                </div>
+                                <button class="carousel-nav-btn prev" aria-label="Previous">‹</button>
+                                <button class="carousel-nav-btn next" aria-label="Next">›</button>
+                            </div>
+                            <div id="sv-card-hormones-dots" class="carousel-dots">
+                                <!-- JS에서 페이지 점 채움 -->
+                            </div>
                         </div>
 
                         <!-- 5. Keeps 모아보기 카드 -->
@@ -477,7 +503,7 @@
                                     data-lang-key="importData">파일
                                     불러오기</button>
                             </div>
-                            <input type="file" id="import-file-input" accept=".json" style="display: none;">
+                            <input type="file" id="import-file-input" accept=".json" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0;">
                             <p class="warning"><strong data-lang-key="warning">주의!</strong> <span
                                     data-lang-key="importWarning">복원하면
                                     지금 브라우저에 있는 모든 데이터가 파일 내용으로 완전히 대체돼요!</span></p>
@@ -668,6 +694,7 @@
                     </div>
                     <!-- 메인 그래프 섹션 -->
                     <div class="chart-section">
+                        <div class="hormone-legend-controls" id="briefing-legend-controls"></div>
                         <div class="chart-wrapper">
                             <canvas id="briefing-chart"></canvas>
                         </div>
@@ -711,20 +738,25 @@
                     <h3 data-lang-key="roadmapOverallProgress">전체 진행도</h3>
                     <div class="roadmap-progress-container">
                         <div class="roadmap-progress-bar">
-                            <div id="roadmap-progress-fill" class="roadmap-progress-fill" style="width: 0%">
-                                <!-- 주간 변화 틱들이 여기에 표시됨 -->
-                            </div>
+                            <div id="roadmap-progress-fill" class="roadmap-progress-fill" style="width: 0%"></div>
+                            <div id="roadmap-progress-segments" class="roadmap-progress-segments"></div>
+                            <div id="roadmap-progress-ticks" class="roadmap-progress-ticks"></div>
+                            <svg id="roadmap-progress-trajectory" class="roadmap-progress-trajectory" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"></svg>
+                            <div id="roadmap-progress-marker-start" class="roadmap-progress-marker start"></div>
+                            <div id="roadmap-progress-marker-current" class="roadmap-progress-marker current"></div>
+                            <div id="roadmap-progress-marker-target" class="roadmap-progress-marker target"></div>
                         </div>
                         <div class="roadmap-progress-labels">
                             <span data-lang-key="roadmapStart">시작</span>
                             <span id="roadmap-current-week">Week 0</span>
-                            <span id="roadmap-target-week">목표</span>
+                            <span id="roadmap-target-week">Week 0</span>
                         </div>
                         <div class="roadmap-progress-info">
                             <span data-lang-key="roadmapAchievementRate">전체 달성률:</span>
                             <span id="roadmap-achievement-rate">0%</span>
                             <span id="roadmap-achievement-count">(0/0 목표)</span>
                         </div>
+                        <div id="roadmap-progress-note" class="roadmap-progress-note" style="display:none;"></div>
                     </div>
                 </div>
 
@@ -739,6 +771,10 @@
                 <!-- 월별 요약 -->
                 <div class="roadmap-section">
                     <h3 data-lang-key="roadmapMonthlySummary">월별 요약</h3>
+                    <div class="roadmap-standout">
+                        <h4 data-lang-key="roadmapStandoutChanges">가장 눈에 띄는 변화</h4>
+                        <div id="roadmap-standout-container" class="roadmap-standout-list"></div>
+                    </div>
                     <div id="roadmap-monthly-summary-container" class="monthly-summary-container">
                         <!-- JS에서 동적 생성 -->
                     </div>
@@ -747,50 +783,81 @@
 
             <!-- 2. 상세 탭 -->
             <div id="roadmap-detail-view" class="modal-tab-content">
-                <!-- 상세 그래프 -->
-                <div class="roadmap-section">
-                    <h3 data-lang-key="roadmapDetailedGraph">상세 그래프</h3>
-                    <div class="chart-section">
+                <div class="modal-tab-switcher roadmap-detail-switcher">
+                    <button class="modal-tab-btn active" data-subtab="roadmap-detail-graph" data-lang-key="roadmapDetailedGraph">상세 그래프</button>
+                    <button class="modal-tab-btn" data-subtab="roadmap-detail-change" data-lang-key="roadmapChangeComparison">변화</button>
+                    <button class="modal-tab-btn" data-subtab="roadmap-detail-compare" data-lang-key="roadmapCompareSpecificDate">특정일과 비교</button>
+                </div>
+
+                <div id="roadmap-detail-graph-view" class="modal-tab-content active">
+                    <div class="roadmap-section">
+                        <div class="hormone-legend-controls" id="roadmap-legend-controls"></div>
                         <div class="chart-wrapper">
                             <canvas id="roadmap-chart"></canvas>
                         </div>
-                    </div>
-                </div>
-
-                <!-- 변화 비교 -->
-                <div class="roadmap-section">
-                    <h3 data-lang-key="roadmapChangeComparison">변화 비교</h3>
-                    <div id="roadmap-comparison-container" class="comparison-container">
-                        <!-- 지난주와 비교, 처음과 비교 -->
-                        <div class="comparison-item">
-                            <h4 data-lang-key="roadmapComparePreviousWeek">지난주와 비교</h4>
-                            <div id="roadmap-compare-previous" class="comparison-results">
-                                <!-- JS에서 동적 생성 -->
-                            </div>
-                        </div>
-                        <div class="comparison-item">
-                            <h4 data-lang-key="roadmapCompareFirst">처음과 비교</h4>
-                            <div id="roadmap-compare-first" class="comparison-results">
-                                <!-- JS에서 동적 생성 -->
-                            </div>
+                        <div id="roadmap-selected-week-data-container" class="selected-week-data-container">
+                            <h4 id="roadmap-selected-week-data-title"></h4>
+                            <div id="roadmap-selected-week-data-content" class="selected-week-data-content" style="display:none;"></div>
+                            <p id="roadmap-data-placeholder" class="placeholder-text" data-lang-key="graphClickPrompt"></p>
                         </div>
                     </div>
                 </div>
 
-                <!-- 특정일과 비교 -->
-                <div class="roadmap-section">
-                    <h3 data-lang-key="roadmapCompareSpecificDate">특정일과 비교</h3>
-                    <div class="date-selector-container">
-                        <label for="roadmap-compare-date-select" data-lang-key="roadmapSelectDate">날짜 선택:</label>
-                        <select id="roadmap-compare-date-select">
-                            <option value="">-- 날짜 선택 --</option>
-                            <!-- JS에서 동적 생성 -->
-                        </select>
-                    </div>
-                    <div id="roadmap-compare-specific" class="comparison-results">
-                        <!-- JS에서 동적 생성 -->
+                <div id="roadmap-detail-change-view" class="modal-tab-content">
+                    <div class="roadmap-section">
+                        <div id="roadmap-change-comparison" class="roadmap-change-comparison"></div>
                     </div>
                 </div>
+
+                <div id="roadmap-detail-compare-view" class="modal-tab-content">
+                    <div class="roadmap-section">
+                        <div class="date-selector-container roadmap-date-compare">
+                            <div class="date-selector-field">
+                                <label for="roadmap-compare-base-select" data-lang-key="roadmapBaseDate">기준일</label>
+                                <select id="roadmap-compare-base-select"></select>
+                            </div>
+                            <div class="date-selector-field">
+                                <label for="roadmap-compare-target-select" data-lang-key="roadmapCompareDate">비교일</label>
+                                <select id="roadmap-compare-target-select"></select>
+                            </div>
+                        </div>
+                        <div class="roadmap-compare-actions">
+                            <button type="button" class="roadmap-action-btn" data-action="set-base-latest" data-lang-key="roadmapSetBaseLatest">기준=현재</button>
+                            <button type="button" class="roadmap-action-btn" data-action="set-compare-prev" data-lang-key="roadmapSetComparePrev">비교=지난주</button>
+                            <button type="button" class="roadmap-action-btn" data-action="set-compare-first" data-lang-key="roadmapSetCompareFirst">비교=처음</button>
+                            <button type="button" class="roadmap-action-btn" data-action="swap-dates" data-lang-key="roadmapSwapDates">바꾸기</button>
+                        </div>
+                        <div id="roadmap-compare-specific" class="comparison-results"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="action-guide-view" class="modal-tab-content" style="display: none;">
+        <div class="action-guide">
+            <div class="action-guide-hero">
+                <div class="action-guide-hero-title" data-lang-key="actionGuideNextMeasurement">다음 측정일</div>
+                <div class="action-guide-hero-main">
+                    <div id="action-guide-dday" class="action-guide-dday"></div>
+                    <div id="action-guide-next-date" class="action-guide-next-date"></div>
+                </div>
+                <div id="action-guide-next-message" class="action-guide-hero-sub"></div>
+            </div>
+
+            <div class="action-guide-section">
+                <div class="action-guide-section-title" data-lang-key="actionGuideRecommendations">추천 액션</div>
+                <div id="action-guide-recommendations" class="action-guide-recommendations"></div>
+            </div>
+
+            <div class="action-guide-section">
+                <div class="action-guide-section-title" data-lang-key="actionGuidePerformance">최근 성과 피드백</div>
+                <div id="action-guide-performance" class="action-guide-performance"></div>
+            </div>
+
+            <div class="action-guide-section">
+                <div class="action-guide-section-title" data-lang-key="actionGuideMotivation">동기부여</div>
+                <div id="action-guide-motivation" class="action-guide-motivation"></div>
             </div>
         </div>
     </div>
@@ -849,6 +916,7 @@
         </div>
     </div>
 
+    <script type="module" src="src/bridge.js"></script>
     <script src="script.js"></script>
     <script>
         if ('serviceWorker' in navigator) {

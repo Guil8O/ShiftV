@@ -11,6 +11,7 @@
 
 export const MEDICATION_CATEGORIES = {
   estrogen: 'estrogen',              // 에스트로겐
+  progestogen: 'progestogen',        // 프로게스테론/프로게스틴
   antiAndrogen: 'antiAndrogen',      // 항안드로겐
   testosterone: 'testosterone',       // 테스토스테론
   aas: 'aas',                        // 아나볼릭 스테로이드
@@ -20,6 +21,27 @@ export const MEDICATION_CATEGORIES = {
   hairLoss: 'hairLoss',             // 탈모 치료제
   supplement: 'supplement'           // 보조제
 };
+
+// ========================================
+// 2.5. 프로게스토겐 (Progestogens)
+// ========================================
+
+export const PROGESTOGENS = [
+  {
+    id: 'progesterone',
+    names: ['프로게스테론', 'Progesterone', 'Utrogestan', '프로게스테론(미세화)'],
+    category: 'progestogen',
+    route: 'oral',
+    riskLevel: 'low',
+    halfLife: 16,
+    interactions: [],
+    recommendedUnits: ['mg'],
+    effects: ['수면 질 개선', '기분 안정', '유방 조직 변화 가능'],
+    sideEffects: ['졸림', '어지러움', '기분 변화'],
+    warnings: ['개인차 큼', '졸림이 심하면 복용 시간 조정'],
+    relatedSymptoms: ['hypersomnia', 'mood_swings']
+  }
+];
 
 // ========================================
 // 2. 에스트로겐 (Estrogens)
@@ -33,6 +55,9 @@ export const ESTROGENS = {
       category: 'estrogen',
       route: 'oral',
       riskLevel: 'medium',
+      halfLife: 24, // 약 12-24시간
+      interactions: [],
+      recommendedUnits: ['pg/mL', 'pmol/L'],
       effects: ['여성화', '가슴 발달', '피부 부드러워짐', '지방 재분배'],
       sideEffects: ['혈전 위험', '간 부담', '두통', '메스꺼움'],
       warnings: ['흡연 시 혈전 위험 급증', '간 질환 주의'],
@@ -44,6 +69,9 @@ export const ESTROGENS = {
       category: 'estrogen',
       route: 'oral',
       riskLevel: 'medium',
+      halfLife: 24, // 약 12-24시간
+      interactions: [],
+      recommendedUnits: ['pg/mL', 'pmol/L'],
       effects: ['여성화', '가슴 발달', '피부 개선'],
       sideEffects: ['혈전 위험', '간 부담', '체중 증가'],
       warnings: ['흡연 금지', '정기 간 검사'],
@@ -58,6 +86,9 @@ export const ESTROGENS = {
       category: 'estrogen',
       route: 'transdermal',
       riskLevel: 'low',
+      halfLife: 36, // 도포 후 서서히 흡수
+      interactions: [],
+      recommendedUnits: ['pg/mL', 'pmol/L'],
       effects: ['여성화', '가슴 발달', '피부 개선'],
       sideEffects: ['피부 자극', '도포 부위 발진'],
       warnings: ['타인 접촉 주의', '샤워 전 흡수 대기'],
@@ -69,6 +100,9 @@ export const ESTROGENS = {
       category: 'estrogen',
       route: 'transdermal',
       riskLevel: 'low',
+      halfLife: 84, // 부착 기간 동안 지속
+      interactions: [],
+      recommendedUnits: ['pg/mL', 'pmol/L'],
       effects: ['여성화', '안정적 호르몬 수치'],
       sideEffects: ['피부 자극', '패치 부착 부위 가려움'],
       warnings: ['주 2회 교체', '땀에 떨어질 수 있음'],
@@ -83,6 +117,9 @@ export const ESTROGENS = {
       category: 'estrogen',
       route: 'injectable',
       riskLevel: 'low',
+      halfLife: 120, // 약 4-5일
+      interactions: [],
+      recommendedUnits: ['pg/mL', 'pmol/L'],
       effects: ['강력한 여성화', '안정적 수치', '간 부담 없음'],
       sideEffects: ['주사 통증', '수치 변동'],
       warnings: ['근육 주사', '무균 기법 필수'],
@@ -94,6 +131,9 @@ export const ESTROGENS = {
       category: 'estrogen',
       route: 'injectable',
       riskLevel: 'low',
+      halfLife: 168, // 약 7일
+      interactions: [],
+      recommendedUnits: ['pg/mL', 'pmol/L'],
       effects: ['강력한 여성화', '장기 지속'],
       sideEffects: ['주사 통증'],
       warnings: ['근육 주사'],
@@ -112,6 +152,12 @@ export const ANTI_ANDROGENS = [
     names: ['알닥톤', 'Aldactone', '스피로노락톤', 'Spironolactone'],
     category: 'antiAndrogen',
     riskLevel: 'medium',
+    halfLife: 14, // 대사산물 포함 시 김
+    interactions: [
+      { category: 'potassium_supplements', message: '고칼륨혈증 위험이 있으므로 칼륨 보충제 섭취를 제한하세요.' },
+      { category: 'ace_inhibitors', message: '혈압 강하 효과가 증폭될 수 있습니다.' }
+    ],
+    recommendedUnits: ['mg'],
     effects: ['테스토스테론 억제', '이뇨 작용', '여성화 촉진'],
     sideEffects: ['칼륨 증가', '저혈압', '어지러움', '빈뇨'],
     warnings: ['칼륨 섭취 주의', '혈압 모니터링', '신장 기능 검사'],
@@ -122,6 +168,11 @@ export const ANTI_ANDROGENS = [
     names: ['비칼루타미드', 'Bicalutamide', 'Casodex'],
     category: 'antiAndrogen',
     riskLevel: 'medium',
+    halfLife: 144, // 약 6일
+    interactions: [
+      { category: 'hepatotoxic_drugs', message: '간 독성 약물과 병용 시 주의가 필요합니다.' }
+    ],
+    recommendedUnits: ['mg'],
     effects: ['강력한 항안드로겐', '수용체 직접 차단'],
     sideEffects: ['간 독성', '가슴 통증', '열감'],
     warnings: ['정기 간 검사 필수', '고용량 주의'],
@@ -132,6 +183,9 @@ export const ANTI_ANDROGENS = [
     names: ['시프로테론 아세테이트', 'Cyproterone', 'Androcur'],
     category: 'antiAndrogen',
     riskLevel: 'high',
+    halfLife: 38, // 약 38시간
+    interactions: [],
+    recommendedUnits: ['mg'],
     effects: ['강력한 테스토스테론 억제'],
     sideEffects: ['간 독성', '우울증', '체중 증가', '뇌수막종 위험'],
     warnings: ['간 검사 필수', '우울증 모니터링', '장기 사용 위험'],
@@ -142,10 +196,26 @@ export const ANTI_ANDROGENS = [
     names: ['루크린', 'Leuprorelin', '데카펩틸', 'Triptorelin'],
     category: 'antiAndrogen',
     riskLevel: 'high',
+    halfLife: 0, // 제형에 따라 다름 (데포)
+    interactions: [],
+    recommendedUnits: ['mg'],
     effects: ['완전한 고환 셧다운', '테스토스테론 거세 수준'],
     sideEffects: ['뼈 손실', '열감', '기분 변화'],
     warnings: ['골밀도 검사', '비용 높음', '가역성 확인'],
     relatedSymptoms: ['hot_flashes', 'testicular_atrophy', 'libido_decrease_mtf']
+  },
+  {
+    id: 'anti_androgen',
+    names: ['항안드로겐(기타)', 'Anti-Androgen (Other)'],
+    category: 'antiAndrogen',
+    riskLevel: 'medium',
+    halfLife: 24,
+    interactions: [],
+    recommendedUnits: ['mg'],
+    effects: ['테스토스테론 억제'],
+    sideEffects: ['개인차'],
+    warnings: ['구체 약물명을 알고 있다면 해당 약물로 기록하세요'],
+    relatedSymptoms: []
   }
 ];
 
@@ -294,6 +364,11 @@ export const SERM_AND_AI = {
       names: ['타목시펜', 'Tamoxifen', 'Nolvadex'],
       category: 'serm',
       riskLevel: 'medium',
+      halfLife: 168, // 5-7일
+      interactions: [
+        { category: 'ssri_antidepressants', message: '일부 항우울제(SSRI)는 타목시펜의 효과를 감소시킬 수 있습니다.' }
+      ],
+      recommendedUnits: ['mg'],
       effects: ['여유증 억제', '고환 자극', 'PCT'],
       sideEffects: ['시력 문제', '혈전 위험', '기분 변화'],
       warnings: ['장기 사용 시 시력 검사', '혈전 위험'],
@@ -304,6 +379,9 @@ export const SERM_AND_AI = {
       names: ['랄록시펜', 'Raloxifene', 'Evista'],
       category: 'serm',
       riskLevel: 'low',
+      halfLife: 27, // 약 27시간
+      interactions: [],
+      recommendedUnits: ['mg'],
       effects: ['여유증 억제 특화', '뼈 강화', '부작용 적음'],
       sideEffects: ['혈전 위험 낮음', '간 부담 적음'],
       warnings: ['타목시펜보다 안전'],
@@ -314,6 +392,9 @@ export const SERM_AND_AI = {
       names: ['클로미펜', 'Clomid', 'Clomiphene'],
       category: 'serm',
       riskLevel: 'medium',
+      halfLife: 120, // 5일
+      interactions: [],
+      recommendedUnits: ['mg'],
       effects: ['고환 자극', 'PCT', '자가 호르몬 생성'],
       sideEffects: ['시력 문제', '기분 변화'],
       warnings: ['PCT 전문', '단기 사용'],
@@ -488,6 +569,7 @@ export function getAllMedications() {
     ...ESTROGENS.oral,
     ...ESTROGENS.transdermal,
     ...ESTROGENS.injectable,
+    ...PROGESTOGENS,
     ...ANTI_ANDROGENS,
     ...TESTOSTERONE.longActing,
     ...TESTOSTERONE.mediumActing,
@@ -513,6 +595,7 @@ export function getMedicationsForMode(mode) {
     case 'mtf':
       return all.filter(m => 
         m.category === 'estrogen' || 
+        m.category === 'progestogen' ||
         m.category === 'antiAndrogen' ||
         m.category === 'supplement'
       );

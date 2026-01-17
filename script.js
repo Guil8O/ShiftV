@@ -11,918 +11,1641 @@ window.onerror = function (message, source, lineno, colno, error) {
     alert(errorMessage);
 };
 
+function ensureAverageLinePluginRegistered() {
+    if (typeof Chart === 'undefined') return;
+    const pluginId = 'shiftvAverageLines';
+    const alreadyRegistered = Chart?.registry?.plugins?.get?.(pluginId);
+    if (alreadyRegistered) return;
+
+    Chart.register({
+        id: pluginId,
+        afterDatasetsDraw(chart) {
+            const yScale = Object.values(chart.scales || {}).find(s => s?.axis === 'y') || chart.scales?.y;
+            if (!yScale) return;
+            const { ctx, chartArea } = chart;
+            if (!ctx || !chartArea) return;
+
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                const meta = chart.getDatasetMeta(datasetIndex);
+                if (!meta || !chart.isDatasetVisible(datasetIndex)) return;
+
+                const targetValue = Number(dataset?._targetValue);
+                if (!Number.isFinite(targetValue)) return;
+                const y = yScale.getPixelForValue(targetValue);
+                if (!Number.isFinite(y)) return;
+
+                ctx.save();
+                ctx.setLineDash([6, 4]);
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = dataset.borderColor || 'rgba(255,255,255,0.6)';
+                ctx.globalAlpha = 0.6;
+
+                ctx.beginPath();
+                ctx.moveTo(chartArea.left, y);
+                ctx.lineTo(chartArea.right, y);
+                ctx.stroke();
+
+                ctx.restore();
+            });
+        }
+    });
+}
+
+function normalizeSymptomsArray(symptoms) {
+    if (!Array.isArray(symptoms) || symptoms.length === 0) return null;
+
+    const idMap = {
+        depression_lethargy: 'depression',
+        anxiety_restlessness: 'anxiety',
+        raynauds_paresthesia: 'paresthesia',
+        flushing_erythema: 'flushing',
+        skin_atrophy_bruising: 'skin_atrophy',
+        alopecia_mpb: 'male_pattern_baldness',
+        edema_moon_face: 'edema',
+        sarcopenia_weakness: 'sarcopenia',
+        voice_cracking_deepening: 'voice_change',
+        breast_budding_mastalgia: 'breast_budding',
+        gynecomastia_enlargement: 'gynecomastia',
+        palpitation_tachycardia: 'palpitation',
+        dvt_suspicion: 'dvt_symptoms'
+    };
+
+    const byId = new Map();
+    for (const s of symptoms) {
+        const rawId = s?.id;
+        if (!rawId) continue;
+        const id = idMap[rawId] || rawId;
+        const sev = Number.isFinite(Number(s?.severity)) ? Number(s.severity) : 3;
+        const prev = byId.get(id);
+        const next = { id, severity: Math.max(1, Math.min(5, sev)) };
+        if (!prev || next.severity > prev.severity) byId.set(id, next);
+    }
+
+    const out = [...byId.values()];
+    return out.length > 0 ? out : null;
+}
+
+function symptomsSignature(symptoms) {
+    if (!Array.isArray(symptoms) || symptoms.length === 0) return '';
+    return symptoms
+        .map(s => ({ id: s?.id || '', severity: Number.isFinite(Number(s?.severity)) ? Number(s.severity) : 3 }))
+        .filter(s => s.id)
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .map(s => `${s.id}:${Math.max(1, Math.min(5, s.severity))}`)
+        .join('|');
+}
+
+function syncModuleLanguage(lang) {
+    try {
+        import('./src/translations.js').then(mod => {
+            if (typeof mod?.setCurrentLanguage === 'function') {
+                mod.setCurrentLanguage(lang);
+            }
+        }).catch(() => { });
+    } catch { }
+}
+
+const chartZoomState = {
+    levels: {},
+    bound: {}
+};
+
+function ensureChartWrapperContainer(wrapper) {
+    if (!wrapper) return wrapper;
+    const parent = wrapper.parentElement;
+    if (!parent) return wrapper;
+    if (parent.classList.contains('chart-wrapper-container')) return parent;
+    const container = document.createElement('div');
+    container.className = 'chart-wrapper-container';
+    parent.insertBefore(container, wrapper);
+    container.appendChild(wrapper);
+    return container;
+}
+
+function applyChartZoom(chart, wrapper, inner, pointCount, chartKey) {
+    if (!chart || !wrapper || !inner) return;
+    const levelRaw = chartZoomState.levels[chartKey];
+    const level = Math.max(0, Math.min(4, Number.isFinite(Number(levelRaw)) ? Number(levelRaw) : 0));
+    chartZoomState.levels[chartKey] = level;
+
+    const basePointWidth = 42;
+    const stepWidths = [basePointWidth, 36, 30, 24];
+    const wrapperWidth = wrapper.clientWidth || 0;
+    const availableWidth = Math.max(0, wrapperWidth - 20);
+
+    if (level >= 4 || pointCount <= 1) {
+        wrapper.style.overflowX = 'hidden';
+        wrapper.style.overflowY = 'hidden';
+        inner.style.width = '100%';
+    } else {
+        const pointWidth = stepWidths[level] || basePointWidth;
+        const neededWidth = pointCount * pointWidth;
+        if (neededWidth > availableWidth && availableWidth > 0) {
+            wrapper.style.overflowX = 'auto';
+            wrapper.style.overflowY = 'hidden';
+            inner.style.width = neededWidth + 'px';
+        } else {
+            wrapper.style.overflowX = 'hidden';
+            wrapper.style.overflowY = 'hidden';
+            inner.style.width = '100%';
+        }
+    }
+
+    const hideDetails = level >= 3;
+    chart.data.datasets.forEach(ds => {
+        ds.pointRadius = hideDetails ? 0 : 4;
+        ds.pointHoverRadius = hideDetails ? 0 : 6;
+    });
+    if (chart.options?.scales?.x?.ticks) {
+        chart.options.scales.x.ticks.display = !hideDetails;
+    }
+    chart.update('none');
+}
+
+function ensureChartZoomControls(chart, wrapper, inner, pointCount, chartKey) {
+    if (!chart || !wrapper) return;
+    const container = ensureChartWrapperContainer(wrapper);
+    const stale = wrapper.querySelector('.chart-zoom-controls');
+    if (stale) stale.remove();
+
+    let controls = container.querySelector(`.chart-zoom-controls[data-chart="${chartKey}"]`);
+    if (!controls) {
+        controls = document.createElement('div');
+        controls.className = 'chart-zoom-controls';
+        controls.dataset.chart = chartKey;
+        controls.innerHTML = `
+            <button type="button" class="chart-zoom-btn zoom-in" aria-label="Zoom in">+</button>
+            <button type="button" class="chart-zoom-btn zoom-out" aria-label="Zoom out">−</button>
+        `;
+        container.appendChild(controls);
+    }
+
+    const updateState = () => {
+        const level = Math.max(0, Math.min(4, Number(chartZoomState.levels[chartKey]) || 0));
+        const inBtn = controls.querySelector('.zoom-in');
+        const outBtn = controls.querySelector('.zoom-out');
+        if (inBtn) inBtn.disabled = level <= 0;
+        if (outBtn) outBtn.disabled = level >= 4;
+    };
+
+    updateState();
+    if (chartZoomState.bound[chartKey]) return;
+    chartZoomState.bound[chartKey] = true;
+
+    controls.addEventListener('click', (e) => {
+        const btn = e.target.closest('.chart-zoom-btn');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const isIn = btn.classList.contains('zoom-in');
+        const isOut = btn.classList.contains('zoom-out');
+        if (!isIn && !isOut) return;
+        const next = (Number(chartZoomState.levels[chartKey]) || 0) + (isOut ? 1 : -1);
+        chartZoomState.levels[chartKey] = Math.max(0, Math.min(4, next));
+        applyChartZoom(chart, wrapper, inner, pointCount, chartKey);
+        updateState();
+    }, { passive: false });
+}
+
 // --- Language Data (i18n) ---
 const languages = {
-    ko: {
-        // General
-        save: "저장", edit: "수정", delete: "삭제", cancel: "취소",
-        saveRecord: "기록하기 ✨", cancelEdit: "수정 취소", saveTarget: "목표 저장! 💪",
-        saveNote: "플래닝 저장 🖋️",
-        saveSettings: "설정 저장", close: "닫기", ComRemainder: '남은 수치',
-        confirm: "확인", selectAll: "전체 선택", deselectAll: "전체 해제",
-        noDataYet: "첫 기록을 남겨볼까요?",
-        noNotesYet: "첫 플래닝을 남겨보세요!",
-        noTargetsYet: "설정된 목표가 없어요.", noDataForChart: "표시할 항목을 선택하거나 데이터를 입력하세요.",
-        invalidValue: "유효하지 않은 값", loadingError: "데이터 로드 오류", savingError: "데이터 저장 오류",
-        confirmReset: "정말로 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든 측정 기록, 목표, 플래닝가 영구적으로 삭제됩니다. 초기화 전에 데이터를 백업하는 것이 좋습니다.",
-        confirmDeleteRecord: "주차 {week} ({date}) 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.", // Updated delete confirmation
-        confirmDeleteNote: "플래닝 '{title}'을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-        dataExported: "데이터가 파일로 저장되었습니다.", dataImported: "데이터를 성공적으로 불러왔습니다!",
-        dataReset: "모든 데이터가 초기화되었습니다.", dataSaved: "저장 완료! 👍",
-        noteSaved: "플래닝가 저장되었습니다.",
-        targetsSaved: "목표가 저장되었습니다.", settingsSaved: "설정이 저장되었습니다.",
-        importError: "파일을 불러오는 중 오류 발생:", importSuccessRequiresReload: "데이터를 성공적으로 불러왔습니다. 변경사항을 적용하려면 페이지를 새로고침해주세요.",
-        unexpectedError: "예상치 못한 오류가 발생했습니다 😢 콘솔(F12)을 확인해주세요.\n오류: {message}",
-        alertInitError: "앱 초기화 중 오류 발생!", alertListenerError: "이벤트 리스너 설정 오류!",
-        popupSaveSuccess: "측정 기록 저장 완료! 🎉", popupUpdateSuccess: "측정 기록 수정 완료! ✨",
-        popupDeleteSuccess: "측정 기록 삭제 완료 👍", popupTargetSaveSuccess: "목표 저장 완료! 👍",
-        popupNoteSaveSuccess: "새 플래닝 저장 완료! 🎉", popupNoteUpdateSuccess: "플래닝 수정 완료! ✨",
-        popupNoteDeleteSuccess: "플래닝 삭제 완료 👍", popupDataExportSuccess: "데이터 내보내기 성공! 🎉",
-        popupDataImportSuccess: "데이터 가져오기 성공! ✨", popupDataResetSuccess: "모든 데이터가 초기화되었습니다. ✨",
-        popupSettingsSaved: "설정 저장 완료! 👍",
-        alertValidationError: "유효하지 않은 입력 값이 있습니다. 빨간색 표시 필드를 확인해주세요. 숫자 값은 0 이상이어야 합니다.",
-        alertNoteContentMissing: "플래닝 제목이나 내용을 입력해주세요!",
-        alertImportConfirm: "현재 데이터를 덮어쓰고 가져온 데이터로 복원하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-        alertImportInvalidFile: "파일 형식이 올바르지 않거나 호환되지 않는 데이터입니다.",
-        alertImportReadError: "파일 읽기/처리 중 오류 발생.", alertImportFileReadError: "파일 읽기 실패.",
-        alertGenericError: "오류가 발생했습니다.", alertDeleteError: "삭제 중 오류 발생.",
-        alertLoadError: "데이터 로드 중 오류 발생. 데이터가 손상되었을 수 있습니다. 콘솔 확인.",
-        alertSaveError: "로컬 스토리지 저장 실패.", alertExportError: "데이터 내보내기 중 오류 발생.",
-        alertCannotFindRecordEdit: "수정할 기록 찾기 실패.", alertCannotFindRecordDelete: "삭제할 기록 찾기 실패.",
-        alertInvalidIndex: "기록 처리 중 오류: 인덱스 오류.",
-        alertCannotFindNoteEdit: "수정할 플래닝 찾기 실패.", alertCannotFindNoteDelete: "삭제할 플래닝 찾기 실패.",
-        notification_setup_success_title: "알림 설정 완료",
-        notification_setup_success_body: "알림이 설정되었습니다. 매주 측정일이 되면 알려드릴게요!",
-        notification_permission_denied: "알림 권한이 차단되었습니다. 브라우저 설정에서 허용해주세요.",
-
-        // Tabs
-        tabMain: "홈",
-        tabRecord: "기록하기",
-        tabMy: "마이",
-        tabSettings: "설정",
-        myTitle: "마이 페이지 🧑‍🚀", // 임시 제목
-        // ▼▼▼ 새 키 추가 ▼▼▼
-        showHistoryButton: "기록 확인하기",
-        showInputButton: "입력으로 돌아가기",
-        recordKeepsLabel: "이번 주 플래닝! 📝",
-        recordKeepsPlaceholder: "오늘의 기분, 이벤트, 신체 변화 등을 자유롭게 기록해보세요...",
-        memo: "플래닝",
-        //SVcard
-        svcard_shortcut_new: "새 마음으로<br><span class='countdown-days'>기록</span><br>해볼까요?",
-        svcard_shortcut_dday: "'D-Day!'<br>새로운 기록을<br>측정해주세요",
-        svcard_shortcut_overdue: "'측정이 {days}일 지났어요!'<br>새로운 기록을<br>측정해주세요",
-        svcard_shortcut_countdown: "다음 측정일까지<br><span class='countdown-days'>{days}일</span><br>남았어요",
-        // SV Card Titles & Content
-        svcard_title_highlights: "✨ 바디 브리핑",
-        svcard_title_targets: "🎯 변화 로드맵",
-        svcard_title_hormones: "💉 호르몬 저널",
-        svcard_title_keeps: "📝 플래닝 노트",
-        svcard_no_data_for_highlights: "변화를 비교하려면 데이터가 2개 이상 필요해요.",
-        svcard_no_targets_set: "설정 탭에서 목표를 설정해주세요.",
-        svcard_overall_progress: "전체 달성률",
-        svcard_label_current: "현재: {value}",
-        targetLabelShort: "(목표:{value})",
-        // SV Card Titles & Content
-        svcard_guide_default: "꾸준함이 <br>변화를 만들어요! ✨",
-        svcard_guide_positive_short: "훌륭해요! <br>변화가 순조로워요.",
-        svcard_guide_positive_long: "최근 3주간 목표를 향해 <br>꾸준히 나아가고 있어요!",
-        svcard_guide_negative_short: "괜찮아요 <br>잠시 쉬어가는 주일 수도 있어요.",
-        svcard_guide_negative_long: "괜찮아요 <br>다시 한번 해볼까요?",
-        svcard_no_hormone_data: "호르몬 데이터가 부족해요.",
-        svcard_hormone_prediction: "다음 주 예상 {hormone} 수치: <strong>{value}</strong>",
-        notification_title: "ShiftV 측정 알림",
-        notification_body: "마지막으로 기록한 지 일주일이 지났어요. 새로운 변화를 기록해볼까요?",
-        notification_permission_denied: "알림 권한이 차단되었습니다. 브라우저 설정에서 허용해주세요.",
-        notificationSettingsTitle: "알림 설정",
-        notificationToggleLabel: "측정일 알림 받기",
-        notificationSettingsDesc: "마지막 측정일로부터 7일이 지나면 알려드려요. 알림을 받으려면 브라우저의 권한 허용이 필요해요.",
-        alertBrowserNotSupportNotification: "이 브라우저는 알림을 지원하지 않아요.",
-        comparisonModalTitle: "바디 브리핑",
-        selectedWeekDataTitle: "{week}주차 상세 기록",
-
-        medicationHistoryTitle: "투여량 변화",
-        hormoneLevelHistoryTitle: "호르몬 수치 변화",
-        hormoneAnalysisTitle: "최근 2주 분석",
-        hormoneAnalysisAvgChange: "평균 변화량: {change}",
-        hormoneAnalysisNextWeek: "다음 주 예상 수치: {value}",
-        hormoneModalTitle: "호르몬 저널",
-
-        svcard_no_major_changes: "최근 주요 변화가 없어요.",
-        svcard_change_vs_last_week: "지난 주 대비",
-        svcard_title_weekly_guide: "오늘의 한마디",
-        svcard_no_keeps_yet: "작성된 플래닝가 없어요.",
-        svcard_no_keeps_add_prompt: "작성된 플래닝가 없어요. '기록하기' 탭에서 추가해보세요!",
-        modalTabDetailedAnalysis: "상세 분석",
-        modalTabComparativeAnalysis: "비교 분석",
-        labelBase: "기준",
-        labelCompareTarget: "비교 대상",
-        svcard_hormone_weekly_change: "주간 변화량",
-        emaxTitle: "Emax / Hill 분석 🧬",
-        responseFactor: "실제 반응도 (RF)",
-        rfMessage_high: "평균 대비 E2에 높은 민감도를 보입니다. ✨",
-        rfMessage_normal: "예측 모델과 유사한 반응을 보입니다. 👌",
-        rfMessage_low: "E2 수치 대비 T 억제가 예상보다 낮습니다. 🤔",
-        rfMessage_negative: "수치가 상승했습니다. (플레어/변동) 📈",
-
-        //hormon
-        currentLevelEvaluation: "현재 수치 평가",
-        currentLevelEvaluationDesc: "목표치와 비교하여 현재 호르몬 수치가 적절한지 평가합니다.",
-        hormoneAnalysisTitleChange: "수치 변화량 분석",
-        hormoneChangeAnalysisDesc: "시간에 따른 호르몬 수치의 변화를 주간, 월간, 전체 기간으로 나누어 분석합니다.",
-        hormoneAnalysisTitleInfluence: "약물 영향력 분석",
-        drugInfluenceDesc: "복용 중인 약물이 호르몬 수치에 미치는 영향을 데이터 기반으로 분석합니다.",
-        hormoneAnalysisTitlePrediction: "미래 예측",
-        emaxAnalysisDesc: "Hill 모델을 사용하여 호르몬 반응도를 평가하고 테스토스테론 억제량을 예측합니다.",
-        bodyRatioAnalysisDesc: "신체 비율을 분석하여 변화 추이를 시각화합니다.",
-        
-        // Status messages
-        estrogen_optimal: "최적 범위입니다",
-        estrogen_above_target: "목표보다 높습니다",
-        estrogen_below_target: "목표보다 낮습니다",
-        estrogen_critical_high: "위험: 매우 높은 수치입니다",
-        testosterone_optimal: "최적 범위입니다",
-        testosterone_above_target: "목표보다 높습니다",
-        testosterone_below_target: "목표보다 낮습니다",
-        testosterone_critical_low: "위험: 매우 낮은 수치입니다",
-        no_target_set: "목표 미설정",
-        
-        // Hormone understanding
-        understandingHormones: "호르몬 수치 이해하기",
-        estrogenExplanation: "에스트로겐은 여성화 효과를 담당하는 주요 호르몬입니다. 피부 변화, 유방 발달, 지방 분포 변화 등에 영향을 미칩니다.",
-        testosteroneExplanation: "테스토스테론은 남성화 효과를 담당하는 주요 호르몬입니다. 근육량, 체모, 목소리 등에 영향을 미칩니다.",
-        
-        // Stability
-        stabilityAnalysisTitle: "호르몬 안정성 분석",
-        variationCoeff: "변동 계수",
-        stability: "안정성",
-        stability_stable: "안정적",
-        stability_moderate: "보통",
-        stability_unstable: "불안정",
-        
-        // Drug influence
-        drugInfluenceHowItWorks: "작동 원리",
-        drugInfluenceHowItWorksDesc: "약물 복용 전후의 호르몬 변화를 분석하여 각 약물의 영향력을 계산합니다. 복용량 변화가 큰 시기에 더 높은 가중치를 부여합니다.",
-        drugInfluenceConfidenceDesc: "신뢰도는 데이터의 양과 질을 나타냅니다. 샘플 수가 많고 단일 약물 변화 구간이 많을수록 높아집니다.",
-        samples: "샘플",
-        confidence: "신뢰도",
-        
-        // Body ratios
-        bodyRatioAnalysisTitle: "신체 비율 분석",
-        waistHipRatio: "허리-엉덩이 비율 (WHR)",
-        chestWaistRatio: "가슴-허리 비율",
-        shoulderHipRatio: "어깨-엉덩이 비율",
-        
-        weeklyChange: "주간 변화량",
-        monthlyAvgChange: "월간 평균 변화량",
-        totalChange: "총 변화량",
-        totalChangeWithInitial: '총 변화량 (초기: {value})',
-        drugInfluence: "mg당 영향",
-        predictedNextWeek: "다음 주 예상",
-        daysToTarget: "목표까지 예상",
-        daysUnit: "{days}일",
-        notEnoughData: "데이터 부족",
-        dailyTSuppression: '일일 T 억제량',
-        influenceAnalysisDesc: '이 정보는 실측 데이터에 기반한 예측치입니다. <br>수치에는 오차가 있을 수 있습니다.',
-        
-        // 추가된 호르몬 저널 키들
-        currentLevelsEvaluationTitle: "현재 수치 평가",
-        svcard_label_target: "목표",
-        hormoneLevelOptimal: "최적 범위입니다",
-        hormoneLevelAboveTarget: "목표보다 높습니다",
-        hormoneLevelBelowTarget: "목표보다 낮습니다",
-        hormoneLevelHigh: "높은 수치입니다",
-        hormoneLevelLow: "낮은 수치입니다",
-        hormoneLevelNoTarget: "목표가 설정되지 않았습니다",
-        healthAlertsTitle: "건강 주의사항",
-        healthAlertHighE2: "⚠️ 에스트로겐 수치가 매우 높습니다 (>300 pg/mL). 의료진과 상담을 권장합니다.",
-        healthAlertLowT: "⚠️ 테스토스테론 수치가 매우 낮습니다 (<0.05 ng/mL). 의료진과 상담을 권장합니다.",
-        predictionDisclaimer: "※ 예측 수치는 참고용이며, 개인차와 측정 오차가 있을 수 있습니다.",
-        hormoneExplanationTitle: "호르몬 수치 이해하기",
-        hormoneExplanationDesc: "아래는 각 호르몬의 의미와 측정 방법입니다.",
-        hormoneLevelsExplained: "호르몬 수치 설명",
-        estrogenLevelUnit: "pg/mL",
-        estrogenLevelExplanation: "에스트라디올(E2)은 여성화에 중요한 호르몬으로, 혈액 검사를 통해 측정됩니다.",
-        testosteroneLevelUnit: "ng/mL",
-        testosteroneLevelExplanation: "테스토스테론(T)은 남성화에 중요한 호르몬으로, 혈액 검사를 통해 측정됩니다.",
-        responseFactorExplanation: "개인의 호르몬 반응 민감도를 나타냅니다. 1.0에 가까울수록 표준적인 반응입니다.",
-        etRatioTitle: "E/T 비율",
-        etRatioMale: "남성형",
-        etRatioFemale: "여성형",
-        etRatioExplanation: "E/T 비율은 에스트로겐(E)과 테스토스테론(T)의 상대적 균형을 나타냅니다. 의학적 표준 공식: E2(pg/mL) ÷ T(ng/dL), 정상 범위: 0.04~0.1. 높을수록 여성화, 낮을수록 남성화를 의미합니다.",
-        bodyRatioTitle: "신체 비율 분석",
-        whrLabel: "WHR (허리-엉덩이 비율)",
-        chestWaistLabel: "가슴-허리 비율",
-        shoulderHipLabel: "어깨-엉덩이 비율",
-        drugInfluenceHow: "이 분석은 약물 복용량과 호르몬 변화를 비교하여, 각 약물이 호르몬 수치에 미치는 영향을 예측합니다. 복용량 변경이 명확한 구간에 더 높은 가중치를 부여합니다.",
-        drugInfluenceConfidence: "신뢰도는 분석에 사용된 데이터의 양과 질을 나타냅니다. 높을수록 더 정확한 예측입니다.",
-        drugInfluenceHowTitle: "분석 방법",
-        drugInfluenceConfidenceTitle: "신뢰도",
-        influenceSamplesLabel: "분석 구간",
-        hormoneStabilityTitle: "호르몬 안정성",
-        cvStabilityNote: "낮을수록 안정적 (< 10%: 매우 안정적)",
-        rfMessage_very_high: "매우 높은 반응도 - 호르몬에 매우 민감하게 반응합니다",
-        rfMessage_high: "높은 반응도 - 호르몬에 민감하게 반응합니다",
-        rfMessage_normal: "정상 반응도 - 표준적인 호르몬 반응입니다",
-        rfMessage_low: "낮은 반응도 - 호르몬에 둔감하게 반응합니다",
-        rfMessage_very_low: "매우 낮은 반응도 - 호르몬에 매우 둔감하게 반응합니다",
-
-        // Input Tab
-        formTitleNew: "측정 시작하기<br>현재 {week}주차", formTitleEdit: "측정 기록 수정 <br>{week}주차",
-        inputDescription: "모든 항목은 선택 사항! 기록하고 싶은 것만 편하게 입력해주세요 😉",
-        nextMeasurementInfoNoData: "마지막 측정일을 기준으로 다음 예정일을 계산해요.",
-        nextMeasurementInfo: "마지막 측정: {lastDate} ({daysAgo}일 전) <br>다음 측정 추천일: {nextDate} ({daysUntil}일 후)",
-        nextMeasurementInfoToday: "마지막 측정: {lastDate} ({daysAgo}일 전) <br>오늘은 측정하는 날!",
-        nextMeasurementInfoOverdue: "마지막 측정: {lastDate} ({daysAgo}일 전) <br>측정이 {daysOverdue}일 지났어요!",
-        daysAgo: "{count}일 전", daysUntil: "{count}일 후", today: "오늘",
-        categoryBodySize: "신체 사이즈 📐", categoryHealth: "건강 💪", categoryMedication: "마법 ✨",
-        // Measurement Labels (camelCase keys)
-        week: '주차', date: '날짜', timestamp: '기록 시간',
-        height: '신장 (cm)', weight: '체중 (kg)', shoulder: '어깨너비 (cm)', neck: '목둘레 (cm)',
-        chest: '윗 가슴둘레 (cm)', cupSize: '아랫 가슴둘레 (cm)', waist: '허리둘레 (cm)', hips: '엉덩이둘레 (cm)',
-        thigh: '허벅지둘레 (cm)', calf: '종아리둘레 (cm)', arm: '팔뚝둘레 (cm)',
-        muscleMass: '근육량 (kg)', bodyFatPercentage: '체지방률 (%)', libido: '성욕 (회/주)',
-        estrogenLevel: '에스트로겐 수치 (pg/ml)', testosteroneLevel: '테스토스테론 수치 (ng/ml)',
-        healthStatus: '건강 상태', healthScore: '건강 점수', healthNotes: '건강 상세(텍스트)',
-        skinCondition: '피부 상태',
-        estradiol: '에스트라디올 (mg)', progesterone: '프로게스테론 (mg)',
-        antiAndrogen: '항안드로겐 (mg)', testosterone: '테스토스테론 (mg)', antiEstrogen: '항에스트로겐 (mg)',
-        medicationOtherName: '기타 마법 이름',
-        medicationOtherDose: '기타 마법 용량 (mg)',
-        medicationOtherNamePlaceholder: '(기타)',
-        unitMgPlaceholder: 'mg',
-        // Placeholders
-        skinConditionPlaceholder: '예: 부드러워짐', libidoPlaceholder: '회/주',
-        scorePlaceholder: "점수", notesPlaceholder: "특이사항",
-        unitCm: "cm", unitKg: "kg", unitPercent: "%", unitMg: "mg", unitCountPerWeek: "회/주",
-        placeholderPrevious: "이전: {value}",
-        // History Tab
-        historyTitle: "측정 기록 꼼꼼히 보기 🧐",
-        historyDescription: "(표가 화면보다 넓으면 좌우로 스크롤해보세요!)",
-        manageColumn: "관리",
-        // Report Tab
-        reportTitle: "나의 변화 리포트 📈",
-        reportGraphTitle: "주차별 변화 그래프",
-        reportGraphDesc: "보고 싶은 항목 버튼을 눌러 선택(활성)하거나 해제할 수 있어요. 여러 항목을 겹쳐 볼 수도 있답니다!",
-        reportPrevWeekTitle: "지난주와 비교🤔",
-        reportInitialTitle: "처음과 비교🌱",
-        reportTargetTitle: "목표 달성률🎯",
-        reportNeedTwoRecords: "데이터가 2개 이상 기록되어야 비교할 수 있어요.",
-        reportNeedTarget: "먼저 '목표 설정' 탭에서 목표를 입력해주세요!",
-        chartAxisLabel: "주차",
-        comparisonItem: "항목", comparisonChange: "변화량", comparisonProgress: "달성률",
-        targetAchieved: "달성 🎉",
-        // Targets Tab
-        targetTitle: "나만의 목표 설정 💖",
-        targetDescription: "원하는 목표 수치를 입력해주세요. 메인 탭에서 달성률을 확인할 수 있어요.",
-        targetItem: "항목", targetValue: "목표값",
-        // Overview (Keeps) Tab
-        overviewTitle: "플래닝 📝",
-        noteNewTitle: "새 플래닝 작성", noteEditTitle: "플래닝 수정",
-        noteTitleLabel: "제목", noteTitlePlaceholder: "플래닝 제목 (선택)",
-        noteContentLabel: "내용", noteContentPlaceholder: "이벤트, 몸 상태, 생각 등 자유롭게 플래닝에 기록해요!",
-        noteListTitle: "작성된 플래닝 목록 ✨", noteTitleUntitled: "제목 없음",
-        sortBy: "정렬:", sortNewest: "최신 순", sortOldest: "오래된 순",
-        noteDateCreated: "작성:", noteDateUpdated: "(수정: {date})", notePreviewEmpty: "내용을 적어 보세요",
-        // Settings Tab
-        settingsTitle: "설정 ⚙️",
-        languageSettingsTitle: "언어 설정", language: "언어",
-        modeSettingsTitle: "모드 설정", modeSettingsDesc: "목표하는 신체 변화 방향을 선택해주세요.",
-        mode: "모드", modeMtf: "여성화", modeFtm: "남성화",
-        themeSettingsTitle: "테마 설정", theme: "테마", themeSystem: "기기 값 참조", themeLight: "라이트 모드", themeDark: "다크 모드",
-        dataManagementTitle: "데이터 백업 & 복원",
-        dataManagementDesc: "모든 기록(측정, 목표, 플래닝)을 파일 하나로 저장하거나 복원할 수 있어요. 가끔 백업해두면 안심이에요! 😊",
-        exportData: "파일 저장하기", importData: "파일 불러오기",
-        warning: "주의!", importWarning: "복원하면 지금 앱에 있는 모든 데이터가 파일 내용으로 완전히 대체돼요!",
-        resetDataTitle: "데이터 초기화",
-        severeWarning: "정말정말 주의!", resetWarning: "😱 모든 데이터(측정, 목표, 플래닝)가 영구적으로 삭제됩니다! 초기화 전에 꼭! 데이터를 파일로 백업해주세요.",
-        resetDataButton: "모든 데이터 초기화",
-        infoTitle: "정보", versionLabel: "버전:",
-        privacyInfo: "이 앱은 오프라인 작동하며 모든 데이터는 앱에만 안전하게 저장됩니다! 😉",
-        developerMessage: "이 작은 도구가 당신의 소중한 여정에 즐거움과 도움이 되기를 바라요!",
-        dataUpdateAndResetTitle: "데이터 업데이트 및 초기화",
-        checkForUpdatesButton: "업데이트 확인",
-        popupUpdateComplete: "업데이트 완료! 앱을 다시 시작합니다.",
-        popupUpdateFailed: "업데이트에 실패했습니다. 잠시 후 다시 시도해주세요.",
-        popupAlreadyLatest: "이미 최신 버전이에요! ✨",
-        popupOfflineForUpdate: "업데이트를 확인하려면 인터넷 연결이 필요해요.",
-        resetWarning: "😱 데이터 초기화는 모든 기록(측정, 목표, 플래닝)을 영구적으로 삭제합니다! 초기화 전에 꼭! 데이터를 파일로 백업해주세요.",
-        // Initial Setup
-        initialSetupTitle: "초기 설정",
-        initialSetupDesc: "ShiftV 사용을 시작하기 전에 언어와 모드를 선택해주세요.",
-        // Swipe feature
-        swipeThresholdMet: "스와이프 감지: {direction}",
-        labelInitial: "초기",
-        labelPrev: "전주",
-        labelCurrent: "현재",
-        labelTarget: "목표",
-        initialTargetSame: "초기/목표",
-        prevCurrentSame: "전주/현재",
-        graphClickPrompt: "그래프의 수치를 클릭하면 해당 주차의 상세정보가 표시됩니다.",
-        biologicalSex: "생물학적 성별",
-        sexSettingsTitle: "생물학적 성별 설정",
-        sexSettingsDesc: "자연 호르몬 회복률 계산의 정확도를 높이기 위해 사용됩니다.",
-        sexMale: "남성",
-        sexFemale: "여성",
-        sexOther: "기타/무성별"
-    },
-    en: {
-        // General
-        save: "Save", edit: "Edit", delete: "Delete", cancel: "Cancel",
-        saveRecord: "Record ✨", cancelEdit: "Cancel Edit", saveTarget: "Save Targets! 💪",
-        saveNote: "Save Planning 🖋️", saveSettings: "Save Settings", close: "Close", ComRemainder: 'Remainder',
-        confirm: "Confirm", selectAll: "Select All", deselectAll: "Deselect All",
-        noDataYet: "Let's add the first record!", noNotesYet: "No Planning written yet. Let's add the first Planning!",
-        noTargetsYet: "No targets set.", noDataForChart: "Select items to display or enter data.",
-        invalidValue: "Invalid value", loadingError: "Data loading error", savingError: "Data saving error",
-        confirmReset: "Are you absolutely sure you want to reset all data? This action cannot be undone and will permanently delete all measurement records, targets, and Planning. It is highly recommended to back up your data before proceeding.",
-        confirmDeleteRecord: "Delete record for Week {week} ({date})? This action cannot be undone.",
-        confirmDeleteNote: "Delete Planning \"{title}\"? This cannot be undone.",
-        dataExported: "Data exported to file.", dataImported: "Data imported successfully!",
-        dataReset: "All data has been reset.", dataSaved: "Saved! 👍",
-        noteSaved: "Planning saved.👍", targetsSaved: "Targets saved.👍", settingsSaved: "Settings saved.👍",
-        importError: "Error importing file:", importSuccessRequiresReload: "Data imported successfully. Please reload the page to apply changes.",
-        unexpectedError: "An unexpected error occurred 😢 Check console (F12).\nError: {message}",
-        alertInitError: "Error during app initialization!", alertListenerError: "Error setting up event listeners!",
-        popupSaveSuccess: "Measurement saved! 🎉", popupUpdateSuccess: "Measurement updated! ✨",
-        popupDeleteSuccess: "Measurement deleted 👍", popupTargetSaveSuccess: "Targets saved! 👍",
-        popupNoteSaveSuccess: "New Planning saved! 🎉", popupNoteUpdateSuccess: "Planning updated! ✨",
-        popupNoteDeleteSuccess: "Planning deleted 👍", popupDataExportSuccess: "Data export successful! 🎉",
-        popupDataImportSuccess: "Data import successful! ✨", popupDataResetSuccess: "All data has been reset. ✨",
-        popupSettingsSaved: "Settings saved!",
-        alertValidationError: "Invalid input value(s). Check red fields. Numbers must be 0 or greater.",
-        alertNoteContentMissing: "Please enter Planning title or content!",
-        alertImportConfirm: "Overwrite current data and restore from file? This cannot be undone.",
-        alertImportInvalidFile: "Invalid file format or incompatible data.",
-        alertImportReadError: "Error reading/processing file.", alertImportFileReadError: "Failed to read file.",
-        alertGenericError: "An error occurred.", alertDeleteError: "Error during deletion.",
-        alertLoadError: "Error loading data. Data might be corrupt. Check console.",
-        alertSaveError: "Failed to save data.", alertExportError: "Error exporting data.",
-        alertCannotFindRecordEdit: "Cannot find record to edit.", alertCannotFindRecordDelete: "Cannot find record to delete.",
-        alertInvalidIndex: "Error processing record: Invalid index.",
-        alertCannotFindNoteEdit: "Cannot find Planning to edit.", alertCannotFindNoteDelete: "Cannot find Planning to delete.",
-        notification_setup_success_title: "Notification Setup Complete",
-        notification_setup_success_body: "Notifications have been set. We'll remind you on your weekly measurement day!",
-        notification_permission_denied: "Notification permission was denied. Please allow it in your browser settings.",
-        // Tabs
-        tabMain: "Main",
-        tabRecord: "Record",
-        tabMy: "My",
-        tabSettings: "Settings",
-        myTitle: "My Page 🧑‍🚀", // Temporary title
-        showHistoryButton: "View History",
-        showInputButton: "Back to Input",
-        recordKeepsLabel: "This Week's Planning 📝",
-        recordKeepsPlaceholder: "Freely write down your mood, events, body changes, etc.",
-        memo: "Planning",
-        //SVcard
-        svcard_title_highlights: "✨Body Brief",
-        svcard_title_targets: "🎯 Change Roadmap",
-        svcard_title_hormones: "💉 Hormone Journal",
-        svcard_title_keeps: "📝 Planning Notes",
-        svcard_no_data_for_highlights: "Need at least 2 records to compare changes.",
-        svcard_no_targets_set: "Set your goals in the Settings tab.",
-        svcard_overall_progress: "Overall Progress",
-
-        svcard_shortcut_new: "Ready for a<br><span class='countdown-days'>New Start</span><br>Shall we record?",
-        svcard_shortcut_dday: "'It's D-Day!'<br>Time to record<br>your new data",
-        svcard_shortcut_overdue: "'{days} days overdue!'<br>Time to record<br>your new data",
-        svcard_shortcut_countdown: "Next measurement in<br><span class='countdown-days'>{days} days</span><br>left",
-        // SV Card Titles & Content
-        svcard_guide_default: "Consistency creates change! ✨",
-        svcard_guide_positive_short: "Great work! <br>Progress is smooth.",
-        svcard_guide_positive_long: "You've been making steady <br>progress towards your goals!",
-        svcard_guide_negative_short: "It's okay, <br>this might be a week to rest.",
-        svcard_guide_negative_long: "It's okay, <br>you can start again!",
-        svcard_no_hormone_data: "Not enough hormone data.",
-        svcard_hormone_prediction: "Next week's predicted {hormone} level: <strong>{value}</strong>",
-        notification_title: "ShiftV Measurement Reminder",
-        notification_body: "It's been a week since your last record. Time to log your new changes!",
-        notification_permission_denied: "Notification permission was denied. Please allow it in your browser settings.",
-        notificationSettingsTitle: "Notification Settings",
-        notificationToggleLabel: "Receive measurement reminders",
-        notificationSettingsDesc: "Get notified 7 days after your last measurement. Browser permission is required.",
-        alertBrowserNotSupportNotification: "This browser does not support notifications.",
-        comparisonModalTitle: "Body Brief",
-
-        medicationHistoryTitle: "Medication Dosage History",
-        hormoneLevelHistoryTitle: "Hormone Level History",
-        hormoneAnalysisTitle: "Last 2 Weeks Analysis",
-        hormoneAnalysisAvgChange: "Average Change: {change}",
-        hormoneAnalysisNextWeek: "Predicted Next Week: {value}",
-        hormoneModalTitle: "Hormone Journal",
-        selectedWeekDataTitle: "Week {week} Detailed Data",
-
-        svcard_no_major_changes: "No major changes recently.",
-        svcard_change_vs_last_week: "vs last week",
-        svcard_title_weekly_guide: "Today's Words",
-        svcard_no_keeps_yet: "No Planning written yet.",
-        svcard_no_keeps_add_prompt: "No Planning written yet. Try adding one in the 'Record' tab!",
-        modalTabDetailedAnalysis: "Detailed Analysis",
-        modalTabComparativeAnalysis: "Comparative Analysis",
-        labelBase: "Base",
-        labelCompareTarget: "Compare Target",
-        svcard_hormone_weekly_change: "Weekly Change",
-        svcard_label_current: "Current: {value}",
-        targetLabelShort: "(Target:{value})",
-        emaxTitle: "Emax / Hill Analysis 🧬",
-        responseFactor: "Response Factor (RF)",
-        rfMessage_high: "You show higher sensitivity to E2 than average. ✨",
-        rfMessage_normal: "Response aligns with the predictive model. 👌",
-        rfMessage_low: "T suppression is lower than expected for E2 levels. 🤔",
-        rfMessage_negative: "Levels have increased. (Flare/Fluctuation) 📈",
-
-        //hormon
-        currentLevelEvaluation: "Current Level Evaluation",
-        currentLevelEvaluationDesc: "Evaluates whether current hormone levels are appropriate compared to target values.",
-        hormoneAnalysisTitleChange: "Level Change Analysis",
-        hormoneChangeAnalysisDesc: "Analyzes hormone level changes over time, divided into weekly, monthly, and total periods.",
-        hormoneAnalysisTitleInfluence: "Medication Influence Analysis",
-        drugInfluenceDesc: "Data-driven analysis of how medications affect hormone levels.",
-        hormoneAnalysisTitlePrediction: "Prediction",
-        emaxAnalysisDesc: "Uses the Hill model to evaluate hormone response and predict testosterone suppression.",
-        bodyRatioAnalysisDesc: "Analyzes and visualizes body ratio changes over time.",
-        
-        // Status messages
-        estrogen_optimal: "Optimal Range",
-        estrogen_above_target: "Above Target",
-        estrogen_below_target: "Below Target",
-        estrogen_critical_high: "Warning: Very High Level",
-        testosterone_optimal: "Optimal Range",
-        testosterone_above_target: "Above Target",
-        testosterone_below_target: "Below Target",
-        testosterone_critical_low: "Warning: Very Low Level",
-        no_target_set: "No Target Set",
-        
-        // Hormone understanding
-        understandingHormones: "Understanding Hormone Levels",
-        estrogenExplanation: "Estrogen is the primary hormone responsible for feminizing effects, influencing skin changes, breast development, and fat distribution.",
-        testosteroneExplanation: "Testosterone is the primary hormone responsible for masculinizing effects, influencing muscle mass, body hair, and voice.",
-        
-        // Stability
-        stabilityAnalysisTitle: "Hormone Stability Analysis",
-        variationCoeff: "Variation Coefficient",
-        stability: "Stability",
-        stability_stable: "Stable",
-        stability_moderate: "Moderate",
-        stability_unstable: "Unstable",
-        
-        // Drug influence
-        drugInfluenceHowItWorks: "How It Works",
-        drugInfluenceHowItWorksDesc: "Analyzes hormone changes before and after medication intake to calculate each drug's influence. Higher weight is given to periods with significant dosage changes.",
-        drugInfluenceConfidenceDesc: "Confidence indicates the quantity and quality of data. It increases with more samples and isolated single-drug change intervals.",
-        samples: "Samples",
-        confidence: "Confidence",
-        
-        // Body ratios
-        bodyRatioAnalysisTitle: "Body Ratio Analysis",
-        waistHipRatio: "Waist-Hip Ratio (WHR)",
-        chestWaistRatio: "Chest-Waist Ratio",
-        shoulderHipRatio: "Shoulder-Hip Ratio",
-        
-        weeklyChange: "Weekly Change",
-        monthlyAvgChange: "Monthly Avg. Change",
-        totalChange: "Total Change",
-        totalChangeWithInitial: 'Total Change (Initial: {value})',
-        drugInfluence: "Influence/mg",
-        predictedNextWeek: "Next Week's Forecast",
-        daysToTarget: "Est. Days to Target",
-        daysUnit: "{days} days",
-        notEnoughData: "N/A",
-        dailyTSuppression: 'Daily T Suppression',
-        influenceAnalysisDesc: 'This is predictive data based on measurements. <br>Values may contain errors.',
-        
-        // Additional hormone journal keys
-        currentLevelsEvaluationTitle: "Current Level Evaluation",
-        svcard_label_target: "Target",
-        hormoneLevelOptimal: "Optimal range",
-        hormoneLevelAboveTarget: "Above target",
-        hormoneLevelBelowTarget: "Below target",
-        hormoneLevelHigh: "High level",
-        hormoneLevelLow: "Low level",
-        hormoneLevelNoTarget: "No target set",
-        healthAlertsTitle: "Health Alerts",
-        healthAlertHighE2: "⚠️ Estrogen level is very high (>300 pg/mL). Consult your healthcare provider.",
-        healthAlertLowT: "⚠️ Testosterone level is very low (<0.05 ng/mL). Consult your healthcare provider.",
-        predictionDisclaimer: "※ Predictions are for reference only. Individual variations and measurement errors may occur.",
-        hormoneExplanationTitle: "Understanding Hormone Levels",
-        hormoneExplanationDesc: "Below are the meanings and measurement methods for each hormone.",
-        hormoneLevelsExplained: "Hormone Level Explanation",
-        estrogenLevelUnit: "pg/mL",
-        estrogenLevelExplanation: "Estradiol (E2) is an important hormone for feminization, measured through blood tests.",
-        testosteroneLevelUnit: "ng/mL",
-        testosteroneLevelExplanation: "Testosterone (T) is an important hormone for masculinization, measured through blood tests.",
-        responseFactorExplanation: "Indicates individual hormone response sensitivity. Closer to 1.0 means standard response.",
-        etRatioTitle: "E/T Ratio",
-        etRatioMale: "Masculine",
-        etRatioFemale: "Feminine",
-        etRatioExplanation: "The E/T ratio represents the relative balance between Estrogen (E) and Testosterone (T). Medical standard formula: E2(pg/mL) ÷ T(ng/dL), Normal range: 0.04~0.1. Higher values indicate feminization, lower values indicate masculinization.",
-        bodyRatioTitle: "Body Ratio Analysis",
-        whrLabel: "WHR (Waist-Hip Ratio)",
-        chestWaistLabel: "Chest-Waist Ratio",
-        shoulderHipLabel: "Shoulder-Hip Ratio",
-        drugInfluenceHow: "This analysis compares medication dosages with hormone changes to predict each drug's effect on hormone levels. Intervals with clear dosage changes receive higher weights.",
-        drugInfluenceConfidence: "Confidence indicates the quantity and quality of data used in the analysis. Higher values mean more accurate predictions.",
-        drugInfluenceHowTitle: "Analysis Method",
-        drugInfluenceConfidenceTitle: "Confidence",
-        influenceSamplesLabel: "Analysis Intervals",
-        hormoneStabilityTitle: "Hormone Stability",
-        cvStabilityNote: "Lower is more stable (< 10%: very stable)",
-        rfMessage_very_high: "Very high response - highly sensitive to hormones",
-        rfMessage_high: "High response - sensitive to hormones",
-        rfMessage_normal: "Normal response - standard hormone reaction",
-        rfMessage_low: "Low response - less sensitive to hormones",
-        rfMessage_very_low: "Very low response - very insensitive to hormones",
-
-        // Input Tab
-        formTitleNew: "Start Measuring📏 <br>Current Week {week}", formTitleEdit: "Edit Measurement Record <br>Week {week}",
-        inputDescription: "All fields are optional! Feel free to enter only what you want to track 😉",
-        nextMeasurementInfoNoData: "Calculates the next recommended date based on the last measurement.",
-        nextMeasurementInfo: "Last: {lastDate} ({daysAgo} ago) <br>Next recommended: {nextDate} ({daysUntil} away)",
-        nextMeasurementInfoToday: "Last: {lastDate} ({daysAgo} ago) <br>Today is measurement day!",
-        nextMeasurementInfoOverdue: "Last: {lastDate} ({daysAgo} ago) <br>Measurement is {daysOverdue} days overdue!",
-        daysAgo: "{count} days ago", daysUntil: "{count} days left", today: "Today",
-        categoryBodySize: "Body Size 📐", categoryHealth: "Health 💪", categoryMedication: "Magic ✨",
-        // Measurement Labels
-        week: 'Week', date: 'Date', timestamp: 'Timestamp',
-        height: 'Height (cm)', weight: 'Weight (kg)', shoulder: 'Shoulder Width (cm)', neck: 'Neck Circum (cm)',
-        chest: 'Upper Chest Circum (cm)', cupSize: 'Under Bust Circum (cm)', waist: 'Waist Circum (cm)', hips: 'Hip Circum (cm)',
-        thigh: 'Thigh Circum (cm)', calf: 'Calf Circum (cm)', arm: 'Arm Circum (cm)',
-        muscleMass: 'Muscle Mass (kg)', bodyFatPercentage: 'Body Fat (%)', libido: 'Libido (freq/wk)',
-        estrogenLevel: 'Estrogen Level (pg/ml)', testosteroneLevel: 'Testosterone Level (ng/ml)',
-        healthStatus: 'Health Status', healthScore: 'Health Score', healthNotes: 'Health Detail(text)',
-        skinCondition: 'Skin Condition',
-        estradiol: 'Estradiol (mg)', progesterone: 'Progesterone (mg)',
-        antiAndrogen: 'Anti-androgen (mg)', testosterone: 'Testosterone (mg)', antiEstrogen: 'Anti-Estrogen (mg)',
-        medicationOtherName: 'Other Magic Name',
-        medicationOtherDose: 'Other Magic Dose (mg)',
-        medicationOtherNamePlaceholder: '(Other)',
-        unitMgPlaceholder: 'mg',
-        // Placeholders
-        skinConditionPlaceholder: 'e.g., Softer', libidoPlaceholder: 'freq/week',
-        scorePlaceholder: "Score", notesPlaceholder: "Notes",
-        unitCm: "cm", unitKg: "kg", unitPercent: "%", unitMg: "mg", unitCountPerWeek: "freq/wk",
-        placeholderPrevious: "Prev: {value}",
-        // History Tab
-        historyTitle: "Measurement History 🧐",
-        historyDescription: "(If the table is wider than the screen, scroll horizontally!)",
-        manageColumn: "Manage",
-        // Report Tab
-        reportTitle: "My Change Report 📈", reportGraphTitle: "Weekly Change Graph",
-        reportGraphDesc: "Select (activate) or deselect items by clicking the buttons. You can overlay multiple items!",
-        reportPrevWeekTitle: "vs Last Week🤔", reportInitialTitle: "vs Beginning🌱",
-        reportTargetTitle: "Target🎯",
-        reportNeedTwoRecords: "At least two records are needed for comparison.", reportNeedTarget: "Please set your targets in the 'Targets' tab first!",
-        chartAxisLabel: "Week", comparisonItem: "Item", comparisonChange: "Change", comparisonProgress: "Progress", targetAchieved: "Achieved 🎉",
-        // Targets Tab
-        targetTitle: "Set Your Personal Goals 💖",
-        targetDescription: "Enter your desired target values. You can check the progress in the Main tab.",
-        targetItem: "Item", targetValue: "Target Value",
-        // Overview (Keeps) Tab
-        overviewTitle: "Planning 📝", noteNewTitle: "New Planning", noteEditTitle: "Edit Planning",
-        noteTitleLabel: "Title", noteTitlePlaceholder: "Planning title (optional)",
-        noteContentLabel: "Content", noteContentPlaceholder: "Record anything - events, body changes, thoughts in Planning!",
-        noteListTitle: "Saved Planning ✨", noteTitleUntitled: "Untitled",
-        sortBy: "Sort by:", sortNewest: "Newest First", sortOldest: "Oldest First",
-        noteDateCreated: "Created:", noteDateUpdated: "(Edited: {date})", notePreviewEmpty: "(No content)",
-        // Settings Tab
-        settingsTitle: "Settings ⚙️",
-        languageSettingsTitle: "Language Settings", language: "Language",
-        modeSettingsTitle: "Mode Settings", modeSettingsDesc: "Select the direction of physical changes you are aiming for.",
-        mode: "Mode", modeMtf: "Feminization", modeFtm: "Masculinization",
-        themeSettingsTitle: "Theme Settings", theme: "Theme", themeSystem: "Follow Device", themeLight: "Light Mode", themeDark: "Dark Mode",
-        dataManagementTitle: "Data Backup & Restore",
-        dataManagementDesc: "You can save all your records (measurements, targets, Planning) to a single file or restore from one. Backing up occasionally gives peace of mind! 😊",
-        exportData: "Export Data", importData: "Import Data",
-        warning: "Warning!", importWarning: "Restoring will completely replace all data currently in your browser with the file's content!",
-        resetDataTitle: "Reset Data",
-        severeWarning: "Extreme Caution!", resetWarning: "😱 All data (measurements, targets, Planning) will be permanently deleted! Please back up your data before proceeding.",
-        resetDataButton: "Reset All Data",
-        infoTitle: "Information", versionLabel: "Version:",
-        privacyInfo: "This app works offline and all data is stored securely only in your browser! 😉",
-        developerMessage: "Hope this little tool brings joy and help to your precious journey!",
-        dataUpdateAndResetTitle: "Data Update & Reset",
-        checkForUpdatesButton: "Check for Updates",
-        popupUpdateComplete: "Update complete! The app will now restart.",
-        popupUpdateFailed: "Update failed. Please try again later.",
-        popupAlreadyLatest: "You are already on the latest version! ✨",
-        popupOfflineForUpdate: "An internet connection is required to check for updates.",
-        resetWarning: "😱 Resetting data will permanently delete all records (measurements, targets, Planning)! Please back up your data before resetting.",
-        // Initial Setup
-        initialSetupTitle: "Initial Setup", initialSetupDesc: "Before starting ShiftV, please select your language and mode.",
-        swipeThresholdMet: "Swipe detected: {direction}"
-        ,
-        labelInitial: "Initial",
-        labelPrev: "Prev",
-        labelCurrent: "Current",
-        labelTarget: "Target",
-        initialTargetSame: "Initial/Target",
-        prevCurrentSame: "Prev/Current",
-        graphClickPrompt: "Click a data point on the graph to view detailed records for that week.",
-        biologicalSex: "Biological Sex",
-        sexSettingsTitle: "Biological Sex Settings",
-        sexSettingsDesc: "Used to improve the accuracy of natural hormone recovery calculations.",
-        sexMale: "Male",
-        sexFemale: "Female",
-        sexOther: "Other"
-    },
-    ja: {
-        // General
-        save: "保存", edit: "編集", delete: "削除", cancel: "キャンセル",
-        saveRecord: "記録する ✨", cancelEdit: "編集をキャンセル", saveTarget: "目標を保存! 💪",
-        saveNote: "プランを保存 🖋️", saveSettings: "設定を保存", close: "閉じる", ComRemainder: '残り',
-        confirm: "確認", selectAll: "すべて選択", deselectAll: "すべて解除",
-        noDataYet: "最初の記録を残しましょうか？", noNotesYet: "まだ作成されたプランがありません。最初のプランを残しましょうか？",
-        noTargetsYet: "目標が設定されていません。", noDataForChart: "表示する項目を選択するか、データを入力してください。",
-        invalidValue: "無効な値", loadingError: "データの読み込みエラー", savingError: "データの保存エラー",
-        confirmReset: "本当にすべてのデータを初期化しますか？ この操作は元に戻すことができず、すべての測定記録、目標、プランが完全に削除されます。初期化する前にデータをバックアップすることを強くお勧めします。",
-        confirmDeleteRecord: "週{week} ({date}) の記録を削除しますか？ この操作は元に戻せません。",
-        confirmDeleteNote: "プラン「{title}」を削除しますか？ この操作は元に戻せません。",
-        dataExported: "データがファイルに保存されました。", dataImported: "データが正常に読み込まれました！",
-        dataReset: "すべてのデータが初期化されました。", dataSaved: "保存されました！",
-        noteSaved: "プランが保存されました。", targetsSaved: "目標が保存されました。", settingsSaved: "設定が保存されました。",
-        importError: "ファイルの読み込み中にエラーが発生しました:", importSuccessRequiresReload: "データが正常に読み込まれました。変更を適用するにはページを再読み込みしてください。",
-        unexpectedError: "予期しないエラーが発生しました 😢 コンソール（F12）を確認してください。\nエラー: {message}",
-        alertInitError: "アプリの初期化中にエラーが発生しました！", alertListenerError: "イベントリスナーの設定中にエラーが発生しました！",
-        popupSaveSuccess: "測定記録 保存完了！🎉", popupUpdateSuccess: "測定記録 更新完了！✨",
-        popupDeleteSuccess: "測定記録 削除完了 👍", popupTargetSaveSuccess: "目標 保存完了！👍",
-        popupNoteSaveSuccess: "新規プラン 保存完了！🎉", popupNoteUpdateSuccess: "プラン 更新完了！✨",
-        popupNoteDeleteSuccess: "プラン 削除完了 👍", popupDataExportSuccess: "データ エクスポート成功！🎉",
-        popupDataImportSuccess: "データ インポート成功！✨", popupDataResetSuccess: "全データ リセット完了。 ✨",
-        popupSettingsSaved: "設定 保存完了！",
-        alertValidationError: "無効な入力値あり。赤色箇所を確認。数値は0以上必須。",
-        alertNoteContentMissing: "プランのタイトルか内容を入力してください！",
-        alertImportConfirm: "現在のデータを上書きしファイルから復元しますか？元に戻せません。",
-        alertImportInvalidFile: "ファイル形式が無効か互換性がありません",
-        alertImportReadError: "ファイル読込/処理エラー", alertImportFileReadError: "ファイル読込失敗",
-        alertGenericError: "エラー発生", alertDeleteError: "削除中エラー",
-        alertLoadError: "データ読込エラー。データ破損の可能性あり。コンソール確認",
-        alertSaveError: "保存失敗", alertExportError: "エクスポート中エラー",
-        alertCannotFindRecordEdit: "編集対象記録なし", alertCannotFindRecordDelete: "削除対象記録なし",
-        alertInvalidIndex: "記録処理エラー：インデックス無効",
-        alertCannotFindNoteEdit: "編集対象プランなし", alertCannotFindNoteDelete: "削除対象プランなし",
-        notification_setup_success_title: "通知設定完了",
-        notification_setup_success_body: "通知が設定されました。毎週測定日にお知らせします！",
-        notification_permission_denied: "通知の許可が拒否されました。ブラウザの設定で許可してください。",
-        // Tabs
-        tabMain: "ホーム",
-        tabRecord: "記録する",
-        tabMy: "マイページ",
-        tabSettings: "設定",
-        myTitle: "マイページ 🧑‍🚀", // 仮タイトル
-        //SVcard
-        svcard_shortcut_new: "新たな気持ちで<br><span class='countdown-days'>記録</span><br>しませんか？",
-        svcard_shortcut_dday: "「測定日です！」<br>新しい記録を<br>測定しましょう",
-        svcard_shortcut_overdue: "「測定が{days}日遅れています！」<br>新しい記録を<br>測定しましょう",
-        svcard_shortcut_countdown: "次の測定まで<br><span class='countdown-days'>{days}日</span><br>です",
-
-        svcard_title_highlights: "✨ ボディまとめ",
-        svcard_title_targets: "🎯 変化ロードマップ",
-        svcard_title_hormones: "💉 ホルモン分析",
-        svcard_title_keeps: "📝 プランノート",
-        svcard_no_data_for_highlights: "比較するには記録が2つ以上必要です。",
-        svcard_no_targets_set: "設定タブで目標を設定してください。",
-        svcard_overall_progress: "全体達成率",
-
-        svcard_no_major_changes: "最近、主な変化はありません。",
-        svcard_change_vs_last_week: "先週より",
-        svcard_title_weekly_guide: "今日のひとこと",
-        svcard_no_keeps_yet: "作成されたプランがありません。",
-        svcard_no_keeps_add_prompt: "作成されたプランがありません。「記録する」タブで追加してみてください！",
-        modalTabDetailedAnalysis: "詳細分析",
-        modalTabComparativeAnalysis: "比較分析",
-        labelBase: "基準",
-        labelCompareTarget: "比較対象",
-        svcard_hormone_weekly_change: "週間変化量",
-
-        // SV Card Titles & Content
-        svcard_guide_default: "継続は力なり！✨",
-        svcard_guide_positive_short: "素晴らしい！<br>変化は順調です。",
-        svcard_guide_positive_long: "ここ3週間、<br>着実に目標に向かっています！",
-        svcard_guide_negative_short: "大丈夫、<br>少し休む週かもしれません。",
-        svcard_guide_negative_long: "大丈夫、<br>また始めましょう！",
-        svcard_no_hormone_data: "ホルモンデータが不足しています。",
-        svcard_hormone_prediction: "来週の予測{hormone}値: <strong>{value}</strong>",
-        notification_title: "ShiftV 測定通知",
-        notification_body: "最後の記録から1週間が経ちました。新しい変化を記録しましょう！",
-        notification_permission_denied: "通知の許可が拒否されました。ブラウザの設定で許可してください。",
-        notificationSettingsTitle: "通知設定",
-        notificationToggleLabel: "測定日の通知を受け取る",
-        notificationSettingsDesc: "最終測定日から7日後に通知します。通知を受け取るには、ブラウザの許可が必要です。",
-        alertBrowserNotSupportNotification: "このブラウザは通知をサポートしていません。",
-        showHistoryButton: "記録を確認",
-        showInputButton: "入力に戻る",
-        recordKeepsLabel: "今週のプラン 📝",
-        recordKeepsPlaceholder: "今日の気分、出来事、体の変化などを自由に記録しましょう...",
-        memo: "プラン",
-        comparisonModalTitle: "記録レポートの詳細分析",
-
-        medicationHistoryTitle: "投薬量の変化",
-        hormoneLevelHistoryTitle: "ホルモン数値の変化",
-        hormoneAnalysisTitle: "過去2週間の分析",
-        hormoneAnalysisAvgChange: "平均変化量: {change}",
-        hormoneAnalysisNextWeek: "来週の予測値: {value}",
-        hormoneModalTitle: "ホルモン分析",
-        selectedWeekDataTitle: "{week}週目の詳細記録",
-        svcard_label_current: "現在: {value}",
-        targetLabelShort: "(目標:{value})",
-        emaxTitle: "Emax / Hill 分析 🧬",
-        responseFactor: "実際の反応度 (RF)",
-        rfMessage_high: "平均よりE2に対する感度が高いです。✨",
-        rfMessage_normal: "予測モデルと同様の反応を示しています。👌",
-        rfMessage_low: "E2値に対し、T抑制が予想より低いです。🤔",
-        rfMessage_negative: "数値が上昇しました。(フレア/変動) 📈",
-
-        //hormon
-        currentLevelEvaluation: "現在の数値評価",
-        currentLevelEvaluationDesc: "目標値と比較して現在のホルモン数値が適切かを評価します。",
-        hormoneAnalysisTitleChange: "数値変化分析",
-        hormoneChangeAnalysisDesc: "時間経過によるホルモン数値の変化を週間、月間、全期間に分けて分析します。",
-        hormoneAnalysisTitleInfluence: "薬物影響分析",
-        drugInfluenceDesc: "服用中の薬物がホルモン数値に与える影響をデータに基づいて分析します。",
-        hormoneAnalysisTitlePrediction: "将来予測",
-        emaxAnalysisDesc: "Hillモデルを使用してホルモン反応度を評価し、テストステロン抑制量を予測します。",
-        bodyRatioAnalysisDesc: "身体比率を分析し、変化の推移を可視化します。",
-        
-        // Status messages
-        estrogen_optimal: "最適範囲です",
-        estrogen_above_target: "目標より高いです",
-        estrogen_below_target: "目標より低いです",
-        estrogen_critical_high: "警告：非常に高い数値です",
-        testosterone_optimal: "最適範囲です",
-        testosterone_above_target: "目標より高いです",
-        testosterone_below_target: "目標より低いです",
-        testosterone_critical_low: "警告：非常に低い数値です",
-        no_target_set: "目標未設定",
-        
-        // Hormone understanding
-        understandingHormones: "ホルモン数値の理解",
-        estrogenExplanation: "エストロゲンは女性化効果を担当する主要ホルモンです。肌の変化、乳房の発達、脂肪分布の変化などに影響します。",
-        testosteroneExplanation: "テストステロンは男性化効果を担当する主要ホルモンです。筋肉量、体毛、声などに影響します。",
-        
-        // Stability
-        stabilityAnalysisTitle: "ホルモン安定性分析",
-        variationCoeff: "変動係数",
-        stability: "安定性",
-        stability_stable: "安定",
-        stability_moderate: "普通",
-        stability_unstable: "不安定",
-        
-        // Drug influence
-        drugInfluenceHowItWorks: "動作原理",
-        drugInfluenceHowItWorksDesc: "薬物服用前後のホルモン変化を分析し、各薬物の影響力を計算します。用量変化が大きい時期により高い重みを付与します。",
-        drugInfluenceConfidenceDesc: "信頼度はデータの量と質を示します。サンプル数が多く、単一薬物変化区間が多いほど高くなります。",
-        samples: "サンプル",
-        confidence: "信頼度",
-        
-        // Body ratios
-        bodyRatioAnalysisTitle: "身体比率分析",
-        waistHipRatio: "ウエスト-ヒップ比 (WHR)",
-        chestWaistRatio: "チェスト-ウエスト比",
-        shoulderHipRatio: "肩-ヒップ比",
-        
-        weeklyChange: "週間変化量",
-        monthlyAvgChange: "月間平均変化量",
-        totalChange: "総変化量",
-        totalChangeWithInitial: '総変化量 (初期値: {value})',
-        drugInfluence: "mgあたりの影響",
-        predictedNextWeek: "来週の予測",
-        daysToTarget: "目標までの予測日数",
-        daysUnit: "{days}日",
-        notEnoughData: "データ不足",
-        dailyTSuppression: '一日T抑制量',
-        influenceAnalysisDesc: 'この情報は実測データに基づく予測です。<br>数値には誤差が含まれる場合があります。',
-        
-        // 追加されたホルモンジャーナルキー
-        currentLevelsEvaluationTitle: "現在の数値評価",
-        svcard_label_target: "目標",
-        hormoneLevelOptimal: "最適範囲です",
-        hormoneLevelAboveTarget: "目標より高いです",
-        hormoneLevelBelowTarget: "目標より低いです",
-        hormoneLevelHigh: "高い数値です",
-        hormoneLevelLow: "低い数値です",
-        hormoneLevelNoTarget: "目標が設定されていません",
-        healthAlertsTitle: "健康注意事項",
-        healthAlertHighE2: "⚠️ エストロゲン値が非常に高いです (>300 pg/mL)。医療機関への相談をお勧めします。",
-        healthAlertLowT: "⚠️ テストステロン値が非常に低いです (<0.05 ng/mL)。医療機関への相談をお勧めします。",
-        predictionDisclaimer: "※ 予測値は参考用であり、個人差と測定誤差がある場合があります。",
-        hormoneExplanationTitle: "ホルモン数値の理解",
-        hormoneExplanationDesc: "以下は各ホルモンの意味と測定方法です。",
-        hormoneLevelsExplained: "ホルモン数値の説明",
-        estrogenLevelUnit: "pg/mL",
-        estrogenLevelExplanation: "エストラジオール(E2)は女性化に重要なホルモンで、血液検査で測定されます。",
-        testosteroneLevelUnit: "ng/mL",
-        testosteroneLevelExplanation: "テストステロン(T)は男性化に重要なホルモンで、血液検査で測定されます。",
-        responseFactorExplanation: "個人のホルモン反応感度を示します。1.0に近いほど標準的な反応です。",
-        etRatioTitle: "E/T比",
-        etRatioMale: "男性型",
-        etRatioFemale: "女性型",
-        etRatioExplanation: "E/T比はエストロゲン(E)とテストステロン(T)の相対的バランスを示します。医学的標準式: E2(pg/mL) ÷ T(ng/dL)、正常範囲: 0.04~0.1。高いほど女性化、低いほど男性化を意味します。",
-        bodyRatioTitle: "身体比率分析",
-        whrLabel: "WHR (ウエスト・ヒップ比)",
-        chestWaistLabel: "胸囲・ウエスト比",
-        shoulderHipLabel: "肩幅・ヒップ比",
-        drugInfluenceHow: "この分析は薬物投与量とホルモン変化を比較し、各薬物がホルモン値に与える影響を予測します。投与量変更が明確な区間により高い重み付けを行います。",
-        drugInfluenceConfidence: "信頼度は分析に使用されたデータの量と質を示します。高いほど予測がより正確です。",
-        drugInfluenceHowTitle: "分析方法",
-        drugInfluenceConfidenceTitle: "信頼度",
-        influenceSamplesLabel: "分析区間",
-        hormoneStabilityTitle: "ホルモン安定性",
-        cvStabilityNote: "低いほど安定 (< 10%: 非常に安定)",
-        rfMessage_very_high: "非常に高い反応度 - ホルモンに非常に敏感に反応します",
-        rfMessage_high: "高い反応度 - ホルモンに敏感に反応します",
-        rfMessage_normal: "正常な反応度 - 標準的なホルモン反応です",
-        rfMessage_low: "低い反応度 - ホルモンに鈍感に反応します",
-        rfMessage_very_low: "非常に低い反応度 - ホルモンに非常に鈍感に反応します",
-
-        // Input Tab
-        formTitleNew: "測定開始📏<br>現在{week}週", formTitleEdit: "測定記録を編集<br>{week}週目",
-        inputDescription: "すべての項目は任意です！記録したいものだけ気軽に入力してください 😉",
-        nextMeasurementInfoNoData: "最終測定日を基準に次の予定日を計算します。",
-        nextMeasurementInfo: "最終測定: {lastDate} ({daysAgo}日前) <br>次回推奨日: {nextDate} ({daysUntil}日後)",
-        nextMeasurementInfoToday: "最終測定: {lastDate} ({daysAgo}日前) <br>今日は測定日です！",
-        nextMeasurementInfoOverdue: "最終測定: {lastDate} ({daysAgo}日前) <br>測定が{daysOverdue}日遅れています！",
-        daysAgo: "{count}日前", daysUntil: "{count}日後", today: "今日",
-        categoryBodySize: "身体サイズ 📐", categoryHealth: "健康 💪", categoryMedication: "魔法 ✨",
-        // Measurement Labels
-        week: '週目', date: '日付', timestamp: '記録時間',
-        height: '身長 (cm)', weight: '体重 (kg)', shoulder: '肩幅 (cm)', neck: '首周り (cm)',
-        chest: 'トップバスト (cm)', cupSize: 'アンダーバスト (cm)', waist: '腹囲 (cm)', hips: 'ヒップ (cm)',
-        thigh: '太もも周り (cm)', calf: 'ふくらはぎ周り (cm)', arm: '腕周り (cm)',
-        muscleMass: '筋肉量 (kg)', bodyFatPercentage: '体脂肪率 (%)', libido: '性欲 (回/週)',
-        estrogenLevel: 'エストロゲン値 (pg/ml)', testosteroneLevel: 'テストステロン値 (ng/ml)',
-        healthStatus: '健康状態', healthScore: '健康スコア', healthNotes: '健康状態(テキスト)',
-        skinCondition: '肌の状態',
-        estradiol: 'エストラジオール (mg)', progesterone: 'プロゲステロン (mg)',
-        antiAndrogen: '抗アンドロゲン (mg)', testosterone: 'テストステロン (mg)', antiEstrogen: '抗エストロゲン剤 (mg)',
-        medicationOtherName: 'その他の魔法名',
-        medicationOtherDose: 'その他の魔法用量 (mg)',
-        medicationOtherNamePlaceholder: '（その他）',
-        unitMgPlaceholder: 'mg',
-        // Placeholders
-        skinConditionPlaceholder: '例: 柔らかくなった', libidoPlaceholder: '回/週',
-        scorePlaceholder: "点数", notesPlaceholder: "特記事項",
-        unitCm: "cm", unitKg: "kg", unitPercent: "%", unitMg: "mg", unitCountPerWeek: "回/週",
-        placeholderPrevious: "前回: {value}",
-        // History Tab
-        historyTitle: "測定記録の詳細 🧐", historyDescription: "（表が画面より広い場合は、左右にスクロールしてください！）", manageColumn: "管理",
-        // Report Tab
-        reportTitle: "私の変化レポート 📈", reportGraphTitle: "週ごとの変化グラフ",
-        reportGraphDesc: "見たい項目のボタンを押して選択（アクティブ化）または解除できます。複数の項目を重ねて表示することも可能です！",
-        reportPrevWeekTitle: "先週と比較🤔", reportInitialTitle: "最初と比較🌱", reportTargetTitle: "目標達成率🎯",
-        reportNeedTwoRecords: "比較するには、少なくとも2つの記録が必要です。", reportNeedTarget: "まず「目標設定」タブで目標を入力してください！",
-        chartAxisLabel: "週目", comparisonItem: "項目", comparisonChange: "変化量", comparisonProgress: "達成率", targetAchieved: "達成 🎉",
-        // Targets Tab
-        targetDescription: "希望する目標数値を入力してください。メインタブで達成率を確認できます。",
-        targetItem: "項目", targetValue: "目標値",
-        // Overview (Notes) Tab
-        overviewTitle: "プラン 📝", noteNewTitle: "新しいプランを作成", noteEditTitle: "プランを編集",
-        noteTitleLabel: "タイトル", noteTitlePlaceholder: "プランのタイトル（任意）",
-        noteContentLabel: "内容", noteContentPlaceholder: "イベント、体調の変化、考えなど、自由に記録しましょう！",
-        noteListTitle: "作成されたプラン一覧 ✨", noteTitleUntitled: "無題",
-        sortBy: "並び替え:", sortNewest: "新しい順", sortOldest: "古い順",
-        noteDateCreated: "作成:", noteDateUpdated: "(編集: {date})", notePreviewEmpty: "(内容なし)",
-        // Settings Tab
-        settingsTitle: "設定 ⚙️",
-        languageSettingsTitle: "言語設定", language: "言語",
-        modeSettingsTitle: "モード設定", modeSettingsDesc: "目指す身体の変化の方向を選択してください。",
-        mode: "モード", modeMtf: "女性化", modeFtm: "男性化",
-        themeSettingsTitle: "テーマ設定", theme: "テーマ", themeSystem: "デバイスの設定に従う", themeLight: "ライトモード", themeDark: "ダークモード",
-        dataManagementTitle: "データのバックアップと復元",
-        dataManagementDesc: "すべての記録（測定、目標、プラン）を1つのファイルに保存したり、復元したりできます。時々バックアップしておくと安心です！ 😊",
-        exportData: "ファイルに保存", importData: "ファイルから読み込む",
-        warning: "注意！", importWarning: "復元すると、現在ブラウザにあるすべてのデータがファイルの内容に完全に置き換えられます！",
-        resetDataTitle: "データ初期化",
-        severeWarning: "！！！警告！！！", resetWarning: "😱 すべてのデータ（測定、目標、プラン）が完全に削除されます！ 初期化する前に必ずデータをファイルにバックアップしてください。",
-        resetDataButton: "すべてのデータを初期化",
-        infoTitle: "情報", versionLabel: "バージョン:",
-        privacyInfo: "このアプリはオフラインで動作し、すべてのデータはブラウザ内にのみ安全に保存されます！ 😉",
-        developerMessage: "この小さなツールが、あなたの貴重な旅に喜びと助けをもたらすことを願っています！",
-        dataUpdateAndResetTitle: "データの更新と初期化",
-        checkForUpdatesButton: "更新を確認",
-        popupUpdateComplete: "アップデートが完了しました。アプリを再起動します。",
-        popupUpdateFailed: "アップデートに失敗しました。後でもう一度お試しください。",
-        popupAlreadyLatest: "すでに最新バージョンです！✨",
-        popupOfflineForUpdate: "アップデートを確認するにはインターネット接続が必要です。",
-        resetWarning: "😱 データの初期化は、すべての記録（測定、目標、プラン）を完全に削除します！初期化する前に、必ずデータをファイルにバックアップしてください。",
-        // Initial Setup
-        initialSetupTitle: "初期設定", initialSetupDesc: "ShiftVを使用する前に、言語とモードを選択してください。",
-        swipeThresholdMet: "スワイプ検出: {direction}"
-        ,
-        labelInitial: "初期",
-        labelPrev: "前週",
-        labelCurrent: "現在",
-        labelTarget: "目標",
-        initialTargetSame: "初期/目標",
-        prevCurrentSame: "前週/現在",
-        graphClickPrompt: "グラフの数値をタップすると、該当週の詳細記録が表示されます。",
-        biologicalSex: "生物学的性別",
-        sexSettingsTitle: "生物学的性別設定",
-        sexSettingsDesc: "自然なホルモン回復率の計算精度を向上させるために使用されます。",
-        sexMale: "男性",
-        sexFemale: "女性",
-        sexOther: "その他"
-    }
+  ko: {
+    save: "저장",
+    edit: "수정",
+    delete: "삭제",
+    cancel: "취소",
+    saveRecord: "기록하기 ✨",
+    cancelEdit: "수정 취소",
+    saveTarget: "목표 저장! 💪",
+    saveNote: "플래닝 저장 🖋️",
+    saveSettings: "설정 저장",
+    close: "닫기",
+    ComRemainder: "남은 수치",
+    confirm: "확인",
+    selectAll: "전체 선택",
+    deselectAll: "전체 해제",
+    noDataYet: "첫 기록을 남겨볼까요?",
+    noNotesYet: "첫 플래닝을 남겨보세요!",
+    noTargetsYet: "설정된 목표가 없어요.",
+    noDataForChart: "표시할 항목을 선택하거나 데이터를 입력하세요.",
+    invalidValue: "유효하지 않은 값",
+    loadingError: "데이터 로드 오류",
+    savingError: "데이터 저장 오류",
+    valuePlaceholder: "값",
+    confirmReset: "정말로 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든 측정 기록, 목표, 플래닝가 영구적으로 삭제됩니다. 초기화 전에 데이터를 백업하는 것이 좋습니다.",
+    confirmDeleteRecord: "주차 {week} ({date}) 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    confirmDeleteNote: "플래닝 '{title}'을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    dataExported: "데이터가 파일로 저장되었습니다.",
+    dataImported: "데이터를 성공적으로 불러왔습니다!",
+    dataReset: "모든 데이터가 초기화되었습니다.",
+    dataSaved: "저장 완료! 👍",
+    noteSaved: "플래닝가 저장되었습니다.",
+    targetsSaved: "목표가 저장되었습니다.",
+    settingsSaved: "설정이 저장되었습니다.",
+    importError: "파일을 불러오는 중 오류 발생:",
+    importSuccessRequiresReload: "데이터를 성공적으로 불러왔습니다. 변경사항을 적용하려면 페이지를 새로고침해주세요.",
+    unexpectedError: "예상치 못한 오류가 발생했습니다 😢 콘솔(F12)을 확인해주세요.\n오류: {message}",
+    alertInitError: "앱 초기화 중 오류 발생!",
+    alertListenerError: "이벤트 리스너 설정 오류!",
+    popupSaveSuccess: "측정 기록 저장 완료! 🎉",
+    popupUpdateSuccess: "측정 기록 수정 완료! ✨",
+    popupDeleteSuccess: "측정 기록 삭제 완료 👍",
+    popupTargetSaveSuccess: "목표 저장 완료! 👍",
+    popupNoteSaveSuccess: "새 플래닝 저장 완료! 🎉",
+    popupNoteUpdateSuccess: "플래닝 수정 완료! ✨",
+    popupNoteDeleteSuccess: "플래닝 삭제 완료 👍",
+    popupDataExportSuccess: "데이터 내보내기 성공! 🎉",
+    popupDataImportSuccess: "데이터 가져오기 성공! ✨",
+    popupDataResetSuccess: "모든 데이터가 초기화되었습니다. ✨",
+    popupSettingsSaved: "설정 저장 완료! 👍",
+    alertValidationError: "유효하지 않은 입력 값이 있습니다. 빨간색 표시 필드를 확인해주세요. 숫자 값은 0 이상이어야 합니다.",
+    alertNoteContentMissing: "플래닝 제목이나 내용을 입력해주세요!",
+    alertImportConfirm: "현재 데이터를 덮어쓰고 가져온 데이터로 복원하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    alertImportInvalidFile: "파일 형식이 올바르지 않거나 호환되지 않는 데이터입니다.",
+    alertImportReadError: "파일 읽기/처리 중 오류 발생.",
+    alertImportFileReadError: "파일 읽기 실패.",
+    alertGenericError: "오류가 발생했습니다.",
+    alertDeleteError: "삭제 중 오류 발생.",
+    alertLoadError: "데이터 로드 중 오류 발생. 데이터가 손상되었을 수 있습니다. 콘솔 확인.",
+    alertSaveError: "로컬 스토리지 저장 실패.",
+    alertExportError: "데이터 내보내기 중 오류 발생.",
+    alertCannotFindRecordEdit: "수정할 기록 찾기 실패.",
+    alertCannotFindRecordDelete: "삭제할 기록 찾기 실패.",
+    alertInvalidIndex: "기록 처리 중 오류: 인덱스 오류.",
+    alertCannotFindNoteEdit: "수정할 플래닝 찾기 실패.",
+    alertCannotFindNoteDelete: "삭제할 플래닝 찾기 실패.",
+    notification_setup_success_title: "알림 설정 완료",
+    notification_setup_success_body: "알림이 설정되었습니다. 매주 측정일이 되면 알려드릴게요!",
+    notification_permission_denied: "알림 권한이 차단되었습니다. 브라우저 설정에서 허용해주세요.",
+    tabMain: "홈",
+    tabRecord: "기록하기",
+    tabMy: "마이",
+    tabSettings: "설정",
+    myTitle: "마이 페이지 🧑‍🚀",
+    showHistoryButton: "기록 확인하기",
+    showInputButton: "입력으로 돌아가기",
+    recordKeepsLabel: "이번 주 플래닝! 📝",
+    recordKeepsPlaceholder: "오늘의 기분, 이벤트, 신체 변화 등을 자유롭게 기록해보세요...",
+    memo: "플래닝",
+    svcard_shortcut_new: "새 마음으로<br><span class='countdown-days'>기록</span><br>해볼까요?",
+    svcard_shortcut_dday: "'D-Day!'<br>새로운 기록을<br>측정해주세요",
+    svcard_shortcut_overdue: "'측정이 {days}일 지났어요!'<br>새로운 기록을<br>측정해주세요",
+    svcard_shortcut_countdown: "다음 측정일까지<br><span class='countdown-days'>{days}일</span><br>남았어요",
+    svcard_title_highlights: "✨ 바디 브리핑",
+    svcard_title_targets: "🎯 변화 로드맵",
+    svcard_title_hormones: "💉 호르몬 저널",
+    svcard_title_keeps: "📝 플래닝 노트",
+    svcard_no_data_for_highlights: "변화를 비교하려면 데이터가 2개 이상 필요해요.",
+    svcard_no_targets_set: "설정 탭에서 목표를 설정해주세요.",
+    svcard_overall_progress: "전체 달성률",
+    svcard_label_current: "현재: {value}",
+    targetLabelShort: "(목표:{value})",
+    svcard_guide_default: "꾸준함이 <br>변화를 만들어요! ✨",
+    svcard_guide_positive_short: "훌륭해요! <br>변화가 순조로워요.",
+    svcard_guide_positive_long: "최근 3주간 목표를 향해 <br>꾸준히 나아가고 있어요!",
+    svcard_guide_negative_short: "괜찮아요 <br>잠시 쉬어가는 주일 수도 있어요.",
+    svcard_guide_negative_long: "괜찮아요 <br>다시 한번 해볼까요?",
+    svcard_no_hormone_data: "호르몬 데이터가 부족해요.",
+    svcard_hormone_prediction: "다음 주 예상 {hormone} 수치: <strong>{value}</strong>",
+    notification_title: "ShiftV 측정 알림",
+    notification_body: "마지막으로 기록한 지 일주일이 지났어요. 새로운 변화를 기록해볼까요?",
+    notificationSettingsTitle: "알림 설정",
+    notificationToggleLabel: "측정일 알림 받기",
+    notificationSettingsDesc: "마지막 측정일로부터 7일이 지나면 알려드려요. 알림을 받으려면 브라우저의 권한 허용이 필요해요.",
+    alertBrowserNotSupportNotification: "이 브라우저는 알림을 지원하지 않아요.",
+    comparisonModalTitle: "바디 브리핑",
+    selectedWeekDataTitle: "{week}주차 상세 기록",
+    medicationHistoryTitle: "투여량 변화",
+    hormoneLevelHistoryTitle: "호르몬 수치 변화",
+    hormoneAnalysisTitle: "최근 2주 분석",
+    hormoneAnalysisAvgChange: "평균 변화량: {change}",
+    hormoneAnalysisNextWeek: "다음 주 예상 수치: {value}",
+    hormoneModalTitle: "호르몬 저널",
+    svcard_no_major_changes: "최근 주요 변화가 없어요.",
+    svcard_change_vs_last_week: "지난 주 대비",
+    svcard_title_weekly_guide: "오늘의 한마디",
+    svcard_title_action_guide: "🎯 액션 가이드",
+    svcard_action_guide_summary: "추천 액션과 성과 피드백을 확인해보세요.",
+    svcard_no_keeps_yet: "작성된 플래닝가 없어요.",
+    svcard_no_keeps_add_prompt: "작성된 플래닝가 없어요. '기록하기' 탭에서 추가해보세요!",
+    modalTabDetailedAnalysis: "상세 분석",
+    modalTabComparativeAnalysis: "비교 분석",
+    labelBase: "기준",
+    labelCompareTarget: "비교 대상",
+    svcard_hormone_weekly_change: "주간 변화량",
+    emaxTitle: "Emax / Hill 분석 🧬",
+    responseFactor: "실제 반응도 (RF)",
+    rfMessage_high: "평균 대비 E2에 높은 민감도를 보입니다. ✨",
+    rfMessage_normal: "예측 모델과 유사한 반응을 보입니다. 👌",
+    rfMessage_low: "E2 수치 대비 T 억제가 예상보다 낮습니다. 🤔",
+    rfMessage_negative: "수치가 상승했습니다. (플레어/변동) 📈",
+    currentLevelEvaluation: "현재 수치 평가",
+    currentLevelEvaluationDesc: "목표치와 비교하여 현재 호르몬 수치가 적절한지 평가합니다.",
+    hormoneAnalysisTitleChange: "수치 변화량 분석",
+    hormoneChangeAnalysisDesc: "시간에 따른 호르몬 수치의 변화를 주간, 월간, 전체 기간으로 나누어 분석합니다.",
+    hormoneAnalysisTitleInfluence: "약물 영향력 분석",
+    drugInfluenceDesc: "복용 중인 약물이 호르몬 수치에 미치는 영향을 데이터 기반으로 분석합니다.",
+    hormoneAnalysisTitlePrediction: "미래 예측",
+    emaxAnalysisDesc: "Hill 모델을 사용하여 호르몬 반응도를 평가하고 테스토스테론 억제량을 예측합니다.",
+    bodyRatioAnalysisDesc: "신체 비율을 분석하여 변화 추이를 시각화합니다.",
+    estrogen_optimal: "최적 범위입니다",
+    estrogen_above_target: "목표보다 높습니다",
+    estrogen_below_target: "목표보다 낮습니다",
+    estrogen_critical_high: "위험: 매우 높은 수치입니다",
+    testosterone_optimal: "최적 범위입니다",
+    testosterone_above_target: "목표보다 높습니다",
+    testosterone_below_target: "목표보다 낮습니다",
+    testosterone_critical_low: "위험: 매우 낮은 수치입니다",
+    no_target_set: "목표 미설정",
+    understandingHormones: "호르몬 수치 이해하기",
+    estrogenExplanation: "에스트로겐은 여성화 효과를 담당하는 주요 호르몬입니다. 피부 변화, 유방 발달, 지방 분포 변화 등에 영향을 미칩니다.",
+    testosteroneExplanation: "테스토스테론은 남성화 효과를 담당하는 주요 호르몬입니다. 근육량, 체모, 목소리 등에 영향을 미칩니다.",
+    stabilityAnalysisTitle: "호르몬 안정성 분석",
+    variationCoeff: "변동 계수",
+    stability: "안정성",
+    stability_stable: "안정적",
+    stability_moderate: "보통",
+    stability_unstable: "불안정",
+    drugInfluenceHowItWorks: "작동 원리",
+    drugInfluenceHowItWorksDesc: "약물 복용 전후의 호르몬 변화를 분석하여 각 약물의 영향력을 계산합니다. 복용량 변화가 큰 시기에 더 높은 가중치를 부여합니다.",
+    drugInfluenceConfidenceDesc: "신뢰도는 데이터의 양과 질을 나타냅니다. 샘플 수가 많고 단일 약물 변화 구간이 많을수록 높아집니다.",
+    samples: "샘플",
+    confidence: "신뢰도",
+    bodyRatioAnalysisTitle: "신체 비율 분석",
+    waistHipRatio: "허리-엉덩이 비율 (WHR)",
+    chestWaistRatio: "가슴-허리 비율",
+    shoulderHipRatio: "어깨-엉덩이 비율",
+    weeklyChange: "주간 변화량",
+    monthlyAvgChange: "월간 평균 변화량",
+    totalChange: "총 변화량",
+    totalChangeWithInitial: "총 변화량 (초기: {value})",
+    drugInfluence: "mg당 영향",
+    predictedNextWeek: "다음 주 예상",
+    daysToTarget: "목표까지 예상",
+    daysUnit: "{days}일",
+    notEnoughData: "데이터 부족",
+    dailyTSuppression: "일일 T 억제량",
+    influenceAnalysisDesc: "이 정보는 실측 데이터에 기반한 예측치입니다. <br>수치에는 오차가 있을 수 있습니다.",
+    currentLevelsEvaluationTitle: "현재 수치 평가",
+    svcard_label_target: "목표",
+    hormoneLevelOptimal: "최적 범위입니다",
+    hormoneLevelAboveTarget: "목표보다 높습니다",
+    hormoneLevelBelowTarget: "목표보다 낮습니다",
+    hormoneLevelHigh: "높은 수치입니다",
+    hormoneLevelLow: "낮은 수치입니다",
+    hormoneLevelNoTarget: "목표가 설정되지 않았습니다",
+    healthAlertsTitle: "건강 주의사항",
+    healthAlertHighE2: "⚠️ 에스트로겐 수치가 매우 높습니다 (>300 pg/mL). 의료진과 상담을 권장합니다.",
+    healthAlertLowT: "⚠️ 테스토스테론 수치가 매우 낮습니다 (<5 ng/dL). 의료진과 상담을 권장합니다.",
+    predictionDisclaimer: "※ 예측 수치는 참고용이며, 개인차와 측정 오차가 있을 수 있습니다.",
+    hormoneExplanationTitle: "호르몬 수치 이해하기",
+    hormoneExplanationDesc: "아래는 각 호르몬의 의미와 측정 방법입니다.",
+    hormoneLevelsExplained: "호르몬 수치 설명",
+    estrogenLevelUnit: "pg/mL",
+    estrogenLevelExplanation: "에스트라디올(E2)은 여성화에 중요한 호르몬으로, 혈액 검사를 통해 측정됩니다.",
+    testosteroneLevelUnit: "ng/dL",
+    testosteroneLevelExplanation: "테스토스테론(T)은 남성화에 중요한 호르몬으로, 혈액 검사를 통해 측정됩니다.",
+    responseFactorExplanation: "개인의 호르몬 반응 민감도를 나타냅니다. 1.0에 가까울수록 표준적인 반응입니다.",
+    etRatioTitle: "E/T 비율",
+    etRatioMale: "남성형",
+    etRatioFemale: "여성형",
+    etRatioExplanation: "E/T 비율은 에스트로겐(E)과 테스토스테론(T)의 상대적 균형을 나타냅니다. 의학적 표준 공식: E2(pg/mL) ÷ T(ng/dL), 정상 범위: 0.04~0.1. 높을수록 여성화, 낮을수록 남성화를 의미합니다.",
+    bodyRatioTitle: "신체 비율 분석",
+    whrLabel: "WHR (허리-엉덩이 비율)",
+    chestWaistLabel: "가슴-허리 비율",
+    shoulderHipLabel: "어깨-엉덩이 비율",
+    drugInfluenceHow: "이 분석은 약물 복용량과 호르몬 변화를 비교하여, 각 약물이 호르몬 수치에 미치는 영향을 예측합니다. 복용량 변경이 명확한 구간에 더 높은 가중치를 부여합니다.",
+    drugInfluenceConfidence: "신뢰도는 분석에 사용된 데이터의 양과 질을 나타냅니다. 높을수록 더 정확한 예측입니다.",
+    drugInfluenceHowTitle: "분석 방법",
+    drugInfluenceConfidenceTitle: "신뢰도",
+    influenceSamplesLabel: "분석 구간",
+    hormoneStabilityTitle: "호르몬 안정성",
+    cvStabilityNote: "낮을수록 안정적 (< 10%: 매우 안정적)",
+    rfMessage_very_high: "매우 높은 반응도 - 호르몬에 매우 민감하게 반응합니다",
+    rfMessage_very_low: "매우 낮은 반응도 - 호르몬에 매우 둔감하게 반응합니다",
+    formTitleNew: "측정 시작하기<br>현재 {week}주차",
+    formTitleEdit: "측정 기록 수정 <br>{week}주차",
+    inputDescription: "모든 항목은 선택 사항! 기록하고 싶은 것만 편하게 입력해주세요 😉",
+    nextMeasurementInfoNoData: "마지막 측정일을 기준으로 다음 예정일을 계산해요.",
+    nextMeasurementInfo: "마지막 측정: {lastDate} ({daysAgo}일 전) <br>다음 측정 추천일: {nextDate} ({daysUntil}일 후)",
+    nextMeasurementInfoToday: "마지막 측정: {lastDate} ({daysAgo}일 전) <br>오늘은 측정하는 날!",
+    nextMeasurementInfoOverdue: "마지막 측정: {lastDate} ({daysAgo}일 전) <br>측정이 {daysOverdue}일 지났어요!",
+    daysAgo: "{count}일 전",
+    daysUntil: "{count}일 후",
+    today: "오늘",
+    categoryBodySize: "신체 사이즈 📐",
+    categoryHealth: "건강 💪",
+    categoryMedication: "마법 ✨",
+    week: "주차",
+    date: "날짜",
+    timestamp: "기록 시간",
+    height: "신장 (cm)",
+    weight: "체중 (kg)",
+    shoulder: "어깨너비 (cm)",
+    neck: "목둘레 (cm)",
+    chest: "윗 가슴둘레 (cm)",
+    cupSize: "아랫 가슴둘레 (cm)",
+    waist: "허리둘레 (cm)",
+    hips: "엉덩이둘레 (cm)",
+    thigh: "허벅지둘레 (cm)",
+    calf: "종아리둘레 (cm)",
+    arm: "팔뚝둘레 (cm)",
+    muscleMass: "근육량 (kg)",
+    bodyFatPercentage: "체지방률 (%)",
+    libido: "성욕 (회/주)",
+    estrogenLevel: "에스트로겐 수치 (pg/ml)",
+    testosteroneLevel: "테스토스테론 수치 (ng/ml)",
+    healthStatus: "건강 상태",
+    healthScore: "건강 점수",
+    healthNotes: "건강 상세(텍스트)",
+    skinCondition: "피부 상태",
+    estradiol: "에스트라디올 (mg)",
+    progesterone: "프로게스테론 (mg)",
+    antiAndrogen: "항안드로겐 (mg)",
+    testosterone: "테스토스테론 (mg)",
+    antiEstrogen: "항에스트로겐 (mg)",
+    medicationOtherName: "기타 마법 이름",
+    medicationOtherDose: "기타 마법 용량 (mg)",
+    medicationOtherNamePlaceholder: "(기타)",
+    unitMgPlaceholder: "mg",
+    skinConditionPlaceholder: "예: 부드러워짐",
+    libidoPlaceholder: "회/주",
+    scorePlaceholder: "점수",
+    notesPlaceholder: "특이사항",
+    unitCm: "cm",
+    unitKg: "kg",
+    unitPercent: "%",
+    unitMg: "mg",
+    unitCountPerWeek: "회/주",
+    placeholderPrevious: "이전: {value}",
+    historyTitle: "측정 기록 꼼꼼히 보기 🧐",
+    historyDescription: "(표가 화면보다 넓으면 좌우로 스크롤해보세요!)",
+    manageColumn: "관리",
+    reportTitle: "나의 변화 리포트 📈",
+    reportGraphTitle: "주차별 변화 그래프",
+    reportGraphDesc: "보고 싶은 항목 버튼을 눌러 선택(활성)하거나 해제할 수 있어요. 여러 항목을 겹쳐 볼 수도 있답니다!",
+    reportPrevWeekTitle: "지난주와 비교🤔",
+    reportInitialTitle: "처음과 비교🌱",
+    reportTargetTitle: "목표 달성률🎯",
+    reportNeedTwoRecords: "데이터가 2개 이상 기록되어야 비교할 수 있어요.",
+    reportNeedTarget: "먼저 '목표 설정' 탭에서 목표를 입력해주세요!",
+    chartAxisLabel: "주차",
+    comparisonItem: "항목",
+    comparisonChange: "변화량",
+    comparisonProgress: "달성률",
+    targetAchieved: "달성 🎉",
+    targetTitle: "나만의 목표 설정 💖",
+    targetDescription: "원하는 목표 수치를 입력해주세요. 메인 탭에서 달성률을 확인할 수 있어요.",
+    targetItem: "항목",
+    targetValue: "목표값",
+    overviewTitle: "플래닝 📝",
+    noteNewTitle: "새 플래닝 작성",
+    noteEditTitle: "플래닝 수정",
+    noteTitleLabel: "제목",
+    noteTitlePlaceholder: "플래닝 제목 (선택)",
+    noteContentLabel: "내용",
+    noteContentPlaceholder: "이벤트, 몸 상태, 생각 등 자유롭게 플래닝에 기록해요!",
+    noteListTitle: "작성된 플래닝 목록 ✨",
+    noteTitleUntitled: "제목 없음",
+    sortBy: "정렬:",
+    sortNewest: "최신 순",
+    sortOldest: "오래된 순",
+    noteDateCreated: "작성:",
+    noteDateUpdated: "(수정: {date})",
+    notePreviewEmpty: "내용을 적어 보세요",
+    settingsTitle: "설정 ⚙️",
+    languageSettingsTitle: "언어 설정",
+    language: "언어",
+    modeSettingsTitle: "모드 설정",
+    modeSettingsDesc: "목표하는 신체 변화 방향을 선택해주세요.",
+    mode: "모드",
+    modeMtf: "여성화",
+    modeFtm: "남성화",
+    themeSettingsTitle: "테마 설정",
+    theme: "테마",
+    themeSystem: "기기 값 참조",
+    themeLight: "라이트 모드",
+    themeDark: "다크 모드",
+    dataManagementTitle: "데이터 백업 & 복원",
+    dataManagementDesc: "모든 기록(측정, 목표, 플래닝)을 파일 하나로 저장하거나 복원할 수 있어요. 가끔 백업해두면 안심이에요! 😊",
+    exportData: "파일 저장하기",
+    importData: "파일 불러오기",
+    warning: "주의!",
+    importWarning: "복원하면 지금 앱에 있는 모든 데이터가 파일 내용으로 완전히 대체돼요!",
+    resetDataTitle: "데이터 초기화",
+    severeWarning: "정말정말 주의!",
+    resetWarning: "😱 모든 데이터(측정, 목표, 플래닝)가 영구적으로 삭제됩니다! 초기화 전에 꼭! 데이터를 파일로 백업해주세요.",
+    resetDataButton: "모든 데이터 초기화",
+    infoTitle: "정보",
+    versionLabel: "버전:",
+    privacyInfo: "이 앱은 오프라인 작동하며 모든 데이터는 앱에만 안전하게 저장됩니다! 😉",
+    developerMessage: "이 작은 도구가 당신의 소중한 여정에 즐거움과 도움이 되기를 바라요!",
+    dataUpdateAndResetTitle: "데이터 업데이트 및 초기화",
+    checkForUpdatesButton: "업데이트 확인",
+    popupUpdateComplete: "업데이트 완료! 앱을 다시 시작합니다.",
+    popupUpdateFailed: "업데이트에 실패했습니다. 잠시 후 다시 시도해주세요.",
+    popupAlreadyLatest: "이미 최신 버전이에요! ✨",
+    popupOfflineForUpdate: "업데이트를 확인하려면 인터넷 연결이 필요해요.",
+    initialSetupTitle: "초기 설정",
+    initialSetupDesc: "ShiftV 사용을 시작하기 전에 언어와 모드를 선택해주세요.",
+    swipeThresholdMet: "스와이프 감지: {direction}",
+    labelInitial: "초기",
+    labelPrev: "전주",
+    labelCurrent: "현재",
+    labelTarget: "목표",
+    initialTargetSame: "초기/목표",
+    prevCurrentSame: "전주/현재",
+    graphClickPrompt: "그래프의 수치를 클릭하면 해당 주차의 상세정보가 표시됩니다.",
+    symptoms: "증상",
+    medications: "투여 약물",
+    menstruationActive: "월경 여부",
+    menstruationPain: "월경 통증",
+    briefingGroupMeasurements: "측정",
+    briefingGroupSymptoms: "증상",
+    briefingGroupMedications: "약물",
+    biologicalSex: "생물학적 성별",
+    sexSettingsTitle: "생물학적 성별 설정",
+    sexSettingsDesc: "자연 호르몬 회복률 계산의 정확도를 높이기 위해 사용됩니다.",
+    sexMale: "남성",
+    sexFemale: "여성",
+    sexOther: "기타/무성별",
+    menstruationLabel: "월경 발생 여부",
+    cyclePainLabel: "강도 (1-5)",
+    symptomsLabel: "증상 선택",
+    symptomsDescription: "경험하고 있는 증상을 선택하고 심각도를 표시하세요. (여러 개 선택 가능)",
+    addSymptom: "증상 추가",
+    symptomsEmptyState: "증상이 없으면 추가 버튼을 눌러 증상을 선택하세요.",
+    severityLabel: "심각도",
+    medicationsLabel: "약물 선택",
+    medicationsDescription: "자주 투여하는 약물은 목록으로 추가해두면 다음 기록 때 자동으로 유지됩니다.",
+    addMedication: "약물 추가",
+    medicationsEmptyState: "추가 버튼을 눌러 약물을 선택하세요.",
+    modalTabBriefingSummary: "요약",
+    modalTabBriefingDetail: "상세",
+    briefingOverallProgress: "전체 목표 달성률",
+    briefingBodyChange: "전체 신체 변화",
+    briefingTargetAchievement: "목표 달성률",
+    briefingBodyRatio: "신체 비율 분석",
+    briefingFuturePrediction: "미래 예측",
+    briefingHealthAlerts: "건강 경고 알림",
+    briefingWeeklyChange: "주간 변화:",
+    briefingMonthlyAvg: "월평균:",
+    briefingPreviousWeek: "지난주:",
+    briefingTarget: "목표:",
+    actionGuideModalTitle: "액션 가이드",
+    actionGuideNextMeasurement: "다음 측정일",
+    actionGuideRecommendations: "추천 액션",
+    actionGuidePerformance: "최근 성과 피드백",
+    actionGuideMotivation: "동기부여",
+    actionGuideDDayUnknown: "D-?",
+    actionGuideCategoryExercise: "운동",
+    actionGuideCategoryDiet: "식단",
+    actionGuideCategoryMedication: "약물",
+    actionGuideCategoryHabits: "습관",
+    actionGuideNoRecommendations: "추천을 만들기 위한 데이터가 부족합니다.",
+    actionGuideNoPerformance: "이번 주 성과 피드백을 만들기 위한 데이터가 부족합니다.",
+    actionGuideMotivationClosing: "훌륭해요! 이 페이스를 유지하세요!",
+    actionGuideNextMessageDue: "측정 시기입니다!",
+    actionGuideNextMessageInDays: "{days}일 후 측정 예정",
+    modalTabRoadmapSummary: "요약",
+    modalTabRoadmapDetail: "상세",
+    roadmapOverallProgress: "전체 진행도",
+    roadmapTimeline: "타임라인",
+    roadmapMonthlySummary: "월별 요약",
+    roadmapStandoutChanges: "가장 눈에 띄는 변화",
+    roadmapDetailedGraph: "상세 그래프",
+    roadmapChangeComparison: "변화 비교",
+    roadmapCompareSpecificDate: "특정일과 비교",
+    roadmapBaseDate: "기준일",
+    roadmapCompareDate: "비교일",
+    roadmapStart: "시작",
+    roadmapWeekLabel: "Week {week}",
+    roadmapTimelineStart: "시작",
+    roadmapTimelineCurrent: "현재",
+    roadmapTimelineFinalForecast: "최종 목표 예상",
+    roadmapTimelineAwayFromGoal: "목표에서 멀어짐",
+    roadmapTimelineBigChange: "큰 변화",
+    roadmapTimelineReachedPercent: "{percent}% 도달",
+    roadmapTimelineAllGoalsEta: "모든 목표 달성 예상 시점",
+    roadmapTimelineAwayFromGoalDesc: "일부 지표가 목표에서 멀어졌습니다. 계획을 점검해 보세요.",
+    roadmapAchievementRate: "전체 달성률:",
+    roadmapAchievementCount: "({achieved}/{total} 목표)",
+    roadmapComparePreviousWeek: "지난주와 비교",
+    roadmapCompareFirst: "처음과 비교",
+    roadmapVsPrevious: "vs 지난주",
+    roadmapVsFirst: "vs 처음",
+    roadmapCurrent: "현재",
+    roadmapPrevious: "지난주",
+    roadmapFirst: "처음",
+    roadmapSetBaseLatest: "기준=현재",
+    roadmapSetComparePrev: "비교=지난주",
+    roadmapSetCompareFirst: "비교=처음",
+    roadmapSwapDates: "바꾸기",
+    roadmapSelectDate: "날짜 선택:",
+    roadmapNegativeNote: "목표에서 멀어지는 구간이 감지되었습니다. 빨간 틱/궤적 후퇴를 참고하세요.",
+    roadmapModalTitle: "변화 로드맵",
+    metricWeight: "체중",
+    metricWaist: "허리",
+    metricHips: "엉덩이",
+    metricChest: "가슴",
+    metricShoulder: "어깨",
+    metricThigh: "허벅지",
+    metricArm: "팔뚝",
+    metricMuscleMass: "근육량",
+    metricBodyFatPercentage: "체지방률",
+    feminization: "여성화",
+    masculinization: "남성화",
+    balanced: "균형",
+    points: "점",
+    achieved: "달성",
+    inProgress: "진행 중",
+    noPredictionData: "예측 데이터가 없습니다.",
+    noAlerts: "경고 알림이 없습니다. 건강 상태가 양호합니다! 😊",
+    target: "목표",
+    ratioWHR: "WHR (허리-엉덩이 비율)",
+    ratioShoulderWaist: "어깨-허리 비율",
+    ratioChestWaist: "가슴-허리 비율",
+    percentileTop10: "상위 10%",
+    percentileTop25: "상위 25%",
+    percentileAverage: "평균",
+    percentileBottom25: "하위 25%",
+    percentileBottom10: "하위 10%",
+    percentileBottom5: "하위 5%",
+    percentileRank: "상위 {value}%",
+    removeSymptom: "제거"
+  },
+  en: {
+    save: "Save",
+    edit: "Edit",
+    delete: "Delete",
+    cancel: "Cancel",
+    saveRecord: "Record ✨",
+    cancelEdit: "Cancel Edit",
+    saveTarget: "Save Targets! 💪",
+    saveNote: "Save Planning 🖋️",
+    saveSettings: "Save Settings",
+    close: "Close",
+    ComRemainder: "Remainder",
+    confirm: "Confirm",
+    selectAll: "Select All",
+    deselectAll: "Deselect All",
+    noDataYet: "Let's add the first record!",
+    noNotesYet: "No Planning written yet. Let's add the first Planning!",
+    noTargetsYet: "No targets set.",
+    noDataForChart: "Select items to display or enter data.",
+    invalidValue: "Invalid value",
+    loadingError: "Data loading error",
+    savingError: "Data saving error",
+    valuePlaceholder: "Value",
+    confirmReset: "Are you absolutely sure you want to reset all data? This action cannot be undone and will permanently delete all measurement records, targets, and Planning. It is highly recommended to back up your data before proceeding.",
+    confirmDeleteRecord: "Delete record for Week {week} ({date})? This action cannot be undone.",
+    confirmDeleteNote: "Delete Planning \"{title}\"? This cannot be undone.",
+    dataExported: "Data exported to file.",
+    dataImported: "Data imported successfully!",
+    dataReset: "All data has been reset.",
+    dataSaved: "Saved! 👍",
+    noteSaved: "Planning saved.👍",
+    targetsSaved: "Targets saved.👍",
+    settingsSaved: "Settings saved.👍",
+    importError: "Error importing file:",
+    importSuccessRequiresReload: "Data imported successfully. Please reload the page to apply changes.",
+    unexpectedError: "An unexpected error occurred 😢 Check console (F12).\nError: {message}",
+    alertInitError: "Error during app initialization!",
+    alertListenerError: "Error setting up event listeners!",
+    popupSaveSuccess: "Measurement saved! 🎉",
+    popupUpdateSuccess: "Measurement updated! ✨",
+    popupDeleteSuccess: "Measurement deleted 👍",
+    popupTargetSaveSuccess: "Targets saved! 👍",
+    popupNoteSaveSuccess: "New Planning saved! 🎉",
+    popupNoteUpdateSuccess: "Planning updated! ✨",
+    popupNoteDeleteSuccess: "Planning deleted 👍",
+    popupDataExportSuccess: "Data export successful! 🎉",
+    popupDataImportSuccess: "Data import successful! ✨",
+    popupDataResetSuccess: "All data has been reset. ✨",
+    popupSettingsSaved: "Settings saved!",
+    alertValidationError: "Invalid input value(s). Check red fields. Numbers must be 0 or greater.",
+    alertNoteContentMissing: "Please enter Planning title or content!",
+    alertImportConfirm: "Overwrite current data and restore from file? This cannot be undone.",
+    alertImportInvalidFile: "Invalid file format or incompatible data.",
+    alertImportReadError: "Error reading/processing file.",
+    alertImportFileReadError: "Failed to read file.",
+    alertGenericError: "An error occurred.",
+    alertDeleteError: "Error during deletion.",
+    alertLoadError: "Error loading data. Data might be corrupt. Check console.",
+    alertSaveError: "Failed to save data.",
+    alertExportError: "Error exporting data.",
+    alertCannotFindRecordEdit: "Cannot find record to edit.",
+    alertCannotFindRecordDelete: "Cannot find record to delete.",
+    alertInvalidIndex: "Error processing record: Invalid index.",
+    alertCannotFindNoteEdit: "Cannot find Planning to edit.",
+    alertCannotFindNoteDelete: "Cannot find Planning to delete.",
+    notification_setup_success_title: "Notification Setup Complete",
+    notification_setup_success_body: "Notifications have been set. We'll remind you on your weekly measurement day!",
+    notification_permission_denied: "Notification permission was denied. Please allow it in your browser settings.",
+    tabMain: "Main",
+    tabRecord: "Record",
+    tabMy: "My",
+    tabSettings: "Settings",
+    myTitle: "My Page 🧑‍🚀",
+    showHistoryButton: "View History",
+    showInputButton: "Back to Input",
+    recordKeepsLabel: "This Week's Planning 📝",
+    recordKeepsPlaceholder: "Freely write down your mood, events, body changes, etc.",
+    symptomsLabel: "Select Symptoms",
+    symptomsDescription: "Select symptoms you are experiencing and indicate severity. (Multiple selections possible)",
+    addSymptom: "Add Symptom",
+    symptomsEmptyState: "Click the add button to select symptoms if you have none.",
+    severityLabel: "Severity",
+    medicationsLabel: "Medications",
+    medicationsDescription: "Add frequently used meds so they stay selected next time.",
+    addMedication: "Add Medication",
+    medicationsEmptyState: "Press Add to select a medication.",
+    memo: "Planning",
+    svcard_title_highlights: "✨Body Brief",
+    svcard_title_targets: "🎯 Change Roadmap",
+    svcard_title_hormones: "💉 Hormone Journal",
+    svcard_title_keeps: "📝 Planning Notes",
+    svcard_no_data_for_highlights: "Need at least 2 records to compare changes.",
+    svcard_no_targets_set: "Set your goals in the Settings tab.",
+    svcard_overall_progress: "Overall Progress",
+    svcard_shortcut_new: "Ready for a<br><span class='countdown-days'>New Start</span><br>Shall we record?",
+    svcard_shortcut_dday: "'It's D-Day!'<br>Time to record<br>your new data",
+    svcard_shortcut_overdue: "'{days} days overdue!'<br>Time to record<br>your new data",
+    svcard_shortcut_countdown: "Next measurement in<br><span class='countdown-days'>{days} days</span><br>left",
+    svcard_guide_default: "Consistency creates change! ✨",
+    svcard_guide_positive_short: "Great work! <br>Progress is smooth.",
+    svcard_guide_positive_long: "You've been making steady <br>progress towards your goals!",
+    svcard_guide_negative_short: "It's okay, <br>this might be a week to rest.",
+    svcard_guide_negative_long: "It's okay, <br>you can start again!",
+    svcard_no_hormone_data: "Not enough hormone data.",
+    svcard_hormone_prediction: "Next week's predicted {hormone} level: <strong>{value}</strong>",
+    notification_title: "ShiftV Measurement Reminder",
+    notification_body: "It's been a week since your last record. Time to log your new changes!",
+    notificationSettingsTitle: "Notification Settings",
+    notificationToggleLabel: "Receive measurement reminders",
+    notificationSettingsDesc: "Get notified 7 days after your last measurement. Browser permission is required.",
+    alertBrowserNotSupportNotification: "This browser does not support notifications.",
+    comparisonModalTitle: "Body Brief",
+    medicationHistoryTitle: "Medication Dosage History",
+    hormoneLevelHistoryTitle: "Hormone Level History",
+    hormoneAnalysisTitle: "Last 2 Weeks Analysis",
+    hormoneAnalysisAvgChange: "Average Change: {change}",
+    hormoneAnalysisNextWeek: "Predicted Next Week: {value}",
+    hormoneModalTitle: "Hormone Journal",
+    selectedWeekDataTitle: "Week {week} Detailed Data",
+    svcard_no_major_changes: "No major changes recently.",
+    svcard_change_vs_last_week: "vs last week",
+    svcard_title_weekly_guide: "Today's Words",
+    svcard_title_action_guide: "🎯 Action Guide",
+    svcard_action_guide_summary: "Check recommendations, feedback, and motivation.",
+    svcard_no_keeps_yet: "No Planning written yet.",
+    svcard_no_keeps_add_prompt: "No Planning written yet. Try adding one in the 'Record' tab!",
+    modalTabDetailedAnalysis: "Detailed Analysis",
+    modalTabComparativeAnalysis: "Comparative Analysis",
+    labelBase: "Base",
+    labelCompareTarget: "Compare Target",
+    svcard_hormone_weekly_change: "Weekly Change",
+    svcard_label_current: "Current: {value}",
+    targetLabelShort: "(Target:{value})",
+    emaxTitle: "Emax / Hill Analysis 🧬",
+    responseFactor: "Response Factor (RF)",
+    rfMessage_high: "You show higher sensitivity to E2 than average. ✨",
+    rfMessage_normal: "Response aligns with the predictive model. 👌",
+    rfMessage_low: "T suppression is lower than expected for E2 levels. 🤔",
+    rfMessage_negative: "Levels have increased. (Flare/Fluctuation) 📈",
+    currentLevelEvaluation: "Current Level Evaluation",
+    currentLevelEvaluationDesc: "Evaluates whether current hormone levels are appropriate compared to target values.",
+    hormoneAnalysisTitleChange: "Level Change Analysis",
+    hormoneChangeAnalysisDesc: "Analyzes hormone level changes over time, divided into weekly, monthly, and total periods.",
+    hormoneAnalysisTitleInfluence: "Medication Influence Analysis",
+    drugInfluenceDesc: "Data-driven analysis of how medications affect hormone levels.",
+    hormoneAnalysisTitlePrediction: "Prediction",
+    emaxAnalysisDesc: "Uses the Hill model to evaluate hormone response and predict testosterone suppression.",
+    bodyRatioAnalysisDesc: "Analyzes and visualizes body ratio changes over time.",
+    estrogen_optimal: "Optimal Range",
+    estrogen_above_target: "Above Target",
+    estrogen_below_target: "Below Target",
+    estrogen_critical_high: "Warning: Very High Level",
+    testosterone_optimal: "Optimal Range",
+    testosterone_above_target: "Above Target",
+    testosterone_below_target: "Below Target",
+    testosterone_critical_low: "Warning: Very Low Level",
+    no_target_set: "No Target Set",
+    understandingHormones: "Understanding Hormone Levels",
+    estrogenExplanation: "Estrogen is the primary hormone responsible for feminizing effects, influencing skin changes, breast development, and fat distribution.",
+    testosteroneExplanation: "Testosterone is the primary hormone responsible for masculinizing effects, influencing muscle mass, body hair, and voice.",
+    stabilityAnalysisTitle: "Hormone Stability Analysis",
+    variationCoeff: "Variation Coefficient",
+    stability: "Stability",
+    stability_stable: "Stable",
+    stability_moderate: "Moderate",
+    stability_unstable: "Unstable",
+    drugInfluenceHowItWorks: "How It Works",
+    drugInfluenceHowItWorksDesc: "Analyzes hormone changes before and after medication intake to calculate each drug's influence. Higher weight is given to periods with significant dosage changes.",
+    drugInfluenceConfidenceDesc: "Confidence indicates the quantity and quality of data. It increases with more samples and isolated single-drug change intervals.",
+    samples: "Samples",
+    confidence: "Confidence",
+    bodyRatioAnalysisTitle: "Body Ratio Analysis",
+    waistHipRatio: "Waist-Hip Ratio (WHR)",
+    chestWaistRatio: "Chest-Waist Ratio",
+    shoulderHipRatio: "Shoulder-Hip Ratio",
+    weeklyChange: "Weekly Change",
+    monthlyAvgChange: "Monthly Avg. Change",
+    totalChange: "Total Change",
+    totalChangeWithInitial: "Total Change (Initial: {value})",
+    drugInfluence: "Influence/mg",
+    predictedNextWeek: "Next Week",
+    daysToTarget: "Est. Days to Target",
+    daysUnit: "{days} days",
+    notEnoughData: "N/A",
+    dailyTSuppression: "Daily T Suppression",
+    influenceAnalysisDesc: "This is predictive data based on measurements. <br>Values may contain errors.",
+    currentLevelsEvaluationTitle: "Current Level Evaluation",
+    svcard_label_target: "Target",
+    hormoneLevelOptimal: "Optimal range",
+    hormoneLevelAboveTarget: "Above target",
+    hormoneLevelBelowTarget: "Below target",
+    hormoneLevelHigh: "High level",
+    hormoneLevelLow: "Low level",
+    hormoneLevelNoTarget: "No target set",
+    healthAlertsTitle: "Health Alerts",
+    healthAlertHighE2: "⚠️ Estrogen level is very high (>300 pg/mL). Consult your healthcare provider.",
+    healthAlertLowT: "⚠️ Testosterone level is very low (<5 ng/dL). Consult your healthcare provider.",
+    predictionDisclaimer: "※ Predictions are for reference only. Individual variations and measurement errors may occur.",
+    hormoneExplanationTitle: "Understanding Hormone Levels",
+    hormoneExplanationDesc: "Below are the meanings and measurement methods for each hormone.",
+    hormoneLevelsExplained: "Hormone Level Explanation",
+    estrogenLevelUnit: "pg/mL",
+    estrogenLevelExplanation: "Estradiol (E2) is an important hormone for feminization, measured through blood tests.",
+    testosteroneLevelUnit: "ng/dL",
+    testosteroneLevelExplanation: "Testosterone (T) is an important hormone for masculinization, measured through blood tests.",
+    responseFactorExplanation: "Indicates individual hormone response sensitivity. Closer to 1.0 means standard response.",
+    etRatioTitle: "E/T Ratio",
+    etRatioMale: "Masculine",
+    etRatioFemale: "Feminine",
+    etRatioExplanation: "The E/T ratio represents the relative balance between Estrogen (E) and Testosterone (T). Medical standard formula: E2(pg/mL) ÷ T(ng/dL), Normal range: 0.04~0.1. Higher values indicate feminization, lower values indicate masculinization.",
+    bodyRatioTitle: "Body Ratio Analysis",
+    whrLabel: "WHR (Waist-Hip Ratio)",
+    chestWaistLabel: "Chest-Waist Ratio",
+    shoulderHipLabel: "Shoulder-Hip Ratio",
+    drugInfluenceHow: "This analysis compares medication dosages with hormone changes to predict each drug's effect on hormone levels. Intervals with clear dosage changes receive higher weights.",
+    drugInfluenceConfidence: "Confidence indicates the quantity and quality of data used in the analysis. Higher values mean more accurate predictions.",
+    drugInfluenceHowTitle: "Analysis Method",
+    drugInfluenceConfidenceTitle: "Confidence",
+    influenceSamplesLabel: "Analysis Intervals",
+    hormoneStabilityTitle: "Hormone Stability",
+    cvStabilityNote: "Lower is more stable (< 10%: very stable)",
+    rfMessage_very_high: "Very high response - highly sensitive to hormones",
+    rfMessage_very_low: "Very low response - very insensitive to hormones",
+    formTitleNew: "Start Measuring📏 <br>Current Week {week}",
+    formTitleEdit: "Edit Measurement Record <br>Week {week}",
+    inputDescription: "All fields are optional! Feel free to enter only what you want to track 😉",
+    nextMeasurementInfoNoData: "Calculates the next recommended date based on the last measurement.",
+    nextMeasurementInfo: "Last: {lastDate} ({daysAgo} ago) <br>Next recommended: {nextDate} ({daysUntil} away)",
+    nextMeasurementInfoToday: "Last: {lastDate} ({daysAgo} ago) <br>Today is measurement day!",
+    nextMeasurementInfoOverdue: "Last: {lastDate} ({daysAgo} ago) <br>Measurement is {daysOverdue} days overdue!",
+    daysAgo: "{count} days ago",
+    daysUntil: "{count} days left",
+    today: "Today",
+    categoryBodySize: "Body Size 📐",
+    categoryHealth: "Health 💪",
+    categoryMedication: "Magic ✨",
+    week: "Week",
+    date: "Date",
+    timestamp: "Timestamp",
+    height: "Height (cm)",
+    weight: "Weight (kg)",
+    shoulder: "Shoulder Width (cm)",
+    neck: "Neck (cm)",
+    chest: "Upper Chest (cm)",
+    cupSize: "Lower Chest (cm)",
+    waist: "Waist (cm)",
+    hips: "Hips (cm)",
+    thigh: "Thigh (cm)",
+    calf: "Calf (cm)",
+    arm: "Arm (cm)",
+    muscleMass: "Muscle Mass (kg)",
+    bodyFatPercentage: "Body Fat (%)",
+    libido: "Libido (/week)",
+    estrogenLevel: "Estrogen Level",
+    testosteroneLevel: "Testosterone Level",
+    healthStatus: "Health Status",
+    healthScore: "Health Score",
+    healthNotes: "Health Detail(text)",
+    skinCondition: "Skin Condition",
+    estradiol: "Estradiol (mg)",
+    progesterone: "Progesterone (mg)",
+    antiAndrogen: "Anti-androgen (mg)",
+    testosterone: "Testosterone (mg)",
+    antiEstrogen: "Anti-Estrogen (mg)",
+    medicationOtherName: "Other Magic Name",
+    medicationOtherDose: "Other Magic Dose (mg)",
+    medicationOtherNamePlaceholder: "(Other)",
+    unitMgPlaceholder: "mg",
+    skinConditionPlaceholder: "e.g., Softer",
+    libidoPlaceholder: "freq/week",
+    scorePlaceholder: "Score",
+    notesPlaceholder: "Notes",
+    unitCm: "cm",
+    unitKg: "kg",
+    unitPercent: "%",
+    unitMg: "mg",
+    unitCountPerWeek: "freq/wk",
+    placeholderPrevious: "Prev: {value}",
+    historyTitle: "Measurement History 🧐",
+    historyDescription: "(If the table is wider than the screen, scroll horizontally!)",
+    manageColumn: "Manage",
+    reportTitle: "My Change Report 📈",
+    reportGraphTitle: "Weekly Change Graph",
+    reportGraphDesc: "Select (activate) or deselect items by clicking the buttons. You can overlay multiple items!",
+    reportPrevWeekTitle: "vs Last Week🤔",
+    reportInitialTitle: "vs Beginning🌱",
+    reportTargetTitle: "Target🎯",
+    reportNeedTwoRecords: "At least two records are needed for comparison.",
+    reportNeedTarget: "Please set your targets in the 'Targets' tab first!",
+    chartAxisLabel: "Week",
+    comparisonItem: "Item",
+    comparisonChange: "Change",
+    comparisonProgress: "Progress",
+    targetAchieved: "Achieved 🎉",
+    targetTitle: "Set Your Personal Goals 💖",
+    targetDescription: "Enter your desired target values. You can check the progress in the Main tab.",
+    targetItem: "Item",
+    targetValue: "Target Value",
+    overviewTitle: "Planning 📝",
+    noteNewTitle: "New Planning",
+    noteEditTitle: "Edit Planning",
+    noteTitleLabel: "Title",
+    noteTitlePlaceholder: "Planning title (optional)",
+    noteContentLabel: "Content",
+    noteContentPlaceholder: "Record anything - events, body changes, thoughts in Planning!",
+    noteListTitle: "Saved Planning ✨",
+    noteTitleUntitled: "Untitled",
+    sortBy: "Sort by:",
+    sortNewest: "Newest First",
+    sortOldest: "Oldest First",
+    noteDateCreated: "Created:",
+    noteDateUpdated: "(Edited: {date})",
+    notePreviewEmpty: "(No content)",
+    settingsTitle: "Settings ⚙️",
+    languageSettingsTitle: "Language Settings",
+    language: "Language",
+    modeSettingsTitle: "Mode Settings",
+    modeSettingsDesc: "Select the direction of physical changes you are aiming for.",
+    mode: "Mode",
+    modeMtf: "Feminization",
+    modeFtm: "Masculinization",
+    themeSettingsTitle: "Theme Settings",
+    theme: "Theme",
+    themeSystem: "Follow Device",
+    themeLight: "Light Mode",
+    themeDark: "Dark Mode",
+    dataManagementTitle: "Data Backup & Restore",
+    dataManagementDesc: "You can save all your records (measurements, targets, Planning) to a single file or restore from one. Backing up occasionally gives peace of mind! 😊",
+    exportData: "Export Data",
+    importData: "Import Data",
+    warning: "Warning!",
+    importWarning: "Restoring will completely replace all data currently in your browser with the file's content!",
+    resetDataTitle: "Reset Data",
+    severeWarning: "Extreme Caution!",
+    resetWarning: "😱 Resetting data will permanently delete all records (measurements, targets, Planning)! Please back up your data before resetting.",
+    resetDataButton: "Reset All Data",
+    infoTitle: "Information",
+    versionLabel: "Version:",
+    privacyInfo: "This app works offline and all data is stored securely only in your browser! 😉",
+    developerMessage: "Hope this little tool brings joy and help to your precious journey!",
+    dataUpdateAndResetTitle: "Data Update & Reset",
+    checkForUpdatesButton: "Check for Updates",
+    popupUpdateComplete: "Update complete! The app will now restart.",
+    popupUpdateFailed: "Update failed. Please try again later.",
+    popupAlreadyLatest: "You are already on the latest version! ✨",
+    popupOfflineForUpdate: "An internet connection is required to check for updates.",
+    initialSetupTitle: "Initial Setup",
+    initialSetupDesc: "Before starting ShiftV, please select your language and mode.",
+    swipeThresholdMet: "Swipe detected: {direction}",
+    labelInitial: "Initial",
+    labelPrev: "Prev",
+    labelCurrent: "Current",
+    labelTarget: "Target",
+    initialTargetSame: "Initial/Target",
+    prevCurrentSame: "Prev/Current",
+    graphClickPrompt: "Click a data point on the graph to view detailed records for that week.",
+    symptoms: "Symptoms",
+    medications: "Medications",
+    menstruationActive: "Menstruation",
+    menstruationPain: "Menstruation Pain",
+    briefingGroupMeasurements: "Measurements",
+    briefingGroupSymptoms: "Symptoms",
+    briefingGroupMedications: "Medications",
+    biologicalSex: "Biological Sex",
+    sexSettingsTitle: "Biological Sex Settings",
+    sexSettingsDesc: "Used to improve the accuracy of natural hormone recovery calculations.",
+    sexMale: "Male",
+    sexFemale: "Female",
+    sexOther: "Other",
+    menstruationLabel: "Menstruation occurred",
+    cyclePainLabel: "Severity (1-5)",
+    removeSymptom: "Remove",
+    modalTabBriefingSummary: "Summary",
+    modalTabBriefingDetail: "Detail",
+    briefingOverallProgress: "Overall Target Achievement",
+    briefingBodyChange: "Overall Body Change",
+    briefingTargetAchievement: "Target Achievement",
+    briefingBodyRatio: "Body Ratio Analysis",
+    briefingFuturePrediction: "Future Prediction",
+    briefingHealthAlerts: "Health Warning Alerts",
+    briefingWeeklyChange: "Weekly Change:",
+    briefingMonthlyAvg: "Monthly Avg:",
+    briefingPreviousWeek: "Previous Week:",
+    briefingTarget: "Target:",
+    modalTabRoadmapSummary: "Summary",
+    modalTabRoadmapDetail: "Detail",
+    roadmapOverallProgress: "Overall Progress",
+    roadmapTimeline: "Timeline",
+    roadmapMonthlySummary: "Monthly Summary",
+    roadmapStandoutChanges: "Standout Changes",
+    roadmapDetailedGraph: "Detailed Graph",
+    roadmapChangeComparison: "Change Comparison",
+    roadmapCompareSpecificDate: "Compare with Specific Date",
+    roadmapBaseDate: "Base Date",
+    roadmapCompareDate: "Compare Date",
+    roadmapStart: "Start",
+    roadmapWeekLabel: "Week {week}",
+    roadmapTimelineStart: "Start",
+    roadmapTimelineCurrent: "Now",
+    roadmapTimelineFinalForecast: "Final goal forecast",
+    roadmapTimelineAwayFromGoal: "Moving away from goal",
+    roadmapTimelineBigChange: "Big change",
+    roadmapTimelineReachedPercent: "Reached {percent}%",
+    roadmapTimelineAllGoalsEta: "Estimated time to achieve all goals",
+    roadmapTimelineAwayFromGoalDesc: "Some metrics moved away from the goal. Review your plan.",
+    roadmapAchievementRate: "Overall Achievement Rate:",
+    roadmapAchievementCount: "({achieved}/{total} goals)",
+    roadmapComparePreviousWeek: "Compare with Previous Week",
+    roadmapCompareFirst: "Compare with First",
+    roadmapVsPrevious: "vs previous",
+    roadmapVsFirst: "vs first",
+    roadmapCurrent: "Current",
+    roadmapPrevious: "Previous",
+    roadmapFirst: "First",
+    roadmapSetBaseLatest: "Base = current",
+    roadmapSetComparePrev: "Compare = previous",
+    roadmapSetCompareFirst: "Compare = first",
+    roadmapSwapDates: "Swap",
+    roadmapSelectDate: "Select Date:",
+    roadmapNegativeNote: "A negative segment was detected. See red ticks / rollback in the path.",
+    roadmapModalTitle: "Change Roadmap",
+    metricWeight: "Weight",
+    metricWaist: "Waist",
+    metricHips: "Hips",
+    metricChest: "Chest",
+    metricShoulder: "Shoulder",
+    metricThigh: "Thigh",
+    metricArm: "Arm",
+    metricMuscleMass: "Muscle Mass",
+    metricBodyFatPercentage: "Body Fat %",
+    feminization: "Feminization",
+    masculinization: "Masculinization",
+    balanced: "Balanced",
+    points: "pts",
+    achieved: "Achieved",
+    inProgress: "In Progress",
+    noPredictionData: "No prediction data available.",
+    noAlerts: "No alerts. Your health status is good! 😊",
+    target: "target",
+    ratioWHR: "WHR (Waist-Hip Ratio)",
+    ratioShoulderWaist: "Shoulder-Waist Ratio",
+    ratioChestWaist: "Chest-Waist Ratio",
+    percentileTop10: "Top 10%",
+    percentileTop25: "Top 25%",
+    percentileAverage: "Average",
+    percentileBottom25: "Bottom 25%",
+    percentileBottom10: "Bottom 10%",
+    percentileBottom5: "Bottom 5%",
+    percentileRank: "Top {value}%",
+    actionGuideModalTitle: "Action Guide",
+    actionGuideNextMeasurement: "Next measurement",
+    actionGuideRecommendations: "Recommended actions",
+    actionGuidePerformance: "Recent performance feedback",
+    actionGuideMotivation: "Motivation",
+    actionGuideDDayUnknown: "D-?",
+    actionGuideCategoryExercise: "Exercise",
+    actionGuideCategoryDiet: "Diet",
+    actionGuideCategoryMedication: "Medication",
+    actionGuideCategoryHabits: "Habits",
+    actionGuideNoRecommendations: "Not enough data to generate recommendations.",
+    actionGuideNoPerformance: "Not enough data to generate performance feedback.",
+    actionGuideMotivationClosing: "Great work — keep this pace!",
+    actionGuideNextMessageDue: "It's time to measure!",
+    actionGuideNextMessageInDays: "Measurement in {days} days"
+  },
+  ja: {
+    save: "保存",
+    edit: "編集",
+    delete: "削除",
+    cancel: "キャンセル",
+    saveRecord: "記録する ✨",
+    cancelEdit: "編集をキャンセル",
+    saveTarget: "目標を保存! 💪",
+    saveNote: "プランを保存 🖋️",
+    saveSettings: "設定を保存",
+    close: "閉じる",
+    ComRemainder: "残り",
+    confirm: "確認",
+    selectAll: "すべて選択",
+    deselectAll: "すべて解除",
+    noDataYet: "最初の記録を残しましょうか？",
+    noNotesYet: "まだ作成されたプランがありません。最初のプランを残しましょうか？",
+    noTargetsYet: "目標が設定されていません。",
+    noDataForChart: "表示する項目を選択するか、データを入力してください。",
+    invalidValue: "無効な値",
+    loadingError: "データの読み込みエラー",
+    savingError: "データの保存エラー",
+    valuePlaceholder: "値",
+    confirmReset: "本当にすべてのデータを初期化しますか？ この操作は元に戻すことができず、すべての測定記録、目標、プランが完全に削除されます。初期化する前にデータをバックアップすることを強くお勧めします。",
+    confirmDeleteRecord: "週{week} ({date}) の記録を削除しますか？ この操作は元に戻せません。",
+    confirmDeleteNote: "プラン「{title}」を削除しますか？ この操作は元に戻せません。",
+    dataExported: "データがファイルに保存されました。",
+    dataImported: "データが正常に読み込まれました！",
+    dataReset: "すべてのデータが初期化されました。",
+    dataSaved: "保存されました！",
+    noteSaved: "プランが保存されました。",
+    targetsSaved: "目標が保存されました。",
+    settingsSaved: "設定が保存されました。",
+    importError: "ファイルの読み込み中にエラーが発生しました:",
+    importSuccessRequiresReload: "データが正常に読み込まれました。変更を適用するにはページを再読み込みしてください。",
+    unexpectedError: "予期しないエラーが発生しました 😢 コンソール（F12）を確認してください。\nエラー: {message}",
+    alertInitError: "アプリの初期化中にエラーが発生しました！",
+    alertListenerError: "イベントリスナーの設定中にエラーが発生しました！",
+    popupSaveSuccess: "測定記録 保存完了！🎉",
+    popupUpdateSuccess: "測定記録 更新完了！✨",
+    popupDeleteSuccess: "測定記録 削除完了 👍",
+    popupTargetSaveSuccess: "目標 保存完了！👍",
+    popupNoteSaveSuccess: "新規プラン 保存完了！🎉",
+    popupNoteUpdateSuccess: "プラン 更新完了！✨",
+    popupNoteDeleteSuccess: "プラン 削除完了 👍",
+    popupDataExportSuccess: "データ エクスポート成功！🎉",
+    popupDataImportSuccess: "データ インポート成功！✨",
+    popupDataResetSuccess: "全データ リセット完了。 ✨",
+    popupSettingsSaved: "設定 保存完了！",
+    alertValidationError: "無効な入力値あり。赤色箇所を確認。数値は0以上必須。",
+    alertNoteContentMissing: "プランのタイトルか内容を入力してください！",
+    alertImportConfirm: "現在のデータを上書きしファイルから復元しますか？元に戻せません。",
+    alertImportInvalidFile: "ファイル形式が無効か互換性がありません",
+    alertImportReadError: "ファイル読込/処理エラー",
+    alertImportFileReadError: "ファイル読込失敗",
+    alertGenericError: "エラー発生",
+    alertDeleteError: "削除中エラー",
+    alertLoadError: "データ読込エラー。データ破損の可能性あり。コンソール確認",
+    alertSaveError: "保存失敗",
+    alertExportError: "エクスポート中エラー",
+    alertCannotFindRecordEdit: "編集対象記録なし",
+    alertCannotFindRecordDelete: "削除対象記録なし",
+    alertInvalidIndex: "記録処理エラー：インデックス無効",
+    alertCannotFindNoteEdit: "編集対象プランなし",
+    alertCannotFindNoteDelete: "削除対象プランなし",
+    notification_setup_success_title: "通知設定完了",
+    notification_setup_success_body: "通知が設定されました。毎週測定日にお知らせします！",
+    notification_permission_denied: "通知の許可が拒否されました。ブラウザの設定で許可してください。",
+    tabMain: "ホーム",
+    tabRecord: "記録する",
+    tabMy: "マイページ",
+    tabSettings: "設定",
+    myTitle: "マイページ 🧑‍🚀",
+    svcard_shortcut_new: "新たな気持ちで<br><span class='countdown-days'>記録</span><br>しませんか？",
+    svcard_shortcut_dday: "「測定日です！」<br>新しい記録を<br>測定しましょう",
+    svcard_shortcut_overdue: "「測定が{days}日遅れています！」<br>新しい記録を<br>測定しましょう",
+    svcard_shortcut_countdown: "次の測定まで<br><span class='countdown-days'>{days}日</span><br>です",
+    svcard_title_highlights: "✨ ボディまとめ",
+    svcard_title_targets: "🎯 変化ロードマップ",
+    svcard_title_hormones: "💉 ホルモン分析",
+    svcard_title_keeps: "📝 プランノート",
+    svcard_no_data_for_highlights: "比較するには記録が2つ以上必要です。",
+    svcard_no_targets_set: "設定タブで目標を設定してください。",
+    svcard_overall_progress: "全体達成率",
+    svcard_no_major_changes: "最近、主な変化はありません。",
+    svcard_change_vs_last_week: "先週より",
+    svcard_title_weekly_guide: "今日のひとこと",
+    svcard_title_action_guide: "🎯 アクションガイド",
+    svcard_action_guide_summary: "おすすめアクションとフィードバックを確認しましょう。",
+    actionGuideCategoryExercise: "運動",
+    actionGuideCategoryDiet: "食事",
+    actionGuideCategoryMedication: "薬",
+    actionGuideCategoryHabits: "習慣",
+    svcard_no_keeps_yet: "作成されたプランがありません。",
+    svcard_no_keeps_add_prompt: "作成されたプランがありません。「記録する」タブで追加してみてください！",
+    modalTabDetailedAnalysis: "詳細分析",
+    modalTabComparativeAnalysis: "比較分析",
+    labelBase: "基準",
+    labelCompareTarget: "比較対象",
+    svcard_hormone_weekly_change: "週間変化量",
+    svcard_guide_default: "継続は力なり！✨",
+    svcard_guide_positive_short: "素晴らしい！<br>変化は順調です。",
+    svcard_guide_positive_long: "ここ3週間、<br>着実に目標に向かっています！",
+    svcard_guide_negative_short: "大丈夫、<br>少し休む週かもしれません。",
+    svcard_guide_negative_long: "大丈夫、<br>また始めましょう！",
+    svcard_no_hormone_data: "ホルモンデータが不足しています。",
+    svcard_hormone_prediction: "来週の予測{hormone}値: <strong>{value}</strong>",
+    notification_title: "ShiftV 測定通知",
+    notification_body: "最後の記録から1週間が経ちました。新しい変化を記録しましょう！",
+    notificationSettingsTitle: "通知設定",
+    notificationToggleLabel: "測定日の通知を受け取る",
+    notificationSettingsDesc: "最終測定日から7日後に通知します。通知を受け取るには、ブラウザの許可が必要です。",
+    alertBrowserNotSupportNotification: "このブラウザは通知をサポートしていません。",
+    showHistoryButton: "記録を確認",
+    showInputButton: "入力に戻る",
+    recordKeepsLabel: "今週のプラン 📝",
+    recordKeepsPlaceholder: "今日の気分、出来事、体の変化などを自由に記録しましょう...",
+    symptomsLabel: "症状選択",
+    symptomsDescription: "経験している症状を選択し、重症度を表示してください。（複数選択可能）",
+    addSymptom: "症状追加",
+    symptomsEmptyState: "症状がない場合は追加ボタンを押して症状を選択してください。",
+    severityLabel: "重症度",
+    medicationsLabel: "薬の選択",
+    medicationsDescription: "よく使う薬を追加しておくと、次の記録で自動的に維持されます。",
+    addMedication: "薬を追加",
+    medicationsEmptyState: "追加ボタンを押して薬を選択してください。",
+    memo: "プラン",
+    comparisonModalTitle: "記録レポートの詳細分析",
+    medicationHistoryTitle: "投薬量の変化",
+    hormoneLevelHistoryTitle: "ホルモン数値の変化",
+    hormoneAnalysisTitle: "過去2週間の分析",
+    hormoneAnalysisAvgChange: "平均変化量: {change}",
+    hormoneAnalysisNextWeek: "来週の予測値: {value}",
+    hormoneModalTitle: "ホルモン分析",
+    selectedWeekDataTitle: "{week}週目の詳細記録",
+    svcard_label_current: "現在: {value}",
+    targetLabelShort: "(目標:{value})",
+    emaxTitle: "Emax / Hill 分析 🧬",
+    responseFactor: "実際の反応度 (RF)",
+    rfMessage_high: "平均よりE2に対する感度が高いです。✨",
+    rfMessage_normal: "予測モデルと同様の反応を示しています。👌",
+    rfMessage_low: "E2値に対し、T抑制が予想より低いです。🤔",
+    rfMessage_negative: "数値が上昇しました。(フレア/変動) 📈",
+    currentLevelEvaluation: "現在の数値評価",
+    currentLevelEvaluationDesc: "目標値と比較して現在のホルモン数値が適切かを評価します。",
+    hormoneAnalysisTitleChange: "数値変化分析",
+    hormoneChangeAnalysisDesc: "時間経過によるホルモン数値の変化を週間、月間、全期間に分けて分析します。",
+    hormoneAnalysisTitleInfluence: "薬物影響分析",
+    drugInfluenceDesc: "服用中の薬物がホルモン数値に与える影響をデータに基づいて分析します。",
+    hormoneAnalysisTitlePrediction: "将来予測",
+    emaxAnalysisDesc: "Hillモデルを使用してホルモン反応度を評価し、テストステロン抑制量を予測します。",
+    bodyRatioAnalysisDesc: "身体比率を分析し、変化の推移を可視化します。",
+    estrogen_optimal: "最適範囲です",
+    estrogen_above_target: "目標より高いです",
+    estrogen_below_target: "目標より低いです",
+    estrogen_critical_high: "警告：非常に高い数値です",
+    testosterone_optimal: "最適範囲です",
+    testosterone_above_target: "目標より高いです",
+    testosterone_below_target: "目標より低いです",
+    testosterone_critical_low: "警告：非常に低い数値です",
+    no_target_set: "目標未設定",
+    understandingHormones: "ホルモン数値の理解",
+    estrogenExplanation: "エストロゲンは女性化効果を担当する主要ホルモンです。肌の変化、乳房の発達、脂肪分布の変化などに影響します。",
+    testosteroneExplanation: "テストステロンは男性化効果を担当する主要ホルモンです。筋肉量、体毛、声などに影響します。",
+    stabilityAnalysisTitle: "ホルモン安定性分析",
+    variationCoeff: "変動係数",
+    stability: "安定性",
+    stability_stable: "安定",
+    stability_moderate: "普通",
+    stability_unstable: "不安定",
+    drugInfluenceHowItWorks: "動作原理",
+    drugInfluenceHowItWorksDesc: "薬物服用前後のホルモン変化を分析し、各薬物の影響力を計算します。用量変化が大きい時期により高い重みを付与します。",
+    drugInfluenceConfidenceDesc: "信頼度はデータの量と質を示します。サンプル数が多く、単一薬物変化区間が多いほど高くなります。",
+    samples: "サンプル",
+    confidence: "信頼度",
+    bodyRatioAnalysisTitle: "身体比率分析",
+    waistHipRatio: "ウエスト-ヒップ比 (WHR)",
+    chestWaistRatio: "チェスト-ウエスト比",
+    shoulderHipRatio: "肩-ヒップ比",
+    weeklyChange: "週間変化量",
+    monthlyAvgChange: "月間平均変化量",
+    totalChange: "総変化量",
+    totalChangeWithInitial: "総変化量 (初期値: {value})",
+    drugInfluence: "mgあたりの影響",
+    predictedNextWeek: "来週予測",
+    daysToTarget: "目標までの予測日数",
+    daysUnit: "{days}日",
+    notEnoughData: "データ不足",
+    dailyTSuppression: "一日T抑制量",
+    influenceAnalysisDesc: "この情報は実測データに基づく予測です。<br>数値には誤差が含まれる場合があります。",
+    currentLevelsEvaluationTitle: "現在の数値評価",
+    svcard_label_target: "目標",
+    hormoneLevelOptimal: "最適範囲です",
+    hormoneLevelAboveTarget: "目標より高いです",
+    hormoneLevelBelowTarget: "目標より低いです",
+    hormoneLevelHigh: "高い数値です",
+    hormoneLevelLow: "低い数値です",
+    hormoneLevelNoTarget: "目標が設定されていません",
+    healthAlertsTitle: "健康注意事項",
+    healthAlertHighE2: "⚠️ エストロゲン値が非常に高いです (>300 pg/mL)。医療機関への相談をお勧めします。",
+    healthAlertLowT: "⚠️ テストステロン値が非常に低いです (<5 ng/dL)。医療機関への相談をお勧めします。",
+    predictionDisclaimer: "※ 予測値は参考用であり、個人差と測定誤差がある場合があります。",
+    hormoneExplanationTitle: "ホルモン数値の理解",
+    hormoneExplanationDesc: "以下は各ホルモンの意味と測定方法です。",
+    hormoneLevelsExplained: "ホルモン数値の説明",
+    estrogenLevelUnit: "pg/mL",
+    estrogenLevelExplanation: "エストラジオール(E2)は女性化に重要なホルモンで、血液検査で測定されます。",
+    testosteroneLevelUnit: "ng/mL",
+    testosteroneLevelExplanation: "テストステロン(T)は男性化に重要なホルモンで、血液検査で測定されます。",
+    responseFactorExplanation: "個人のホルモン反応感度を示します。1.0に近いほど標準的な反応です。",
+    etRatioTitle: "E/T比",
+    etRatioMale: "男性型",
+    etRatioFemale: "女性型",
+    etRatioExplanation: "E/T比はエストロゲン(E)とテストステロン(T)の相対的バランスを示します。医学的標準式: E2(pg/mL) ÷ T(ng/dL)、正常範囲: 0.04~0.1。高いほど女性化、低いほど男性化を意味します。",
+    bodyRatioTitle: "身体比率分析",
+    whrLabel: "WHR (ウエスト・ヒップ比)",
+    chestWaistLabel: "胸囲・ウエスト比",
+    shoulderHipLabel: "肩幅・ヒップ比",
+    drugInfluenceHow: "この分析は薬物投与量とホルモン変化を比較し、各薬物がホルモン値に与える影響を予測します。投与量変更が明確な区間により高い重み付けを行います。",
+    drugInfluenceConfidence: "信頼度は分析に使用されたデータの量と質を示します。高いほど予測がより正確です。",
+    drugInfluenceHowTitle: "分析方法",
+    drugInfluenceConfidenceTitle: "信頼度",
+    influenceSamplesLabel: "分析区間",
+    hormoneStabilityTitle: "ホルモン安定性",
+    cvStabilityNote: "低いほど安定 (< 10%: 非常に安定)",
+    rfMessage_very_high: "非常に高い反応度 - ホルモンに非常に敏感に反応します",
+    rfMessage_very_low: "非常に低い反応度 - ホルモンに非常に鈍感に反応します",
+    formTitleNew: "測定開始📏<br>現在{week}週",
+    formTitleEdit: "測定記録を編集<br>{week}週目",
+    inputDescription: "すべての項目は任意です！記録したいものだけ気軽に入力してください 😉",
+    nextMeasurementInfoNoData: "最終測定日を基準に次の予定日を計算します。",
+    nextMeasurementInfo: "最終測定: {lastDate} ({daysAgo}日前) <br>次回推奨日: {nextDate} ({daysUntil}日後)",
+    nextMeasurementInfoToday: "最終測定: {lastDate} ({daysAgo}日前) <br>今日は測定日です！",
+    nextMeasurementInfoOverdue: "最終測定: {lastDate} ({daysAgo}日前) <br>測定が{daysOverdue}日遅れています！",
+    daysAgo: "{count}日前",
+    daysUntil: "{count}日後",
+    today: "今日",
+    categoryBodySize: "身体サイズ 📐",
+    categoryHealth: "健康 💪",
+    categoryMedication: "魔法 ✨",
+    week: "週目",
+    date: "日付",
+    timestamp: "記録時間",
+    height: "身長 (cm)",
+    weight: "体重 (kg)",
+    shoulder: "肩幅 (cm)",
+    neck: "首回り (cm)",
+    chest: "上胸囲 (cm)",
+    cupSize: "下胸囲 (cm)",
+    waist: "ウエスト (cm)",
+    hips: "ヒップ (cm)",
+    thigh: "太もも (cm)",
+    calf: "ふくらはぎ (cm)",
+    arm: "腕 (cm)",
+    muscleMass: "筋肉量 (kg)",
+    bodyFatPercentage: "体脂肪率 (%)",
+    libido: "性欲 (回/週)",
+    estrogenLevel: "エストロゲン数値",
+    testosteroneLevel: "テストステロン数値",
+    healthStatus: "健康状態",
+    healthScore: "健康スコア",
+    healthNotes: "健康状態(テキスト)",
+    skinCondition: "肌の状態",
+    estradiol: "エストラジオール (mg)",
+    progesterone: "プロゲステロン (mg)",
+    antiAndrogen: "抗アンドロゲン (mg)",
+    testosterone: "テストステロン (mg)",
+    antiEstrogen: "抗エストロゲン剤 (mg)",
+    medicationOtherName: "その他の魔法名",
+    medicationOtherDose: "その他の魔法用量 (mg)",
+    medicationOtherNamePlaceholder: "（その他）",
+    unitMgPlaceholder: "mg",
+    skinConditionPlaceholder: "例: 柔らかくなった",
+    libidoPlaceholder: "回/週",
+    scorePlaceholder: "点数",
+    notesPlaceholder: "特記事項",
+    unitCm: "cm",
+    unitKg: "kg",
+    unitPercent: "%",
+    unitMg: "mg",
+    unitCountPerWeek: "回/週",
+    placeholderPrevious: "前回: {value}",
+    historyTitle: "測定記録の詳細 🧐",
+    historyDescription: "（表が画面より広い場合は、左右にスクロールしてください！）",
+    manageColumn: "管理",
+    reportTitle: "私の変化レポート 📈",
+    reportGraphTitle: "週ごとの変化グラフ",
+    reportGraphDesc: "見たい項目のボタンを押して選択（アクティブ化）または解除できます。複数の項目を重ねて表示することも可能です！",
+    reportPrevWeekTitle: "先週と比較🤔",
+    reportInitialTitle: "最初と比較🌱",
+    reportTargetTitle: "目標達成率🎯",
+    reportNeedTwoRecords: "比較するには、少なくとも2つの記録が必要です。",
+    reportNeedTarget: "まず「目標設定」タブで目標を入力してください！",
+    chartAxisLabel: "週目",
+    comparisonItem: "項目",
+    comparisonChange: "変化量",
+    comparisonProgress: "達成率",
+    targetAchieved: "達成 🎉",
+    targetDescription: "希望する目標数値を入力してください。メインタブで達成率を確認できます。",
+    targetItem: "項目",
+    targetValue: "目標値",
+    overviewTitle: "プラン 📝",
+    noteNewTitle: "新しいプランを作成",
+    noteEditTitle: "プランを編集",
+    noteTitleLabel: "タイトル",
+    noteTitlePlaceholder: "プランのタイトル（任意）",
+    noteContentLabel: "内容",
+    noteContentPlaceholder: "イベント、体調の変化、考えなど、自由に記録しましょう！",
+    noteListTitle: "作成されたプラン一覧 ✨",
+    noteTitleUntitled: "無題",
+    sortBy: "並び替え:",
+    sortNewest: "新しい順",
+    sortOldest: "古い順",
+    noteDateCreated: "作成:",
+    noteDateUpdated: "(編集: {date})",
+    notePreviewEmpty: "(内容なし)",
+    settingsTitle: "設定 ⚙️",
+    languageSettingsTitle: "言語設定",
+    language: "言語",
+    modeSettingsTitle: "モード設定",
+    modeSettingsDesc: "目指す身体の変化の方向を選択してください。",
+    mode: "モード",
+    modeMtf: "女性化",
+    modeFtm: "男性化",
+    themeSettingsTitle: "テーマ設定",
+    theme: "テーマ",
+    themeSystem: "デバイスの設定に従う",
+    themeLight: "ライトモード",
+    themeDark: "ダークモード",
+    dataManagementTitle: "データのバックアップと復元",
+    dataManagementDesc: "すべての記録（測定、目標、プラン）を1つのファイルに保存したり、復元したりできます。時々バックアップしておくと安心です！ 😊",
+    exportData: "ファイルに保存",
+    importData: "ファイルから読み込む",
+    warning: "注意！",
+    importWarning: "復元すると、現在ブラウザにあるすべてのデータがファイルの内容に完全に置き換えられます！",
+    resetDataTitle: "データ初期化",
+    severeWarning: "！！！警告！！！",
+    resetWarning: "😱 すべてのデータ（測定、目標、プラン）が完全に削除されます！ 初期化する前に必ずデータをファイルにバックアップしてください。",
+    resetDataButton: "すべてのデータを初期化",
+    infoTitle: "情報",
+    versionLabel: "バージョン:",
+    privacyInfo: "このアプリはオフラインで動作し、すべてのデータはブラウザ内にのみ安全に保存されます！ 😉",
+    developerMessage: "この小さなツールが、あなたの貴重な旅に喜びと助けをもたらすことを願っています！",
+    dataUpdateAndResetTitle: "データの更新と初期化",
+    checkForUpdatesButton: "更新を確認",
+    popupUpdateComplete: "アップデートが完了しました。アプリを再起動します。",
+    popupUpdateFailed: "アップデートに失敗しました。後でもう一度お試しください。",
+    popupAlreadyLatest: "すでに最新バージョンです！✨",
+    popupOfflineForUpdate: "アップデートを確認するにはインターネット接続が必要です。",
+    initialSetupTitle: "初期設定",
+    initialSetupDesc: "ShiftVを使用する前に、言語とモードを選択してください。",
+    swipeThresholdMet: "スワイプ検出: {direction}",
+    labelInitial: "初期",
+    labelPrev: "前週",
+    labelCurrent: "現在",
+    labelTarget: "目標",
+    initialTargetSame: "初期/目標",
+    prevCurrentSame: "前週/現在",
+    graphClickPrompt: "グラフの数値をタップすると、該当週の詳細記録が表示されます。",
+    symptoms: "症状",
+    medications: "服用薬",
+    menstruationActive: "月経の有無",
+    menstruationPain: "月経痛",
+    briefingGroupMeasurements: "測定",
+    briefingGroupSymptoms: "症状",
+    briefingGroupMedications: "薬",
+    biologicalSex: "生物学的性別",
+    sexSettingsTitle: "生物学的性別設定",
+    sexSettingsDesc: "自然なホルモン回復率の計算精度を向上させるために使用されます。",
+    sexMale: "男性",
+    sexFemale: "女性",
+    sexOther: "その他",
+    menstruationLabel: "月経の有無",
+    cyclePainLabel: "強度 (1-5)",
+    actionGuideModalTitle: "アクションガイド",
+    actionGuideNextMeasurement: "次回測定日",
+    actionGuideRecommendations: "おすすめアクション",
+    actionGuidePerformance: "最近の成果フィードバック",
+    actionGuideMotivation: "モチベーション",
+    actionGuideDDayUnknown: "D-?",
+    actionGuideNoRecommendations: "おすすめを作るためのデータが不足しています。",
+    actionGuideNoPerformance: "成果フィードバックを作るためのデータが不足しています。",
+    actionGuideMotivationClosing: "素晴らしい！このペースを保ちましょう！",
+    actionGuideNextMessageDue: "測定のタイミングです！",
+    actionGuideNextMessageInDays: "測定まであと{days}日",
+    removeSymptom: "削除",
+    modalTabBriefingSummary: "要約",
+    modalTabBriefingDetail: "詳細",
+    briefingOverallProgress: "全体目標達成率",
+    briefingBodyChange: "全体身体変化",
+    briefingTargetAchievement: "目標達成率",
+    briefingBodyRatio: "身体比率分析",
+    briefingFuturePrediction: "未来予測",
+    briefingHealthAlerts: "健康警告アラート",
+    briefingWeeklyChange: "週間変化:",
+    briefingMonthlyAvg: "月平均:",
+    briefingPreviousWeek: "先週:",
+    briefingTarget: "目標:",
+    modalTabRoadmapSummary: "要約",
+    modalTabRoadmapDetail: "詳細",
+    roadmapOverallProgress: "全体進捗",
+    roadmapTimeline: "タイムライン",
+    roadmapMonthlySummary: "月別要約",
+    roadmapStandoutChanges: "注目の変化",
+    roadmapDetailedGraph: "詳細グラフ",
+    roadmapChangeComparison: "変化比較",
+    roadmapCompareSpecificDate: "特定日と比較",
+    roadmapBaseDate: "基準日",
+    roadmapCompareDate: "比較日",
+    roadmapStart: "開始",
+    roadmapWeekLabel: "Week {week}",
+    roadmapTimelineStart: "開始",
+    roadmapTimelineCurrent: "現在",
+    roadmapTimelineFinalForecast: "最終目標の予測",
+    roadmapTimelineAwayFromGoal: "目標から遠ざかり",
+    roadmapTimelineBigChange: "大きな変化",
+    roadmapTimelineReachedPercent: "{percent}%到達",
+    roadmapTimelineAllGoalsEta: "すべての目標達成の予測時期",
+    roadmapTimelineAwayFromGoalDesc: "一部の指標が目標から遠ざかっています。計画を見直しましょう。",
+    roadmapAchievementRate: "全体達成率:",
+    roadmapAchievementCount: "（{achieved}/{total}目標）",
+    roadmapComparePreviousWeek: "先週と比較",
+    roadmapCompareFirst: "最初と比較",
+    roadmapVsPrevious: "先週比",
+    roadmapVsFirst: "初回比",
+    roadmapCurrent: "現在",
+    roadmapPrevious: "先週",
+    roadmapFirst: "初回",
+    roadmapSetBaseLatest: "基準=現在",
+    roadmapSetComparePrev: "比較=先週",
+    roadmapSetCompareFirst: "比較=初回",
+    roadmapSwapDates: "入れ替え",
+    roadmapSelectDate: "日付選択:",
+    roadmapNegativeNote: "目標から離れる区間が検出されました。赤いティック/軌跡の後退を参照してください。",
+    roadmapModalTitle: "変化ロードマップ",
+    metricWeight: "体重",
+    metricWaist: "ウエスト",
+    metricHips: "ヒップ",
+    metricChest: "胸囲",
+    metricShoulder: "肩幅",
+    metricThigh: "太もも",
+    metricArm: "腕",
+    metricMuscleMass: "筋肉量",
+    metricBodyFatPercentage: "体脂肪率",
+    feminization: "女性化",
+    masculinization: "男性化",
+    balanced: "バランス",
+    points: "点",
+    achieved: "達成",
+    inProgress: "進行中",
+    noPredictionData: "予測データがありません。",
+    noAlerts: "警告アラートがありません。健康状態は良好です！😊",
+    target: "目標",
+    ratioWHR: "WHR (ウエスト-ヒップ比率)",
+    ratioShoulderWaist: "肩-ウエスト比率",
+    ratioChestWaist: "胸-ウエスト比率",
+    percentileTop10: "上位10%",
+    percentileTop25: "上位25%",
+    percentileAverage: "平均",
+    percentileBottom25: "下位25%",
+    percentileBottom10: "下位10%",
+    percentileBottom5: "下位5%",
+    percentileRank: "上位 {value}%",
+    targetTitle: "目標設定"
+  }
 };
+    function populateMedicationAutocomplete() {
+        const datalist = document.getElementById('medication-suggestions');
+        if (!datalist || !window.ShiftV_MedDB) {
+            // Retry once if DB not loaded yet
+            if (!window.ShiftV_MedDB) {
+                setTimeout(populateMedicationAutocomplete, 1000);
+            }
+            return;
+        }
+
+        const allMeds = [];
+        const db = window.ShiftV_MedDB;
+        
+        const extract = (list) => {
+            if (Array.isArray(list)) {
+                list.forEach(item => {
+                    if (item.names) allMeds.push(...item.names);
+                });
+            }
+        };
+
+        if (db.ESTROGENS) {
+            extract(db.ESTROGENS.oral);
+            extract(db.ESTROGENS.transdermal);
+            extract(db.ESTROGENS.injectable);
+        }
+        extract(db.ANTI_ANDROGENS);
+        if (db.TESTOSTERONE) {
+            extract(db.TESTOSTERONE.longActing);
+            extract(db.TESTOSTERONE.mediumActing);
+            extract(db.TESTOSTERONE.topical);
+        }
+        if (db.SERM_AND_AI) {
+            extract(db.SERM_AND_AI.serm);
+        }
+
+        const uniqueNames = [...new Set(allMeds)].sort();
+        datalist.innerHTML = uniqueNames.map(name => `<option value="${escapeHTML(name)}">`).join('');
+        console.log("Autocomplete populated with " + uniqueNames.length + " items.");
+    }
+
 // --- Main Application Logic ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log(`DEBUG: ShiftV App Initializing v${APP_VERSION}...`);
@@ -962,6 +1685,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalContent = document.getElementById('modal-content');
     const modalCloseBtn = document.getElementById('modal-close-btn');
     const notificationToggle = document.getElementById('notification-toggle');
+    
+    const menstruationActiveInput = document.getElementById('menstruationActive');
+    const menstruationPainInput = document.getElementById('menstruationPain');
+    const menstruationPainValue = document.getElementById('menstruationPainValue');
+    const menstruationPainGroup = document.getElementById('menstruation-pain-group');
+    if (menstruationPainInput && menstruationPainValue) {
+        menstruationPainInput.addEventListener('input', () => {
+            menstruationPainValue.textContent = menstruationPainInput.value;
+        });
+    }
+    if (menstruationActiveInput && menstruationPainGroup) {
+        menstruationActiveInput.addEventListener('change', () => {
+            menstruationPainGroup.style.display = menstruationActiveInput.checked ? 'block' : 'none';
+        });
+    }
+
+        // Handle Unit Selects Persistence
+        document.querySelectorAll('.unit-select').forEach(select => {
+            const persistKey = select.dataset.persist;
+            if (persistKey) {
+                // Load saved unit
+                const savedUnit = localStorage.getItem('shiftV_' + persistKey);
+                if (savedUnit) {
+                    select.value = savedUnit;
+                }
+                
+                // Save on change
+                select.addEventListener('change', (e) => {
+                    localStorage.setItem('shiftV_' + persistKey, e.target.value);
+                });
+            }
+        });
+        
+        // Populate Medication Autocomplete if needed
+        setTimeout(populateMedicationAutocomplete, 500);
+
     // History View within My Tab (마이 탭의 기록 뷰) // ▼▼▼ 이 부분 추가 ▼▼▼
     const myHistoryViewContainer = document.getElementById('my-history-view-container');
     const myHistoryCardsContainer = document.getElementById('my-history-cards-container');
@@ -1032,16 +1791,16 @@ document.addEventListener('DOMContentLoaded', () => {
         'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm', // 'cupSize' 추가
         'muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'healthScore', // 'semenScore' 삭제 및 새 키 추가
         'estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen', // 'antiEstrogen' 추가
-        'medicationOtherDose'
+        'menstruationPain'
     ];
-    const textKeys = ['healthNotes', 'skinCondition', 'medicationOtherName', 'memo']; // <-- 'memo' 추가
+    const textKeys = ['healthNotes', 'skinCondition', 'memo', 'menstruationActive'];
     // displayKeysInOrder를 업데이트합니다. (표시 순서 제어)
     const displayKeysInOrder = [
         'week', 'date',
         'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm',
         'muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'skinCondition', 'healthScore', 'healthNotes',
         'estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen',
-        'medicationOtherName', 'medicationOtherDose', 'memo',
+        'memo', 'menstruationActive', 'menstruationPain',
         'timestamp'
     ];
 
@@ -1060,6 +1819,57 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     console.log("DEBUG: Measurement keys defined (camelCase).");
 
+
+    // --- Unit Conversion Constants ---
+    const UNIT_CONVERSIONS = {
+        estrogenLevel: {
+            'pg/ml': 1,
+            'pmol/L': 0.2724 // 1 pmol/L = 0.2724 pg/mL
+        },
+        testosteroneLevel: {
+            'ng/dl': 1,
+            'nmol/L': 28.85, // 1 nmol/L = 28.85 ng/dL
+            'ng/ml': 100     // 1 ng/mL = 100 ng/dL
+        },
+        weight: {
+            'kg': 1,
+            'lbs': 0.45359237
+        }
+    };
+
+    function convertToStandard(key, value, unit) {
+        if (value === null || value === undefined || value === '') return null;
+        const num = typeof value === 'number' ? value : parseFloat(value);
+        if (Number.isNaN(num)) return null;
+        if (!UNIT_CONVERSIONS[key] || !UNIT_CONVERSIONS[key][unit]) return num;
+        return num * UNIT_CONVERSIONS[key][unit];
+    }
+
+    function convertFromStandard(key, value, unit) {
+        if (value === null || value === undefined || value === '') return '';
+        const num = typeof value === 'number' ? value : parseFloat(value);
+        if (Number.isNaN(num)) return '';
+        if (!UNIT_CONVERSIONS[key] || !UNIT_CONVERSIONS[key][unit]) return num.toFixed(2);
+        return (num / UNIT_CONVERSIONS[key][unit]).toFixed(2);
+    }
+
+    let UnitHealthEvaluatorClass = null;
+    let unitHealthEvaluatorInstance = null;
+
+    async function getUnitHealthEvaluator() {
+        if (unitHealthEvaluatorInstance) return unitHealthEvaluatorInstance;
+        if (!UnitHealthEvaluatorClass) {
+            const module = await import('./src/doctor-module/core/health-evaluator.js');
+            UnitHealthEvaluatorClass = module.HealthEvaluator || module.default;
+        }
+        unitHealthEvaluatorInstance = new UnitHealthEvaluatorClass([], currentMode, biologicalSex);
+        return unitHealthEvaluatorInstance;
+    }
+
+    async function normalizeMetricValue(metric, value, fromUnit) {
+        const evaluator = await getUnitHealthEvaluator();
+        return evaluator.normalizeUnit(metric, value, fromUnit);
+    }
 
     // --- Utility Functions ---
 
@@ -1266,132 +2076,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 3. E/T Ratio 계산 (자동 단위 변환 포함)
-        let latestE_pgml = parseFloat(latest.estrogenLevel);
-        let latestT_ngml = parseFloat(latest.testosteroneLevel);
+        // 3. E/T Ratio 계산 (표준 단위: E2 pg/mL, T ng/dL)
+        const latestE_pgml = parseFloat(latest.estrogenLevel);
+        const latestT_ngdL = parseFloat(latest.testosteroneLevel);
 
-        // E2 단위 자동 감지 및 변환 (더 정교한 로직)
-        if (!isNaN(latestE_pgml)) {
-            const originalValue = latestE_pgml;
-            
-            // 단위별 일반적인 범위 정의 (MTF 기준)
-            const rangesE2 = {
-                'pg/mL': { min: 50, max: 300, extreme: 600 },    // 표준 단위
-                'ng/mL': { min: 0.05, max: 0.3, extreme: 0.6 },  // 드물게 사용
-                'pmol/L': { min: 180, max: 1100, extreme: 2200 } // SI 단위
-            };
-            
-            let detectedUnit = null;
-            let highProbability = false;
-            
-            // 1. 완벽한 정상 범위 내에 있는가?
-            for (const [unit, range] of Object.entries(rangesE2)) {
-                if (latestE_pgml >= range.min && latestE_pgml <= range.max) {
-                    detectedUnit = unit;
-                    highProbability = true;
-                    break;
-                }
-            }
-            
-            // 2. 정상은 아니지만 생물학적으로 가능한 범위인가?
-            if (!detectedUnit) {
-                for (const [unit, range] of Object.entries(rangesE2)) {
-                    if (latestE_pgml <= range.extreme) {
-                        detectedUnit = unit;
-                        break;
-                    }
-                }
-            }
-            
-            // 3. 감지된 단위에 따라 pg/mL로 변환
-            if (detectedUnit === 'ng/mL') {
-                latestE_pgml *= 1000;
-                console.warn(`E2 value ${originalValue} detected as ng/mL, converted to ${latestE_pgml} pg/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
-            } else if (detectedUnit === 'pmol/L') {
-                latestE_pgml /= 3.671; // pmol/L to pg/mL 변환 계수
-                console.warn(`E2 value ${originalValue} detected as pmol/L, converted to ${latestE_pgml.toFixed(1)} pg/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
-            } else if (detectedUnit === 'pg/mL') {
-                console.log(`E2 value ${originalValue} detected as pg/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
-            } else {
-                // 감지 실패 시 기본값 추정
-                if (latestE_pgml < 10) {
-                    latestE_pgml *= 1000; // ng/mL로 가정
-                    console.warn(`E2 value ${originalValue} unit detection failed, assuming ng/mL -> ${latestE_pgml} pg/mL`);
-                }
-            }
-        }
-
-        // T 단위 자동 감지 및 변환 (더 정교한 로직)
-        if (!isNaN(latestT_ngml)) {
-            const originalValue = latestT_ngml;
-            
-            // 단위별 일반적인 범위 정의
-            const ranges = {
-                'ng/dL': { min: 200, max: 1000, extreme: 2000 },  // 남성 일반 범위
-                'nmol/L': { min: 8, max: 35, extreme: 100 },      // SI 단위
-                'ng/mL': { min: 2, max: 10, extreme: 20 }         // 표준 단위
-            };
-            
-            let detectedUnit = null;
-            let highProbability = false;
-            
-            // 1. 완벽한 정상 범위 내에 있는가?
-            for (const [unit, range] of Object.entries(ranges)) {
-                if (latestT_ngml >= range.min && latestT_ngml <= range.max) {
-                    detectedUnit = unit;
-                    highProbability = true;
-                    break;
-                }
-            }
-            
-            // 2. 정상은 아니지만 생물학적으로 가능한 범위인가?
-            if (!detectedUnit) {
-                for (const [unit, range] of Object.entries(ranges)) {
-                    if (latestT_ngml <= range.extreme) {
-                        detectedUnit = unit;
-                        break;
-                    }
-                }
-            }
-            
-            // 3. 감지된 단위에 따라 ng/mL로 변환
-            if (detectedUnit === 'ng/dL') {
-                latestT_ngml /= 100;
-                console.warn(`T value ${originalValue} detected as ng/dL, converted to ${latestT_ngml} ng/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
-            } else if (detectedUnit === 'nmol/L') {
-                latestT_ngml *= 0.0347; // nmol/L to ng/mL 변환 계수
-                console.warn(`T value ${originalValue} detected as nmol/L, converted to ${latestT_ngml} ng/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
-            } else if (detectedUnit === 'ng/mL') {
-                console.log(`T value ${originalValue} detected as ng/mL (${highProbability ? 'High' : 'Medium'} Probability)`);
-            } else {
-                // 감지 실패 시 기본값은 ng/dL로 가정 (한국 표준)
-                if (latestT_ngml > 50) {
-                    latestT_ngml /= 100;
-                    console.warn(`T value ${originalValue} unit detection failed, assuming ng/dL -> ${latestT_ngml} ng/mL`);
-                }
-            }
-        }
-
-        if (!isNaN(latestE_pgml) && !isNaN(latestT_ngml) && latestT_ngml > 0) {
-            // ⚠️ 중요: 의학적 표준 E/T 비율 공식
-            // E2 (pg/mL) ÷ T (ng/dL) - 단위 변환 없이 그대로!
-            // 정상 범위: 0.04 ~ 0.1
-            
-            // T를 ng/mL에서 ng/dL로 다시 변환 (× 100)
-            const latestT_ngdL = latestT_ngml * 100;
-            
-            // 표준 E/T 비율 계산
+        if (!isNaN(latestE_pgml) && !isNaN(latestT_ngdL) && latestT_ngdL > 0) {
             const ratio = latestE_pgml / latestT_ngdL;
-            
-            console.log(`📊 E/T Ratio (Medical Standard):
-                E2: ${latestE_pgml.toFixed(1)} pg/mL
-                T: ${latestT_ngdL.toFixed(1)} ng/dL
-                E/T = ${latestE_pgml.toFixed(1)} ÷ ${latestT_ngdL.toFixed(1)} = ${ratio.toFixed(3)}
-                Normal Range: 0.04 ~ 0.1`);
-            
             analytics.etRatio = {
                 value: ratio,
-                position: Math.min(Math.max((ratio / 0.2) * 100, 0), 100), // 0-0.2 범위를 0-100%로 정규화
+                position: Math.min(Math.max((ratio / 0.2) * 100, 0), 100),
                 evaluation: ratio < 0.1 ? 'male_range' : ratio > 0.5 ? 'female_range' : 'transitioning',
                 isNormal: ratio >= 0.04 && ratio <= 0.1
             };
@@ -1513,9 +2206,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 5. 약물 영향력 분석 (개선된 알고리즘)
         if (sortedMeas.length >= 2) {
-            const standardMeds = ['estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen'];
-            const otherMeds = [...new Set(sortedMeas.map(m => m.medicationOtherName).filter(n => n && n.trim() !== ''))];
-            const allMedNames = [...standardMeds, ...otherMeds];
+            const legacyStandardMeds = ['estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen'];
+
+            const getMedicationDoseMap = (m) => {
+                const map = {};
+
+                if (m && Array.isArray(m.medications)) {
+                    m.medications.forEach(entry => {
+                        const id = entry?.id || entry?.medicationId;
+                        const dose = Number(entry?.dose);
+                        if (!id || !Number.isFinite(dose) || dose <= 0) return;
+                        map[id] = (map[id] || 0) + dose;
+                    });
+                }
+
+                legacyStandardMeds.forEach(key => {
+                    const dose = Number(m?.[key]);
+                    if (!Number.isFinite(dose) || dose <= 0) return;
+                    map[key] = (map[key] || 0) + dose;
+                });
+
+                const otherName = m?.medicationOtherName;
+                const otherDose = Number(m?.medicationOtherDose);
+                if (otherName && otherName.trim() !== '' && Number.isFinite(otherDose) && otherDose > 0) {
+                    map[otherName] = (map[otherName] || 0) + otherDose;
+                }
+
+                return map;
+            };
+
+            const doseMaps = sortedMeas.map(getMedicationDoseMap);
+
+            const allMedNames = [...new Set(doseMaps.flatMap(dm => Object.keys(dm)))];
             const drugStats = {};
             allMedNames.forEach(name => drugStats[name] = { 
                 eDeltaSum: 0, tDeltaSum: 0, doseSum: 0, count: 0, weightSum: 0 
@@ -1573,17 +2295,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 각 약물의 복용량 변화 계산
                 const doseChanges = {};
+                const currMap = doseMaps[i] || {};
+                const prevMap = doseMaps[i - 1] || {};
                 allMedNames.forEach(drugName => {
-                    let currDose = 0, prevDose = 0;
-                    if (standardMeds.includes(drugName)) {
-                        currDose = parseFloat(curr[drugName]) || 0;
-                        prevDose = parseFloat(prev[drugName]) || 0;
-                    } else if (curr.medicationOtherName === drugName) {
-                        currDose = parseFloat(curr.medicationOtherDose) || 0;
-                        if (prev.medicationOtherName === drugName) {
-                            prevDose = parseFloat(prev.medicationOtherDose) || 0;
-                        }
-                    }
+                    const currDose = Number(currMap[drugName] || 0);
+                    const prevDose = Number(prevMap[drugName] || 0);
                     doseChanges[drugName] = { curr: currDose, prev: prevDose, change: Math.abs(currDose - prevDose) };
                 });
 
@@ -1671,12 +2387,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const E_max = 0.95;
         const EC_50 = 175; // 개선된 값 (WPATH SOC 8 기반)
         
-        // T0 설정 (성별 기반)
-        let T0 = 6.0; // 기본값 (남성)
+        // T0 설정 (성별 기반) - 표준 단위: ng/dL
+        let T0 = 600; // 기본값 (남성)
         if (biologicalSex === 'female') {
-            T0 = 0.4; // 여성
-        } else if (!isNaN(parseFloat(initial.testosteroneLevel)) && parseFloat(initial.testosteroneLevel) > 2.0) {
-            T0 = parseFloat(initial.testosteroneLevel);
+            T0 = 40; // 여성
+        } else {
+            const initialT = parseFloat(initial.testosteroneLevel);
+            if (!isNaN(initialT) && initialT > 200) T0 = initialT;
         }
 
         if (!isNaN(latestE_pgml)) {
@@ -1684,8 +2401,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const predictedSuppressedAmount = T0 * predictedSuppressionFraction;
             analytics.emax.dailySuppression = -1 * predictedSuppressedAmount;
 
-            if (!isNaN(latestT_ngml)) {
-                const actualSuppressionFraction = (T0 - latestT_ngml) / T0;
+            if (!isNaN(latestT_ngdL)) {
+                const actualSuppressionFraction = (T0 - latestT_ngdL) / T0;
                 let rf = 0;
                 let messageKey = 'rfMessage_normal';
 
@@ -1732,13 +2449,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        if (!isNaN(latestT_ngml)) {
+        if (!isNaN(latestT_ngdL)) {
             if (!isNaN(targetT)) {
-                if (latestT_ngml < 0.05) {
+                if (latestT_ngdL < 5) {
                     analytics.testosteroneLevel.status = 'critical_low';
-                } else if (Math.abs(latestT_ngml - targetT) / targetT < 0.1) {
+                } else if (Math.abs(latestT_ngdL - targetT) / targetT < 0.1) {
                     analytics.testosteroneLevel.status = 'optimal';
-                } else if (latestT_ngml > targetT) {
+                } else if (latestT_ngdL > targetT) {
                     analytics.testosteroneLevel.status = 'above_target';
                 } else {
                     analytics.testosteroneLevel.status = 'below_target';
@@ -1767,8 +2484,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeModal() {
         // 이미 닫혀있으면 아무것도 하지 않음
-        if (!modalOverlay.classList.contains('visible')) return;
-        history.back();
+        if (!modalOverlay || !modalOverlay.classList.contains('visible')) return;
+
+        const state = history.state;
+        if (state && typeof state.type === 'string' && state.type.startsWith('modal')) {
+            history.back();
+        } else {
+            // 히스토리 상태가 없는 경우에는 그냥 시각적으로만 닫기
+            closeAllModalsVisually();
+        }
     }
     // --- Hormone Modal Functions ---
     function openHormoneModal() {
@@ -1788,17 +2512,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeHormoneModal() {
-        if (!hormoneModalOverlay.classList.contains('visible')) return;
-        history.back();
+        if (!hormoneModalOverlay || !hormoneModalOverlay.classList.contains('visible')) return;
 
-        // 모달이 닫힐 때 차트 인스턴스를 파괴
-        if (medicationChartInstance) {
-            medicationChartInstance.destroy();
-            medicationChartInstance = null;
-        }
-        if (hormoneChartInstance) {
-            hormoneChartInstance.destroy();
-            hormoneChartInstance = null;
+        const state = history.state;
+        if (state && state.type === 'modal-hormone') {
+            history.back();
+        } else {
+            closeAllModalsVisually();
         }
     }
 
@@ -1817,6 +2537,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     language: currentLanguage || 'ko',
                     targets: targets || {}
                 };
+                pushHistoryState('modal-briefing');
                 const modal = new BodyBriefingModal(measurements || [], userSettings);
                 modal.open();
             }).catch(error => {
@@ -2048,6 +2769,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.canvas.style.height = '100%';
         }
 
+        ensureAverageLinePluginRegistered();
         comparisonChartInstance = new Chart(ctx, {
             type: 'line',
             data: { labels, datasets },
@@ -2392,7 +3114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 변화율이 가장 큰 순서대로 정렬하고, 상위 3개만 선택
         allChanges.sort((a, b) => b.percentageChange - a.percentageChange);
-        const topChanges = allChanges.slice(0, 3);
+        const topChanges = allChanges.slice(0, 4);
 
         if (topChanges.length === 0) {
             contentEl.innerHTML = `<div class="carousel-item"><p class="placeholder">${translate('svcard_no_major_changes')}</p></div>`; // 수정
@@ -2405,10 +3127,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const changeText = item.diff > 0 ? `+${item.diff.toFixed(1)}` : `${item.diff.toFixed(1)}`;
             const changeClass = item.diff > 0 ? 'positive-change' : 'negative-change';
             return `
-        <div class="carousel-item">
-            <p style="font-size: 1.1em; font-weight: 500;">${translate(item.key)}</p>
-            <p style="font-size: 2.2em; font-weight: 700; color: var(--text-main); margin: 5px 0;">${formatValue(item.value, item.key)}</p>
-            <p class="${changeClass}" style="font-weight: 600;">${translate('svcard_change_vs_last_week')} ${changeText}</p>
+        <div class="carousel-item sv-metric-slide">
+            <p class="sv-metric-title">${translate(item.key)}</p>
+            <p class="sv-metric-value">${formatValue(item.value, item.key)}</p>
+            <p class="sv-metric-change ${changeClass}">${translate('svcard_change_vs_last_week')} ${changeText}</p>
         </div>`;
         }).join('');
 
@@ -2417,6 +3139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 스크롤 이벤트 리스너 추가 (이벤트 중복 방지)
         contentEl.removeEventListener('scroll', handleCarouselScroll); // 기존 리스너 제거
         contentEl.addEventListener('scroll', handleCarouselScroll); // 새 리스너 추가
+        contentEl.scrollLeft = 0;
     }
 
     function renderHormoneReport() {
@@ -2669,7 +3392,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="emax-item">
                                 <div class="emax-label">${translate('dailyTSuppression')}</div>
                                 <div class="emax-value primary-color">${suppressionValue}</div>
-                                <div class="emax-unit">ng/mL / week</div>
+                                <div class="emax-unit">ng/dL / week</div>
                             </div>
                             <div class="emax-divider"></div>
                             <div class="emax-item">
@@ -2861,17 +3584,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         <div class="drug-grid">`;
 
+                    try { ensureMedicationNameMap(); } catch { }
+
+                    const translateIfExists = (key) => {
+                        const t = translate(key);
+                        return t && t !== key ? t : null;
+                    };
+
                     analysisHTML += influenceEntries.map(([drug, effects]) => {
                         const confidencePercent = Math.round(effects.confidence * 100);
                         let confidenceClass = '';
                         if (confidencePercent >= 80) confidenceClass = 'high';
                         else if (confidencePercent >= 50) confidenceClass = 'medium';
                         else confidenceClass = 'low';
+
+                        const drugLabel = translateIfExists(drug) || medicationNameMap?.get?.(drug) || drug;
                         
                         return `
                         <div class="drug-card">
                             <div class="drug-card-header">
-                                <h3 class="drug-name">💊 ${translate(drug) || drug}</h3>
+                                <h3 class="drug-name">💊 ${drugLabel}</h3>
                                 <div class="drug-samples">${effects.samples} ${translate('samples')}</div>
                             </div>
                             <div class="drug-influences">
@@ -2887,7 +3619,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <span class="drug-influence-value ${effects.testosterone >= 0 ? 'positive' : 'negative'}">
                                         ${effects.testosterone >= 0 ? '+' : ''}${effects.testosterone.toFixed(2)}
                                     </span>
-                                    <span class="drug-influence-unit">ng/mL / mg</span>
+                                    <span class="drug-influence-unit">ng/dL / mg</span>
                                 </div>
                             </div>
                             <div class="drug-confidence ${confidenceClass}">
@@ -3090,7 +3822,8 @@ document.addEventListener('DOMContentLoaded', () => {
             borderWidth: 2,
             spanGaps: true,
             pointRadius: 4,
-            pointHoverRadius: 6
+            pointHoverRadius: 6,
+            _targetValue: (targets && Number.isFinite(Number(targets[key]))) ? Number(targets[key]) : undefined
         }));
 
         const onChartClick = (event, chartInstance) => {
@@ -3198,6 +3931,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hormoneCtx.canvas.style.height = '100%';
         }
 
+        ensureAverageLinePluginRegistered();
         medicationChartInstance = new Chart(medicationCtx, { type: 'line', data: { labels, datasets: allDatasets }, options: chartOptions(() => medicationChartInstance) });
         hormoneChartInstance = new Chart(hormoneCtx, { type: 'line', data: { labels, datasets: hormoneDatasets }, options: chartOptions(() => hormoneChartInstance) });
 
@@ -3205,16 +3939,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const hormoneLegendEl = document.getElementById('hormone-legend-controls');
         if (!medicationLegendEl || !hormoneLegendEl) return;
 
-        const createLegend = (chart, container) => {
-            container.innerHTML = chart.data.datasets.map((dataset, index) => {
+        const createGroupedLegend = (chart, container, titleKey) => {
+            const allVisible = chart.data.datasets.length > 0 && chart.data.datasets.every((_, i) => chart.isDatasetVisible(i));
+            const toggleText = allVisible ? translate('deselectAll') : translate('selectAll');
+            const items = chart.data.datasets.map((dataset, index) => {
                 const color = dataset.borderColor;
-                return `<button class="legend-button" data-chart="${chart.canvas.id}" data-dataset-index="${index}" style="background-color: ${color}; border-color: ${color}; color: white;">
-                ${dataset.label}
-            </button>`;
+                const isActive = chart.isDatasetVisible(index);
+                const inactive = isActive ? '' : 'inactive';
+                const bg = isActive ? color : 'transparent';
+                const fg = isActive ? 'white' : getCssVar('--text-dim');
+                return `<button class="legend-button ${inactive}" data-chart="${chart.canvas.id}" data-dataset-index="${index}" style="background-color: ${bg}; border-color: ${color}; color: ${fg};">${dataset.label}</button>`;
             }).join('');
+
+            container.innerHTML = `
+                <div class="briefing-legend-toolbar">
+                    <button class="legend-button" data-action="toggle-all" data-chart="${chart.canvas.id}" style="background-color: var(--accent); border-color: var(--accent); color: white;">${toggleText}</button>
+                </div>
+                <div class="briefing-legend-grid">
+                    <div class="legend-group-card">
+                        <h5 class="legend-group-title">${translate(titleKey)}</h5>
+                        <div class="legend-list">${items}</div>
+                    </div>
+                </div>
+            `;
         };
-        createLegend(medicationChartInstance, medicationLegendEl);
-        createLegend(hormoneChartInstance, hormoneLegendEl);
+
+        createGroupedLegend(medicationChartInstance, medicationLegendEl, 'briefingGroupMedications');
+        createGroupedLegend(hormoneChartInstance, hormoneLegendEl, 'briefingGroupMeasurements');
+
+        const pointCount = labels.length;
+        const medContainer = ensureChartWrapperContainer(medicationWrapper);
+        const hormoneContainer = ensureChartWrapperContainer(hormoneWrapper);
+        ensureChartZoomControls(medicationChartInstance, medicationWrapper, medInnerContainer, pointCount, 'medication-chart');
+        ensureChartZoomControls(hormoneChartInstance, hormoneWrapper, hormoneInnerContainer, pointCount, 'hormone-chart');
+        applyChartZoom(medicationChartInstance, medicationWrapper, medInnerContainer, pointCount, 'medication-chart');
+        applyChartZoom(hormoneChartInstance, hormoneWrapper, hormoneInnerContainer, pointCount, 'hormone-chart');
     }
 
     // 캐러셀 스크롤 이벤트 핸들러 (유틸리티 함수 섹션에 추가해도 좋습니다)
@@ -3234,81 +3993,216 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 가이드 카드 렌더링 함수
     function renderGuideCard() {
-        if (!svCardGuide) return;
+        const card = document.getElementById('sv-card-guide');
+        const titleEl = document.getElementById('sv-card-guide-title');
+        const contentEl = document.getElementById('sv-card-guide-content');
+        const dotsEl = document.getElementById('sv-card-guide-dots');
 
-        let message = translate('svcard_guide_default');
-        let icon = '💬';
-        let title = translate('svcard_title_weekly_guide');
-        svCardGuide.className = 'sv-card sv-card-widget'; // 클래스 초기화
+        if (!card || !titleEl || !contentEl || !dotsEl) return;
 
-        // 모든 경우에 기본 이미지 클래스를 먼저 추가합니다.
-        svCardGuide.classList.add('sv-card-with-image');
+        const renderId = (renderGuideCard._renderId = (renderGuideCard._renderId || 0) + 1);
 
-        // 데이터가 충분할 때만 점수를 계산하고, 그렇지 않으면 기본 상태를 유지합니다.
-        if (measurements.length >= 4 && Object.keys(targets).length > 0) {
-            const lastFour = measurements.slice(-4);
-            let progressScores = [];
+        const localizeActionGuideText = (text) => {
+            const s = String(text || '');
+            if (!s) return s;
+            const lang = currentLanguage || 'ko';
+            if (lang === 'ko') return s;
 
-            // 최근 3주간의 변화를 계산
-            for (let i = 1; i < lastFour.length; i++) {
-                const current = lastFour[i];
-                const prev = lastFour[i - 1];
-                let weeklyProgress = 0;
-                let validTargetsInWeek = 0;
-
-                Object.keys(targets).forEach(key => {
-                    const targetValue = parseFloat(targets[key]);
-                    const prevValue = parseFloat(prev[key]);
-                    const currentValue = parseFloat(current[key]);
-
-                    if (![targetValue, prevValue, currentValue].some(isNaN)) {
-                        const direction = Math.sign(targetValue - prevValue);
-                        if (direction !== 0) {
-                            if (Math.sign(currentValue - prevValue) === direction) {
-                                weeklyProgress += 1;
-                            } else if (Math.sign(currentValue - prevValue) === -direction) {
-                                weeklyProgress -= 1;
-                            }
-                        }
-                        validTargetsInWeek++;
-                    }
-                });
-
-                if (validTargetsInWeek > 0) {
-                    progressScores.push(weeklyProgress / validTargetsInWeek);
-                } else {
-                    progressScores.push(0);
+            const dictionary = {
+                en: {
+                    '하체 집중 운동': 'Lower-body focused training',
+                    '여성적 하체 라인 형성': 'Build a feminine lower-body line',
+                    '여성적 곡선 만들기': 'Build feminine curves',
+                    '근육 손실 방지': 'Prevent muscle loss',
+                    '근육량 회복': 'Recover muscle mass',
+                    '건강한 체중 증가 필요': 'Need healthy weight gain',
+                    '주 3회, 복합 운동 중심': '3 times/week, compound-focused',
+                    '단백질 섭취 늘리기': 'Increase protein intake',
+                    '단백질 섭취 증가': 'Increase protein intake',
+                    '고단백 식단으로 근육 보호': 'Protect muscle with a high-protein diet',
+                    '건강한 지방 섭취': 'Healthy fat intake',
+                    '호르몬 균형 및 지방 재분배': 'Hormone balance and fat redistribution',
+                    '수분 섭취': 'Hydration',
+                    '전반적인 건강': 'Overall health',
+                    '하루 2-3리터': '2–3 liters/day',
+                    '항안드로겐 증량 고려': 'Consider increasing anti-androgen',
+                    '테스토스테론 억제가 충분하지 않습니다': 'Testosterone suppression is insufficient',
+                    '에스트라디올 복용량 유지': 'Maintain estradiol dose',
+                    '현재 수치가 이상적입니다': 'Current level is ideal',
+                    '충분한 수분 섭취': 'Adequate hydration',
+                    '하루 2-3리터 물 마시기': 'Drink 2–3 L of water per day',
+                    '신진대사 및 호르몬 대사': 'Metabolism and hormone metabolism',
+                    '정기 측정 유지': 'Keep regular measurements',
+                    '일관성 있는 측정으로 정확한 추세 파악': 'Consistent measurements improve trend accuracy',
+                    '피부 관리': 'Skin care',
+                    '여성적 피부 유지': 'Maintain feminine skin',
+                    '보습 및 관리': 'Moisturizing and care',
+                    '근력 운동': 'Strength training',
+                    '유산소 운동 증가': 'Increase cardio',
+                    '체중 감소를 위한 유산소 운동': 'Cardio for weight loss',
+                    '체중 증가 및 근육 발달': 'Build muscle and gain weight',
+                    '주 3-4회, 30-45분': '3–4 times/week, 30–45 min',
+                    '칼로리 섭취 조절': 'Adjust calorie intake',
+                    '약물 복용량 관리': 'Manage medication dosage',
+                    '습관 개선': 'Improve habits'
+                },
+                ja: {
+                    '하체 집중 운동': '下半身集中トレ',
+                    '여성적 하체 라인 형성': '女性らしい下半身ラインづくり',
+                    '여성적 곡선 만들기': '女性らしい曲線づくり',
+                    '근육 손실 방지': '筋肉減少の防止',
+                    '근육량 회복': '筋肉量の回復',
+                    '건강한 체중 증가 필요': '健康的な増量が必要',
+                    '주 3회, 복합 운동 중심': '週3回、複合種目中心',
+                    '단백질 섭취 늘리기': 'タンパク質摂取を増やす',
+                    '단백질 섭취 증가': 'タンパク質摂取を増やす',
+                    '고단백 식단으로 근육 보호': '高タンパク食で筋肉を守る',
+                    '건강한 지방 섭취': '良質な脂質を摂る',
+                    '호르몬 균형 및 지방 재분배': 'ホルモンバランスと脂肪再分配',
+                    '수분 섭취': '水分補給',
+                    '전반적인 건강': '全体的な健康',
+                    '하루 2-3리터': '1日2〜3L',
+                    '항안드로겐 증량 고려': '抗アンドロゲン増量を検討',
+                    '테스토스테론 억제가 충분하지 않습니다': 'テストステロン抑制が不十分です',
+                    '에스트라디올 복용량 유지': 'エストラジオール量を維持',
+                    '현재 수치가 이상적입니다': '現在の値は理想的です',
+                    '충분한 수분 섭취': '十分な水分補給',
+                    '하루 2-3리터 물 마시기': '1日2〜3Lの水を飲む',
+                    '신진대사 및 호르몬 대사': '代謝とホルモン代謝',
+                    '정기 측정 유지': '定期測定を継続',
+                    '일관성 있는 측정으로 정확한 추세 파악': '一貫した測定で正確な傾向を把握',
+                    '피부 관리': 'スキンケア',
+                    '여성적 피부 유지': '女性らしい肌を保つ',
+                    '보습 및 관리': '保湿とケア',
+                    '근력 운동': '筋力トレーニング',
+                    '유산소 운동 증가': '有酸素運動を増やす',
+                    '체중 감소를 위한 유산소 운동': '減量のための有酸素運動',
+                    '체중 증가 및 근육 발달': '増量・筋肉増加',
+                    '주 3-4회, 30-45분': '週3〜4回、30〜45分',
+                    '칼로리 섭취 조절': '摂取カロリーの調整',
+                    '약물 복용량 관리': '服薬量の管理',
+                    '습관 개선': '習慣の改善'
                 }
+            };
+
+            const direct = dictionary[lang]?.[s];
+            if (direct) return direct;
+
+            const metricToken = {
+                ko: { '체중': 'weight', '허리': 'waist', '엉덩이': 'hips', '가슴': 'chest', '어깨': 'shoulder', '허벅지': 'thigh', '팔뚝': 'arm', '근육량': 'muscleMass', '체지방률': 'bodyFatPercentage' },
+                en: { 'weight': 'Weight', 'waist': 'Waist', 'hips': 'Hips', 'chest': 'Chest', 'shoulder': 'Shoulder', 'thigh': 'Thigh', 'arm': 'Arm', 'muscleMass': 'Muscle Mass', 'bodyFatPercentage': 'Body Fat %' },
+                ja: { 'weight': '体重', 'waist': 'ウエスト', 'hips': 'ヒップ', 'chest': '胸囲', 'shoulder': '肩幅', 'thigh': '太もも', 'arm': '腕', 'muscleMass': '筋肉量', 'bodyFatPercentage': '体脂肪率' }
+            };
+
+            const patterns = [
+                {
+                    regex: /^([0-9]+)주\s*연속\s*기록\s*중!$/,
+                    replace: (m) => lang === 'en' ? `${m[1]}-week streak!` : `${m[1]}週連続記録中！`
+                },
+                {
+                    regex: /^(.+?)\s*([0-9.]+)(kg|cm|%)\s*감소$/,
+                    replace: (m) => {
+                        const rawMetric = m[1].trim();
+                        const key = metricToken.ko[rawMetric];
+                        const metric = key ? metricToken[lang]?.[key] : rawMetric;
+                        return lang === 'en' ? `${metric} decreased by ${m[2]}${m[3]}` : `${metric}が${m[2]}${m[3]}減少`;
+                    }
+                },
+                {
+                    regex: /^주간\s*([0-9.]+)kg\s*감소\s*\(권장:\s*([0-9.]+)kg\)$/,
+                    replace: (m) => lang === 'en' ? `Weekly loss ${m[1]}kg (recommended: ${m[2]}kg)` : `週間${m[1]}kg減（推奨：${m[2]}kg）`
+                },
+                {
+                    regex: /^목표\s*체지방률:\s*([0-9.]+\s*-\s*[0-9.]+)%\s*\(현재:\s*([0-9.]+)%\)$/,
+                    replace: (m) => lang === 'en' ? `Target body fat: ${m[1].replace(/\s*/g, '')}% (current: ${m[2]}%)` : `目標体脂肪率：${m[1].replace(/\s*/g, '')}%（現在：${m[2]}%）`
+                },
+                {
+                    regex: /^💪\s*거의\s*다\s*왔어요!\s*약\s*([0-9]+)주\s*남았습니다!$/,
+                    replace: (m) => lang === 'en' ? `💪 Almost there! About ${m[1]} weeks left!` : `💪 もうすぐです！あと約${m[1]}週間！`
+                },
+                {
+                    regex: /^현재\s*추세로는\s*목표에서\s*멀어지고\s*있습니다\.$/,
+                    replace: () => lang === 'en' ? `Trending away from target.` : `現在の傾向では目標から遠ざかっています。`
+                },
+                {
+                    regex: /^📈\s*순조롭게\s*진행\s*중입니다\.\s*약\s*([0-9]+)주\s*예상됩니다\.$/,
+                    replace: (m) => lang === 'en' ? `📈 On track. Estimated ${m[1]} weeks.` : `📈 順調です。約${m[1]}週間と予想されます。`
+                }
+            ];
+
+            for (const p of patterns) {
+                const match = s.match(p.regex);
+                if (match) return p.replace(match);
             }
 
-            const totalScore = progressScores.reduce((a, b) => a + b, 0);
+            return s;
+        };
 
-            if (totalScore >= 2) {
-                message = translate('svcard_guide_positive_long');
-                icon = '🎉';
-                svCardGuide.classList.add('sv-card--countdown-green', 'sv-card-image-good');
-            } else if (totalScore > 0) {
-                message = translate('svcard_guide_positive_short');
-                icon = '👍';
-                svCardGuide.classList.add('sv-card--countdown-yellow', 'sv-card-image-normal');
-            } else if (totalScore <= -2) {
-                message = translate('svcard_guide_negative_long');
-                icon = '😥';
-                svCardGuide.classList.add('sv-card--countdown-red', 'sv-card-image-bad');
-            } else if (totalScore < 0) {
-                message = translate('svcard_guide_negative_short');
-                icon = '🤔';
-                svCardGuide.classList.add('sv-card--dday', 'sv-card-image-bad');
-            } else {
-                // 점수가 0이거나 계산 불가일 때 (기본 메시지 유지)
-                svCardGuide.classList.add('sv-card-image-nothing');
-            }
-        } else {
-            // 데이터가 부족한 경우
-            svCardGuide.classList.add('sv-card-image-nothing');
-        }
+        card.className = 'sv-card sv-card-widget carousel-container sv-card-with-image sv-card-image-normal sv-card--clickable';
+        titleEl.innerHTML = `${translate('svcard_title_action_guide')}`;
 
-        svCardGuide.innerHTML = `<h3>${icon} ${title}</h3><div class="sv-card-content"><p>${message}</p></div>`;
+        const metaByCategory = {
+            exercise: { icon: '💪', titleKey: 'actionGuideCategoryExercise' },
+            diet: { icon: '🥗', titleKey: 'actionGuideCategoryDiet' },
+            medication: { icon: '💊', titleKey: 'actionGuideCategoryMedication' },
+            habits: { icon: '🧠', titleKey: 'actionGuideCategoryHabits' }
+        };
+
+        const categoryKeys = ['exercise', 'diet', 'medication', 'habits'];
+
+        const renderSlides = (recs) => {
+            return categoryKeys.map((key) => {
+                const meta = metaByCategory[key];
+                const title = translate(meta.titleKey) || key;
+                const list = Array.isArray(recs?.[key]) ? recs[key].slice(0, 3) : [];
+                const itemsHtml = list.length > 0
+                    ? list.map((it) => {
+                        const itemTitle = localizeActionGuideText(it?.title || '');
+                        const reason = localizeActionGuideText(it?.reason || it?.description || '');
+                        return `
+                            <div class="sv-action-item">
+                                <div class="sv-action-item-title">${itemTitle}</div>
+                                ${reason ? `<div class="sv-action-item-reason">${reason}</div>` : ''}
+                            </div>
+                        `;
+                    }).join('')
+                    : `<div class="sv-action-empty">${translate('notEnoughData')}</div>`;
+
+                return `
+                    <div class="carousel-item sv-action-slide">
+                        <div class="sv-action-category">${meta.icon} ${title}</div>
+                        <div class="sv-action-items">${itemsHtml}</div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        contentEl.innerHTML = renderSlides(null);
+        dotsEl.innerHTML = categoryKeys.map((_, index) => `<div class="carousel-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></div>`).join('');
+
+        contentEl.removeEventListener('scroll', handleCarouselScroll);
+        contentEl.addEventListener('scroll', handleCarouselScroll);
+        contentEl.scrollLeft = 0;
+
+        const userSettings = {
+            mode: currentMode || 'mtf',
+            biologicalSex: biologicalSex || 'male',
+            language: currentLanguage || 'ko',
+            targets: targets || {}
+        };
+
+        import('./src/doctor-module/core/doctor-engine.js').then((module) => {
+            if (renderGuideCard._renderId !== renderId) return;
+            const DoctorEngine = module.DoctorEngine || module.default;
+            const engine = new DoctorEngine(measurements || [], userSettings);
+            const guide = engine.generateActionGuide();
+            const recs = guide?.recommendations || null;
+            contentEl.innerHTML = renderSlides(recs);
+            contentEl.scrollLeft = 0;
+        }).catch(() => {
+            if (renderGuideCard._renderId !== renderId) return;
+            contentEl.innerHTML = renderSlides(null);
+        });
     }
 
     // 목표 달성도 카드 렌더링 함수
@@ -3375,78 +4269,137 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 호르몬 카드 렌더링 함수
     function renderHormonesCard() {
-        if (!svCardHormones) return;
+        const card = document.getElementById('sv-card-hormones');
+        const titleEl = document.getElementById('sv-card-hormones-title');
+        const contentEl = document.getElementById('sv-card-hormones-content');
+        const dotsEl = document.getElementById('sv-card-hormones-dots');
 
-        svCardHormones.classList.add('sv-card--clickable');
-        // ▼▼▼▼▼ 여기가 수정된 부분입니다 ▼▼▼▼▼
+        if (!card || !titleEl || !contentEl || !dotsEl) return;
+
+        card.classList.add('sv-card--clickable');
+        titleEl.innerHTML = `${translate('svcard_title_hormones')}`;
+
         const analytics = calculateAdvancedHormoneAnalytics();
-        // ▲▲▲▲▲ 여기가 수정된 부분입니다 ▲▲▲▲▲
-        let content = `<h3>${translate('svcard_title_hormones')}</h3><div class="sv-card-content" style="align-items: stretch; text-align: left; gap: 20px;">`;
 
         if (measurements.length < 1) {
-            content += `<p class="placeholder" style="text-align: center;">${translate('svcard_no_hormone_data')}</p>`;
-        } else {
-            const initial = measurements[0];
-            const latest = measurements[measurements.length - 1];
-            const previous = measurements.length > 1 ? measurements[measurements.length - 2] : null;
+            contentEl.innerHTML = `<div class="carousel-item"><p class="placeholder">${translate('svcard_no_hormone_data')}</p></div>`;
+            dotsEl.innerHTML = '';
+            return;
+        }
 
-            const hormonesToDisplay = [
-                { key: 'estrogenLevel', label: translate('estrogenLevel').split('(')[0] },
-                { key: 'testosteroneLevel', label: translate('testosteroneLevel').split('(')[0] }
+        const getStatusBadge = (hormoneKey, status) => {
+            const isE = hormoneKey === 'estrogenLevel';
+            if (status === 'critical_high') return { cls: 'danger-badge', icon: '⚠️', text: translate('estrogen_critical_high') };
+            if (status === 'critical_low') return { cls: 'danger-badge', icon: '⚠️', text: translate('testosterone_critical_low') };
+            if (status === 'optimal') return { cls: 'optimal-badge', icon: '✓', text: isE ? translate('estrogen_optimal') : translate('testosterone_optimal') };
+            if (status === 'above_target') return { cls: 'above-badge', icon: '↑', text: isE ? translate('estrogen_above_target') : translate('testosterone_above_target') };
+            if (status === 'below_target') return { cls: 'below-badge', icon: '↓', text: isE ? translate('estrogen_below_target') : translate('testosterone_below_target') };
+            return { cls: 'neutral-badge', icon: '—', text: translate('no_target_set') };
+        };
+
+        const currentLevelSlide = (() => {
+            if (!analytics) {
+                return `
+                    <div class="carousel-item sv-hormone-summary-slide">
+                        <p class="placeholder">${translate('notEnoughData')}</p>
+                    </div>
+                `;
+            }
+
+            const hormones = [
+                { key: 'estrogenLevel', name: translate('estrogenLevel').split('(')[0] },
+                { key: 'testosteroneLevel', name: translate('testosteroneLevel').split('(')[0] }
             ];
 
-            hormonesToDisplay.forEach(h => {
-                const barData = {
-                    key: h.key,
-                    initialValue: initial ? parseFloat(initial[h.key]) : null,
-                    prevValue: previous ? parseFloat(previous[h.key]) : null,
-                    currentValue: latest ? parseFloat(latest[h.key]) : null,
-                    targetValue: targets[h.key] ? parseFloat(targets[h.key]) : null,
-                };
+            const cardsHtml = hormones.map(h => {
+                const current = analytics[h.key]?.current;
+                const target = parseFloat(targets?.[h.key]);
+                const status = analytics[h.key]?.status;
+                const badge = getStatusBadge(h.key, status);
+                const showTarget = Number.isFinite(target);
 
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = `<table><tr>${createProgressBarHTML(barData)}</tr></table>`;
-                const barHTML = tempDiv.querySelector('.progress-bar-cell')?.innerHTML || '<p class="placeholder" style="font-size: 0.8em; text-align: center;">-</p>';
-
-                let weeklyChangeHTML = '';
-
-                // analytics.weeklyChange 값이 유효한 'number' 타입인지 명확하게 확인합니다.
-                if (analytics && analytics[h.key] && typeof analytics[h.key].weeklyChange === 'number') {
-                    const change = analytics[h.key].weeklyChange;
-                    const changeClass = change >= 0 ? 'positive-change' : 'negative-change';
-                    const changeText = change >= 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
-                    weeklyChangeHTML = `
-                    <div class="hormone-weekly-change">
-                        <span class="change-label">${translate('svcard_hormone_weekly_change')}</span>
-                        <span class="change-value ${changeClass}">${changeText}</span>
+                return `
+                    <div class="hormone-card highlight-card sv-hormone-mini-card">
+                        <div class="hormone-card-header">
+                            <h3 class="hormone-name">${h.name}</h3>
+                        </div>
+                        <div class="hormone-current-value">${Number.isFinite(current) ? formatValue(current, h.key) : '-'}</div>
+                        ${showTarget ? `<div class="hormone-target">
+                            <span class="target-label">${translate('svcard_label_target')}</span>
+                            <span class="target-value">${formatValue(target, h.key)}</span>
+                        </div>` : ''}
+                        <div class="status-badge ${badge.cls}">${badge.icon} ${badge.text}</div>
                     </div>
                 `;
-                } else {
-                    // 값이 유효하지 않으면 '-'로 표시합니다.
-                    weeklyChangeHTML = `
-                    <div class="hormone-weekly-change">
-                        <span class="change-label">${translate('svcard_hormone_weekly_change')}</span>
-                        <span class="change-value">-</span>
-                    </div>
-                `;
-                }
+            }).join('');
 
-                content += `
-                    <div class="hormone-item">
-                        <label style="font-weight: 600; font-size: 0.9em; color: var(--text-main); margin-bottom: 5px; display: block;">${h.label}</label>
-                        <div class="hormone-item-row">
-                            <div class="hormone-progress-bar-container">
-                                ${barHTML}
+            return `
+                <div class="carousel-item sv-hormone-summary-slide">
+                    <div class="hormone-grid sv-hormone-widget-grid">${cardsHtml}</div>
+                </div>
+            `;
+        })();
+
+        const etRatioSlide = (() => {
+            const lang = currentLanguage || 'ko';
+            const transitioningText = lang.startsWith('ja') ? '移行中' : lang.startsWith('en') ? 'Transitioning' : '전환 중';
+
+            if (!analytics?.etRatio) {
+                return `
+                    <div class="carousel-item sv-hormone-summary-slide">
+                        <div class="hormone-card ratio-card sv-hormone-mini-card">
+                            <div class="ratio-value-display">
+                                <span class="ratio-number">-</span>
                             </div>
-                            ${weeklyChangeHTML}
+                            <p class="placeholder">${translate('notEnoughData')}</p>
                         </div>
                     </div>
                 `;
-            });
-        }
+            }
 
-        content += '</div>';
-        svCardHormones.innerHTML = content;
+            const ratio = analytics.etRatio.value;
+            const label = analytics.etRatio.evaluation === 'male_range'
+                ? translate('etRatioMale')
+                : analytics.etRatio.evaluation === 'female_range'
+                    ? translate('etRatioFemale')
+                    : transitioningText;
+
+            const badgeClass = analytics.etRatio.isNormal ? 'optimal-badge' : 'neutral-badge';
+            const badgeText = analytics.etRatio.isNormal ? (lang.startsWith('ja') ? '正常範囲' : lang.startsWith('en') ? 'Normal range' : '정상 범위') : label;
+
+            return `
+                <div class="carousel-item sv-hormone-summary-slide">
+                    <div class="hormone-card ratio-card sv-hormone-mini-card">
+                        <div class="sv-ratio-row">
+                            <div class="sv-ratio-group">
+                                <div class="ratio-icon male">♂</div>
+                                <div class="ratio-percentile">${translate('etRatioMale')}</div>
+                            </div>
+                            <div class="sv-ratio-bar-wrapper">
+                                <div class="ratio-bar">
+                                    <div class="ratio-bar-marker" style="left: ${analytics.etRatio.position}%;"></div>
+                                </div>
+                            </div>
+                            <div class="sv-ratio-group">
+                                <div class="ratio-icon female">♀</div>
+                                <div class="ratio-percentile">${translate('etRatioFemale')}</div>
+                            </div>
+                        </div>
+                        <div class="ratio-value-display">
+                            <span class="ratio-number">E/T - ${ratio.toFixed(3)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        })();
+
+        contentEl.innerHTML = `${currentLevelSlide}${etRatioSlide}`;
+
+        dotsEl.innerHTML = [0, 1].map((_, index) => `<div class="carousel-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></div>`).join('');
+
+        contentEl.removeEventListener('scroll', handleCarouselScroll);
+        contentEl.addEventListener('scroll', handleCarouselScroll);
+        contentEl.scrollLeft = 0;
     }
 
 
@@ -3675,14 +4628,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return { data: [], headers: [] };
         }
 
-        const currentDisplayKeys = getFilteredDisplayKeys();
+        const currentDisplayKeys = getFilteredDisplayKeys().filter(k => !legacyKeysToHideInTables.has(k));
         let headers = currentDisplayKeys.filter(k => k !== 'timestamp');
 
         // 헤더 필터링 (테이블 뷰용)
         if (activeHistoryFilters.length > 0) {
             headers = currentDisplayKeys.filter(key =>
-                ['week', 'date', 'memo'].includes(key) || activeHistoryFilters.includes(key)
+                ['week', 'date', 'symptoms', 'medications', 'memo'].includes(key) || activeHistoryFilters.includes(key)
             );
+        }
+
+        if (!headers.includes('symptoms')) {
+            const memoIndex = headers.indexOf('memo');
+            const insertAt = memoIndex >= 0 ? memoIndex : headers.length;
+            headers.splice(insertAt, 0, 'symptoms');
+        }
+        if (!headers.includes('medications')) {
+            const memoIndex = headers.indexOf('memo');
+            const insertAt = memoIndex >= 0 ? memoIndex : headers.length;
+            headers.splice(insertAt, 0, 'medications');
         }
 
         // 데이터 필터링 (카드/테이블 뷰 공통)
@@ -3715,14 +4679,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const index = m.week;
 
             let displayKeys = getFilteredDisplayKeys().filter(key =>
-                !['week', 'date', 'timestamp', 'memo'].includes(key) && (m[key] !== null && m[key] !== undefined && m[key] !== '')
+                !legacyKeysToHideInTables.has(key) &&
+                !['week', 'date', 'timestamp', 'memo'].includes(key) &&
+                (key === 'symptoms' || key === 'medications' || (m[key] !== null && m[key] !== undefined && m[key] !== ''))
             );
+
+            if (!displayKeys.includes('symptoms')) displayKeys.unshift('symptoms');
+            if (!displayKeys.includes('medications')) displayKeys.splice(Math.min(1, displayKeys.length), 0, 'medications');
             if (activeHistoryFilters.length > 0) {
                 displayKeys = displayKeys.filter(key => activeHistoryFilters.includes(key));
             }
 
             const labelsRow = displayKeys.map(key => `<th class="label">${translate(key).split('(')[0].trim()}</th>`).join('');
-            const valuesRow = displayKeys.map(key => `<td class="value">${formatValue(m[key], key)}</td>`).join('');
+            const valuesRow = displayKeys.map(key => {
+                if (key === 'symptoms') return `<td class="value wrap-cell">${formatSymptomsCell(m.symptoms)}</td>`;
+                if (key === 'medications') return `<td class="value wrap-cell">${formatMedicationsCell(m.medications)}</td>`;
+                if (key === 'menstruationActive') return `<td class="value">${m.menstruationActive === true ? '✓' : '-'}</td>`;
+                return `<td class="value">${formatValue(m[key], key)}</td>`;
+            }).join('');
 
             html += `
         <div class="history-card glass-card">
@@ -3757,29 +4731,50 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let tableHTML = '<table><thead><tr>';
-        headers.forEach(key => {
+        let effectiveHeaders = Array.isArray(headers) ? headers.filter(k => !legacyKeysToHideInTables.has(k)) : [];
+        if (!effectiveHeaders.includes('symptoms')) {
+            const memoIndex = effectiveHeaders.indexOf('memo');
+            const insertAt = memoIndex >= 0 ? memoIndex : effectiveHeaders.length;
+            effectiveHeaders.splice(insertAt, 0, 'symptoms');
+        }
+        if (!effectiveHeaders.includes('medications')) {
+            const memoIndex = effectiveHeaders.indexOf('memo');
+            const insertAt = memoIndex >= 0 ? memoIndex : effectiveHeaders.length;
+            effectiveHeaders.splice(insertAt, 0, 'medications');
+        }
+
+        let tableHTML = '<table class="history-table"><thead><tr>';
+        effectiveHeaders.forEach(key => {
             if (key === 'timestamp') return;
             const labelText = translate(key).split('(')[0].trim();
-            tableHTML += `<th>${labelText}</th>`;
+            const thClass = (key === 'symptoms') ? 'col-symptoms' : (key === 'medications') ? 'col-medications' : '';
+            tableHTML += `<th class="${thClass}">${labelText}</th>`;
         });
         tableHTML += `<th class="sticky-col">${translate('manageColumn')}</th></tr></thead><tbody>`;
 
         data.forEach(m => {
             const index = m.week;
             tableHTML += '<tr>';
-            headers.forEach(key => {
+            effectiveHeaders.forEach(key => {
                 if (key === 'timestamp') return;
-                let value = (key === 'date') ? formatTimestamp(m.timestamp, true) : formatValue(m[key], key);
+                let value = '-';
+                if (key === 'date') value = formatTimestamp(m.timestamp, true);
+                else if (key === 'week') value = m.week;
+                else if (key === 'symptoms') value = formatSymptomsCell(m.symptoms);
+                else if (key === 'medications') value = formatMedicationsCell(m.medications);
+                else if (key === 'menstruationActive') value = m.menstruationActive === true ? '✓' : '-';
+                else value = formatValue(m[key], key);
                 if (key === 'memo' && value.length > 20) {
                     value = value.substring(0, 20) + '...';
                 }
-                tableHTML += `<td>${value}</td>`;
+                if (key === 'symptoms') tableHTML += `<td class="wrap-cell col-symptoms">${value}</td>`;
+                else if (key === 'medications') tableHTML += `<td class="wrap-cell col-medications">${value}</td>`;
+                else tableHTML += `<td>${value}</td>`;
             });
-            tableHTML += `<td class="action-buttons sticky-col">
+            tableHTML += `<td class="sticky-col action-col"><div class="action-buttons">
                         <button class="glass-button btn-edit" data-index="${index}">${translate('edit')}</button>
                         <button class="glass-button danger btn-delete" data-index="${index}">${translate('delete')}</button>
-                      </td></tr>`;
+                      </div></td></tr>`;
         });
 
         tableHTML += '</tbody></table>';
@@ -3929,6 +4924,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         needsSave = true;
                     }
                     if (m.memoLiked === undefined) { m.memoLiked = false; needsSave = true; }
+
+                    const beforeSig = symptomsSignature(m.symptoms);
+                    const normalizedSymptoms = normalizeSymptomsArray(m.symptoms);
+                    const afterSig = symptomsSignature(normalizedSymptoms);
+                    if (beforeSig !== afterSig) {
+                        m.symptoms = normalizedSymptoms;
+                        needsSave = true;
+                    }
                 });
                 notes.forEach(note => {
                     if (!note.id) { note.id = 'note_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9); needsSave = true; }
@@ -3937,6 +4940,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (needsSave) {
                     console.log("DEBUG: Data migration applied (week numbers/timestamps/note IDs). Saving updated data.");
                     savePrimaryDataToStorage();
+                }
+
+                if (window.medicationSelector && editIndexInput?.value === '') {
+                    const lastMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
+                    try {
+                        window.medicationSelector.setMedications(lastMeasurement?.medications || null);
+                    } catch (error) {
+                        console.error('Error applying last medications after load:', error);
+                    }
                 }
                 console.log("DEBUG: Primary data loaded.", { measurements: measurements.length, targets: Object.keys(targets).length, notes: notes.length });
             } else {
@@ -4081,10 +5093,28 @@ document.addEventListener('DOMContentLoaded', () => {
             renderChartSelector();
             renderChart();
         }
+
+        updateCycleTrackerVisibility();
+        unitHealthEvaluatorInstance = null;
+    }
+
+    function updateCycleTrackerVisibility() {
+        const cycleGroup = document.getElementById('cycle-tracker-group');
+        if (!cycleGroup) return;
+        const shouldShow = currentMode === 'ftm' && biologicalSex === 'female';
+        cycleGroup.style.display = shouldShow ? '' : 'none';
+
+        if (!shouldShow) {
+            const menstruationActiveInput = document.getElementById('menstruationActive');
+            const menstruationPainGroup = document.getElementById('menstruation-pain-group');
+            if (menstruationActiveInput) menstruationActiveInput.checked = false;
+            if (menstruationPainGroup) menstruationPainGroup.style.display = 'none';
+        }
     }
 
     function applyLanguageToUI() {
         if (languageSelect) languageSelect.value = currentLanguage;
+        syncModuleLanguage(currentLanguage);
         translateUI(); // Translates UI and triggers re-renders
     }
 
@@ -4233,6 +5263,126 @@ document.addEventListener('DOMContentLoaded', () => {
         return keys;
     }
 
+    const legacyKeysToHideInTables = new Set([
+        'skinCondition',
+        'healthScore',
+        'healthNotes',
+        'estradiol',
+        'progesterone',
+        'antiAndrogen',
+        'testosterone',
+        'antiEstrogen'
+    ]);
+
+    let symptomLabelMap = null;
+    let symptomLabelMapPromise = null;
+    let medicationNameMap = null;
+    let medicationNameMapPromise = null;
+
+    function pickLocalizedName(names, language) {
+        if (!Array.isArray(names) || names.length === 0) return '';
+        if (language === 'ko') return names.find(n => /[가-힣]/.test(n)) || names[0];
+        if (language === 'ja') return names.find(n => /[ぁ-んァ-ン一-龯]/.test(n)) || names.find(n => /[A-Za-z]/.test(n)) || names[0];
+        return names.find(n => /[A-Za-z]/.test(n)) || names[0];
+    }
+
+    function ensureSymptomLabelMap() {
+        if (symptomLabelMap) return Promise.resolve(symptomLabelMap);
+        if (symptomLabelMapPromise) return symptomLabelMapPromise;
+
+        symptomLabelMapPromise = import('./src/doctor-module/data/symptom-database.js')
+            .then(mod => {
+                const map = new Map();
+
+                const db = mod.SYMPTOM_DATABASE;
+                if (db && typeof db === 'object') {
+                    Object.values(db).forEach(group => {
+                        const symptoms = group?.symptoms;
+                        if (!Array.isArray(symptoms)) return;
+                        symptoms.forEach(s => {
+                            if (!s?.id) return;
+                            const label = (currentLanguage === 'ja' ? s.ja : currentLanguage === 'en' ? s.en : s.ko) || s.ko || s.en || s.ja || s.id;
+                            map.set(s.id, label);
+                        });
+                    });
+                }
+
+                symptomLabelMap = map;
+                return map;
+            })
+            .finally(() => {
+                symptomLabelMapPromise = null;
+            });
+
+        symptomLabelMapPromise.then(() => {
+            try { renderHistoryTable(); } catch { }
+            try { renderMyHistoryView(); } catch { }
+        });
+
+        return symptomLabelMapPromise;
+    }
+
+    function ensureMedicationNameMap() {
+        if (medicationNameMap) return Promise.resolve(medicationNameMap);
+        if (medicationNameMapPromise) return medicationNameMapPromise;
+
+        medicationNameMapPromise = import('./src/doctor-module/data/medication-database.js')
+            .then(mod => {
+                const getAllMedications = mod.getAllMedications;
+                if (typeof getAllMedications !== 'function') return null;
+                const list = getAllMedications();
+                const map = new Map();
+                (Array.isArray(list) ? list : []).forEach(m => {
+                    map.set(m.id, pickLocalizedName(m.names, currentLanguage || 'ko') || m.id);
+                });
+                medicationNameMap = map;
+                return map;
+            })
+            .finally(() => {
+                medicationNameMapPromise = null;
+            });
+
+        medicationNameMapPromise.then(() => {
+            try { renderHistoryTable(); } catch { }
+            try { renderMyHistoryView(); } catch { }
+        });
+
+        return medicationNameMapPromise;
+    }
+
+    function formatSymptomsCell(symptoms) {
+        if (!Array.isArray(symptoms) || symptoms.length === 0) return '-';
+        ensureSymptomLabelMap();
+        const map = symptomLabelMap;
+
+        return symptoms
+            .filter(s => s && s.id)
+            .map(s => {
+                const name = map?.get(s.id) || s.id;
+                const sev = Number.isFinite(Number(s.severity)) ? Number(s.severity) : null;
+                return sev ? `${name}(${sev})` : `${name}`;
+            })
+            .join(',<br>');
+    }
+
+    function formatMedicationsCell(medications) {
+        if (!Array.isArray(medications) || medications.length === 0) return '-';
+        ensureMedicationNameMap();
+        const map = medicationNameMap;
+
+        return medications
+            .filter(m => m && (m.id || m.medicationId))
+            .map(m => {
+                const id = m.id || m.medicationId;
+                const name = map?.get(id) || id;
+                const dose = Number.isFinite(Number(m.dose)) ? Number(m.dose) : null;
+                const unit = m.unit || '';
+                if (dose === null) return `${name}`;
+                return `${name} ${dose}${unit}`;
+            })
+            .join(',<br>');
+    }
+
 
     // --- History Tab Rendering ---
     function renderHistoryTable() {
@@ -4243,22 +5393,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         try {
             measurements.sort((a, b) => (a.week || 0) - (b.week || 0));
-            const currentDisplayKeys = getFilteredDisplayKeys();
+            const currentDisplayKeys = getFilteredDisplayKeys().filter(k => !legacyKeysToHideInTables.has(k));
             let filteredHeaderKeys = currentDisplayKeys;
             if (activeHistoryFilters.length > 0) {
                 // '주차'와 '날짜'는 항상 표시하고, 선택된 필터 항목을 추가
                 filteredHeaderKeys = currentDisplayKeys.filter(key =>
-                    ['week', 'date', 'memo'].includes(key) || activeHistoryFilters.includes(key)
+                    ['week', 'date', 'symptoms', 'medications', 'memo'].includes(key) || activeHistoryFilters.includes(key)
                 );
             }
 
-            let tableHTML = '<table><thead><tr>';
+            if (!filteredHeaderKeys.includes('symptoms')) {
+                const memoIndex = filteredHeaderKeys.indexOf('memo');
+                const insertAt = memoIndex >= 0 ? memoIndex : filteredHeaderKeys.length;
+                filteredHeaderKeys.splice(insertAt, 0, 'symptoms');
+            }
+            if (!filteredHeaderKeys.includes('medications')) {
+                const memoIndex = filteredHeaderKeys.indexOf('memo');
+                const insertAt = memoIndex >= 0 ? memoIndex : filteredHeaderKeys.length;
+                filteredHeaderKeys.splice(insertAt, 0, 'medications');
+            }
+
+            let tableHTML = '<table class="history-table"><thead><tr>';
             filteredHeaderKeys.forEach(key => {
                 if (key === 'timestamp') return;
                 const labelData = translate(key).match(/^(.*?) *(\((.*?)\))?$/);
                 const labelText = labelData ? labelData[1].trim() : translate(key);
                 const unitText = labelData && labelData[3] ? `<span class="unit">(${labelData[3]})</span>` : '';
-                tableHTML += `<th>${labelText}${unitText}</th>`;
+                const thClass = (key === 'symptoms') ? 'col-symptoms' : (key === 'medications') ? 'col-medications' : '';
+                tableHTML += `<th class="${thClass}">${labelText}${unitText}</th>`;
             });
             tableHTML += `<th class="sticky-col">${translate('manageColumn')}</th>`;
             tableHTML += `</tr></thead><tbody>`;
@@ -4271,14 +5433,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     let value = '-';
                     if (key === 'week') { value = m.week ?? i; }
                     else if (key === 'date') { value = displayDate; }
+                    else if (key === 'symptoms') {
+                        value = formatSymptomsCell(m.symptoms);
+                        tableHTML += `<td class="wrap-cell col-symptoms">${value}</td>`;
+                        return;
+                    }
+                    else if (key === 'medications') {
+                        value = formatMedicationsCell(m.medications);
+                        tableHTML += `<td class="wrap-cell col-medications">${value}</td>`;
+                        return;
+                    }
+                    else if (key === 'menstruationActive') {
+                        value = m.menstruationActive === true ? '✓' : '-';
+                    }
                     else { value = formatValue(m[key], key); }
                     tableHTML += `<td>${value}</td>`;
                 });
-                tableHTML += `<td class="action-buttons sticky-col">`;
-                // ** MODIFIED to use new glass button classes **
+                tableHTML += `<td class="sticky-col action-col"><div class="action-buttons">`;
                 tableHTML += `<button class="glass-button btn-edit" data-index="${i}">${translate('edit')}</button>`;
                 tableHTML += `<button class="glass-button danger btn-delete" data-index="${i}">${translate('delete')}</button>`;
-                tableHTML += `</td>`;
+                tableHTML += `</div></td>`;
                 tableHTML += '</tr>';
             }
             tableHTML += '</tbody></table>';
@@ -4749,6 +5923,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.canvas.style.height = '100%';
         }
 
+        ensureAverageLinePluginRegistered();
         chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
@@ -4861,15 +6036,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formGroup = document.createElement('div'); formGroup.classList.add('form-group');
                 const label = document.createElement('label'); label.setAttribute('for', `target-${key}`);
                 label.textContent = translate(key); label.dataset.langKey = key;
-                const input = document.createElement('input'); input.setAttribute('type', 'number');
-                input.setAttribute('id', `target-${key}`); input.setAttribute('name', key);
-                input.setAttribute('step', '0.1'); input.setAttribute('min', '0');
+
+                const input = document.createElement('input');
+                input.setAttribute('type', 'number');
+                input.setAttribute('id', `target-${key}`);
+                input.setAttribute('name', key);
+                input.setAttribute('step', '0.1');
+                input.setAttribute('min', '0');
+
+                const needsUnitSelect = key === 'estrogenLevel' || key === 'testosteroneLevel' || key === 'weight';
+
                 let placeholderUnit = '';
-                if (key.includes('Percentage')) placeholderUnit = translate('unitPercent');
+                if (needsUnitSelect) placeholderUnit = translate('valuePlaceholder');
+                else if (key.includes('Percentage')) placeholderUnit = translate('unitPercent');
                 else if (key === 'weight' || key === 'muscleMass') placeholderUnit = translate('unitKg');
                 else if (bodySizeKeys.includes(key) && key !== 'cupSize') placeholderUnit = translate('unitCm');
                 input.setAttribute('placeholder', placeholderUnit);
-                formGroup.appendChild(label); formGroup.appendChild(input);
+
+                formGroup.appendChild(label);
+                if (needsUnitSelect) {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'input-with-unit';
+                    wrap.appendChild(input);
+
+                    const select = document.createElement('select');
+                    select.className = 'unit-select';
+                    select.id = `target-${key}-unit`;
+                    select.dataset.targetMetric = key;
+                    select.dataset.prevUnit = '';
+
+                    const options =
+                        key === 'estrogenLevel'
+                            ? ['pg/ml', 'pmol/L']
+                            : key === 'testosteroneLevel'
+                                ? ['ng/dl', 'nmol/L', 'ng/ml']
+                                : ['kg', 'lbs'];
+
+                    select.innerHTML = options.map(u => `<option value="${u}">${u}</option>`).join('');
+                    const pref = localStorage.getItem(`shiftV_targetUnit_${key}`);
+                    if (pref && options.includes(pref)) select.value = pref;
+                    select.dataset.prevUnit = select.value;
+
+                    select.addEventListener('focus', () => {
+                        select.dataset.prevUnit = select.value;
+                    });
+                    select.addEventListener('change', async () => {
+                        const prevUnit = select.dataset.prevUnit || select.value;
+                        const nextUnit = select.value;
+                        if (input.value !== '') {
+                            const standard = await normalizeMetricValue(key, input.value, prevUnit);
+                            input.value = convertFromStandard(key, standard, nextUnit);
+                        }
+                        localStorage.setItem(`shiftV_targetUnit_${key}`, nextUnit);
+                        select.dataset.prevUnit = nextUnit;
+                    });
+
+                    wrap.appendChild(select);
+                    formGroup.appendChild(wrap);
+                } else {
+                    formGroup.appendChild(input);
+                }
                 targetGrid.appendChild(formGroup);
             });
         } else {
@@ -4879,7 +6105,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const key = input.name;
                     label.textContent = translate(key);
                     let placeholderUnit = '';
-                    if (key.includes('Percentage')) placeholderUnit = translate('unitPercent');
+                    if (key === 'estrogenLevel' || key === 'testosteroneLevel' || key === 'weight') placeholderUnit = translate('valuePlaceholder');
+                    else if (key.includes('Percentage')) placeholderUnit = translate('unitPercent');
                     else if (key === 'weight' || key === 'muscleMass') placeholderUnit = translate('unitKg');
                     else if (bodySizeKeys.includes(key) && key !== 'cupSize') placeholderUnit = translate('unitCm');
                     input.setAttribute('placeholder', placeholderUnit);
@@ -4895,98 +6122,153 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!targetGrid) return;
         targetGrid.querySelectorAll('input[type="number"]').forEach(input => {
             const key = input.name;
-            input.value = targets[key] || '';
+            const unitSelect = document.getElementById(`target-${key}-unit`);
+            if (unitSelect && targets[key] !== undefined && targets[key] !== null && targets[key] !== '') {
+                input.value = convertFromStandard(key, targets[key], unitSelect.value);
+            } else {
+                input.value = targets[key] || '';
+            }
         });
     }
 
     // --- Event Handlers ---
 
-    // Form submission
-    function handleFormSubmit(event) {
-        event.preventDefault();
-        if (!form) return;
-        form.querySelectorAll('.invalid-input').forEach(el => el.classList.remove('invalid-input'));
-        let isValid = true; let firstInvalidField = null;
-        const formData = new FormData(form);
-        // measurementData 객체는 여기서 초기화하지 않습니다. edit 여부에 따라 다르게 처리합니다.
+    async function handleSaveMeasurement() {
+        if (!form) return null;
 
-        // *** 수정 1 확인: HTML의 name이 카멜케이스로 변경되었으므로, JS 키와 일치함 ***
-        const collectedData = {}; // 폼에서 읽어온 데이터만 임시 저장
-        [...baseNumericKeys, ...textKeys].forEach(key => { // Process all keys
+        form.querySelectorAll('.invalid-input').forEach(el => el.classList.remove('invalid-input'));
+
+        const unitEvaluator = await getUnitHealthEvaluator();
+        const formData = new FormData(form);
+        const editIndexValue = editIndexInput.value;
+        const isEdit = editIndexValue !== '';
+        const indexToUpdate = isEdit ? parseInt(editIndexValue, 10) : -1;
+
+        const base = isEdit && indexToUpdate >= 0 && indexToUpdate < measurements.length ? { ...measurements[indexToUpdate] } : {};
+
+        const timestamp = isEdit ? (base.timestamp || Date.now()) : Date.now();
+        const date = isEdit ? (base.date || new Date(timestamp).toISOString().split('T')[0]) : new Date(timestamp).toISOString().split('T')[0];
+
+        const collectedData = { ...base };
+        let isValid = true;
+        let firstInvalidField = null;
+
+        for (const key of [...baseNumericKeys, ...textKeys]) {
             const formKey = (key === 'memo') ? 'record-keeps' : key;
-            let value = formData.get(formKey);
+            const value = formData.get(formKey);
             const inputElement = form.querySelector(`[name="${formKey}"]`);
 
-            if (value !== null && value !== undefined) {
-                if (baseNumericKeys.includes(key) && value !== '') {
-                    const numValue = parseFloat(value);
-                    if (isNaN(numValue) || numValue < 0) {
-                        collectedData[key] = null; // Store invalid as null
-                        if (inputElement) {
-                            inputElement.classList.add('invalid-input'); isValid = false;
-                            if (!firstInvalidField) firstInvalidField = inputElement;
-                        }
-                    } else { collectedData[key] = numValue; }
-                } else if (textKeys.includes(key)) {
-                    collectedData[key] = value.trim() || null; // Trim text, store empty as null
-                } else {
-                    collectedData[key] = value || null;
+            if (baseNumericKeys.includes(key)) {
+                if (value === null || value === undefined || value === '') {
+                    collectedData[key] = null;
+                    continue;
                 }
-            } else { collectedData[key] = null; } // Ensure key exists even if not in form
-        });
+
+                const numValue = parseFloat(value);
+                if (Number.isNaN(numValue) || numValue < 0) {
+                    collectedData[key] = null;
+                    if (inputElement) {
+                        inputElement.classList.add('invalid-input');
+                        if (!firstInvalidField) firstInvalidField = inputElement;
+                    }
+                    isValid = false;
+                    continue;
+                }
+
+                if (key === 'estrogenLevel') {
+                    const unit = document.getElementById('estrogenUnit')?.value || 'pg/ml';
+                    collectedData[key] = unitEvaluator.normalizeUnit('estrogenLevel', numValue, unit);
+                } else if (key === 'testosteroneLevel') {
+                    const unit = document.getElementById('testosteroneUnit')?.value || 'ng/dl';
+                    collectedData[key] = unitEvaluator.normalizeUnit('testosteroneLevel', numValue, unit);
+                } else if (key === 'weight') {
+                    const unit = document.getElementById('weightUnit')?.value || 'kg';
+                    collectedData[key] = unitEvaluator.normalizeUnit('weight', numValue, unit);
+                } else {
+                    collectedData[key] = numValue;
+                }
+            } else {
+                if (key === 'menstruationActive') {
+                    collectedData[key] = document.getElementById('menstruationActive')?.checked === true;
+                } else {
+                    collectedData[key] = (value !== null && value !== undefined) ? (value.toString().trim() || null) : null;
+                }
+            }
+        }
+
+        const menstruationActive = document.getElementById('menstruationActive')?.checked === true;
+        collectedData.menstruationActive = menstruationActive;
+        if (menstruationActive) {
+            const painRaw = document.getElementById('menstruationPain')?.value;
+            const pain = painRaw === null || painRaw === undefined || painRaw === '' ? null : parseInt(painRaw, 10);
+            collectedData.menstruationPain = Number.isNaN(pain) ? null : pain;
+        } else {
+            collectedData.menstruationPain = null;
+        }
+
+        const symptoms = window.symptomSelector ? window.symptomSelector.getSymptoms() : [];
+        collectedData.symptoms = Array.isArray(symptoms) && symptoms.length > 0 ? symptoms : null;
+
+        const medsRaw = window.medicationSelector ? window.medicationSelector.getMedications() : [];
+        const meds = Array.isArray(medsRaw)
+            ? medsRaw
+                .map(m => {
+                    const medId = m?.id || m?.medicationId || null;
+                    if (!medId) return null;
+                    const dose = m?.dose === null || m?.dose === undefined || Number.isNaN(m?.dose) ? null : m.dose;
+                    const unit = m?.unit || 'mg';
+                    return { id: medId, dose, unit, date };
+                })
+                .filter(Boolean)
+            : [];
+
+        collectedData.medications = meds.length > 0 ? meds : null;
 
         if (!isValid) {
             showPopup('alertValidationError', 4000);
             if (firstInvalidField) firstInvalidField.focus();
-            return;
+            return null;
         }
 
-        // 증상 데이터 가져오기
-        const symptomsContainer = document.getElementById('symptoms-container');
-        let symptoms = [];
-        if (symptomsContainer && window.symptomSelector) {
-            try {
-                symptoms = window.symptomSelector.getSymptoms();
-            } catch (error) {
-                console.error('Error getting symptoms:', error);
-            }
+        if (!isEdit) {
+            collectedData.timestamp = timestamp;
+            collectedData.date = date;
+            collectedData.week = measurements.length;
         }
-        collectedData.symptoms = symptoms.length > 0 ? symptoms : null;
 
-        const editIndexValue = editIndexInput.value;
+        return { isEdit, indexToUpdate, data: collectedData };
+    }
 
-        if (editIndexValue !== '') { // --- 수정 모드 ---
-            const indexToUpdate = parseInt(editIndexValue, 10);
-            if (indexToUpdate >= 0 && indexToUpdate < measurements.length) {
-                measurements[indexToUpdate] = { ...measurements[indexToUpdate], ...collectedData };
-                console.log("DEBUG: Measurement updated at index", indexToUpdate);
+    async function handleFormSubmit(event) {
+        event.preventDefault();
+        const saved = await handleSaveMeasurement();
+        if (!saved) return;
+
+        if (saved.isEdit) {
+            if (saved.indexToUpdate >= 0 && saved.indexToUpdate < measurements.length) {
+                measurements[saved.indexToUpdate] = saved.data;
                 showPopup('popupUpdateSuccess');
             } else {
-                console.error("Invalid index for editing:", editIndex); showPopup('savingError'); return;
+                console.error("Invalid index for editing:", saved.indexToUpdate);
+                showPopup('savingError');
+                return;
             }
         } else {
-            const measurementData = { ...collectedData }; // 폼 데이터 복사
-            measurementData.timestamp = Date.now(); // 새 레코드에만 현재 타임스탬프 추가
-            measurementData.date = new Date(measurementData.timestamp).toISOString().split('T')[0]; // 오늘 날짜 추가
-            measurementData.week = measurements.length; // 새 주차 번호 할당 (저장 전)
             const fullMeasurementData = {};
-            [...baseNumericKeys, ...textKeys, 'date', 'week', 'timestamp'].forEach(key => {
-                fullMeasurementData[key] = measurementData.hasOwnProperty(key) ? measurementData[key] : null;
+            [...baseNumericKeys, ...textKeys, 'symptoms', 'medications', 'date', 'week', 'timestamp'].forEach(key => {
+                fullMeasurementData[key] = saved.data.hasOwnProperty(key) ? saved.data[key] : null;
             });
             measurements.push(fullMeasurementData);
-            console.log("DEBUG: New measurement added with week", measurementData.week);
             showPopup('popupSaveSuccess');
             activateTab('tab-sv');
-
             measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-            calculateAndAddWeekNumbers(); // Recalculate weeks after adding and sorting
+            calculateAndAddWeekNumbers();
         }
-
 
         savePrimaryDataToStorage();
         resetFormState();
         renderAll();
-        applyModeToUI(); // Ensure UI consistency
+        applyModeToUI();
     }
 
     // Delete Measurement
@@ -5039,9 +6321,29 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (window.symptomSelector) {
                 window.symptomSelector.reset();
             }
+
+            if (window.medicationSelector && measurementToEdit.medications) {
+                try {
+                    window.medicationSelector.setMedications(measurementToEdit.medications);
+                } catch (error) {
+                    console.error('Error loading medications:', error);
+                }
+            } else if (window.medicationSelector) {
+                window.medicationSelector.reset();
+            }
             
             editIndexInput.value = index;
-            updateFormTitle();
+            // Initialize Unit Selects from Preference
+            ['estrogenUnit', 'testosteroneUnit'].forEach(persistKey => {
+                const savedUnit = localStorage.getItem('shiftV_' + persistKey);
+                if (savedUnit) {
+                    const select = document.getElementById(persistKey);
+                    if (select) select.value = savedUnit;
+                }
+            });
+
+        // Initialize Form Title
+        updateFormTitle();
             if (saveUpdateBtn) saveUpdateBtn.textContent = translate('edit');
             if (cancelEditBtn) cancelEditBtn.style.display = 'inline-block';
             activateTab('tab-record');
@@ -5062,12 +6364,30 @@ document.addEventListener('DOMContentLoaded', () => {
         form.querySelectorAll('.invalid-input').forEach(el => el.classList.remove('invalid-input'));
         editIndexInput.value = '';
         
+        // Restore Unit Preferences
+        ['estrogenUnit', 'testosteroneUnit'].forEach(persistKey => {
+            const savedUnit = localStorage.getItem('shiftV_' + persistKey);
+            if (savedUnit) {
+                const select = document.getElementById(persistKey);
+                if (select) select.value = savedUnit;
+            }
+        });
+        
         // 증상 선택기 리셋
         if (window.symptomSelector) {
             try {
                 window.symptomSelector.reset();
             } catch (error) {
                 console.error('Error resetting symptom selector:', error);
+            }
+        }
+
+        const lastMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
+        if (window.medicationSelector) {
+            try {
+                window.medicationSelector.setMedications(lastMeasurement?.medications || null);
+            } catch (error) {
+                console.error('Error resetting medication selector:', error);
             }
         }
         
@@ -5100,19 +6420,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (lastValue !== null && lastValue !== undefined && lastValue !== '') {
                 placeholderText = translate('placeholderPrevious', { value: formatValue(lastValue, key) });
             } else {
-                // 기존 단위 placeholder 로직 (단순화 버전)
-                const unit = translate(key).match(/\((.*?)\)/)?.[1] || '';
-                placeholderText = unit;
+                if (key === 'estrogenLevel' || key === 'testosteroneLevel') {
+                    placeholderText = translate('valuePlaceholder');
+                } else {
+                    const unit = translate(key).match(/\((.*?)\)/)?.[1] || '';
+                    placeholderText = unit;
+                }
             }
             input.placeholder = placeholderText;
         });
     }
 
     // Save Targets
-    function handleTargetFormSubmit(event) {
+    async function handleTargetFormSubmit(event) {
         event.preventDefault(); if (!targetForm || !targetGrid) return;
         targetForm.querySelectorAll('.invalid-input').forEach(el => el.classList.remove('invalid-input'));
         let isValid = true; let firstInvalidField = null;
+        const unitEvaluator = await getUnitHealthEvaluator();
         const formData = new FormData(targetForm);
         const newTargets = {};
         targetGrid.querySelectorAll('input[type="number"]').forEach(input => {
@@ -5123,7 +6447,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     newTargets[key] = null; // Invalid treated as cleared
                     input.classList.add('invalid-input'); isValid = false;
                     if (!firstInvalidField) firstInvalidField = input;
-                } else { newTargets[key] = numValue; }
+                } else {
+                    if (key === 'estrogenLevel') {
+                        const unit = document.getElementById(`target-${key}-unit`)?.value || 'pg/ml';
+                        newTargets[key] = unitEvaluator.normalizeUnit('estrogenLevel', numValue, unit);
+                    } else if (key === 'testosteroneLevel') {
+                        const unit = document.getElementById(`target-${key}-unit`)?.value || 'ng/dl';
+                        newTargets[key] = unitEvaluator.normalizeUnit('testosteroneLevel', numValue, unit);
+                    } else if (key === 'weight') {
+                        const unit = document.getElementById(`target-${key}-unit`)?.value || 'kg';
+                        newTargets[key] = unitEvaluator.normalizeUnit('weight', numValue, unit);
+                    } else {
+                        newTargets[key] = numValue;
+                    }
+                }
             } else { newTargets[key] = null; } // Empty treated as cleared
         });
         if (!isValid) {
@@ -5150,6 +6487,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Language Change
     function handleLanguageChange(event) {
         currentLanguage = event.target.value; console.log("DEBUG: Language changed to", currentLanguage);
+
+        syncModuleLanguage(currentLanguage);
         
         // 증상 선택기 언어 업데이트
         if (window.symptomSelector) {
@@ -5159,8 +6498,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error updating symptom selector language:', error);
             }
         }
+
+        if (window.medicationSelector) {
+            try {
+                window.medicationSelector.setLanguage(currentLanguage);
+            } catch (error) {
+                console.error('Error updating medication selector language:', error);
+            }
+        }
+        
+        // 증상/약물 맵 무효화 (언어 변경 시 재생성)
+        symptomLabelMap = null;
+        symptomLabelMapPromise = null;
+        medicationNameMap = null;
+        medicationNameMapPromise = null;
         
         saveSettingsToStorage(); applyLanguageToUI(); showPopup('popupSettingsSaved');
+        
+        // 폼 타이틀 및 측정 정보 업데이트
+        if (typeof updateFormTitle === 'function') updateFormTitle();
+        if (typeof renderNextMeasurementInfo === 'function') renderNextMeasurementInfo();
+        
+        // 기록 테이블 강제 재렌더링
+        if (typeof renderHistoryTable === 'function') renderHistoryTable();
+        if (typeof renderMyHistoryView === 'function') renderMyHistoryView();
     }
 
     // Handle Mode Change
@@ -5173,6 +6534,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.symptomSelector.setMode(currentMode);
             } catch (error) {
                 console.error('Error updating symptom selector mode:', error);
+            }
+        }
+
+        if (window.medicationSelector) {
+            try {
+                window.medicationSelector.setMode(currentMode);
+            } catch (error) {
+                console.error('Error updating medication selector mode:', error);
             }
         }
         
@@ -5206,7 +6575,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const dataToExport = {
                 app: "ShiftV", version: APP_VERSION, exportDate: new Date().toISOString(),
-                settings: { language: currentLanguage, mode: currentMode, theme: currentTheme, selectedMetrics: selectedMetrics },
+                settings: { language: currentLanguage, mode: currentMode, theme: currentTheme, biologicalSex: biologicalSex, selectedMetrics: selectedMetrics },
                 data: { measurements: measurements, targets: targets, notes: notes }
             };
             const dataStr = JSON.stringify(dataToExport, null, 2);
@@ -5232,11 +6601,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!confirm(translate('alertImportConfirm'))) {
                         if (importFileInput) importFileInput.value = ''; return;
                     }
-                    measurements = imported.data.measurements; targets = imported.data.targets; notes = imported.data.notes;
+                    measurements = imported.data.measurements;
+                    measurements.forEach(m => {
+                        const beforeSig = symptomsSignature(m.symptoms);
+                        const normalizedSymptoms = normalizeSymptomsArray(m.symptoms);
+                        const afterSig = symptomsSignature(normalizedSymptoms);
+                        if (beforeSig !== afterSig) m.symptoms = normalizedSymptoms;
+                    });
+                    targets = imported.data.targets;
+                    notes = imported.data.notes;
                     if (imported.settings) {
                         currentLanguage = imported.settings.language || currentLanguage;
                         currentMode = imported.settings.mode || currentMode;
                         currentTheme = imported.settings.theme || currentTheme; // *** 수정 4: 테마 설정 복원 ***
+                        biologicalSex = imported.settings.biologicalSex || biologicalSex;
                         selectedMetrics = Array.isArray(imported.settings.selectedMetrics) ? imported.settings.selectedMetrics : selectedMetrics;
                     }
                     isInitialSetupDone = true;
@@ -5249,6 +6627,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     savePrimaryDataToStorage(); saveSettingsToStorage();
                     console.log("DEBUG: Data imported successfully."); showPopup('popupDataImportSuccess');
                     applyModeToUI(); applyLanguageToUI(); applyTheme();
+                    if (sexSelect) sexSelect.value = biologicalSex;
+                    updateCycleTrackerVisibility();
                     setupTargetInputs(); renderAll(); activateTab('tab-my');
                 } else { console.error("Import failed: Invalid file structure."); showPopup('alertImportInvalidFile', 4000); }
             } catch (err) { console.error("Error parsing imported file:", err); showPopup('alertImportReadError', 4000); }
@@ -5514,15 +6894,49 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 이벤트 위임: 범주 버튼(.legend-button) 클릭 처리
                 const button = e.target.closest('.legend-button');
                 if (button) {
+                    const action = button.dataset.action;
                     const chartId = button.dataset.chart;
                     const datasetIndex = parseInt(button.dataset.datasetIndex, 10);
                     const chart = chartId === 'medication-chart' ? medicationChartInstance : hormoneChartInstance;
 
                     if (chart) {
+                        if (action === 'toggle-all') {
+                            const isAllVisible = chart.data.datasets.length > 0 && chart.data.datasets.every((_, i) => chart.isDatasetVisible(i));
+                            chart.data.datasets.forEach((_, i) => chart.setDatasetVisibility(i, !isAllVisible));
+                            chart.update();
+                            const container = chartId === 'medication-chart' ? document.getElementById('medication-legend-controls') : document.getElementById('hormone-legend-controls');
+                            if (container) {
+                                const titleKey = chartId === 'medication-chart' ? 'briefingGroupMedications' : 'briefingGroupMeasurements';
+                                try {
+                                    const allVisible = chart.data.datasets.length > 0 && chart.data.datasets.every((_, i) => chart.isDatasetVisible(i));
+                                    const toggleText = allVisible ? translate('deselectAll') : translate('selectAll');
+                                    const toolbarBtn = container.querySelector('.briefing-legend-toolbar .legend-button[data-action="toggle-all"]');
+                                    if (toolbarBtn) toolbarBtn.textContent = toggleText;
+                                    container.querySelectorAll(`.legend-button[data-chart="${chartId}"][data-dataset-index]`).forEach(el => {
+                                        const idx = parseInt(el.dataset.datasetIndex, 10);
+                                        const active = chart.isDatasetVisible(idx);
+                                        el.classList.toggle('inactive', !active);
+                                        el.style.backgroundColor = active ? chart.data.datasets[idx].borderColor : 'transparent';
+                                        el.style.color = active ? 'white' : getCssVar('--text-dim');
+                                    });
+                                } catch { }
+                            }
+                            return;
+                        }
+
                         const isHidden = chart.isDatasetVisible(datasetIndex);
                         chart.setDatasetVisibility(datasetIndex, !isHidden);
                         button.classList.toggle('inactive', isHidden);
+                        button.style.backgroundColor = isHidden ? 'transparent' : chart.data.datasets[datasetIndex].borderColor;
+                        button.style.color = isHidden ? getCssVar('--text-dim') : 'white';
                         chart.update();
+
+                        const container = chartId === 'medication-chart' ? document.getElementById('medication-legend-controls') : document.getElementById('hormone-legend-controls');
+                        const toolbarBtn = container?.querySelector('.briefing-legend-toolbar .legend-button[data-action="toggle-all"]');
+                        if (toolbarBtn) {
+                            const allVisible = chart.data.datasets.length > 0 && chart.data.datasets.every((_, i) => chart.isDatasetVisible(i));
+                            toolbarBtn.textContent = allVisible ? translate('deselectAll') : translate('selectAll');
+                        }
                     }
                 }
             });
@@ -5543,6 +6957,32 @@ document.addEventListener('DOMContentLoaded', () => {
             svCardHighlights.classList.add('sv-card--clickable'); // 이 줄을 추가하세요
             svCardHighlights.addEventListener('click', () => {
                 openComparisonModal();
+            });
+        }
+
+        if (svCardGuide) {
+            svCardGuide.classList.add('sv-card--clickable');
+            svCardGuide.addEventListener('click', () => {
+                try {
+                    syncModuleLanguage(currentLanguage || 'ko');
+                    // 히스토리에 모달 상태를 먼저 추가하여 연속 열기/닫기 시 버그 방지
+                    pushHistoryState('modal-action-guide');
+                    import('./src/ui/action-guide-modal.js').then(module => {
+                        const ActionGuideModal = module.ActionGuideModal || module.default;
+                        const userSettings = {
+                            mode: currentMode || 'mtf',
+                            biologicalSex: biologicalSex || 'male',
+                            language: currentLanguage || 'ko',
+                            targets: targets || {}
+                        };
+                        const modal = new ActionGuideModal(measurements || [], userSettings);
+                        modal.open();
+                    }).catch(error => {
+                        console.error('Failed to load Action Guide modal:', error);
+                    });
+                } catch (error) {
+                    console.error('Error opening Action Guide modal:', error);
+                }
             });
         }
 
@@ -5574,39 +7014,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Clickable Main Cards Events ---
         if (svCardTargets) {
             svCardTargets.addEventListener('click', () => {
-                const title = translate('svcard_title_targets');
-
-                // 1. 탭 구조를 포함한 모달의 HTML을 생성합니다.
-                const content = `
-            <div class="modal-content-wrapper">
-                <div class="modal-tab-switcher">
-                    <button class="modal-tab-btn active" data-tab="target-progress-view">${translate('reportTargetTitle')}</button>
-                    <button class="modal-tab-btn" data-tab="prev-week-view">${translate('reportPrevWeekTitle')}</button>
-                    <button class="modal-tab-btn" data-tab="initial-view">${translate('reportInitialTitle')}</button>
-                </div>
-
-                <div id="target-progress-view" class="modal-tab-content active">
-                    <!-- '목표 달성도' 탭 내용이 여기에 렌더링됩니다. -->
-                </div>
-                <div id="prev-week-view" class="modal-tab-content">
-                    <!-- '지난주와 비교' 탭 내용이 여기에 렌더링됩니다. -->
-                </div>
-                <div id="initial-view" class="modal-tab-content">
-                    <!-- '처음과 비교' 탭 내용이 여기에 렌더링됩니다. -->
-                </div>
-            </div>
-        `;
-
-                // 2. 새로운 HTML 구조로 모달을 엽니다.
-                openModal(title, content);
-
-                // 3. 기본으로 선택된 '목표 달성도' 탭의 내용을 렌더링합니다.
-                renderTargetProgressTab();
-
-                // 4. 탭 버튼에 클릭 이벤트를 연결합니다.
-                const tabSwitcher = modalContent.querySelector('.modal-tab-switcher');
-                if (tabSwitcher) {
-                    tabSwitcher.addEventListener('click', handleTargetModalTabSwitch);
+                try {
+                    import('./src/ui/change-roadmap-modal.js').then(module => {
+                        const ChangeRoadmapModal = module.ChangeRoadmapModal || module.default;
+                        const userSettings = {
+                            mode: currentMode || 'mtf',
+                            biologicalSex: biologicalSex || 'male',
+                            language: currentLanguage || 'ko',
+                            targets: targets || {}
+                        };
+                        const modal = new ChangeRoadmapModal(measurements || [], userSettings);
+                        modal.open();
+                    }).catch(error => {
+                        console.error('Failed to load Change Roadmap modal:', error);
+                    });
+                } catch (error) {
+                    console.error('Error opening Change Roadmap modal:', error);
                 }
             });
         }
@@ -5787,12 +7210,39 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error initializing Symptom Selector:', error);
         }
 
+        window.medicationSelector = null;
+        try {
+            import('./src/ui/medication-selector.js').then(module => {
+                const MedicationSelector = module.MedicationSelector || module.default;
+                window.medicationSelector = new MedicationSelector('medications-container', currentMode || 'mtf', currentLanguage || 'ko');
+                const lastMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
+                if (lastMeasurement?.medications && editIndexInput.value === '') {
+                    window.medicationSelector.setMedications(lastMeasurement.medications);
+                }
+                console.log('✅ Medication Selector initialized');
+            }).catch(error => {
+                console.error('Failed to load Medication Selector:', error);
+            });
+        } catch (error) {
+            console.error('Error initializing Medication Selector:', error);
+        }
+
         // Buttons
         if (cancelEditBtn) cancelEditBtn.addEventListener('click', cancelEdit);
         if (resetDataButton) resetDataButton.addEventListener('click', handleResetData);
         if (checkForUpdatesButton) checkForUpdatesButton.addEventListener('click', handleCheckForUpdates);
         if (exportDataButton) exportDataButton.addEventListener('click', exportMeasurementData);
-        if (importDataButton) importDataButton.addEventListener('click', () => importFileInput.click());
+        if (importDataButton) {
+            importDataButton.addEventListener('click', () => {
+                if (!importFileInput) {
+                    console.error('Import file input not found');
+                    showPopup('alertImportFileReadError', 4000);
+                    return;
+                }
+                importFileInput.value = '';
+                importFileInput.click();
+            });
+        }
         if (importFileInput) importFileInput.addEventListener('change', importMeasurementData);
 
         // Selects
@@ -5806,6 +7256,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveSettingsToStorage();
                 showPopup('popupSettingsSaved');
                 renderAll(); // 계산식에 영향을 주므로 다시 렌더링
+                updateCycleTrackerVisibility();
+                unitHealthEvaluatorInstance = null;
             });
         }
 
@@ -5853,9 +7305,86 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        function setupCarouselDotControls(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const dots = container.querySelector('.carousel-dots');
+            const content = container.querySelector('.carousel-content');
+
+            if (!dots || !content) return;
+
+            dots.addEventListener('click', (e) => {
+                const dot = e.target.closest('.carousel-dot');
+                if (!dot) return;
+                e.stopPropagation();
+
+                const index = parseInt(dot.dataset.index, 10);
+                if (Number.isNaN(index)) return;
+
+                const item = content.querySelector('.carousel-item');
+                if (!item) return;
+                const itemWidth = item.offsetWidth;
+                content.scrollTo({
+                    left: itemWidth * index,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
+        function setupCarouselSwipeGuard(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const content = container.querySelector('.carousel-content');
+            if (!content) return;
+
+            let isSwiping = false;
+            let startX = 0;
+            let startY = 0;
+
+            const reset = () => {
+                isSwiping = false;
+            };
+
+            content.addEventListener('pointerdown', (e) => {
+                startX = e.clientX;
+                startY = e.clientY;
+                isSwiping = false;
+            }, { passive: true });
+
+            content.addEventListener('pointermove', (e) => {
+                const dx = Math.abs(e.clientX - startX);
+                const dy = Math.abs(e.clientY - startY);
+                if (dx > 10 && dx > dy) isSwiping = true;
+            }, { passive: true });
+
+            content.addEventListener('pointerup', () => {
+                if (!isSwiping) return;
+                window.setTimeout(reset, 200);
+            }, { passive: true });
+
+            content.addEventListener('pointercancel', reset, { passive: true });
+
+            content.addEventListener('click', (e) => {
+                if (!isSwiping) return;
+                e.preventDefault();
+                e.stopPropagation();
+            }, true);
+        }
+
         // 이벤트 리스너 설정 부분에서 위 함수를 호출합니다.
         setupCarouselControls('sv-card-highlights');
+        setupCarouselControls('sv-card-guide');
+        setupCarouselControls('sv-card-hormones');
         setupCarouselControls('sv-card-keeps');
+        setupCarouselDotControls('sv-card-highlights');
+        setupCarouselDotControls('sv-card-guide');
+        setupCarouselDotControls('sv-card-hormones');
+        setupCarouselDotControls('sv-card-keeps');
+        setupCarouselSwipeGuard('sv-card-highlights');
+        setupCarouselSwipeGuard('sv-card-guide');
+        setupCarouselSwipeGuard('sv-card-hormones');
+        setupCarouselSwipeGuard('sv-card-keeps');
 
 
         console.log("DEBUG: Event listeners setup complete.");

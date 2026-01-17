@@ -5,7 +5,7 @@
  */
 
 import { SYMPTOM_DATABASE } from '../doctor-module/data/symptom-database.js';
-import { translateUI } from '../translations.js';
+import { translateUI, setCurrentLanguage } from '../translations.js';
 
 // ========================================
 // 1. 증상 선택기 클래스
@@ -120,6 +120,7 @@ export class SymptomSelector {
       this.renderEmptyState();
       // 번역 적용
       if (this.container) {
+        setCurrentLanguage(this.language);
         translateUI(this.container);
       }
       return;
@@ -130,6 +131,7 @@ export class SymptomSelector {
     ).join('');
     
     // 번역 적용
+    setCurrentLanguage(this.language);
     translateUI(this.container);
     
     // 이벤트 리스너 설정
@@ -342,6 +344,7 @@ export class SymptomSelector {
    */
   setLanguage(language) {
     this.language = language;
+    setCurrentLanguage(language);
     this.render();
   }
 }

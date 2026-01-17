@@ -6,7 +6,7 @@
  */
 
 import { SYMPTOM_DATABASE } from '../data/symptom-database.js';
-import { MEDICATION_DATABASE } from '../data/medication-database.js';
+import { MEDICATION_DATABASE, getMedicationById } from '../data/medication-database.js';
 import { HealthEvaluator } from './health-evaluator.js';
 import { SymptomAnalyzer } from './symptom-analyzer.js';
 import { TrendPredictor } from './trend-predictor.js';
@@ -42,10 +42,95 @@ export class DoctorEngine {
       latestSymptoms,
       latestMedications,
       this.targets,
-      this.mode
+      this.mode,
+      this.language
     );
   }
+
+  _t(texts, params = {}) {
+    const lang = this.language || 'ko';
+    let text = (texts && (texts[lang] || texts.ko)) || '';
+    Object.keys(params).forEach(k => {
+      text = text.replaceAll(`{${k}}`, String(params[k]));
+    });
+    return text;
+  }
   
+  // ========================================
+  // 1.5. 약물 분석 (Medication Analysis)
+  // ========================================
+
+  /**
+   * 약물 상호작용 분석
+   * @param {Array} currentMeds - 현재 복용 중인 약물 ID 목록
+   * @returns {Array} 상호작용 경고 목록
+   */
+  analyzeMedicationInteraction(currentMeds) {
+    const warnings = [];
+    if (!currentMeds || currentMeds.length === 0) return warnings;
+
+    // 약물 ID로 약물 정보 찾기
+    const medObjects = currentMeds.map(id => {
+      // ID가 문자열인 경우
+      if (typeof id === 'string') {
+        return getMedicationById(id);
+      }
+      // ID가 객체인 경우 (예: { id: '...', dosage: '...' })
+      if (typeof id === 'object' && id.id) {
+        return getMedicationById(id.id);
+      }
+      return null;
+    }).filter(Boolean);
+
+    // 1. 개별 약물의 상호작용 경고 확인
+    for (const med of medObjects) {
+      if (med.interactions && med.interactions.length > 0) {
+        // 정의된 상호작용 확인
+        for (const interaction of med.interactions) {
+          // 상호작용 카테고리가 현재 복용 약물 중에 있는지 확인 (간단한 로직)
+          // 실제로는 카테고리 매칭 로직이 더 정교해야 함 (지금은 기초 구현)
+          const hasInteraction = this._checkInteractionCategory(interaction.category, medObjects);
+          if (hasInteraction) {
+            warnings.push({
+              medication: med.names[0],
+              level: 'warning',
+              message: interaction.message
+            });
+          }
+        }
+      }
+    }
+    
+    // 2. 일반적인 금기 사항 체크 (하드코딩된 로직 - 추후 DB로 이동 가능)
+    // 예: 에스트로겐 + 흡연
+    const hasEstrogen = medObjects.some(m => m.category === 'estrogen');
+    if (hasEstrogen && this.userSettings.isSmoker) {
+      warnings.push({
+        medication: '에스트로겐',
+        level: 'critical',
+        message: '흡연은 에스트로겐 복용 중 혈전 위험을 치명적으로 높입니다. 즉시 금연하세요.'
+      });
+    }
+
+    return warnings;
+  }
+
+  /**
+   * 상호작용 카테고리 매칭 확인 (내부 헬퍼)
+   * @private
+   */
+  _checkInteractionCategory(category, currentMedObjects) {
+    // 예: category가 'potassium_supplements'이면, 현재 약물 중 보조제 확인
+    // 현재는 단순화하여 구현
+    
+    // 1. 카테고리 이름이 약물 ID에 포함되는지
+    if (currentMedObjects.some(m => m.id.includes(category) || m.category === category)) {
+      return true;
+    }
+    
+    return false;
+  }
+
   // ========================================
   // 2. 바디 브리핑 생성 (Body Briefing)
   // ========================================
@@ -75,9 +160,27 @@ export class DoctorEngine {
     
     // 각 모듈로부터 데이터 수집
     const healthEvaluation = this.healthEvaluator.evaluateAll();
-    const symptomAnalysis = this.symptomAnalyzer.analyzeAll();
+    
+    // 약물 정보 추출 (최신 측정 데이터에 포함되어 있다고 가정)
+    const currentMeds = latestMeasurement.medications || [];
+    
+    // 증상 분석 (약물 정보 전달)
+    const symptomAnalysis = this.symptomAnalyzer.analyzeAll(currentMeds);
+    
+    // 호르몬 주기 분석 (Peak/Trough)
+    const hormoneCycle = this.analyzeHormoneCycle(currentMeds, latestMeasurement.date);
+    
     const predictions = this.trendPredictor.predictAll();
     
+    const mergedAlerts = this._mergeAlerts(symptomAnalysis.criticalAlerts, symptomAnalysis.warnings);
+    if (this.biologicalSex === 'female' && this.mode === 'ftm' && latestMeasurement.menstruationActive) {
+      const severity = typeof latestMeasurement.menstruationPain === 'number' ? latestMeasurement.menstruationPain : 1;
+      mergedAlerts.push({
+        level: severity >= 4 ? 'critical' : 'warning',
+        message: `월경이 기록되었습니다. 강도: ${severity}/5`
+      });
+    }
+
     const briefing = {
       // 요약 (Summary Tab)
       summary: {
@@ -97,13 +200,16 @@ export class DoctorEngine {
       predictions: predictions.predictions,
       
       // 건강 경고 알림
-      alerts: this._mergeAlerts(symptomAnalysis.criticalAlerts, symptomAnalysis.warnings),
+      alerts: mergedAlerts,
       
       // 증상 분석
       symptomAnalysis: {
         summary: symptomAnalysis.summary,
         insights: symptomAnalysis.insights,
-        trends: symptomAnalysis.trends
+        trends: symptomAnalysis.trends,
+        lagAnalysis: symptomAnalysis.lagAnalysis,
+        crossValidation: symptomAnalysis.crossValidation,
+        hormoneCycle: hormoneCycle
       },
       
       // 호르몬 상태
@@ -117,6 +223,62 @@ export class DoctorEngine {
     };
     
     return briefing;
+  }
+
+  /**
+   * 호르몬 주기 분석 (Peak/Trough)
+   * @param {Array} currentMeds - 현재 약물 목록
+   * @param {string} measurementDate - 측정 날짜
+   */
+  analyzeHormoneCycle(currentMeds, measurementDate) {
+    const cycleInfo = [];
+    const measureDate = new Date(measurementDate);
+    
+    if (!currentMeds || currentMeds.length === 0) return cycleInfo;
+
+    // 약물 정보 병합
+    const medObjects = currentMeds.map(m => {
+      const medId = typeof m === 'string' ? m : m.id;
+      const dbMed = getMedicationById(medId);
+      if (!dbMed) return null;
+      // 사용자 입력 데이터(날짜 등)와 DB 데이터 병합
+      return typeof m === 'object' ? { ...dbMed, ...m } : dbMed;
+    }).filter(Boolean);
+
+    for (const med of medObjects) {
+      // 주사제이고 마지막 투여일이 있는 경우
+      if (med.route === 'injectable' && med.date) {
+        const injectionDate = new Date(med.date);
+        const diffHours = (measureDate - injectionDate) / (1000 * 60 * 60);
+        
+        if (diffHours < 0) continue;
+        
+        const halfLife = med.halfLife || 120; // 기본값 5일
+        
+        let status = 'stable';
+        let message = '안정적인 농도입니다.';
+        
+        // 피크: 보통 주사 후 24-48시간 (에스테르에 따라 다름)
+        if (diffHours <= 48) {
+          status = 'peak';
+          message = '호르몬 농도가 가장 높은 시기(Peak)입니다. 기분 변화나 과민 반응이 있을 수 있습니다.';
+        } 
+        // 트러프: 반감기 이후 다음 주사 직전
+        else if (diffHours >= halfLife) {
+          status = 'trough';
+          message = '호르몬 농도가 낮아지는 시기(Trough)입니다. 피로감이나 감정 저하가 올 수 있습니다.';
+        }
+        
+        cycleInfo.push({
+          medication: med.names[0],
+          status,
+          hoursSinceInjection: Math.round(diffHours),
+          message
+        });
+      }
+    }
+    
+    return cycleInfo;
   }
   
   /**
@@ -416,15 +578,67 @@ export class DoctorEngine {
    */
   _generateTimeline(targetAchievement) {
     const milestones = [];
+    const totalWeeks = this.measurements.length;
+    const overallProgressObj = this.trendPredictor.calculateOverallProgress();
+    const overallPercent = Number(overallProgressObj?.percentage) || 0;
     
     // 시작 시점
     milestones.push({
       week: 1,
       date: this.measurements[0].date,
       type: 'start',
-      title: '시작',
-      description: '첫 측정'
+      title: this._t({ ko: '시작', en: 'Start', ja: 'Start' }),
+      description: this._formatMilestoneSnapshot(0)
     });
+
+    const addMilestone = (week, type, title, description) => {
+      if (!Number.isFinite(week) || week < 1 || week > totalWeeks) return;
+      const date = this.measurements[week - 1]?.date;
+      milestones.push({ week, date, type, title, description });
+    };
+
+    const thresholdWeeks = [];
+    const candidates = [25, 50, 75];
+    candidates.forEach(threshold => {
+      const w = this._findProgressCrossWeek(threshold);
+      if (w && w > 1 && w < totalWeeks) thresholdWeeks.push({ threshold, week: w });
+    });
+
+    thresholdWeeks
+      .sort((a, b) => a.week - b.week)
+      .slice(0, 3)
+      .forEach(item => {
+        addMilestone(
+          item.week,
+          'milestone',
+          this._t({ ko: '{percent}% 도달', en: 'Reached {percent}%', ja: '{percent}%到達' }, { percent: item.threshold }),
+          this._formatMilestoneSnapshot(item.week - 1)
+        );
+      });
+
+    const bigChangeWeeks = this._findBigChangeWeeks(3);
+    bigChangeWeeks.forEach(week => {
+      addMilestone(
+        week,
+        'milestone',
+        this._t({ ko: '큰 변화', en: 'Big change', ja: '大きな変化' }),
+        this._formatMilestoneSnapshot(week - 1)
+      );
+    });
+
+    const rollbackWeek = this._findRollbackWeek();
+    if (rollbackWeek) {
+      addMilestone(
+        rollbackWeek,
+        'warning',
+        this._t({ ko: '목표에서 멀어짐', en: 'Moving away from goal', ja: '目標から遠ざかり' }),
+        this._t({
+          ko: '일부 지표가 목표에서 멀어졌습니다. 계획을 점검해 보세요.',
+          en: 'Some metrics moved away from the goal. Review your plan.',
+          ja: '一部の指標が目標から遠ざかっています。計画を見直しましょう。'
+        })
+      );
+    }
     
     // 목표 달성 마일스톤 찾기
     Object.keys(targetAchievement).forEach(metric => {
@@ -438,8 +652,8 @@ export class DoctorEngine {
             week: achievedWeek,
             date: this.measurements[achievedWeek - 1].date,
             type: 'achievement',
-            title: `${this._getMetricName(metric)} 달성!`,
-            description: `목표: ${this.targets[metric]}`
+            title: `${this._getMetricName(metric)} ${this._t({ ko: '달성!', en: 'achieved!', ja: '達成！' })}`,
+            description: this._formatMilestoneAchievement(metric)
           });
         }
       }
@@ -447,26 +661,120 @@ export class DoctorEngine {
     
     // 현재 시점
     milestones.push({
-      week: this.measurements.length,
-      date: this.measurements[this.measurements.length - 1].date,
+      week: totalWeeks,
+      date: this.measurements[totalWeeks - 1].date,
       type: 'current',
-      title: '현재',
-      description: `Week ${this.measurements.length}`
+      title: this._t({ ko: '현재', en: 'Now', ja: '現在' }),
+      description: `${this._formatMilestoneSnapshot(totalWeeks - 1)} · ${overallPercent.toFixed(0)}%`
     });
     
     // 예상 달성 시점
     const estimatedWeek = this._estimateTargetCompletionWeek();
-    if (estimatedWeek > this.measurements.length) {
+    if (estimatedWeek > totalWeeks) {
       milestones.push({
         week: estimatedWeek,
-        date: this._estimateDate(estimatedWeek - this.measurements.length),
+        date: this._estimateDate(estimatedWeek - totalWeeks),
         type: 'prediction',
-        title: '최종 목표 예상',
-        description: '모든 목표 달성 예상 시점'
+        title: this._t({ ko: '최종 목표 예상', en: 'Final goal forecast', ja: '最終目標の予測' }),
+        description: this._t({ ko: '모든 목표 달성 예상 시점', en: 'Estimated time to achieve all goals', ja: 'すべての目標達成の予測時期' })
       });
     }
-    
-    return milestones.sort((a, b) => a.week - b.week);
+
+    const dedup = new Map();
+    milestones
+      .sort((a, b) => a.week - b.week)
+      .forEach(m => {
+        const key = `${m.week}::${m.type}::${m.title}`;
+        if (!dedup.has(key)) dedup.set(key, m);
+      });
+
+    return [...dedup.values()].sort((a, b) => a.week - b.week);
+  }
+
+  _findProgressCrossWeek(thresholdPercent) {
+    const timeline = this._generateOverallProgressTimeline();
+    const changes = Array.isArray(timeline?.weeklyChanges) ? timeline.weeklyChanges : [];
+    if (changes.length === 0) return null;
+
+    let score = 0;
+    for (let i = 0; i < changes.length; i++) {
+      score += changes[i]?.positive ? 1 : -1;
+      const percent = Math.max(0, Math.min(100, (score / Math.max(1, changes.length)) * 100 + 50));
+      if (percent >= thresholdPercent) return i + 1;
+    }
+    return null;
+  }
+
+  _findRollbackWeek() {
+    const timeline = this._generateOverallProgressTimeline();
+    const changes = Array.isArray(timeline?.weeklyChanges) ? timeline.weeklyChanges : [];
+    if (changes.length < 3) return null;
+    for (let i = 2; i < changes.length; i++) {
+      const a = changes[i - 2];
+      const b = changes[i - 1];
+      const c = changes[i];
+      if (a?.positive === true && b?.positive === false && c?.positive === false) return i + 1;
+    }
+    return null;
+  }
+
+  _findBigChangeWeeks(limit = 3) {
+    const result = [];
+    const keys = Object.keys(this.targets || {});
+    if (keys.length === 0) return result;
+    for (let i = 1; i < this.measurements.length; i++) {
+      const curr = this.measurements[i];
+      const prev = this.measurements[i - 1];
+      let sum = 0;
+      let count = 0;
+      keys.forEach(key => {
+        const c = Number(curr?.[key]);
+        const p = Number(prev?.[key]);
+        const t = Number(this.targets?.[key]);
+        if (!Number.isFinite(c) || !Number.isFinite(p) || !Number.isFinite(t)) return;
+        const d1 = Math.abs(p - t);
+        const d2 = Math.abs(c - t);
+        const delta = d1 - d2;
+        sum += delta;
+        count += 1;
+      });
+      if (count > 0) {
+        result.push({ week: i + 1, score: sum / count });
+      }
+    }
+    return result
+      .filter(x => Math.abs(x.score) > 0.2)
+      .sort((a, b) => Math.abs(b.score) - Math.abs(a.score))
+      .slice(0, limit)
+      .map(x => x.week)
+      .filter(w => w > 1 && w < this.measurements.length);
+  }
+
+  _formatMilestoneAchievement(metric) {
+    const key = metric;
+    const target = this.targets?.[key];
+    const week = this._findAchievementWeek(key);
+    if (!week || week < 1) {
+      return this._t({ ko: '목표: {target}', en: 'Target: {target}', ja: '目標：{target}' }, { target: target });
+    }
+    return this._t({
+      ko: '{metric} 목표 {target} 달성',
+      en: '{metric} goal achieved: {target}',
+      ja: '{metric}の目標{target}を達成'
+    }, { metric: this._getMetricName(key), target: target });
+  }
+
+  _formatMilestoneSnapshot(index) {
+    const m = this.measurements[index];
+    if (!m) return '';
+    const pick = ['weight', 'waist', 'hips', 'chest'];
+    const parts = [];
+    pick.forEach(k => {
+      const v = Number(m?.[k]);
+      if (!Number.isFinite(v)) return;
+      parts.push(`${this._getMetricName(k)}: ${v}${this._getMetricUnit(k)}`);
+    });
+    return parts.slice(0, 2).join(', ');
   }
   
   /**
@@ -687,7 +995,11 @@ export class DoctorEngine {
     if (this.measurements.length === 0) {
       return {
         date: new Date().toISOString().split('T')[0],
-        message: '첫 측정을 시작하세요!'
+        message: this._t({
+          ko: '첫 측정을 시작하세요!',
+          en: 'Start your first measurement!',
+          ja: '最初の測定を始めましょう！'
+        })
       };
     }
     
@@ -700,8 +1012,16 @@ export class DoctorEngine {
       date: nextDate.toISOString().split('T')[0],
       daysUntil,
       message: daysUntil <= 0 
-        ? '측정 시기입니다!' 
-        : `${daysUntil}일 후 측정 예정`
+        ? this._t({
+          ko: '측정 시기입니다!',
+          en: "It's time to measure!",
+          ja: '測定のタイミングです！'
+        })
+        : this._t({
+          ko: '{days}일 후 측정 예정',
+          en: 'Measurement in {days} days',
+          ja: '測定まであと{days}日'
+        }, { days: daysUntil })
     };
   }
   
@@ -726,7 +1046,11 @@ export class DoctorEngine {
   _generatePerformanceFeedback() {
     if (this.measurements.length < 2) {
       return {
-        message: '데이터가 부족합니다. 꾸준히 측정하세요!'
+        message: this._t({
+          ko: '데이터가 부족합니다. 꾸준히 측정하세요!',
+          en: 'Not enough data yet. Keep measuring regularly!',
+          ja: 'データが不足しています。継続して測定しましょう！'
+        })
       };
     }
     
@@ -749,14 +1073,26 @@ export class DoctorEngine {
           feedbacks.push({
             metric: this._getMetricName(metric),
             status: 'improving',
-            message: `${this._getMetricName(metric)} ${Math.abs(improvement).toFixed(1)}${this._getMetricUnit(metric)} 개선!`,
+            message: this._t({
+              ko: '{metric} {value}{unit} 개선!',
+              en: '{metric}: improved by {value}{unit}!',
+              ja: '{metric}が{value}{unit}改善！'
+            }, {
+              metric: this._getMetricName(metric),
+              value: Math.abs(improvement).toFixed(1),
+              unit: this._getMetricUnit(metric)
+            }),
             tip: this._getTipForMetric(metric, 'keep_going')
           });
         } else if (currentDiff > prevDiff * 1.1) {
           feedbacks.push({
             metric: this._getMetricName(metric),
             status: 'declining',
-            message: `${this._getMetricName(metric)} 목표에서 멀어지고 있습니다.`,
+            message: this._t({
+              ko: '{metric} 목표에서 멀어지고 있습니다.',
+              en: '{metric}: moving away from the goal.',
+              ja: '{metric}が目標から遠ざかっています。'
+            }, { metric: this._getMetricName(metric) }),
             tip: this._getTipForMetric(metric, 'needs_work')
           });
         }
@@ -777,7 +1113,11 @@ export class DoctorEngine {
     if (this.measurements.length >= 4) {
       messages.push({
         icon: '🔥',
-        text: `연속 ${this.measurements.length}주 기록 중! 대단해요!`
+        text: this._t({
+          ko: '연속 {weeks}주 기록 중! 대단해요!',
+          en: 'Streak: {weeks} weeks of logging!',
+          ja: '連続{weeks}週記録中！すごい！'
+        }, { weeks: this.measurements.length })
       });
     }
     
@@ -796,7 +1136,11 @@ export class DoctorEngine {
     if (achievements.length > 0) {
       messages.push({
         icon: '🎉',
-        text: `${achievements.join(', ')} 목표 달성!`
+        text: this._t({
+          ko: '{items} 목표 달성!',
+          en: 'Goal achieved: {items}',
+          ja: '目標達成：{items}'
+        }, { items: achievements.join(', ') })
       });
     }
     
@@ -811,7 +1155,14 @@ export class DoctorEngine {
         if (Math.abs(weightChange) >= 1) {
           messages.push({
             icon: '💪',
-            text: `지난 달 체중 ${weightChange > 0 ? '-' : '+'}${Math.abs(weightChange).toFixed(1)}kg!`
+            text: this._t({
+              ko: '지난 달 체중 {sign}{value}kg!',
+              en: 'Last month weight {sign}{value}kg!',
+              ja: '先月の体重 {sign}{value}kg！'
+            }, {
+              sign: weightChange > 0 ? '-' : '+',
+              value: Math.abs(weightChange).toFixed(1)
+            })
           });
         }
       }
@@ -821,7 +1172,11 @@ export class DoctorEngine {
     if (messages.length === 0) {
       messages.push({
         icon: '✨',
-        text: '꾸준한 노력이 결과를 만듭니다. 계속 진행하세요!'
+        text: this._t({
+          ko: '꾸준한 노력이 결과를 만듭니다. 계속 진행하세요!',
+          en: 'Consistency creates results. Keep going!',
+          ja: '継続は結果につながります。続けましょう！'
+        })
       });
     }
     
@@ -834,55 +1189,92 @@ export class DoctorEngine {
   
   _getMetricName(metric) {
     const names = {
-      weight: '체중',
-      waist: '허리',
-      hips: '엉덩이',
-      chest: '가슴',
-      shoulder: '어깨',
-      thigh: '허벅지',
-      arm: '팔뚝',
-      muscleMass: '근육량',
-      bodyFatPercentage: '체지방률'
+      height: { ko: '키', en: 'Height', ja: '身長' },
+      weight: { ko: '체중', en: 'Weight', ja: '体重' },
+      shoulderWidth: { ko: '어깨 너비', en: 'Shoulder Width', ja: '肩幅' },
+      shoulder: { ko: '어깨', en: 'Shoulder', ja: '肩' },
+      neck: { ko: '목', en: 'Neck', ja: '首回り' },
+      waist: { ko: '허리', en: 'Waist', ja: 'ウエスト' },
+      hips: { ko: '엉덩이', en: 'Hips', ja: 'ヒップ' },
+      upperChest: { ko: '가슴(상)', en: 'Upper Chest', ja: '胸囲(上)' },
+      lowerChest: { ko: '가슴(하)', en: 'Lower Chest', ja: '胸囲(下)' },
+      chest: { ko: '가슴', en: 'Chest', ja: '胸囲' },
+      thigh: { ko: '허벅지', en: 'Thigh', ja: '太もも' },
+      calf: { ko: '종아리', en: 'Calf', ja: 'ふくらはぎ' },
+      arm: { ko: '팔뚝', en: 'Arm', ja: '腕' },
+      muscleMass: { ko: '근육량', en: 'Muscle Mass', ja: '筋肉量' },
+      bodyFatPercentage: { ko: '체지방률', en: 'Body Fat %', ja: '体脂肪率' },
+      libido: { ko: '리비도', en: 'Libido', ja: 'リビドー' },
+      estrogenLevel: { ko: '에스트로겐', en: 'Estrogen', ja: 'エストロゲン' },
+      testosteroneLevel: { ko: '테스토스테론', en: 'Testosterone', ja: 'テストステロン' }
     };
-    return names[metric] || metric;
+    const entry = names[metric];
+    if (!entry) return metric;
+    return this._t(entry);
   }
   
   _getMetricUnit(metric) {
     const units = {
+      height: 'cm',
       weight: 'kg',
+      shoulderWidth: 'cm',
+      shoulder: 'cm',
+      neck: 'cm',
       waist: 'cm',
       hips: 'cm',
+      upperChest: 'cm',
+      lowerChest: 'cm',
       chest: 'cm',
-      shoulder: 'cm',
       thigh: 'cm',
+      calf: 'cm',
       arm: 'cm',
       muscleMass: 'kg',
-      bodyFatPercentage: '%'
+      bodyFatPercentage: '%',
+      estrogenLevel: 'pg/mL',
+      testosteroneLevel: 'ng/dL'
     };
     return units[metric] || '';
   }
   
   _getAllMetricCategories() {
     return [
-      { id: 'bodySize', name: '신체 사이즈', metrics: ['weight', 'waist', 'hips', 'chest', 'shoulder', 'thigh', 'arm'] },
-      { id: 'composition', name: '체성분', metrics: ['muscleMass', 'bodyFatPercentage'] },
-      { id: 'hormones', name: '호르몬', metrics: ['estrogenLevel', 'testosteroneLevel'] }
+      { id: 'bodySize', name: this._t({ ko: '신체 사이즈', en: 'Body size', ja: '体のサイズ' }), metrics: ['weight', 'waist', 'hips', 'chest', 'shoulder', 'thigh', 'arm'] },
+      { id: 'composition', name: this._t({ ko: '체성분', en: 'Body composition', ja: '体組成' }), metrics: ['muscleMass', 'bodyFatPercentage'] },
+      { id: 'hormones', name: this._t({ ko: '호르몬', en: 'Hormones', ja: 'ホルモン' }), metrics: ['estrogenLevel', 'testosteroneLevel'] }
     ];
   }
   
   _getTipForMetric(metric, situation) {
     const tips = {
       weight: {
-        keep_going: '현재 식단과 운동을 계속 유지하세요!',
-        needs_work: '칼로리 섭취를 재검토하고, 유산소 운동을 늘려보세요.'
+        keep_going: {
+          ko: '현재 식단과 운동을 계속 유지하세요!',
+          en: 'Keep up your current diet and workouts!',
+          ja: '今の食事と運動を続けましょう！'
+        },
+        needs_work: {
+          ko: '칼로리 섭취를 재검토하고, 유산소 운동을 늘려보세요.',
+          en: 'Review calorie intake and increase cardio.',
+          ja: '摂取カロリーを見直し、有酸素運動を増やしましょう。'
+        }
       },
       waist: {
-        keep_going: '복부 운동을 계속하세요!',
-        needs_work: '복부 운동을 늘리고, 탄수화물 섭취를 조절하세요.'
+        keep_going: {
+          ko: '복부 운동을 계속하세요!',
+          en: 'Keep doing core workouts!',
+          ja: '腹部のトレーニングを続けましょう！'
+        },
+        needs_work: {
+          ko: '복부 운동을 늘리고, 탄수화물 섭취를 조절하세요.',
+          en: 'Increase core work and moderate carbs.',
+          ja: '腹部トレを増やし、炭水化物を調整しましょう。'
+        }
       }
     };
-    
-    return tips[metric]?.[situation] || '꾸준히 노력하세요!';
+
+    const t = tips[metric]?.[situation];
+    if (t) return this._t(t);
+    return this._t({ ko: '꾸준히 노력하세요!', en: 'Keep going consistently!', ja: '継続して取り組みましょう！' });
   }
   
   /**

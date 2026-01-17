@@ -28,28 +28,152 @@ export class SymptomAnalyzer {
   
   /**
    * 최신 증상 전체 분석
+   * @param {Array} currentMeds - 현재 복용 중인 약물 목록 (선택 사항)
    */
-  analyzeAll() {
+  analyzeAll(currentMeds = []) {
     if (this.measurements.length === 0) {
       return {
         summary: 'No data to analyze.',
         criticalAlerts: [],
         warnings: [],
-        insights: []
+        insights: [],
+        lagAnalysis: [],
+        crossValidation: []
       };
     }
     
     const latest = this.measurements[this.measurements.length - 1];
     
+    // 추가 분석 실행
+    const lagAnalysis = this.runLagEffectAnalysis(latest);
+    const crossValidation = this.crossValidateSymptoms(latest, currentMeds);
+
     return {
       summary: this.generateSummary(latest),
       criticalAlerts: this.detectCriticalSymptoms(latest),
       warnings: this.detectWarningSymptoms(latest),
       insights: this.generateInsights(latest),
-      trends: this.analyzeTrends()
+      trends: this.analyzeTrends(),
+      lagAnalysis,
+      crossValidation
     };
   }
-  
+
+  // ========================================
+  // 2.5. 고급 분석 (Lag Effect & Cross-Validation)
+  // ========================================
+
+  /**
+   * 전체 증상에 대한 시간차 분석 실행
+   */
+  runLagEffectAnalysis(latest) {
+    if (!latest.symptoms || latest.symptoms.length === 0) return [];
+    
+    const results = [];
+    for (const symptom of latest.symptoms) {
+      if (symptom.severity >= 3) {
+        const analysis = this.analyzeTimeLag(symptom.id, this.measurements);
+        if (analysis) {
+          results.push(analysis);
+        }
+      }
+    }
+    return results;
+  }
+
+  /**
+   * 개별 증상에 대한 시간차(Lag Effect) 분석
+   * @param {string} symptomId - 증상 ID
+   * @param {Array} history - 측정 기록
+   */
+  analyzeTimeLag(symptomId, history) {
+    if (history.length < 3) return null; // 최소 3주 데이터 필요
+
+    // 2주 ~ 4주 전 데이터 확인
+    const currentWeek = history.length - 1;
+    const startWeek = Math.max(0, currentWeek - 4);
+    const endWeek = Math.max(0, currentWeek - 2);
+    
+    const relevantHistory = history.slice(startWeek, endWeek + 1);
+    
+    // 1. 호르몬 수치 급변 확인
+    for (let i = 1; i < relevantHistory.length; i++) {
+      const prev = relevantHistory[i-1];
+      const curr = relevantHistory[i];
+      
+      // 테스토스테론 급증/급감
+      if (curr.testosteroneLevel && prev.testosteroneLevel) {
+        const change = curr.testosteroneLevel - prev.testosteroneLevel;
+        if (Math.abs(change) > 100) { // 예: 100ng/dL 이상 변화
+           return {
+             symptomId,
+             cause: 'hormone_fluctuation',
+             detail: `3-4주 전 테스토스테론 수치의 급격한 변화(${change > 0 ? '증가' : '감소'})가 원인일 수 있습니다.`,
+             confidence: 'high'
+           };
+        }
+      }
+      
+      // 에스트로겐 급증/급감
+      if (curr.estrogenLevel && prev.estrogenLevel) {
+        const change = curr.estrogenLevel - prev.estrogenLevel;
+        if (Math.abs(change) > 50) { // 예: 50pg/mL 이상 변화
+           return {
+             symptomId,
+             cause: 'hormone_fluctuation',
+             detail: `3-4주 전 에스트로겐 수치의 급격한 변화가 원인일 수 있습니다.`,
+             confidence: 'medium'
+           };
+        }
+      }
+    }
+    
+    // 2. 약물 변경 확인 (데이터 구조에 따라 다름, 여기서는 placeholder)
+    // if (medicationChanged) ...
+
+    return null;
+  }
+
+  /**
+   * 교차 검증 (Cross-Validation)
+   * 증상 + 수치 + 약물 3요소 조합 분석
+   */
+  crossValidateSymptoms(measurement, currentMeds) {
+    const validations = [];
+    if (!measurement.symptoms) return validations;
+
+    // 시나리오 1: 두통 + 혈압 약물/이슈 + 수분 정체
+    const hasHeadache = measurement.symptoms.some(s => s.id === 'headache' && s.severity >= 3);
+    const hasEdema = measurement.symptoms.some(s => s.id === 'edema');
+    // const takingBPMeds = currentMeds.includes('blood_pressure_meds'); // 예시
+    
+    if (hasHeadache && hasEdema) {
+      validations.push({
+        symptom: '두통',
+        type: 'cross_validated',
+        cause: 'fluid_retention',
+        message: '두통과 부종이 동반되어 혈압 상승이나 수분 정체가 의심됩니다.',
+        action: '혈압을 측정하고 나트륨 섭취를 줄이세요.'
+      });
+    }
+
+    // 시나리오 2: 여드름 + 높은 T 수치
+    const hasAcne = measurement.symptoms.some(s => s.id === 'cystic_acne' && s.severity >= 3);
+    const highT = measurement.testosteroneLevel > (this.mode === 'mtf' ? 50 : 800);
+    
+    if (hasAcne && highT) {
+       validations.push({
+        symptom: '여드름',
+        type: 'cross_validated',
+        cause: 'high_androgen',
+        message: `높은 테스토스테론 수치(${measurement.testosteroneLevel})가 여드름의 직접적인 원인으로 보입니다.`,
+        action: '호르몬 수치 조절이 필요합니다.'
+      });
+    }
+
+    return validations;
+  }
+
   // ========================================
   // 3. 위험 증상 탐지
   // ========================================
@@ -65,7 +189,7 @@ export class SymptomAnalyzer {
     }
     
     // ⚠️ 혈전 의심 증상
-    const dvtSymptom = measurement.symptoms.find(s => s.id === 'dvt_suspicion');
+    const dvtSymptom = measurement.symptoms.find(s => s.id === 'dvt_symptoms');
     if (dvtSymptom && dvtSymptom.severity >= 4) {
       alerts.push({
         level: 'critical',
@@ -112,7 +236,7 @@ export class SymptomAnalyzer {
     }
     
     // ⚠️ 심혈관 증상
-    const palpitationSymptom = measurement.symptoms.find(s => s.id === 'palpitation_tachycardia');
+    const palpitationSymptom = measurement.symptoms.find(s => s.id === 'palpitation');
     const dyspneaSymptom = measurement.symptoms.find(s => s.id === 'dyspnea');
     
     if ((palpitationSymptom && palpitationSymptom.severity >= 4) ||
@@ -145,7 +269,7 @@ export class SymptomAnalyzer {
     
     // 정신 건강 증상
     const mentalSymptoms = measurement.symptoms.filter(s =>
-      ['depression_lethargy', 'mood_swings', 'aggression', 'anxiety_restlessness'].includes(s.id) &&
+      ['depression', 'mood_swings', 'aggression', 'anxiety'].includes(s.id) &&
       s.severity >= 3
     );
     
@@ -234,7 +358,7 @@ export class SymptomAnalyzer {
     
     // 근육/체력 감소
     const muscleSymptoms = measurement.symptoms.filter(s =>
-      ['sarcopenia_weakness', 'chronic_fatigue'].includes(s.id) &&
+      ['sarcopenia', 'chronic_fatigue'].includes(s.id) &&
       s.severity >= 3
     );
     
@@ -260,7 +384,7 @@ export class SymptomAnalyzer {
     
     // 탈모
     const hairLossSymptoms = measurement.symptoms.filter(s =>
-      ['alopecia_mpb', 'hair_thinning'].includes(s.id) &&
+      ['male_pattern_baldness', 'hair_thinning'].includes(s.id) &&
       s.severity >= 3
     );
     
@@ -406,7 +530,7 @@ export class SymptomAnalyzer {
       // MTF: E2 낮으면 hot flashes, 기분 변화
       if (measurement.estrogenLevel < 100) {
         const moodSymptoms = measurement.symptoms.filter(s =>
-          ['depression_lethargy', 'anxiety_restlessness', 'mood_swings'].includes(s.id)
+          ['depression', 'anxiety', 'mood_swings'].includes(s.id)
         );
         
         if (moodSymptoms.length > 0) {
@@ -435,7 +559,7 @@ export class SymptomAnalyzer {
             title: '테스토스테론 억제 부족',
             description: '높은 테스토스테론 수치가 원치 않는 남성화 증상을 유발할 수 있습니다.',
             testosteroneLevel: measurement.testosteroneLevel,
-            targetRange: '< 50 ng/ml',
+            targetRange: '< 50 ng/dL',
             advice: '항안드로겐 용량 조정이 필요할 수 있습니다.'
           };
         }
@@ -455,7 +579,7 @@ export class SymptomAnalyzer {
             title: '높은 테스토스테론 부작용',
             description: '테스토스테론 수치가 높아 부작용이 나타나고 있습니다.',
             testosteroneLevel: measurement.testosteroneLevel,
-            targetRange: '300-700 ng/ml',
+            targetRange: '300-700 ng/dL',
             advice: '테스토스테론 용량 감소를 고려하세요.'
           };
         }
@@ -464,7 +588,7 @@ export class SymptomAnalyzer {
       // FTM: T 너무 낮으면 피로, 우울
       if (measurement.testosteroneLevel < 300) {
         const lowTSymptoms = measurement.symptoms.filter(s =>
-          ['depression_lethargy', 'chronic_fatigue', 'low_libido'].includes(s.id) && s.severity >= 3
+          ['depression', 'chronic_fatigue', 'low_libido'].includes(s.id) && s.severity >= 3
         );
         
         if (lowTSymptoms.length > 0) {
@@ -474,7 +598,7 @@ export class SymptomAnalyzer {
             title: '낮은 테스토스테론 증상',
             description: '테스토스테론 수치가 낮아 관련 증상이 나타날 수 있습니다.',
             testosteroneLevel: measurement.testosteroneLevel,
-            targetRange: '300-700 ng/ml',
+            targetRange: '300-700 ng/dL',
             advice: '테스토스테론 용량 증가 또는 투여 간격 조정이 필요할 수 있습니다.'
           };
         }
@@ -493,7 +617,7 @@ export class SymptomAnalyzer {
     if (this.mode === 'mtf') {
       // MTF 초기 (첫 3-6개월): 유방 통증, 성욕 감소, 기분 변화
       const earlyMTFSymptoms = symptoms.filter(s =>
-        ['breast_budding_mastalgia', 'low_libido', 'mood_swings'].includes(s.id)
+        ['breast_budding', 'low_libido', 'mood_swings'].includes(s.id)
       );
       
       if (earlyMTFSymptoms.length >= 2) {
@@ -511,7 +635,7 @@ export class SymptomAnalyzer {
     } else if (this.mode === 'ftm') {
       // FTM 초기: 여드름, 목소리 변화, 생리 중단
       const earlyFTMSymptoms = symptoms.filter(s =>
-        ['cystic_acne', 'voice_cracking_deepening', 'amenorrhea'].includes(s.id)
+        ['cystic_acne', 'voice_change', 'amenorrhea'].includes(s.id)
       );
       
       if (earlyFTMSymptoms.length >= 2) {
@@ -602,7 +726,7 @@ export class SymptomAnalyzer {
   getExpectedSymptoms() {
     if (this.mode === 'mtf') {
       return [
-        'breast_budding_mastalgia',
+        'breast_budding',
         'low_libido',
         'erectile_dysfunction',
         'testicular_atrophy',
@@ -612,7 +736,7 @@ export class SymptomAnalyzer {
       ];
     } else if (this.mode === 'ftm') {
       return [
-        'voice_cracking_deepening',
+        'voice_change',
         'facial_hirsutism',
         'body_hirsutism',
         'cystic_acne',

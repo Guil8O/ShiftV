@@ -50,7 +50,10 @@
     --radius-xs: 4px;
     --radius-sm: 8px;
     --radius-md: 12px;
+    --radius-m: 15px;
     --radius-lg: 16px;
+    --radius-s: 10px;
+    --radius-l: 20px;
     --radius-xl: 20px;
     --radius-2xl: 24px;
     --radius-3xl: 30px;
@@ -105,6 +108,10 @@
     --accent-hover: #ff80b8;
     --accent-active: #ff40a8;
     
+    --secondary: #55f0d0;
+    --secondary-hover: #75ffe0;
+    --secondary-active: #35e0c0;
+    
     --success: #55f0d0;
     --success-hover: #75ffe0;
     --success-active: #35e0c0;
@@ -125,17 +132,17 @@
     /* ==================== */
     /* Glass Morphism */
     /* ==================== */
-    --glass-bg: rgba(42, 42, 98, 0.4);
+    --glass-bg: rgba(42, 42, 98, 0.35);
     --glass-bg-light: rgba(182, 182, 212, 0.5);
-    --glass-border: rgba(180, 180, 255, 0.2);
-    --glass-shadow: 
-        0 8px 32px 0 rgba(0, 0, 0, 0.15),
+    --glass-border: rgba(180, 180, 255, 0.25);
+    --glass-shadow:
+        0 8px 32px 0 rgba(0, 0, 0, 0.18),
         0 1px 2px 0 rgba(255, 255, 255, 0.1) inset;
-    --glass-shadow-floating: 
+    --glass-shadow-floating:
         0 20px 50px rgba(0, 0, 0, 0.25),
         0 10px 20px rgba(0, 0, 0, 0.15);
     --glass-glow: rgba(255, 120, 200, 0.2);
-    --glass-blur: blur(20px);
+    --glass-blur: blur(24px);
 
     /* ==================== */
     /* Modal */
@@ -216,6 +223,10 @@ body.light-mode {
     --success-hover: #00a080;
     --success-active: #006040;
     
+    --secondary: #008060;
+    --secondary-hover: #00a080;
+    --secondary-active: #006040;
+    
     --warning: #ff9800;
     --warning-hover: #ffb020;
     --warning-active: #e08000;
@@ -230,13 +241,13 @@ body.light-mode {
     --info-active: #1976d2;
 
     /* Glass Morphism - Light Mode */
-    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(255, 255, 255, 0.45);
     --glass-bg-light: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 111, 145, 0.3);
-    --glass-shadow: 
+    --glass-border: rgba(255, 111, 145, 0.35);
+    --glass-shadow:
         0 8px 24px rgba(140, 140, 160, 0.15),
         0 1px 2px rgba(255, 255, 255, 0.8) inset;
-    --glass-shadow-floating: 
+    --glass-shadow-floating:
         0 20px 40px rgba(100, 100, 120, 0.15);
     --glass-glow: rgba(255, 111, 145, 0.2);
 

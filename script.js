@@ -5387,9 +5387,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- History Tab Rendering ---
     function renderHistoryTable() {
         console.log("DEBUG: -> renderHistoryTable");
-        if (!historyTableContainer) return;
+        if (!myHistoryTableContainer) return;
         if (!measurements || measurements.length === 0) {
-            clearElement(historyTableContainer, "noDataYet"); return;
+            clearElement(myHistoryTableContainer, "noDataYet"); return;
         }
         try {
             measurements.sort((a, b) => (a.week || 0) - (b.week || 0));
@@ -5456,11 +5456,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 tableHTML += '</tr>';
             }
             tableHTML += '</tbody></table>';
-            historyTableContainer.innerHTML = tableHTML;
+            myHistoryTableContainer.innerHTML = tableHTML;
             console.log("DEBUG: <- renderHistoryTable complete");
         } catch (e) {
             console.error(" Error rendering history table:", e);
-            historyTableContainer.innerHTML = `<p style="color: red;">${translate('alertGenericError')}</p>`;
+            myHistoryTableContainer.innerHTML = `<p style="color: red;">${translate('alertGenericError')}</p>`;
         }
     }
 

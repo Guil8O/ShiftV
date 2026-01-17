@@ -232,9 +232,18 @@ export class BodyBriefingModal {
       });
       
       // 상태 메시지
-      const statusMessage = achievement.status === 'achieved' 
-        ? `✅ ${translate('achieved')}` 
-        : achievement.message || translate('inProgress');
+      let statusMessage;
+      if (achievement.status === 'achieved') {
+        statusMessage = achievement.message ? translate(achievement.message) : `✅ ${translate('achieved')}`;
+      } else {
+        const params = {};
+        if (achievement.weeksRemaining !== undefined) {
+          params.weeks = achievement.weeksRemaining;
+          params.weeksLeft = achievement.weeksRemaining;
+          params.months = Math.ceil(achievement.weeksRemaining / 4);
+        }
+        statusMessage = achievement.message ? translate(achievement.message, params) : translate('inProgress');
+      }
       
       return `
         <div class="target-achievement-item">

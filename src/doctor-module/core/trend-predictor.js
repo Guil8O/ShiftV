@@ -232,7 +232,7 @@ export class TrendPredictor {
     if (Math.abs(diff) < 0.5) {
       return {
         status: 'achieved',
-        message: '목표를 이미 달성했습니다! 🎉',
+        message: 'targetAchievement.already_achieved',
         weeksRemaining: 0
       };
     }
@@ -245,8 +245,8 @@ export class TrendPredictor {
     if ((diff > 0 && weeklyChange < 0) || (diff < 0 && weeklyChange > 0)) {
       return {
         status: 'moving_away',
-        message: '현재 추세로는 목표에서 멀어지고 있습니다.',
-        recommendation: '생활 습관이나 운동 계획을 재검토하세요.',
+        message: 'targetAchievement.moving_away_trend',
+        recommendation: 'targetAchievement.review_habits',
         weeksRemaining: null
       };
     }
@@ -255,8 +255,8 @@ export class TrendPredictor {
     if (Math.abs(weeklyChange) < 0.05) {
       return {
         status: 'too_slow',
-        message: '현재 변화 속도로는 목표 달성이 매우 느립니다.',
-        recommendation: '더 적극적인 접근이 필요할 수 있습니다.',
+        message: 'targetAchievement.too_slow_rate',
+        recommendation: 'targetAchievement.need_more_active',
         weeksRemaining: Math.ceil(Math.abs(diff / weeklyChange))
       };
     }
@@ -292,17 +292,17 @@ export class TrendPredictor {
   getTargetMessage(status, weeks) {
     switch (status) {
       case 'achieved':
-        return '🎉 목표 달성! 축하합니다!';
+        return 'targetAchievement.achieved';
       case 'almost_there':
-        return `💪 거의 다 왔어요! 약 ${weeks}주 남았습니다!`;
+        return 'targetAchievement.almost_there';
       case 'on_track':
-        return `📈 순조롭게 진행 중입니다. 약 ${weeks}주 예상됩니다.`;
+        return 'targetAchievement.on_track';
       case 'long_term':
-        return `🎯 장기 목표입니다. 약 ${weeks}주 (${Math.ceil(weeks / 4)}개월) 예상됩니다.`;
+        return 'targetAchievement.long_term';
       case 'moving_away':
-        return '⚠️ 목표에서 멀어지고 있습니다. 계획을 재검토하세요.';
+        return 'targetAchievement.moving_away';
       case 'too_slow':
-        return '🐌 변화가 너무 느립니다. 더 적극적인 접근이 필요합니다.';
+        return 'targetAchievement.too_slow';
       default:
         return '';
     }

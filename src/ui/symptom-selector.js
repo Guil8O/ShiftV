@@ -5,7 +5,51 @@
  */
 
 import { SYMPTOM_DATABASE } from '../doctor-module/data/symptom-database.js';
-import { translateUI, setCurrentLanguage } from '../translations.js';
+import { translateUI, setCurrentLanguage, translate } from '../translations.js';
+
+// 카테고리 번역 맵
+const SYMPTOM_CATEGORY_TRANSLATIONS = {
+  MENTAL_NEUROLOGICAL: {
+    ko: '정신 / 신경계',
+    en: 'Mental / Neurological',
+    ja: '精神 / 神経系'
+  },
+  SKIN_HAIR: {
+    ko: '피부 / 모발',
+    en: 'Skin / Hair',
+    ja: '皮膚 / 毛髪'
+  },
+  SYSTEMIC_BODY_SHAPE: {
+    ko: '전신 / 체형',
+    en: 'Systemic / Body Shape',
+    ja: '全身 / 体型'
+  },
+  MUSCULOSKELETAL: {
+    ko: '근골격계',
+    en: 'Musculoskeletal',
+    ja: '筋骨格系'
+  },
+  DIGESTIVE_METABOLIC: {
+    ko: '소화 / 대사',
+    en: 'Digestive / Metabolic',
+    ja: '消化 / 代謝'
+  },
+  BREAST_CHEST: {
+    ko: '가슴 / 유방',
+    en: 'Breast / Chest',
+    ja: '胸 / 乳房'
+  },
+  SEXUAL_GENITAL: {
+    ko: '성기능 / 생식기',
+    en: 'Sexual / Genital',
+    ja: '性機能 / 生殖器'
+  },
+  INTERNAL_CIRCULATORY: {
+    ko: '내장 / 순환기 (※ 위험 신호)',
+    en: 'Internal / Circulatory (※ Danger Signs)',
+    ja: '内臓 / 循環器 (※ 危険信号)'
+  }
+};
 
 // ========================================
 // 1. 증상 선택기 클래스
@@ -161,9 +205,16 @@ export class SymptomSelector {
   renderSymptomSelect(id, selectedSymptomId) {
     const options = this.getSymptomOptions(selectedSymptomId);
     
+    // 언어별 플레이스홀더 텍스트
+    const placeholderText = {
+      ko: '-- 증상 선택 --',
+      en: '-- Select Symptom --',
+      ja: '-- 症状選択 --'
+    }[this.language] || '-- 증상 선택 --';
+    
     return `
       <select id="symptom-select-${id}" class="symptom-select" data-symptom-select="${id}">
-        <option value="">-- 증상 선택 --</option>
+        <option value="">${placeholderText}</option>
         ${options}
       </select>
     `;
@@ -182,10 +233,12 @@ export class SymptomSelector {
       const category = SYMPTOM_DATABASE[categoryKey];
       if (!category) return;
       
-      html += `<optgroup label="${category.category}">`;
+      const categoryLabel = SYMPTOM_CATEGORY_TRANSLATIONS[categoryKey]?.[this.language] || category.category;
+      html += `<optgroup label="${categoryLabel}">`;
       
       category.symptoms.forEach(symptom => {
         const selected = symptom.id === selectedSymptomId ? 'selected' : '';
+        // 현재 언어에 맞는 라벨 선택
         const label = symptom[this.language] || symptom.ko;
         html += `<option value="${symptom.id}" ${selected}>${label}</option>`;
       });

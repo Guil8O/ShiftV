@@ -96,10 +96,13 @@ function t(key, language) {
 function pickDisplayName(names, language) {
   if (!Array.isArray(names) || names.length === 0) return '';
 
-  if (language === 'ko') {
+  // 현재 언어에 맞는 이름 선택
+  const mappedLang = language;
+
+  if (mappedLang === 'ko') {
     return names.find(n => /[가-힣]/.test(n)) || names[0];
   }
-  if (language === 'ja') {
+  if (mappedLang === 'ja') {
     return names.find(n => /[ぁ-んァ-ン一-龯]/.test(n)) || names.find(n => /[A-Za-z]/.test(n)) || names[0];
   }
   return names.find(n => /[A-Za-z]/.test(n)) || names[0];

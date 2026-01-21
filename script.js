@@ -2939,8 +2939,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 date = new Date(dateInput);
                 if (isNaN(date.getTime()) && typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
-                    const parts = dateInput.split('-');
-                    date = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
+                    const parts = dateInput.split('-').map(v => parseInt(v, 10));
+                    date = new Date(parts[0], parts[1] - 1, parts[2]);
                 }
             } catch { return '-'; }
         } else { return '-'; }
@@ -2957,6 +2957,88 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             return `${year}-${month}-${day}`;
         }
+    }
+
+    function parseLocalYMD(dateString) {
+        if (typeof dateString !== 'string') return null;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return null;
+        const parts = dateString.split('-').map(v => parseInt(v, 10));
+        const date = new Date(parts[0], parts[1] - 1, parts[2]);
+        if (isNaN(date.getTime())) return null;
+        date.setHours(0, 0, 0, 0);
+        return date;
+    }
+
+    function toLocalDayIndex(date) {
+        if (!(date instanceof Date) || isNaN(date.getTime())) return null;
+        return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000);
+    }
+
+    function localDayIndexToDate(dayIndex) {
+        if (typeof dayIndex !== 'number' || !isFinite(dayIndex)) return null;
+        const utc = new Date(dayIndex * 86400000);
+        return new Date(utc.getUTCFullYear(), utc.getUTCMonth(), utc.getUTCDate());
+    }
+
+    function getMeasurementBaseDate(measurement) {
+        if (!measurement || typeof measurement !== 'object') return null;
+        const ts = measurement.timestamp;
+        if (typeof ts === 'number' && isFinite(ts)) {
+            const d = new Date(ts);
+            if (!isNaN(d.getTime())) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        }
+        if (typeof ts === 'string') {
+            const d = new Date(ts);
+            if (!isNaN(d.getTime())) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        }
+        const dateStr = measurement.date;
+        const parsed = parseLocalYMD(dateStr);
+        if (parsed) return parsed;
+        if (typeof dateStr === 'string' || typeof dateStr === 'number') {
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        }
+        return null;
+    }
+
+    function getUnifiedMedicationDoseMap(measurement) {
+        const legacyStandardMeds = ['estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen'];
+        const map = new Map();
+
+        const addDose = (id, dose) => {
+            if (!id) return;
+            if (dose === null || dose === undefined || dose === '') {
+                if (!map.has(id)) map.set(id, null);
+                return;
+            }
+            const n = Number(dose);
+            if (!Number.isFinite(n)) {
+                if (!map.has(id)) map.set(id, null);
+                return;
+            }
+            const prev = map.get(id);
+            const base = Number.isFinite(Number(prev)) ? Number(prev) : 0;
+            map.set(id, base + n);
+        };
+
+        if (measurement && Array.isArray(measurement.medications)) {
+            measurement.medications.forEach(entry => {
+                const id = entry?.id || entry?.medicationId;
+                addDose(id, entry?.dose);
+            });
+        }
+
+        legacyStandardMeds.forEach(key => {
+            if (!measurement || !(key in measurement)) return;
+            addDose(key, measurement[key]);
+        });
+
+        const otherName = measurement?.medicationOtherName;
+        if (otherName && otherName.trim() !== '') {
+            addDose(otherName, measurement?.medicationOtherDose);
+        }
+
+        return map;
     }
 
     function getMetricColor(key, light = false) {
@@ -3762,52 +3844,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const labels = measurements.map(m => `${m.week}${translate('week')}`);
 
-        // 1. 정규 약물 키 가져오기
-        const standardMedicationKeys = currentMode === 'mtf' ? medicationKeys_MtF : medicationKeys_FtM;
+        try {
+            if (!medicationNameMap) {
+                ensureMedicationNameMap().then(map => {
+                    if (!map) return;
+                    if (!hormoneModalOverlay?.classList?.contains('visible')) return;
+                    try { renderHormoneReport(); } catch { }
+                });
+            } else {
+                ensureMedicationNameMap();
+            }
+        } catch { }
+        const translateIfExists = (key) => {
+            const t = translate(key);
+            return t && t !== key ? t : null;
+        };
 
-        // 2. 기타 약물 이름 추출 (중복 제거)
-        const otherMedNames = [...new Set(measurements
-            .map(m => m.medicationOtherName)
-            .filter(name => name && name.trim() !== '') // 이름이 있는 것만
-        )];
+        const baseColors = ['#ff8fcd', '#ff60a8', '#ff5577', '#e04f9e', '#dc143c'];
+        const medKeyToMeta = new Map();
+        measurements.forEach(m => {
+            if (!m || !Array.isArray(m.medications)) return;
+            m.medications.forEach(entry => {
+                const id = entry?.id || entry?.medicationId;
+                if (!id) return;
+                const unit = entry?.unit || '';
+                const key = `${id}__${unit}`;
+                if (medKeyToMeta.has(key)) return;
+                medKeyToMeta.set(key, { id, unit });
+            });
+        });
 
-        // 3. 데이터셋 구성
-        // 3-1. 정규 약물 데이터셋
-        let allDatasets = standardMedicationKeys.map((key, index) => {
-            const baseColors = ['#ff8fcd', '#ff60a8', '#ff5577', '#e04f9e', '#dc143c'];
-            const color = baseColors[index % baseColors.length];
+        const medSeries = Array.from(medKeyToMeta.values());
+
+        let allDatasets = medSeries.map((def, index) => {
+            const color = baseColors[index % baseColors.length] || `hsl(${(index * 37) % 360}, 70%, 60%)`;
+            const name = translateIfExists(def.id) || medicationNameMap?.get?.(def.id) || def.id;
+            const label = `${name}${def.unit ? ` (${def.unit})` : ''}`;
+
+            const data = measurements.map(m => {
+                const found = Array.isArray(m?.medications)
+                    ? m.medications.find(x => (x?.id || x?.medicationId) === def.id && (x?.unit || '') === (def.unit || ''))
+                    : null;
+                const dose = Number(found?.dose);
+                return Number.isFinite(dose) ? dose : null;
+            });
+
             return {
-                label: translate(key).split('(')[0].trim(),
-                data: measurements.map(m => m[key] || null),
+                label,
+                data,
                 borderColor: color,
                 backgroundColor: color + '33',
                 tension: 0.1,
                 borderWidth: 2,
                 pointRadius: 4,
-                pointHoverRadius: 6
-            };
-        });
-
-        // 3-2. 기타 약물 데이터셋 (이름별로 생성)
-        otherMedNames.forEach((name, index) => {
-            // 동적 색상 생성 (기타 약물용)
-            const hue = (index * 137.5 + 200) % 360; // 겹치지 않게 해시값처럼 색상 분산
-            const color = `hsl(${hue}, 70%, 60%)`;
-
-            allDatasets.push({
-                label: name, // 범주 이름은 입력한 '기타 약물 이름'
-                data: measurements.map(m => {
-                    // 해당 기록의 기타 약물 이름이 현재 데이터셋의 이름과 같으면 용량 반환, 아니면 null
-                    return m.medicationOtherName === name ? (m.medicationOtherDose || null) : null;
-                }),
-                borderColor: color,
-                backgroundColor: color, // HSL 문자열이므로 투명도 처리는 css var등이 아닌 직접 지정 필요할 수 있음
-                tension: 0.1,
-                borderWidth: 2,
-                pointRadius: 4,
                 pointHoverRadius: 6,
-                spanGaps: true // 끊어진 데이터 이어그리기 방지 (이름이 다르면 데이터 없음)
-            });
+                spanGaps: true,
+                _series: { kind: 'medication', id: def.id, unit: def.unit }
+            };
         });
 
         // 호르몬 데이터셋 (기존 동일)
@@ -3823,6 +3916,7 @@ document.addEventListener('DOMContentLoaded', () => {
             spanGaps: true,
             pointRadius: 4,
             pointHoverRadius: 6,
+            _series: { kind: 'metric', key },
             _targetValue: (targets && Number.isFinite(Number(targets[key]))) ? Number(targets[key]) : undefined
         }));
 
@@ -3942,23 +4036,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const createGroupedLegend = (chart, container, titleKey) => {
             const allVisible = chart.data.datasets.length > 0 && chart.data.datasets.every((_, i) => chart.isDatasetVisible(i));
             const toggleText = allVisible ? translate('deselectAll') : translate('selectAll');
+            const groupKey = chart.canvas.id === 'medication-chart' ? 'medication' : 'metric';
+            const groupIndices = chart.data.datasets
+                .map((ds, idx) => ({ ds, idx }))
+                .filter(({ ds }) => (ds?._series?.kind || groupKey) === groupKey)
+                .map(({ idx }) => idx);
+            const groupAllVisible = groupIndices.length > 0 && groupIndices.every(i => chart.isDatasetVisible(i));
+            const groupToggleText = groupAllVisible ? translate('deselectAll') : translate('selectAll');
             const items = chart.data.datasets.map((dataset, index) => {
                 const color = dataset.borderColor;
                 const isActive = chart.isDatasetVisible(index);
                 const inactive = isActive ? '' : 'inactive';
                 const bg = isActive ? color : 'transparent';
                 const fg = isActive ? 'white' : getCssVar('--text-dim');
-                return `<button class="legend-button ${inactive}" data-chart="${chart.canvas.id}" data-dataset-index="${index}" style="background-color: ${bg}; border-color: ${color}; color: ${fg};">${dataset.label}</button>`;
+                return `<button class="legend-button ${inactive}" data-dataset-index="${index}" style="background-color: ${bg}; border-color: ${color}; color: ${fg};">${dataset.label}</button>`;
             }).join('');
 
             container.innerHTML = `
                 <div class="briefing-legend-toolbar">
-                    <button class="legend-button" data-action="toggle-all" data-chart="${chart.canvas.id}" style="background-color: var(--accent); border-color: var(--accent); color: white;">${toggleText}</button>
+                    <button class="legend-button" data-action="toggle-all" style="background-color: var(--accent); border-color: var(--accent); color: white;">${toggleText}</button>
                 </div>
                 <div class="briefing-legend-grid">
                     <div class="legend-group-card">
                         <h5 class="legend-group-title">${translate(titleKey)}</h5>
-                        <div class="legend-list">${items}</div>
+                        <div class="legend-list" data-group="${groupKey}">${items}</div>
+                        <div class="legend-group-toolbar">
+                            <button class="legend-button legend-group-toggle" data-group="${groupKey}" data-action="toggle-group" style="background-color: var(--glass-bg); border-color: var(--glass-border); color: var(--text-dim); margin-top: 8px; width: 100%;">${groupToggleText}</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -4482,14 +4586,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                const nextMeasurementDate = new Date(lastTimestamp);
-                nextMeasurementDate.setDate(nextMeasurementDate.getDate() + 7);
-
-                const diffTime = nextMeasurementDate - today;
-                const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const todayBase = new Date();
+                todayBase.setHours(0, 0, 0, 0);
+                const todayIndex = toLocalDayIndex(todayBase);
+                const lastBase = getMeasurementBaseDate(lastMeasurement) || todayBase;
+                const lastIndex = toLocalDayIndex(lastBase) ?? todayIndex;
+                const nextIndex = lastIndex + 7;
+                const daysUntil = nextIndex - todayIndex;
 
                 if (daysUntil <= 0) {
                     svCardShortcut.classList.add('sv-card--dday');
@@ -5160,55 +5263,38 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // 안전한 데이터 추출 및 정렬
             // 원본 데이터를 손상시키지 않기 위해 복사본 사용
-            const validData = measurements.filter(m => {
-                // 유효한 timestamp나 date가 있는지 확인
-                const ts = m.timestamp || (m.date ? new Date(m.date).getTime() : 0);
-                return !isNaN(ts) && ts > 0;
-            });
+            const validData = measurements
+                .map(m => ({ m, baseDate: getMeasurementBaseDate(m) }))
+                .filter(item => item.baseDate && !isNaN(item.baseDate.getTime()));
 
             if (validData.length === 0) {
                 nextMeasurementInfoDiv.innerHTML = `<p>${translate('nextMeasurementInfoNoData')}</p>`;
                 return;
             }
 
-            const sortedMeasurements = validData.sort((a, b) =>
-                (a.timestamp || new Date(a.date).getTime()) - (b.timestamp || new Date(b.date).getTime())
-            );
+            const sortedMeasurements = validData
+                .sort((a, b) => a.baseDate.getTime() - b.baseDate.getTime());
 
-            const lastMeasurement = sortedMeasurements[sortedMeasurements.length - 1];
+            const lastItem = sortedMeasurements[sortedMeasurements.length - 1];
+            const lastBaseDate = lastItem.baseDate;
 
-            // 날짜 파싱 안전장치
-            let lastTimestamp = lastMeasurement.timestamp;
-            if (!lastTimestamp || isNaN(lastTimestamp)) {
-                lastTimestamp = lastMeasurement.date ? new Date(lastMeasurement.date).getTime() : Date.now();
+            const todayBase = new Date();
+            todayBase.setHours(0, 0, 0, 0);
+            const todayIndex = toLocalDayIndex(todayBase);
+            const lastIndex = toLocalDayIndex(lastBaseDate);
+            if (todayIndex === null || lastIndex === null) {
+                nextMeasurementInfoDiv.innerHTML = `<p>${translate('nextMeasurementInfoNoData')}</p>`;
+                return;
             }
 
-            if (isNaN(lastTimestamp)) {
-                console.warn("DEBUG: Still invalid date after fallback");
-                throw new Error("Invalid Timestamp");
-            }
-
-            const lastDate = new Date(lastTimestamp);
-            const today = new Date();
-
-            // 시간/분/초 제거 (날짜 단위 계산을 위해)
-            today.setHours(0, 0, 0, 0);
-            const lastDateNormalized = new Date(lastDate);
-            lastDateNormalized.setHours(0, 0, 0, 0);
-
-            const diffTime = today.getTime() - lastDateNormalized.getTime();
-            const daysAgo = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
-
-            const nextMeasurementDate = new Date(lastDateNormalized);
-            nextMeasurementDate.setDate(nextMeasurementDate.getDate() + 7);
-
-            const diffUntilNext = nextMeasurementDate.getTime() - today.getTime();
-            // ceil을 사용해 '오늘' 개념 잡기
-            const daysUntil = Math.ceil(diffUntilNext / (1000 * 60 * 60 * 24));
+            const nextIndex = lastIndex + 7;
+            const nextMeasurementDate = localDayIndexToDate(nextIndex) || new Date(lastBaseDate.getFullYear(), lastBaseDate.getMonth(), lastBaseDate.getDate() + 7);
+            const daysAgo = Math.max(0, todayIndex - lastIndex);
+            const daysUntil = nextIndex - todayIndex;
 
             let messageKey = 'nextMeasurementInfo';
             let params = {
-                lastDate: formatTimestamp(lastTimestamp),
+                lastDate: formatTimestamp(lastBaseDate),
                 daysAgo: daysAgo,
                 nextDate: formatTimestamp(nextMeasurementDate),
                 daysUntil: Math.abs(daysUntil)
@@ -6716,7 +6802,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===============================================
     console.log("DEBUG: App Initialization Start");
     try {
-        history.pushState(null, '', location.href);
+        try {
+            if (history && typeof history.pushState === 'function') {
+                history.pushState(null, '', location.href);
+            }
+        } catch (e) {
+            console.warn("DEBUG: pushState failed", e);
+        }
         updateAppVersionDisplay();
         loadSettingsFromStorage();
         if (isIOS()) { bodyElement.classList.add('ios-device'); }
@@ -6735,8 +6827,21 @@ document.addEventListener('DOMContentLoaded', () => {
             activateTab('tab-sv');
         }
 
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        mediaQuery.addEventListener('change', () => { if (currentTheme === 'system') applyTheme(); });
+        try {
+            const mediaQuery = typeof window.matchMedia === 'function'
+                ? window.matchMedia('(prefers-color-scheme: dark)')
+                : null;
+            if (mediaQuery) {
+                const handler = () => { if (currentTheme === 'system') applyTheme(); };
+                if (typeof mediaQuery.addEventListener === 'function') {
+                    mediaQuery.addEventListener('change', handler);
+                } else if (typeof mediaQuery.addListener === 'function') {
+                    mediaQuery.addListener(handler);
+                }
+            }
+        } catch (e) {
+            console.warn("DEBUG: matchMedia listener setup failed", e);
+        }
 
         console.log("DEBUG: App Initialization Sequence Complete");
     } catch (initError) {
@@ -6895,29 +7000,70 @@ document.addEventListener('DOMContentLoaded', () => {
                 const button = e.target.closest('.legend-button');
                 if (button) {
                     const action = button.dataset.action;
-                    const chartId = button.dataset.chart;
                     const datasetIndex = parseInt(button.dataset.datasetIndex, 10);
-                    const chart = chartId === 'medication-chart' ? medicationChartInstance : hormoneChartInstance;
+                    const legendControls = button.closest('#medication-legend-controls, #hormone-legend-controls');
+                    const chart = legendControls?.id === 'medication-legend-controls'
+                        ? medicationChartInstance
+                        : hormoneChartInstance;
 
                     if (chart) {
                         if (action === 'toggle-all') {
                             const isAllVisible = chart.data.datasets.length > 0 && chart.data.datasets.every((_, i) => chart.isDatasetVisible(i));
                             chart.data.datasets.forEach((_, i) => chart.setDatasetVisibility(i, !isAllVisible));
                             chart.update();
-                            const container = chartId === 'medication-chart' ? document.getElementById('medication-legend-controls') : document.getElementById('hormone-legend-controls');
-                            if (container) {
-                                const titleKey = chartId === 'medication-chart' ? 'briefingGroupMedications' : 'briefingGroupMeasurements';
+                            if (legendControls) {
                                 try {
                                     const allVisible = chart.data.datasets.length > 0 && chart.data.datasets.every((_, i) => chart.isDatasetVisible(i));
                                     const toggleText = allVisible ? translate('deselectAll') : translate('selectAll');
-                                    const toolbarBtn = container.querySelector('.briefing-legend-toolbar .legend-button[data-action="toggle-all"]');
-                                    if (toolbarBtn) toolbarBtn.textContent = toggleText;
-                                    container.querySelectorAll(`.legend-button[data-chart="${chartId}"][data-dataset-index]`).forEach(el => {
+                                    legendControls.querySelectorAll(`.legend-button[data-action="toggle-all"]`).forEach(btn => {
+                                        btn.textContent = toggleText;
+                                    });
+                                    legendControls.querySelectorAll(`.legend-button[data-dataset-index]`).forEach(el => {
                                         const idx = parseInt(el.dataset.datasetIndex, 10);
                                         const active = chart.isDatasetVisible(idx);
                                         el.classList.toggle('inactive', !active);
                                         el.style.backgroundColor = active ? chart.data.datasets[idx].borderColor : 'transparent';
                                         el.style.color = active ? 'white' : getCssVar('--text-dim');
+                                    });
+
+                                    const groupKey = legendControls.id === 'medication-legend-controls' ? 'medication' : 'metric';
+                                    const groupIndices = chart.data.datasets
+                                        .map((ds, idx) => ({ ds, idx }))
+                                        .filter(({ ds }) => (ds?._series?.kind || groupKey) === groupKey)
+                                        .map(({ idx }) => idx);
+                                    const groupAllVisible = groupIndices.length > 0 && groupIndices.every(i => chart.isDatasetVisible(i));
+                                    const groupToggleText = groupAllVisible ? translate('deselectAll') : translate('selectAll');
+                                    legendControls.querySelectorAll(`.legend-button[data-action="toggle-group"][data-group="${groupKey}"]`).forEach(btn => {
+                                        btn.textContent = groupToggleText;
+                                    });
+                                } catch { }
+                            }
+                            return;
+                        } else if (action === 'toggle-group') {
+                            const group = button.dataset.group;
+                            const groupIndices = chart.data.datasets
+                                .map((ds, idx) => ({ ds, idx }))
+                                .filter(({ ds }) => ds?._series?.kind === group)
+                                .map(({ idx }) => idx);
+                            if (groupIndices.length === 0) return;
+                            const allVisible = groupIndices.every(i => chart.isDatasetVisible(i));
+                            groupIndices.forEach(i => chart.setDatasetVisibility(i, !allVisible));
+                            chart.update();
+                            if (legendControls) {
+                                try {
+                                    const toggleText = (!allVisible) ? translate('deselectAll') : translate('selectAll');
+                                    button.textContent = toggleText;
+                                    legendControls.querySelectorAll(`.legend-button[data-dataset-index]`).forEach(el => {
+                                        const idx = parseInt(el.dataset.datasetIndex, 10);
+                                        const active = chart.isDatasetVisible(idx);
+                                        el.classList.toggle('inactive', !active);
+                                        el.style.backgroundColor = active ? chart.data.datasets[idx].borderColor : 'transparent';
+                                        el.style.color = active ? 'white' : getCssVar('--text-dim');
+                                    });
+                                    const allVisible = chart.data.datasets.length > 0 && chart.data.datasets.every((_, i) => chart.isDatasetVisible(i));
+                                    const allToggleText = allVisible ? translate('deselectAll') : translate('selectAll');
+                                    legendControls.querySelectorAll(`.legend-button[data-action="toggle-all"]`).forEach(btn => {
+                                        btn.textContent = allToggleText;
                                     });
                                 } catch { }
                             }
@@ -6931,11 +7077,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         button.style.color = isHidden ? getCssVar('--text-dim') : 'white';
                         chart.update();
 
-                        const container = chartId === 'medication-chart' ? document.getElementById('medication-legend-controls') : document.getElementById('hormone-legend-controls');
-                        const toolbarBtn = container?.querySelector('.briefing-legend-toolbar .legend-button[data-action="toggle-all"]');
-                        if (toolbarBtn) {
+                        if (legendControls) {
                             const allVisible = chart.data.datasets.length > 0 && chart.data.datasets.every((_, i) => chart.isDatasetVisible(i));
-                            toolbarBtn.textContent = allVisible ? translate('deselectAll') : translate('selectAll');
+                            const toggleText = allVisible ? translate('deselectAll') : translate('selectAll');
+                            legendControls.querySelectorAll(`.legend-button[data-action="toggle-all"]`).forEach(btn => {
+                                btn.textContent = toggleText;
+                            });
+
+                            const groupKey = legendControls.id === 'medication-legend-controls' ? 'medication' : 'metric';
+                            const groupIndices = chart.data.datasets
+                                .map((ds, idx) => ({ ds, idx }))
+                                .filter(({ ds }) => (ds?._series?.kind || groupKey) === groupKey)
+                                .map(({ idx }) => idx);
+                            const groupAllVisible = groupIndices.length > 0 && groupIndices.every(i => chart.isDatasetVisible(i));
+                            const groupToggleText = groupAllVisible ? translate('deselectAll') : translate('selectAll');
+                            legendControls.querySelectorAll(`.legend-button[data-action="toggle-group"][data-group="${groupKey}"]`).forEach(btn => {
+                                btn.textContent = groupToggleText;
+                            });
                         }
                     }
                 }

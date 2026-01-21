@@ -2741,7 +2741,9 @@ input:checked+.slider:before {
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .comparison-filter-button:hover {
@@ -3188,9 +3190,10 @@ body.light-mode .modal-tab-btn.active {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    flex-wrap: wrap;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
     padding: 8px 12px;
     text-align: left;
 }

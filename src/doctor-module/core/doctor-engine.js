@@ -30,7 +30,7 @@ export class DoctorEngine {
     this.medicationDB = MEDICATION_DATABASE;
     
     // 서브모듈 초기화
-    this.healthEvaluator = new HealthEvaluator(measurements, this.mode, this.biologicalSex);
+    this.healthEvaluator = new HealthEvaluator(measurements, this.mode, this.biologicalSex, this.language);
     this.symptomAnalyzer = new SymptomAnalyzer(measurements, this.mode, this.language);
     this.trendPredictor = new TrendPredictor(measurements, this.targets);
     
@@ -382,7 +382,7 @@ export class DoctorEngine {
     // 이전 주 점수 계산
     if (this.measurements.length >= 2) {
       const previousMeasurements = this.measurements.slice(0, -1);
-      const previousEvaluator = new HealthEvaluator(previousMeasurements, this.mode, this.biologicalSex);
+      const previousEvaluator = new HealthEvaluator(previousMeasurements, this.mode, this.biologicalSex, this.language);
       const previousEval = previousEvaluator.evaluateAll();
       if (previousEval.transformationScore) {
         previousWeekScore = parseFloat(previousEval.transformationScore.score);
@@ -396,7 +396,7 @@ export class DoctorEngine {
       
       for (let i = 0; i < recentMeasurements.length; i++) {
         const tempMeasurements = this.measurements.slice(0, this.measurements.length - (recentMeasurements.length - 1 - i));
-        const tempEvaluator = new HealthEvaluator(tempMeasurements, this.mode, this.biologicalSex);
+        const tempEvaluator = new HealthEvaluator(tempMeasurements, this.mode, this.biologicalSex, this.language);
         const tempEval = tempEvaluator.evaluateAll();
         if (tempEval.transformationScore) {
           totalScore += parseFloat(tempEval.transformationScore.score);

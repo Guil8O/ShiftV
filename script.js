@@ -1890,7 +1890,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const module = await import('./src/doctor-module/core/health-evaluator.js');
             UnitHealthEvaluatorClass = module.HealthEvaluator || module.default;
         }
-        unitHealthEvaluatorInstance = new UnitHealthEvaluatorClass([], currentMode, biologicalSex);
+        unitHealthEvaluatorInstance = new UnitHealthEvaluatorClass([], currentMode, biologicalSex, currentLanguage || 'ko');
         return unitHealthEvaluatorInstance;
     }
 
@@ -6497,16 +6497,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // 증상 선택기 리셋
+        const lastMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
+
+        // 증상 선택기: 마지막 기록을 기본값으로 유지 (약물 선택기와 동일한 UX)
         if (window.symptomSelector) {
             try {
-                window.symptomSelector.reset();
+                window.symptomSelector.setSymptoms(lastMeasurement?.symptoms || null);
+                setTimeout(() => {
+                    const active = document.activeElement;
+                    if (active && active.classList && active.classList.contains('symptom-select')) {
+                        try { active.blur(); } catch { }
+                    }
+                }, 0);
             } catch (error) {
                 console.error('Error resetting symptom selector:', error);
             }
         }
-
-        const lastMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
         if (window.medicationSelector) {
             try {
                 window.medicationSelector.setMedications(lastMeasurement?.medications || null);
@@ -7398,6 +7404,10 @@ document.addEventListener('DOMContentLoaded', () => {
             import('./src/ui/symptom-selector.js').then(module => {
                 const SymptomSelector = module.SymptomSelector || module.default;
                 window.symptomSelector = new SymptomSelector('symptoms-container', currentMode || 'mtf', currentLanguage || 'ko');
+                const lastMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
+                if (lastMeasurement?.symptoms && editIndexInput.value === '') {
+                    try { window.symptomSelector.setSymptoms(lastMeasurement.symptoms); } catch { }
+                }
                 console.log('✅ Symptom Selector initialized');
             }).catch(error => {
                 console.error('Failed to load Symptom Selector:', error);

@@ -7,6 +7,8 @@
   "start_url": "/ShiftV/",
   "scope": "/ShiftV/", 
   "id": "/ShiftV/",
+  "display": "fullscreen", 
+  "orientation": "any", 
   "prefer_related_applications": false,
   "categories": [
     "health",
@@ -144,5 +146,4 @@
         "sizes": "1024x1024"
       }
   ]
-
 }

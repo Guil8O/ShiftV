@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shiftv-v1.0.7';
+const CACHE_NAME = 'shiftv-v1.0.8';
 const urlsToCache = [
   '/ShiftV/',
   '/ShiftV/index.html',
@@ -39,3 +39,4 @@ self.addEventListener('fetch', function (event) {
     })
   );
 });
+

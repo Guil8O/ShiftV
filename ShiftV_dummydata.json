@@ -1,0 +1,2798 @@
+{
+  "app": "ShiftV",
+  "version": "1.5",
+  "exportDate": "2026-01-17T22:35:54.518Z",
+  "settings": {
+    "language": "ko",
+    "mode": "mtf",
+    "theme": "dark",
+    "biologicalSex": "male",
+    "selectedMetrics": [
+      "weight"
+    ]
+  },
+  "data": {
+    "measurements": [
+      {
+        "height": 172,
+        "weight": 69,
+        "shoulder": 46,
+        "neck": 35,
+        "chest": 93,
+        "cupSize": 85,
+        "waist": 74,
+        "hips": 93,
+        "thigh": 53,
+        "calf": 33,
+        "arm": 31,
+        "muscleMass": 31.5,
+        "bodyFatPercentage": 23,
+        "libido": 6,
+        "estrogenLevel": 20,
+        "testosteroneLevel": 650,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": null,
+        "healthNotes": null,
+        "skinCondition": null,
+        "medicationOtherName": null,
+        "memo": null,
+        "date": "2025-04-10",
+        "week": 0,
+        "timestamp": 1744292521920,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "progesterone",
+            "dose": 30,
+            "unit": "mg",
+            "date": "2025-04-10"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 69,
+        "shoulder": 45,
+        "neck": 34,
+        "chest": 91,
+        "cupSize": 83,
+        "waist": 77,
+        "hips": 97,
+        "thigh": 53,
+        "calf": 35,
+        "arm": 33,
+        "muscleMass": 31,
+        "bodyFatPercentage": 24,
+        "libido": 4,
+        "estrogenLevel": 20,
+        "testosteroneLevel": 605,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": null,
+        "healthNotes": null,
+        "skinCondition": null,
+        "medicationOtherName": null,
+        "memo": null,
+        "date": "2025-04-10",
+        "week": 1,
+        "timestamp": 1744292614038,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": null,
+        "medications": [
+          {
+            "id": "finasteride",
+            "dose": 3,
+            "unit": "mg",
+            "date": "2025-04-10"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 70,
+        "shoulder": 45,
+        "neck": 34,
+        "chest": 91,
+        "cupSize": 83,
+        "waist": 75,
+        "hips": 95,
+        "thigh": 54,
+        "calf": 34,
+        "arm": 30,
+        "muscleMass": 31.5,
+        "bodyFatPercentage": 25,
+        "libido": 4,
+        "estrogenLevel": 32,
+        "testosteroneLevel": 585,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": null,
+        "healthNotes": null,
+        "skinCondition": null,
+        "medicationOtherName": null,
+        "memo": null,
+        "date": "2025-04-17",
+        "week": 2,
+        "timestamp": 1744851663218,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-04-17"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 70,
+        "shoulder": 45,
+        "neck": 34,
+        "chest": 90,
+        "cupSize": 83,
+        "waist": 77,
+        "hips": 97,
+        "thigh": 55,
+        "calf": 34,
+        "arm": 31,
+        "muscleMass": 31,
+        "bodyFatPercentage": 25,
+        "libido": 3,
+        "estrogenLevel": 39,
+        "testosteroneLevel": 570,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": null,
+        "healthNotes": null,
+        "skinCondition": null,
+        "medicationOtherName": null,
+        "memo": null,
+        "date": "2025-04-22",
+        "week": 3,
+        "timestamp": 1745310320838,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "flushing",
+            "severity": 1
+          },
+          {
+            "id": "gynecomastia",
+            "severity": 1
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-04-22"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 69,
+        "shoulder": 45,
+        "neck": 34,
+        "chest": 90,
+        "cupSize": 84,
+        "waist": 78,
+        "hips": 97,
+        "thigh": 54,
+        "calf": 34,
+        "arm": 31,
+        "muscleMass": 30,
+        "bodyFatPercentage": 25,
+        "libido": 5,
+        "estrogenLevel": 42,
+        "testosteroneLevel": 585,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-05-01",
+        "week": 4,
+        "timestamp": 1746078197680,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "vision_impairment",
+            "severity": 1
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 1
+          },
+          {
+            "id": "flushing",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-05-01"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-05-01"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 68.5,
+        "shoulder": 44,
+        "neck": 34,
+        "chest": 88,
+        "cupSize": 85,
+        "waist": 76,
+        "hips": 95,
+        "thigh": 51,
+        "calf": 34,
+        "arm": 31,
+        "muscleMass": 30,
+        "bodyFatPercentage": 24.7,
+        "libido": 7,
+        "estrogenLevel": 49,
+        "testosteroneLevel": 630,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "date": "2025-05-07",
+        "week": 5,
+        "timestamp": 1746612449287,
+        "memoLiked": true,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 3
+          },
+          {
+            "id": "hypersexuality",
+            "severity": 1
+          },
+          {
+            "id": "vision_impairment",
+            "severity": 1
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-05-07"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-05-07"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 68,
+        "shoulder": 44.5,
+        "neck": 35,
+        "chest": 89,
+        "cupSize": 82,
+        "waist": 74,
+        "hips": 95,
+        "thigh": 56,
+        "calf": 35,
+        "arm": 31,
+        "muscleMass": 29.5,
+        "bodyFatPercentage": 24.6,
+        "libido": 4,
+        "estrogenLevel": 62,
+        "testosteroneLevel": 591,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-05-14",
+        "week": 6,
+        "timestamp": 1747232438285,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "gynecomastia",
+            "severity": 2
+          },
+          {
+            "id": "depression",
+            "severity": 2
+          },
+          {
+            "id": "orgasm_change",
+            "severity": 2
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1.5,
+            "unit": "mg",
+            "date": "2025-05-14"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-05-14"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 67.6,
+        "shoulder": 44,
+        "neck": 34,
+        "chest": 89,
+        "cupSize": 80,
+        "waist": 74,
+        "hips": 94,
+        "thigh": 54,
+        "calf": 34.5,
+        "arm": 29.5,
+        "muscleMass": 29.5,
+        "bodyFatPercentage": 23,
+        "libido": 3,
+        "estrogenLevel": 80,
+        "testosteroneLevel": 462,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "정액 상태 보존을 위한 감증량 계획: 체네 에스트라디올 수치가 올라 성 활동 및 유지의 문제 발견(성욕감소, 발기력 저하, 정액 감소) 그럼으로 에스트라디올을 격일 투여(0.5mg, 1.0mg)로 고정(체중 62kg도달 까지)",
+        "date": "2025-05-21",
+        "week": 7,
+        "timestamp": 1747800705343,
+        "memoLiked": true,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "cystic_acne",
+            "severity": 2
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          },
+          {
+            "id": "erectile_dysfunction",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 2,
+            "unit": "mg",
+            "date": "2025-05-21"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-05-21"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 67,
+        "shoulder": 44,
+        "neck": 33,
+        "chest": 88,
+        "cupSize": 80,
+        "waist": 73,
+        "hips": 94,
+        "thigh": 54,
+        "calf": 34.5,
+        "arm": 29.5,
+        "muscleMass": 29.1,
+        "bodyFatPercentage": 23,
+        "libido": 3,
+        "estrogenLevel": 89,
+        "testosteroneLevel": 416,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-05-28",
+        "week": 8,
+        "timestamp": 1748425338000,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "cystic_acne",
+            "severity": 2
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          },
+          {
+            "id": "erectile_dysfunction",
+            "severity": 2
+          },
+          {
+            "id": "comedones",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-05-28"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-05-28"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 67.2,
+        "shoulder": 44,
+        "neck": 33,
+        "chest": 89,
+        "cupSize": 80,
+        "waist": 74,
+        "hips": 94,
+        "thigh": 55,
+        "calf": 34,
+        "arm": 29.5,
+        "muscleMass": 29,
+        "bodyFatPercentage": 24,
+        "libido": 2,
+        "estrogenLevel": 95,
+        "testosteroneLevel": 375,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "무정자증 증상으로 인한 일시 투약 중지: 체내 테스토스테론 수치의 저하로 인해 무정자증 증상이 나타남, 1-2달간 투약 중단 후, 새로운 요법으로 개선, 시작할 것 -> (개선점)저용량(0.5kg -> 2mg -> 1mg -> 0.5mg) 리바운드(58kg까지 감량 후 로딩, 증량)로 여성화 효과 극대화",
+        "date": "2025-06-04",
+        "week": 9,
+        "timestamp": 1749032875000,
+        "memoLiked": true,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          },
+          {
+            "id": "comedones",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-06-04"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-06-04"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 67.5,
+        "shoulder": 44.5,
+        "neck": 33,
+        "chest": 88,
+        "cupSize": 82,
+        "waist": 74,
+        "hips": 94,
+        "thigh": 55,
+        "calf": 34,
+        "arm": 30,
+        "muscleMass": 29,
+        "bodyFatPercentage": 24.5,
+        "libido": 2,
+        "estrogenLevel": 75,
+        "testosteroneLevel": 425,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-06-11",
+        "week": 10,
+        "timestamp": 1749637264000,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          },
+          {
+            "id": "comedones",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-06-11"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 67.7,
+        "shoulder": 44.7,
+        "neck": 33.5,
+        "chest": 89,
+        "cupSize": 83,
+        "waist": 75,
+        "hips": 94,
+        "thigh": 56,
+        "calf": 35,
+        "arm": 31,
+        "muscleMass": 28.7,
+        "bodyFatPercentage": 24.7,
+        "libido": 4,
+        "estrogenLevel": 41,
+        "testosteroneLevel": 490,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-06-18",
+        "week": 11,
+        "timestamp": 1750242577000,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          }
+        ],
+        "medications": [
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-06-18"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-06-18"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 67,
+        "shoulder": 44.2,
+        "neck": 33,
+        "chest": 89,
+        "cupSize": 84,
+        "waist": 74,
+        "hips": 94,
+        "thigh": 54,
+        "calf": 35,
+        "arm": 31,
+        "muscleMass": 29,
+        "bodyFatPercentage": 23,
+        "libido": 5,
+        "estrogenLevel": 24,
+        "testosteroneLevel": 550,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-06-25",
+        "week": 12,
+        "timestamp": 1750847588000,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          }
+        ],
+        "medications": [
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-06-25"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-06-25"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 66.2,
+        "shoulder": 44.2,
+        "neck": 33,
+        "chest": 88,
+        "cupSize": 82,
+        "waist": 73,
+        "hips": 93,
+        "thigh": 54,
+        "calf": 35,
+        "arm": 30,
+        "muscleMass": 28.7,
+        "bodyFatPercentage": 22,
+        "libido": 4,
+        "estrogenLevel": 20,
+        "testosteroneLevel": 618,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-07-02",
+        "week": 13,
+        "timestamp": 1751457622000,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          }
+        ],
+        "medications": [
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-07-02"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-07-02"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 65,
+        "shoulder": 44,
+        "neck": 33,
+        "chest": 88,
+        "cupSize": 80,
+        "waist": 70,
+        "hips": 94,
+        "thigh": 52,
+        "calf": 35,
+        "arm": 30,
+        "muscleMass": 28,
+        "bodyFatPercentage": 22,
+        "libido": 4,
+        "estrogenLevel": 26,
+        "testosteroneLevel": 615,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "에스트라디올 저용량 재투여 시작",
+        "date": "2025-07-13",
+        "week": 14,
+        "timestamp": 1752395066317,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "xeroderma",
+            "severity": 2
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-07-13"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-07-13"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-07-13"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 64.8,
+        "shoulder": 44,
+        "neck": 33,
+        "chest": 89,
+        "cupSize": 79,
+        "waist": 69,
+        "hips": 94,
+        "thigh": 52.5,
+        "calf": 33,
+        "arm": 29,
+        "muscleMass": 27.8,
+        "bodyFatPercentage": 20.5,
+        "libido": 4,
+        "estrogenLevel": 34,
+        "testosteroneLevel": 582,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 4,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-07-15",
+        "week": 15,
+        "timestamp": 1752622014564,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "weight_loss",
+            "severity": 1
+          },
+          {
+            "id": "fat_loss",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-07-15"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 4,
+            "unit": "mg",
+            "date": "2025-07-15"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 62.5,
+        "shoulder": 43,
+        "neck": 32.5,
+        "chest": 86,
+        "cupSize": 78,
+        "waist": 67,
+        "hips": 93,
+        "thigh": 51.5,
+        "calf": 31.5,
+        "arm": 29,
+        "muscleMass": 27.5,
+        "bodyFatPercentage": 18.5,
+        "libido": 3,
+        "estrogenLevel": 38,
+        "testosteroneLevel": 578,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-07-23",
+        "week": 16,
+        "timestamp": 1753249163978,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "weight_loss",
+            "severity": 1
+          },
+          {
+            "id": "fat_loss",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-07-23"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-07-23"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 62.7,
+        "shoulder": 43,
+        "neck": 32.5,
+        "chest": 85,
+        "cupSize": 78,
+        "waist": 66,
+        "hips": 92,
+        "thigh": 52,
+        "calf": 33,
+        "arm": 29,
+        "muscleMass": 26.8,
+        "bodyFatPercentage": 20.4,
+        "libido": 4,
+        "estrogenLevel": 40,
+        "testosteroneLevel": 575,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 3,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "지난주 무리한 다이어트 후 1300칼로리 섭취로 요요 현상, \n현재 하루 800-1000칼로리 유지로 근육량 감소",
+        "date": "2025-07-30",
+        "week": 17,
+        "timestamp": 1753857012962,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 1
+          },
+          {
+            "id": "depression",
+            "severity": 1
+          },
+          {
+            "id": "sarcopenia",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-07-30"
+          },
+          {
+            "id": "progesterone",
+            "dose": 15,
+            "unit": "mg",
+            "date": "2025-07-30"
+          },
+          {
+            "id": "finasteride",
+            "dose": 0.3,
+            "unit": "mg",
+            "date": "2025-07-30"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 3,
+            "unit": "mg",
+            "date": "2025-07-30"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 61.3,
+        "shoulder": 43,
+        "neck": 32.5,
+        "chest": 86,
+        "cupSize": 77.5,
+        "waist": 65.5,
+        "hips": 90,
+        "thigh": 50,
+        "calf": 32,
+        "arm": 28,
+        "muscleMass": 26.2,
+        "bodyFatPercentage": 20.9,
+        "libido": 4,
+        "estrogenLevel": 42,
+        "testosteroneLevel": 570,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "이번주, 체중감소는 칼로리 섭취를 줄여서 함, 고로 하체 근력운동과 유산소 양을 늘리고 칼로리 섭취를 늘릴 필요가 있음, 힙쓰러스트 매일 4셋트, 유산소 200칼로리 이상 할것",
+        "date": "2025-08-06",
+        "week": 18,
+        "timestamp": 1754464014972,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "depression",
+            "severity": 1
+          },
+          {
+            "id": "fat_loss",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-08-06"
+          },
+          {
+            "id": "progesterone",
+            "dose": 20,
+            "unit": "mg",
+            "date": "2025-08-06"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-08-06"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-08-06"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 60.9,
+        "shoulder": 43,
+        "neck": 32.5,
+        "chest": 86,
+        "cupSize": 77.5,
+        "waist": 66,
+        "hips": 90,
+        "thigh": 50,
+        "calf": 32.5,
+        "arm": 28,
+        "muscleMass": 26.1,
+        "bodyFatPercentage": 20.1,
+        "libido": 3,
+        "estrogenLevel": 44,
+        "testosteroneLevel": 565,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 4,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "본격적 사이클링 유산소 시작 1200kcal 섭취 평균 450kcal 유산소 사이클",
+        "date": "2025-08-13",
+        "week": 19,
+        "timestamp": 1755065863534,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 2
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 2
+          },
+          {
+            "id": "seborrhea",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-08-13"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 4,
+            "unit": "mg",
+            "date": "2025-08-13"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 60.2,
+        "shoulder": 43,
+        "neck": 33,
+        "chest": 86,
+        "cupSize": 78,
+        "waist": 66,
+        "hips": 91.5,
+        "thigh": 49,
+        "calf": 33,
+        "arm": 28,
+        "muscleMass": 26.2,
+        "bodyFatPercentage": 19.3,
+        "libido": 4,
+        "estrogenLevel": 47,
+        "testosteroneLevel": 564,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 3,
+        "healthNotes": null,
+        "skinCondition": null,
+        "date": "2025-08-19",
+        "week": 20,
+        "timestamp": 1755641657318,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "depression",
+            "severity": 1
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 2
+          },
+          {
+            "id": "seborrhea",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.6,
+            "unit": "mg",
+            "date": "2025-08-19"
+          },
+          {
+            "id": "progesterone",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-08-19"
+          },
+          {
+            "id": "finasteride",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-08-19"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 3,
+            "unit": "mg",
+            "date": "2025-08-19"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 59.6,
+        "shoulder": 42.8,
+        "neck": 33,
+        "chest": 84.5,
+        "cupSize": 77.6,
+        "waist": 65.5,
+        "hips": 91,
+        "thigh": 49.5,
+        "calf": 33.5,
+        "arm": 27.5,
+        "muscleMass": 26.2,
+        "bodyFatPercentage": 18.3,
+        "libido": 4,
+        "estrogenLevel": 51,
+        "testosteroneLevel": 554,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "몸무게 최저치(58kg)근접 몸무개 일주일 감소량 천천히 감소시켜 적용기 가지고  투약 용량 천천히 증가",
+        "date": "2025-08-27",
+        "week": 21,
+        "timestamp": 1756287464678,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.7,
+            "unit": "mg",
+            "date": "2025-08-27"
+          },
+          {
+            "id": "finasteride",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-08-27"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-08-27"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 59.1,
+        "shoulder": 43,
+        "neck": 33,
+        "chest": 85,
+        "cupSize": 77,
+        "waist": 65.5,
+        "hips": 90.5,
+        "thigh": 49,
+        "calf": 33.2,
+        "arm": 27.5,
+        "muscleMass": 26.3,
+        "bodyFatPercentage": 17.2,
+        "libido": 3,
+        "estrogenLevel": 54,
+        "testosteroneLevel": 540,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "무기력증 있는데 주로 수면시간 증가와 수면사이클 불안정이 원인, 이번 주말에 바로잡고 다시 확인해야함",
+        "date": "2025-09-03",
+        "week": 22,
+        "timestamp": 1756901070265,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "depression",
+            "severity": 3
+          },
+          {
+            "id": "insomnia",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.6,
+            "unit": "mg",
+            "date": "2025-09-03"
+          },
+          {
+            "id": "finasteride",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-09-03"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-09-03"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 59.3,
+        "shoulder": 43,
+        "neck": 32.8,
+        "chest": 84.5,
+        "cupSize": 76,
+        "waist": 66,
+        "hips": 90,
+        "thigh": 50,
+        "calf": 33,
+        "arm": 28,
+        "muscleMass": 26.3,
+        "bodyFatPercentage": 17.6,
+        "libido": 3,
+        "estrogenLevel": 58,
+        "testosteroneLevel": 524,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "본격적 로딩기 돌입 + 다음주 자전거 장거리(국토종주 예정)",
+        "date": "2025-09-10",
+        "week": 23,
+        "timestamp": 1757500928169,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 2
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.7,
+            "unit": "mg",
+            "date": "2025-09-10"
+          },
+          {
+            "id": "finasteride",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-09-10"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-09-10"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 60.9,
+        "shoulder": 43.5,
+        "neck": 32,
+        "chest": 84,
+        "cupSize": 78,
+        "waist": 65.5,
+        "hips": 90.5,
+        "thigh": 49,
+        "calf": 34,
+        "arm": 27.7,
+        "muscleMass": 27,
+        "bodyFatPercentage": 17.4,
+        "libido": 1,
+        "estrogenLevel": 63,
+        "testosteroneLevel": 520,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 3,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "국토종주 일요일 - 금요일 \n근육량 위주로 체중증가",
+        "date": "2025-09-19",
+        "week": 24,
+        "timestamp": 1758298358672,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "cystic_acne",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.8,
+            "unit": "mg",
+            "date": "2025-09-19"
+          },
+          {
+            "id": "finasteride",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-09-19"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 3,
+            "unit": "mg",
+            "date": "2025-09-19"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 59,
+        "shoulder": 42.5,
+        "neck": 32.8,
+        "chest": 84,
+        "cupSize": 76.2,
+        "waist": 65.7,
+        "hips": 90.5,
+        "thigh": 50.5,
+        "calf": 32.5,
+        "arm": 27.5,
+        "muscleMass": 26.2,
+        "bodyFatPercentage": 17.7,
+        "libido": 1,
+        "estrogenLevel": 65,
+        "testosteroneLevel": 510,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-09-24",
+        "week": 25,
+        "timestamp": 1758677297573,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "cystic_acne",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 0.7,
+            "unit": "mg",
+            "date": "2025-09-24"
+          },
+          {
+            "id": "finasteride",
+            "dose": 0.5,
+            "unit": "mg",
+            "date": "2025-09-24"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-09-24"
+          }
+        ]
+      },
+      {
+        "height": 171,
+        "weight": 58.5,
+        "shoulder": 43,
+        "neck": 33,
+        "chest": 85,
+        "cupSize": 77.5,
+        "waist": 64.8,
+        "hips": 87,
+        "thigh": 48.5,
+        "calf": 32.5,
+        "arm": 27.5,
+        "muscleMass": 25.9,
+        "bodyFatPercentage": 18,
+        "libido": 3,
+        "estrogenLevel": 72,
+        "testosteroneLevel": 500,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "로딩기 3주차 1.2정도로 에스트라디올 증량",
+        "date": "2025-10-01",
+        "week": 26,
+        "timestamp": 1759291916059,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 2
+          },
+          {
+            "id": "flushing",
+            "severity": 1
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 1
+          },
+          {
+            "id": "hypersomnia",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-10-01"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-10-01"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-10-01"
+          }
+        ]
+      },
+      {
+        "height": 171,
+        "weight": 58.5,
+        "shoulder": 43,
+        "neck": 32,
+        "chest": 85,
+        "cupSize": 77.5,
+        "waist": 64.8,
+        "hips": 89,
+        "thigh": 49,
+        "calf": 32.5,
+        "arm": 27,
+        "muscleMass": 26,
+        "bodyFatPercentage": 17.4,
+        "libido": 3,
+        "estrogenLevel": 79,
+        "testosteroneLevel": 480,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 5,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "용량 1.5까지 증량 앞으로 한달 남음",
+        "date": "2025-10-08",
+        "week": 27,
+        "timestamp": 1759892361522,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 3
+          },
+          {
+            "id": "comedones",
+            "severity": 2
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1.1,
+            "unit": "mg",
+            "date": "2025-10-08"
+          },
+          {
+            "id": "progesterone",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-10-08"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-10-08"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 5,
+            "unit": "mg",
+            "date": "2025-10-08"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 58.7,
+        "shoulder": 43,
+        "neck": 32.3,
+        "chest": 85,
+        "cupSize": 75.5,
+        "waist": 66,
+        "hips": 89,
+        "thigh": 48.5,
+        "calf": 33,
+        "arm": 26.8,
+        "muscleMass": 25.2,
+        "bodyFatPercentage": 19.7,
+        "libido": 2,
+        "estrogenLevel": 92,
+        "testosteroneLevel": 420,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-10-15",
+        "week": 28,
+        "timestamp": 1760504699410,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 2
+          },
+          {
+            "id": "flushing",
+            "severity": 2
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 2
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1.4,
+            "unit": "mg",
+            "date": "2025-10-15"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-10-15"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-10-15"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 58.5,
+        "shoulder": 43,
+        "neck": 32.5,
+        "chest": 85,
+        "cupSize": 77,
+        "waist": 65,
+        "hips": 90.3,
+        "thigh": 49,
+        "calf": 34,
+        "arm": 26.6,
+        "muscleMass": 25,
+        "bodyFatPercentage": 20.5,
+        "libido": 4,
+        "estrogenLevel": 105,
+        "testosteroneLevel": 485,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "2일 늦은 측정, 현재 에스트라디올 약 1.75mg 투여중 다음주 까지 유지 혹은 2mg까지 증량",
+        "date": "2025-10-26",
+        "week": 29,
+        "timestamp": 1761486688523,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 2
+          },
+          {
+            "id": "flushing",
+            "severity": 1
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 1
+          },
+          {
+            "id": "depression",
+            "severity": 2
+          },
+          {
+            "id": "hypersomnia",
+            "severity": 2
+          },
+          {
+            "id": "male_pattern_baldness",
+            "severity": 1
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1.65,
+            "unit": "mg",
+            "date": "2025-10-26"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-10-26"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-10-26"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 58.5,
+        "shoulder": 43,
+        "neck": 32.5,
+        "chest": 85,
+        "cupSize": 77,
+        "waist": 65.5,
+        "hips": 90,
+        "thigh": 50,
+        "calf": 33.5,
+        "arm": 26.6,
+        "muscleMass": 25.5,
+        "bodyFatPercentage": 18.6,
+        "libido": 3,
+        "estrogenLevel": 112,
+        "testosteroneLevel": 460,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "date": "2025-10-30",
+        "week": 30,
+        "timestamp": 1761805226378,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 2
+          },
+          {
+            "id": "flushing",
+            "severity": 1
+          },
+          {
+            "id": "male_pattern_baldness",
+            "severity": 2
+          },
+          {
+            "id": "depression",
+            "severity": 2
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1.8,
+            "unit": "mg",
+            "date": "2025-10-30"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-10-30"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-10-30"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 58.4,
+        "shoulder": 42.8,
+        "neck": 32.8,
+        "chest": 83.2,
+        "cupSize": 75.8,
+        "waist": 64,
+        "hips": 89.5,
+        "thigh": 49.5,
+        "calf": 33,
+        "arm": 27,
+        "muscleMass": 25.4,
+        "bodyFatPercentage": 19,
+        "libido": 2,
+        "estrogenLevel": 108,
+        "testosteroneLevel": 440,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 15,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "MtB 사진기록을 통해 최종 목표 약간 수정 그로서 계획도 수정\n목표:62kg -> 60KG // 최저58kg -> 55kg\n2주간 에스트라디올 1mg 로 회기 및 55kg 만들기\n그 후 3주간 유지 및 로딩(2mg 증량)\n2달간 60kg까지 증량 후 유지\n\n다이어트는 상체 근육 최소화하는 방식으로 할거야 목표는 상체 근력량 1-2kg감소\n단백질 섭취 줄이고 최소한의 탄수화물 섭취(고구마 파이터), 매일 힙쓰러스트 4세트식",
+        "date": "2025-11-05",
+        "week": 31,
+        "timestamp": 1762313216344,
+        "memoLiked": true,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "flushing",
+            "severity": 1
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1.8,
+            "unit": "mg",
+            "date": "2025-11-05"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1.2,
+            "unit": "mg",
+            "date": "2025-11-05"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 15,
+            "unit": "mg",
+            "date": "2025-11-05"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 57.5,
+        "shoulder": 42.5,
+        "neck": 33,
+        "chest": 81.8,
+        "cupSize": 73.8,
+        "waist": 63.2,
+        "hips": 89,
+        "thigh": 48,
+        "calf": 32,
+        "arm": 27.6,
+        "muscleMass": 25.3,
+        "bodyFatPercentage": 18,
+        "libido": 2,
+        "estrogenLevel": 107,
+        "testosteroneLevel": 440,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": null,
+        "date": "2025-11-12",
+        "week": 32,
+        "timestamp": 1762923204783,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "flushing",
+            "severity": 2
+          },
+          {
+            "id": "depression",
+            "severity": 2
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 3
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1.2,
+            "unit": "mg",
+            "date": "2025-11-12"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-11-12"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-11-12"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 56.9,
+        "shoulder": 42.7,
+        "neck": 32,
+        "chest": 81.5,
+        "cupSize": 75,
+        "waist": 62.5,
+        "hips": 89.8,
+        "thigh": 51.2,
+        "calf": 33.2,
+        "arm": 25.7,
+        "muscleMass": 25,
+        "bodyFatPercentage": 18,
+        "libido": 1,
+        "estrogenLevel": 105,
+        "testosteroneLevel": 420,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "다음주 까지 55.xkg으로 감량하고 2주간 로딩기 진입 이번주 1.5까지 증량",
+        "date": "2025-11-19",
+        "week": 33,
+        "timestamp": 1763565170037,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "flushing",
+            "severity": 2
+          },
+          {
+            "id": "breast_budding",
+            "severity": 1
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 3
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1.2,
+            "unit": "mg",
+            "date": "2025-11-19"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-11-19"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-11-19"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 55.9,
+        "shoulder": 42.5,
+        "neck": 32.31,
+        "chest": 81,
+        "cupSize": 74,
+        "waist": 62,
+        "hips": 89.3,
+        "thigh": 49,
+        "calf": 33,
+        "arm": 26,
+        "muscleMass": 25,
+        "bodyFatPercentage": 16,
+        "libido": 2,
+        "estrogenLevel": 100,
+        "testosteroneLevel": 340,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "date": "2025-11-26",
+        "week": 34,
+        "timestamp": 1764147458170,
+        "memoLiked": true,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 1
+          },
+          {
+            "id": "depression",
+            "severity": 1
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 1
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          },
+          {
+            "id": "low_libido",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1.1,
+            "unit": "mg",
+            "date": "2025-11-26"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-11-26"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-11-26"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 56,
+        "shoulder": 42,
+        "neck": 32.3,
+        "chest": 81.8,
+        "cupSize": 76,
+        "waist": 62,
+        "hips": 89,
+        "thigh": 48.3,
+        "calf": 33,
+        "arm": 25.5,
+        "muscleMass": 25,
+        "bodyFatPercentage": 16.5,
+        "libido": 2,
+        "estrogenLevel": 108,
+        "testosteroneLevel": 350,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 11,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "이틀 연속 치팅데이여서 살이찜, 다음주 까지 로딩 후, 증량 시작(주 0.5kg) 이번주 로딩 2mg까지 증량",
+        "date": "2025-12-05",
+        "week": 35,
+        "timestamp": 1764895826986,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "cystic_acne",
+            "severity": 1
+          },
+          {
+            "id": "paresthesia",
+            "severity": 2
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          },
+          {
+            "id": "low_libido",
+            "severity": 2
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 1.3,
+            "unit": "mg",
+            "date": "2025-12-05"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-12-05"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 11,
+            "unit": "mg",
+            "date": "2025-12-05"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 56.2,
+        "shoulder": 42.3,
+        "neck": 32.6,
+        "chest": 82,
+        "cupSize": 74.5,
+        "waist": 62,
+        "hips": 89,
+        "thigh": 49.5,
+        "calf": 32,
+        "arm": 25.5,
+        "muscleMass": 24.8,
+        "bodyFatPercentage": 17.5,
+        "libido": 3,
+        "estrogenLevel": 120,
+        "testosteroneLevel": 270,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "본격 증량기 도입, 요번주 증량 되었으니 한주간 56.3 목표로 증량(거의 유지) \n월요일에 에스트로겐 0.25정도 증량",
+        "date": "2025-12-10",
+        "week": 36,
+        "timestamp": 1765330130998,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "depression",
+            "severity": 1
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 1
+          },
+          {
+            "id": "paresthesia",
+            "severity": 2
+          },
+          {
+            "id": "low_libido",
+            "severity": 1
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 2,
+            "unit": "mg",
+            "date": "2025-12-10"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-12-10"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-12-10"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 57.5,
+        "shoulder": 42,
+        "neck": 32.3,
+        "chest": 81,
+        "cupSize": 75.5,
+        "waist": 61.7,
+        "hips": 90,
+        "thigh": 50.3,
+        "calf": 33,
+        "arm": 26.2,
+        "muscleMass": 25.2,
+        "bodyFatPercentage": 18,
+        "libido": 4,
+        "estrogenLevel": 130,
+        "testosteroneLevel": 200,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "식욕증가와 증량 초반 살이 많이찜, 상체에도 많이 쪄서 하체 운동 열심히 하고 몸무게 천천히 증가 유지(다음주 목표: 57.7), 에스트라디올 2.5까지 증량",
+        "date": "2025-12-17",
+        "week": 37,
+        "timestamp": 1766015165964,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "cystic_acne",
+            "severity": 1
+          },
+          {
+            "id": "paresthesia",
+            "severity": 2
+          },
+          {
+            "id": "hyperphagia",
+            "severity": 2
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          },
+          {
+            "id": "low_libido",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 2.1,
+            "unit": "mg",
+            "date": "2025-12-17"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-12-17"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-12-17"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 57.3,
+        "shoulder": 42,
+        "neck": 32.3,
+        "chest": 82,
+        "cupSize": 74.6,
+        "waist": 62,
+        "hips": 90,
+        "thigh": 50.5,
+        "calf": 32,
+        "arm": 26,
+        "muscleMass": 25.5,
+        "bodyFatPercentage": 17.5,
+        "libido": 2,
+        "estrogenLevel": 135,
+        "testosteroneLevel": 220,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "이틀간 강제 노동으로 살빠지고 상체 근육량 증가... \n다음주 목표 58",
+        "date": "2025-12-23",
+        "week": 38,
+        "timestamp": 1766530827350,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "depression",
+            "severity": 3
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 3
+          },
+          {
+            "id": "mood_swings",
+            "severity": 3
+          },
+          {
+            "id": "low_libido",
+            "severity": 2
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 4
+          },
+          {
+            "id": "brain_fog",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 2.5,
+            "unit": "mg",
+            "date": "2025-12-23"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-12-23"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-12-23"
+          }
+        ]
+      },
+      {
+        "height": 171,
+        "weight": 57.8,
+        "shoulder": 42,
+        "neck": 33,
+        "chest": 82.2,
+        "cupSize": 73.5,
+        "waist": 62.2,
+        "hips": 90.2,
+        "thigh": 50,
+        "calf": 32,
+        "arm": 26,
+        "muscleMass": 26,
+        "bodyFatPercentage": 17,
+        "libido": 1,
+        "estrogenLevel": 143,
+        "testosteroneLevel": 268,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "남성호르몬 가끔 증가로 요번주 최고 3.25 투여\n증량 속도 조절 일주일 0.3\n다음주 목표 58.1",
+        "date": "2025-12-30",
+        "week": 39,
+        "timestamp": 1767136723495,
+        "memoLiked": false,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "depression",
+            "severity": 3
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 2
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          },
+          {
+            "id": "low_libido",
+            "severity": 4
+          },
+          {
+            "id": "hyperphagia",
+            "severity": 1
+          },
+          {
+            "id": "brain_fog",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 2.8,
+            "unit": "mg",
+            "date": "2025-12-30"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2025-12-30"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2025-12-30"
+          }
+        ]
+      },
+      {
+        "height": 171,
+        "weight": 58.7,
+        "shoulder": 42,
+        "neck": 33.3,
+        "chest": 83.5,
+        "cupSize": 74.5,
+        "waist": 63.6,
+        "hips": 91.5,
+        "thigh": 51,
+        "calf": 33,
+        "arm": 26.5,
+        "muscleMass": 25.7,
+        "bodyFatPercentage": 18.5,
+        "libido": 1,
+        "estrogenLevel": 145,
+        "testosteroneLevel": 230,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "휘궈 회식 후 폭풍 증가(러브핸들 등 남성형지방) 다시 리셋 기간 1주간 가지기, 고용량 유지, 공복 운동으로 살, 근육 빼기 -> 56.5kg(목표) 단기간 팔뚝 둘레 -1.5cm 목표",
+        "date": "2026-01-06",
+        "week": 40,
+        "timestamp": 1767686744122,
+        "memoLiked": true,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "chronic_fatigue",
+            "severity": 2
+          },
+          {
+            "id": "depression",
+            "severity": 2
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 2
+          },
+          {
+            "id": "hyperphagia",
+            "severity": 2
+          },
+          {
+            "id": "low_libido",
+            "severity": 4
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 3
+          },
+          {
+            "id": "brain_fog",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 3,
+            "unit": "mg",
+            "date": "2026-01-06"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2026-01-06"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2026-01-06"
+          }
+        ]
+      },
+      {
+        "height": 172,
+        "weight": 57,
+        "shoulder": 42,
+        "neck": 32.7,
+        "chest": 81,
+        "cupSize": 74.5,
+        "waist": 64,
+        "hips": 89.5,
+        "thigh": 50.5,
+        "calf": 33,
+        "arm": 26.5,
+        "muscleMass": 25.5,
+        "bodyFatPercentage": 16,
+        "libido": 1,
+        "estrogenLevel": 140,
+        "testosteroneLevel": 250,
+        "healthScore": null,
+        "estradiol": null,
+        "progesterone": null,
+        "antiAndrogen": null,
+        "testosterone": null,
+        "antiEstrogen": null,
+        "medicationOtherDose": 10,
+        "healthNotes": null,
+        "skinCondition": null,
+        "memo": "몸무개 줄이기는 성공했는데 엉덩이 위주로 빠져서 에스트라디올을 3.2까지 증량하고 공복 유산소, 고중량 하체운동을 병행해 다음주까지 57kg유지하나 지방분배를 바꿔보자",
+        "date": "2026-01-14",
+        "week": 41,
+        "timestamp": 1768361819813,
+        "menstruationActive": false,
+        "menstruationPain": null,
+        "symptoms": [
+          {
+            "id": "brain_fog",
+            "severity": 2
+          },
+          {
+            "id": "cystic_acne",
+            "severity": 2
+          },
+          {
+            "id": "low_libido",
+            "severity": 4
+          },
+          {
+            "id": "oligospermia_azoospermia",
+            "severity": 4
+          },
+          {
+            "id": "depression",
+            "severity": 1
+          }
+        ],
+        "medications": [
+          {
+            "id": "estradiol_valerate",
+            "dose": 3,
+            "unit": "mg",
+            "date": "2026-01-14"
+          },
+          {
+            "id": "finasteride",
+            "dose": 1,
+            "unit": "mg",
+            "date": "2026-01-14"
+          },
+          {
+            "id": "tamoxifen",
+            "dose": 10,
+            "unit": "mg",
+            "date": "2026-01-14"
+          }
+        ]
+      }
+    ],
+    "targets": {
+      "height": 172,
+      "weight": 62,
+      "shoulder": 41,
+      "neck": 32,
+      "chest": 83,
+      "waist": 63,
+      "hips": 96,
+      "thigh": 54,
+      "calf": 32,
+      "arm": 25,
+      "muscleMass": 23.5,
+      "bodyFatPercentage": 22,
+      "cupSize": 74,
+      "estrogenLevel": 90,
+      "testosteroneLevel": 420
+    },
+    "notes": []
+  }
+}

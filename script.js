@@ -124,6 +124,9 @@ function ensureChartWrapperContainer(wrapper) {
 
 function applyChartZoom(chart, wrapper, inner, pointCount, chartKey) {
     if (!chart || !wrapper || !inner) return;
+    const canvas = chart.canvas;
+    if (!canvas || !canvas.ownerDocument || !canvas.isConnected) return;
+    if (!wrapper.isConnected || !inner.isConnected) return;
     const levelRaw = chartZoomState.levels[chartKey];
     const level = Math.max(0, Math.min(4, Number.isFinite(Number(levelRaw)) ? Number(levelRaw) : 0));
     chartZoomState.levels[chartKey] = level;
@@ -159,15 +162,16 @@ function applyChartZoom(chart, wrapper, inner, pointCount, chartKey) {
     if (chart.options?.scales?.x?.ticks) {
         chart.options.scales.x.ticks.display = !hideDetails;
     }
-    chart.update('none');
+    try {
+        chart.update('none');
+    } catch (e) {
+        console.warn('DEBUG: chart update failed during zoom', e);
+    }
 }
 
 function ensureChartZoomControls(chart, wrapper, inner, pointCount, chartKey) {
-    if (!chart || !wrapper) return;
+    if (!wrapper) return;
     const container = ensureChartWrapperContainer(wrapper);
-    const stale = wrapper.querySelector('.chart-zoom-controls');
-    if (stale) stale.remove();
-
     let controls = container.querySelector(`.chart-zoom-controls[data-chart="${chartKey}"]`);
     if (!controls) {
         controls = document.createElement('div');
@@ -189,8 +193,23 @@ function ensureChartZoomControls(chart, wrapper, inner, pointCount, chartKey) {
     };
 
     updateState();
-    if (chartZoomState.bound[chartKey]) return;
-    chartZoomState.bound[chartKey] = true;
+    if (controls.dataset.bound === '1') return;
+    controls.dataset.bound = '1';
+
+    const getChartInstance = () => {
+        try {
+            if (typeof Chart !== 'undefined' && typeof Chart.getChart === 'function') {
+                const byId = Chart.getChart(chartKey);
+                if (byId) return byId;
+                const canvas = document.getElementById(chartKey);
+                if (canvas) {
+                    const byCanvas = Chart.getChart(canvas);
+                    if (byCanvas) return byCanvas;
+                }
+            }
+        } catch { }
+        return chart || null;
+    };
 
     controls.addEventListener('click', (e) => {
         const btn = e.target.closest('.chart-zoom-btn');
@@ -200,9 +219,18 @@ function ensureChartZoomControls(chart, wrapper, inner, pointCount, chartKey) {
         const isIn = btn.classList.contains('zoom-in');
         const isOut = btn.classList.contains('zoom-out');
         if (!isIn && !isOut) return;
+
+        const activeChart = getChartInstance();
+        if (!activeChart) return;
+
         const next = (Number(chartZoomState.levels[chartKey]) || 0) + (isOut ? 1 : -1);
         chartZoomState.levels[chartKey] = Math.max(0, Math.min(4, next));
-        applyChartZoom(chart, wrapper, inner, pointCount, chartKey);
+
+        const containerEl = controls.closest('.chart-wrapper-container');
+        const wrapperEl = containerEl?.querySelector('.chart-wrapper') || wrapper;
+        const innerEl = wrapperEl?.querySelector('.chart-inner-container') || inner;
+        const count = Number(activeChart.data?.labels?.length) || pointCount;
+        applyChartZoom(activeChart, wrapperEl, innerEl, count, chartKey);
         updateState();
     }, { passive: false });
 }
@@ -3085,46 +3113,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Notification Functions ---
     function showNotification() {
-        if (!('Notification' in window)) {
-            console.log("This browser does not support desktop notification");
-            return;
-        }
+        try {
+            if (!('Notification' in window)) {
+                console.log("This browser does not support desktop notification");
+                return;
+            }
 
-        if (Notification.permission === "granted") {
-            const notification = new Notification(translate('notification_title'), {
-                body: translate('notification_body'),
-                icon: '/icons/apple-touch-icon.png' // 앱 아이콘 경로
-            });
-            // 알림 클릭 시 앱 창으로 포커스
-            notification.onclick = () => {
-                window.focus();
-            };
+            if (Notification.permission === "granted") {
+                const notification = new Notification(translate('notification_title'), {
+                    body: translate('notification_body'),
+                    icon: '/icons/apple-touch-icon.png'
+                });
+                notification.onclick = () => {
+                    window.focus();
+                };
+            }
+        } catch (e) {
+            console.warn('DEBUG: Notification failed', e);
         }
     }
 
     function checkAndRequestNotification() {
-        if (!notificationEnabled || !('Notification' in window) || measurements.length === 0) {
-            return;
-        }
-
-
-        const lastMeasurement = measurements[measurements.length - 1];
-        const lastTimestamp = lastMeasurement.timestamp;
-        const sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000;
-
-        // 마지막 측정 후 7일이 지났는지 확인
-        if (Date.now() - lastTimestamp > sevenDaysInMillis) {
-            if (Notification.permission === "granted") {
-                showNotification();
-            } else if (Notification.permission !== "denied") {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        showNotification();
-                    }
-                });
-            } else {
-                console.warn(translate('notification_permission_denied'));
+        try {
+            if (!notificationEnabled || !('Notification' in window) || !Array.isArray(measurements) || measurements.length === 0) {
+                return;
             }
+
+            const lastMeasurement = measurements[measurements.length - 1];
+            if (!lastMeasurement || typeof lastMeasurement !== 'object') return;
+            let lastTimestamp = Number(lastMeasurement.timestamp);
+            if (!Number.isFinite(lastTimestamp)) {
+                lastTimestamp = Number(new Date(lastMeasurement.date).getTime());
+            }
+            if (!Number.isFinite(lastTimestamp)) return;
+
+            const sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000;
+            if (Date.now() - lastTimestamp > sevenDaysInMillis) {
+                if (Notification.permission === "granted") {
+                    showNotification();
+                } else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            showNotification();
+                        }
+                    }).catch(() => { });
+                } else {
+                    console.warn(translate('notification_permission_denied'));
+                }
+            }
+        } catch (e) {
+            console.warn('DEBUG: checkAndRequestNotification failed', e);
         }
     }
 

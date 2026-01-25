@@ -246,6 +246,7 @@ export class HealthEvaluator {
    */
   analyzeBodyRatios(measurement) {
     const ratios = {};
+    const upperChest = measurement?.upperChest ?? measurement?.chest;
     
     // WHR (Waist-Hip Ratio)
     if (measurement.waist && measurement.hips) {
@@ -258,13 +259,8 @@ export class HealthEvaluator {
     }
     
     // Chest-Waist Ratio
-    if (measurement.chest && measurement.waist) {
-      ratios.chestWaist = this.calculateChestWaistRatio(measurement.chest, measurement.waist);
-    }
-    
-    // Cup Size Difference (for MTF)
-    if (measurement.cupSize && measurement.chest) {
-      ratios.cupDifference = this.calculateCupSizeDifference(measurement.cupSize, measurement.chest);
+    if (upperChest && measurement.waist) {
+      ratios.chestWaist = this.calculateChestWaistRatio(upperChest, measurement.waist);
     }
     
     return ratios;
@@ -525,40 +521,6 @@ export class HealthEvaluator {
       )
     };
   }
-  
-  /**
-   * Cup Size Difference (MTF 가슴 발달 평가)
-   */
-  calculateCupSizeDifference(cupSize, chest) {
-    const diff = cupSize - chest;
-    
-    let cupCategory = '';
-    if (diff < 5) {
-      cupCategory = 'AA';
-    } else if (diff < 7.5) {
-      cupCategory = 'A';
-    } else if (diff < 10) {
-      cupCategory = 'B';
-    } else if (diff < 12.5) {
-      cupCategory = 'C';
-    } else if (diff < 15) {
-      cupCategory = 'D';
-    } else {
-      cupCategory = 'DD+';
-    }
-    
-    return {
-      difference: diff.toFixed(1),
-      estimatedCup: cupCategory,
-      evaluation: this.mode === 'mtf' 
-        ? this._t(
-          { ko: '추정 컵 사이즈: {cup}', en: 'Estimated cup size: {cup}', ja: '推定カップサイズ: {cup}' },
-          { cup: cupCategory }
-        )
-        : null
-    };
-  }
-  
   // ========================================
   // 5. 체성분 분석
   // ========================================

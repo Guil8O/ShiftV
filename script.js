@@ -1,6 +1,6 @@
 
 
-const APP_VERSION = "1.5"; // 버전 업데이트
+const APP_VERSION = "1.5.1"; // 버전 업데이트
 
 // Global Error Handler
 window.onerror = function (message, source, lineno, colno, error) {
@@ -1812,22 +1812,20 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("DEBUG: DOM elements fetched.");
     // --- Constants for Measurement Keys (Using camelCase) ---
     const bodySizeKeys = ['height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm'];
-    const healthKeys = ['muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'healthScore', 'skinCondition', 'healthNotes']; // 'semenScore', 'semenNotes' 삭제 및 새 키 추가
-    const medicationKeys_MtF = ['estradiol', 'progesterone', 'antiAndrogen'];
-    const medicationKeys_FtM = ['testosterone', 'antiEstrogen']; // 'antiEstrogen' 추가
+    const healthKeys = ['muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'healthScore'];
+    const medicationKeys_MtF = [];
+    const medicationKeys_FtM = [];
     const baseNumericKeys = [
         'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm', // 'cupSize' 추가
-        'muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'healthScore', // 'semenScore' 삭제 및 새 키 추가
-        'estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen', // 'antiEstrogen' 추가
+        'muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'healthScore',
         'menstruationPain'
     ];
-    const textKeys = ['healthNotes', 'skinCondition', 'memo', 'menstruationActive'];
+    const textKeys = ['memo', 'menstruationActive'];
     // displayKeysInOrder를 업데이트합니다. (표시 순서 제어)
     const displayKeysInOrder = [
         'week', 'date',
         'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm',
-        'muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'skinCondition', 'healthScore', 'healthNotes',
-        'estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen',
+        'muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'healthScore',
         'memo', 'menstruationActive', 'menstruationPain',
         'timestamp'
     ];
@@ -2234,8 +2232,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 5. 약물 영향력 분석 (개선된 알고리즘)
         if (sortedMeas.length >= 2) {
-            const legacyStandardMeds = ['estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen'];
-
             const getMedicationDoseMap = (m) => {
                 const map = {};
 
@@ -2246,18 +2242,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (!id || !Number.isFinite(dose) || dose <= 0) return;
                         map[id] = (map[id] || 0) + dose;
                     });
-                }
-
-                legacyStandardMeds.forEach(key => {
-                    const dose = Number(m?.[key]);
-                    if (!Number.isFinite(dose) || dose <= 0) return;
-                    map[key] = (map[key] || 0) + dose;
-                });
-
-                const otherName = m?.medicationOtherName;
-                const otherDose = Number(m?.medicationOtherDose);
-                if (otherName && otherName.trim() !== '' && Number.isFinite(otherDose) && otherDose > 0) {
-                    map[otherName] = (map[otherName] || 0) + otherDose;
                 }
 
                 return map;
@@ -2557,7 +2541,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 새로운 Body Briefing 모달 사용
         try {
             // 동적 import로 Body Briefing 모달 로드
-            import('./src/ui/body-briefing-modal.js').then(module => {
+            import(`./src/ui/body-briefing-modal.js?v=${APP_VERSION}`).then(module => {
                 const BodyBriefingModal = module.BodyBriefingModal || module.default;
                 const userSettings = {
                     mode: currentMode || 'mtf',
@@ -3030,7 +3014,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getUnifiedMedicationDoseMap(measurement) {
-        const legacyStandardMeds = ['estradiol', 'progesterone', 'antiAndrogen', 'testosterone', 'antiEstrogen'];
         const map = new Map();
 
         const addDose = (id, dose) => {
@@ -3054,16 +3037,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const id = entry?.id || entry?.medicationId;
                 addDose(id, entry?.dose);
             });
-        }
-
-        legacyStandardMeds.forEach(key => {
-            if (!measurement || !(key in measurement)) return;
-            addDose(key, measurement[key]);
-        });
-
-        const otherName = measurement?.medicationOtherName;
-        if (otherName && otherName.trim() !== '') {
-            addDose(otherName, measurement?.medicationOtherDose);
         }
 
         return map;
@@ -5049,6 +5022,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
                 let needsSave = false;
+                const legacyMeasurementFields = [
+                    'healthNotes',
+                    'skinCondition',
+                    'estradiol',
+                    'progesterone',
+                    'antiAndrogen',
+                    'testosterone',
+                    'antiEstrogen',
+                    'medicationOtherName',
+                    'medicationOtherDose',
+                    'semenScore',
+                    'semenNotes'
+                ];
+                legacyMeasurementFields.forEach(k => {
+                    if (targets && Object.prototype.hasOwnProperty.call(targets, k)) {
+                        try { delete targets[k]; } catch { }
+                        needsSave = true;
+                    }
+                });
                 measurements.forEach((m, index) => {
                     // 1. 주차 번호 복구
                     if (m.week !== index) { m.week = index; needsSave = true; }
@@ -5065,6 +5057,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         needsSave = true;
                     }
                     if (m.memoLiked === undefined) { m.memoLiked = false; needsSave = true; }
+
+                    legacyMeasurementFields.forEach(k => {
+                        if (m && Object.prototype.hasOwnProperty.call(m, k)) {
+                            try { delete m[k]; } catch { }
+                            needsSave = true;
+                        }
+                    });
 
                     const beforeSig = symptomsSignature(m.symptoms);
                     const normalizedSymptoms = normalizeSymptomsArray(m.symptoms);
@@ -5356,46 +5355,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     function getFilteredDisplayKeys() {
-        let keys = [...displayKeysInOrder];
-        if (currentMode === 'mtf') {
-            // medicationKeys_FtM에 'antiEstrogen'이 추가되었으므로 이 로직은 자동으로 처리됩니다.
-            keys = keys.filter(k => !medicationKeys_FtM.includes(k));
-        } else if (currentMode === 'ftm') {
-            // 'cupSize'와 'semen' 관련 필터링 부분만 수정합니다.
-            keys = keys.filter(k => !medicationKeys_MtF.includes(k) && !k.startsWith('semen'));
-        }
-        return keys;
+        return [...displayKeysInOrder];
     }
 
     function getFilteredNumericKeys() {
-        let keys = [...baseNumericKeys];
-        if (currentMode === 'mtf') {
-            keys = keys.filter(k => !medicationKeys_FtM.includes(k));
-        } else if (currentMode === 'ftm') {
-            keys = keys.filter(k => !medicationKeys_MtF.includes(k) && k !== 'semenScore');
-        }
-        return keys;
+        return [...baseNumericKeys];
     }
 
     function getFilteredChartKeys() {
-        let keys = [...chartSelectableKeys];
-        if (currentMode === 'mtf') {
-            keys = keys.filter(k => !medicationKeys_FtM.includes(k));
-        } else if (currentMode === 'ftm') {
-            keys = keys.filter(k => !medicationKeys_MtF.includes(k));
-        }
-        return keys;
+        return [...chartSelectableKeys];
     }
 
     const legacyKeysToHideInTables = new Set([
-        'skinCondition',
         'healthScore',
-        'healthNotes',
-        'estradiol',
-        'progesterone',
-        'antiAndrogen',
-        'testosterone',
-        'antiEstrogen'
     ]);
 
     let symptomLabelMap = null;
@@ -5651,7 +5623,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const previous = measurements.length > 1 ? measurements[measurements.length - 2] : null;
 
         const keysToShow = targetSettingKeys.filter(key => {
-            if (currentMode === 'ftm') return !medicationKeys_MtF.includes(key) && key !== 'cupSize' && !key.startsWith('semen');
+            if (currentMode === 'ftm') return !medicationKeys_MtF.includes(key) && !key.startsWith('semen');
             return true;
         });
 
@@ -6114,8 +6086,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     let displayUnit = '';
                                     if (originalKey.includes('Percentage')) displayUnit = '%';
                                     else if (originalKey === 'weight' || originalKey === 'muscleMass') displayUnit = translate('unitKg');
-                                    else if (bodySizeKeys.includes(originalKey) && originalKey !== 'cupSize') displayUnit = translate('unitCm');
-                                    else if (medicationKeys_MtF.includes(originalKey) || medicationKeys_FtM.includes(originalKey)) displayUnit = translate('unitMg');
+                                    else if (bodySizeKeys.includes(originalKey)) displayUnit = translate('unitCm');
                                     if (displayUnit) label += ` ${displayUnit}`;
                                 } else { label += '-'; }
                                 return label;
@@ -6174,7 +6145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (needsUnitSelect) placeholderUnit = translate('valuePlaceholder');
                 else if (key.includes('Percentage')) placeholderUnit = translate('unitPercent');
                 else if (key === 'weight' || key === 'muscleMass') placeholderUnit = translate('unitKg');
-                else if (bodySizeKeys.includes(key) && key !== 'cupSize') placeholderUnit = translate('unitCm');
+                else if (bodySizeKeys.includes(key)) placeholderUnit = translate('unitCm');
                 input.setAttribute('placeholder', placeholderUnit);
 
                 formGroup.appendChild(label);
@@ -6232,7 +6203,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (key === 'estrogenLevel' || key === 'testosteroneLevel' || key === 'weight') placeholderUnit = translate('valuePlaceholder');
                     else if (key.includes('Percentage')) placeholderUnit = translate('unitPercent');
                     else if (key === 'weight' || key === 'muscleMass') placeholderUnit = translate('unitKg');
-                    else if (bodySizeKeys.includes(key) && key !== 'cupSize') placeholderUnit = translate('unitCm');
+                    else if (bodySizeKeys.includes(key)) placeholderUnit = translate('unitCm');
                     input.setAttribute('placeholder', placeholderUnit);
                     const keyShouldBeVisible = keysForMode.includes(key);
                     group.style.display = keyShouldBeVisible ? '' : 'none';
@@ -7217,7 +7188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (svCardTargets) {
             svCardTargets.addEventListener('click', () => {
                 try {
-                    import('./src/ui/change-roadmap-modal.js').then(module => {
+                    import(`./src/ui/change-roadmap-modal.js?v=${APP_VERSION}`).then(module => {
                         const ChangeRoadmapModal = module.ChangeRoadmapModal || module.default;
                         const userSettings = {
                             mode: currentMode || 'mtf',

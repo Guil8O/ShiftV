@@ -18,7 +18,14 @@ import { RecommendationEngine } from './recommendation-engine.js';
 
 export class DoctorEngine {
   constructor(measurements = [], userSettings = {}) {
-    this.measurements = measurements;
+    this.measurements = (Array.isArray(measurements) ? measurements : []).map(m => {
+      const mm = m && typeof m === 'object' ? m : {};
+      return {
+        ...mm,
+        upperChest: (mm.upperChest ?? mm.chest ?? null),
+        lowerChest: (mm.lowerChest ?? mm.cupSize ?? null)
+      };
+    });
     this.userSettings = userSettings;
     this.mode = userSettings.mode || 'mtf';
     this.biologicalSex = userSettings.biologicalSex || 'male';
@@ -30,9 +37,9 @@ export class DoctorEngine {
     this.medicationDB = MEDICATION_DATABASE;
     
     // 서브모듈 초기화
-    this.healthEvaluator = new HealthEvaluator(measurements, this.mode, this.biologicalSex, this.language);
+    this.healthEvaluator = new HealthEvaluator(this.measurements, this.mode, this.biologicalSex, this.language);
     this.symptomAnalyzer = new SymptomAnalyzer(measurements, this.mode, this.language);
-    this.trendPredictor = new TrendPredictor(measurements, this.targets);
+    this.trendPredictor = new TrendPredictor(this.measurements, this.targets);
     
     // 추천 엔진은 증상과 약물 정보도 필요
     const latestSymptoms = measurements.length > 0 ? measurements[measurements.length - 1].symptoms : [];
@@ -767,7 +774,7 @@ export class DoctorEngine {
   _formatMilestoneSnapshot(index) {
     const m = this.measurements[index];
     if (!m) return '';
-    const pick = ['weight', 'waist', 'hips', 'chest'];
+    const pick = ['weight', 'waist', 'hips', 'chest', 'cupSize'];
     const parts = [];
     pick.forEach(k => {
       const v = Number(m?.[k]);
@@ -864,11 +871,13 @@ export class DoctorEngine {
     const last = measurements[measurements.length - 1];
     const changes = [];
     
-    const metrics = ['weight', 'waist', 'hips', 'chest', 'shoulder', 'thigh', 'arm', 'muscleMass', 'bodyFatPercentage'];
+    const metrics = ['weight', 'waist', 'hips', 'chest', 'cupSize', 'shoulder', 'thigh', 'arm', 'muscleMass', 'bodyFatPercentage'];
     
     metrics.forEach(metric => {
-      if (first[metric] && last[metric]) {
-        const change = last[metric] - first[metric];
+      const a = Number(first?.[metric]);
+      const b = Number(last?.[metric]);
+      if (!Number.isFinite(a) || !Number.isFinite(b)) return;
+      const change = b - a;
         if (Math.abs(change) > 0.1) {
           changes.push({
             metric: this._getMetricName(metric),
@@ -876,7 +885,6 @@ export class DoctorEngine {
             unit: this._getMetricUnit(metric)
           });
         }
-      }
     });
     
     return changes;
@@ -919,17 +927,45 @@ export class DoctorEngine {
    */
   _compareTwo(current, comparison, label) {
     const differences = {};
-    const metrics = ['weight', 'waist', 'hips', 'chest', 'shoulder', 'thigh', 'arm', 'muscleMass', 'bodyFatPercentage'];
+    const metrics = [
+      'height',
+      'weight',
+      'shoulder',
+      'neck',
+      'chest',
+      'cupSize',
+      'waist',
+      'hips',
+      'thigh',
+      'calf',
+      'arm',
+      'muscleMass',
+      'bodyFatPercentage',
+      'estrogenLevel',
+      'testosteroneLevel',
+      'libido',
+      'menstruationPain'
+    ];
     
     metrics.forEach(metric => {
-      if (current[metric] && comparison[metric]) {
+      const cur = Number(current?.[metric]);
+      const cmp = Number(comparison?.[metric]);
+      if (!Number.isFinite(cur) || !Number.isFinite(cmp)) return;
+      if (cmp === 0) {
         differences[metric] = {
-          current: current[metric],
-          comparison: comparison[metric],
-          change: (current[metric] - comparison[metric]).toFixed(2),
-          percentChange: (((current[metric] - comparison[metric]) / comparison[metric]) * 100).toFixed(1)
+          current: cur,
+          comparison: cmp,
+          change: (cur - cmp).toFixed(2),
+          percentChange: '-'
         };
+        return;
       }
+      differences[metric] = {
+        current: cur,
+        comparison: cmp,
+        change: (cur - cmp).toFixed(2),
+        percentChange: (((cur - cmp) / cmp) * 100).toFixed(1)
+        };
     });
     
     return {
@@ -1198,7 +1234,8 @@ export class DoctorEngine {
       hips: { ko: '엉덩이', en: 'Hips', ja: 'ヒップ' },
       upperChest: { ko: '가슴(상)', en: 'Upper Chest', ja: '胸囲(上)' },
       lowerChest: { ko: '가슴(하)', en: 'Lower Chest', ja: '胸囲(下)' },
-      chest: { ko: '가슴', en: 'Chest', ja: '胸囲' },
+      chest: { ko: '윗 가슴둘레', en: 'Upper chest', ja: '上胸囲' },
+      cupSize: { ko: '아랫 가슴둘레', en: 'Lower chest', ja: '下胸囲' },
       thigh: { ko: '허벅지', en: 'Thigh', ja: '太もも' },
       calf: { ko: '종아리', en: 'Calf', ja: 'ふくらはぎ' },
       arm: { ko: '팔뚝', en: 'Arm', ja: '腕' },
@@ -1225,20 +1262,23 @@ export class DoctorEngine {
       upperChest: 'cm',
       lowerChest: 'cm',
       chest: 'cm',
+      cupSize: 'cm',
       thigh: 'cm',
       calf: 'cm',
       arm: 'cm',
       muscleMass: 'kg',
       bodyFatPercentage: '%',
+      libido: '',
       estrogenLevel: 'pg/mL',
-      testosteroneLevel: 'ng/dL'
+      testosteroneLevel: 'ng/dL',
+      menstruationPain: ''
     };
     return units[metric] || '';
   }
   
   _getAllMetricCategories() {
     return [
-      { id: 'bodySize', name: this._t({ ko: '신체 사이즈', en: 'Body size', ja: '体のサイズ' }), metrics: ['weight', 'waist', 'hips', 'chest', 'shoulder', 'thigh', 'arm'] },
+      { id: 'bodySize', name: this._t({ ko: '신체 사이즈', en: 'Body size', ja: '体のサイズ' }), metrics: ['weight', 'waist', 'hips', 'chest', 'cupSize', 'shoulder', 'thigh', 'arm'] },
       { id: 'composition', name: this._t({ ko: '체성분', en: 'Body composition', ja: '体組成' }), metrics: ['muscleMass', 'bodyFatPercentage'] },
       { id: 'hormones', name: this._t({ ko: '호르몬', en: 'Hormones', ja: 'ホルモン' }), metrics: ['estrogenLevel', 'testosteroneLevel'] }
     ];

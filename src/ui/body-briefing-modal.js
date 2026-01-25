@@ -212,7 +212,20 @@ export class BodyBriefingModal {
     const container = this.$('#briefing-target-achievement-list');
     if (!container || !targetAchievement) return;
     
-    const items = Object.keys(targetAchievement).map(metric => {
+    const preferredOrder = [
+      'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm',
+      'muscleMass', 'bodyFatPercentage', 'estrogenLevel', 'testosteroneLevel', 'libido',
+      'menstruationActive', 'menstruationPain'
+    ];
+    const rank = new Map(preferredOrder.map((k, i) => [k, i]));
+    const metrics = Object.keys(targetAchievement).sort((a, b) => {
+      const ra = rank.has(a) ? rank.get(a) : 9999;
+      const rb = rank.has(b) ? rank.get(b) : 9999;
+      if (ra !== rb) return ra - rb;
+      return String(a).localeCompare(String(b));
+    });
+
+    const items = metrics.map(metric => {
       const achievement = targetAchievement[metric];
       if (!achievement) return null;
       
@@ -582,8 +595,20 @@ export class BodyBriefingModal {
   renderPredictions(predictions) {
     const container = this.$('#briefing-predictions-container');
     if (!container || !predictions) return;
-    
-    const items = Object.keys(predictions).map(metric => {
+
+    const preferredOrder = [
+      'height', 'weight', 'shoulder', 'neck', 'chest', 'cupSize', 'waist', 'hips', 'thigh', 'calf', 'arm',
+      'muscleMass', 'bodyFatPercentage', 'estrogenLevel', 'testosteroneLevel', 'libido', 'menstruationPain'
+    ];
+    const rank = new Map(preferredOrder.map((k, i) => [k, i]));
+    const metrics = Object.keys(predictions).sort((a, b) => {
+      const ra = rank.has(a) ? rank.get(a) : 9999;
+      const rb = rank.has(b) ? rank.get(b) : 9999;
+      if (ra !== rb) return ra - rb;
+      return String(a).localeCompare(String(b));
+    });
+
+    const items = metrics.map(metric => {
       const prediction = predictions[metric];
       if (!prediction) return null;
       const unit = this.getMetricUnit(metric);
@@ -1427,17 +1452,23 @@ export class BodyBriefingModal {
   
   getMetricUnit(metric) {
     const units = {
+      height: 'cm',
       weight: 'kg',
+      shoulder: 'cm',
+      neck: 'cm',
       waist: 'cm',
       hips: 'cm',
       chest: 'cm',
-      shoulder: 'cm',
+      cupSize: 'cm',
       thigh: 'cm',
+      calf: 'cm',
       arm: 'cm',
       muscleMass: 'kg',
       bodyFatPercentage: '%',
+      libido: '',
       estrogenLevel: 'pg/mL',
-      testosteroneLevel: 'ng/dL'
+      testosteroneLevel: 'ng/dL',
+      menstruationPain: ''
     };
     return units[metric] || '';
   }

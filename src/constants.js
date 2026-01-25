@@ -10,7 +10,7 @@
 // ====================
 
 /** 앱 버전 */
-export const APP_VERSION = "1.5";
+export const APP_VERSION = "1.5.1";
 
 // ====================
 // 로컬 스토리지 키

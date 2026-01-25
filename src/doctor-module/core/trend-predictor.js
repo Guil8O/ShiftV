@@ -35,8 +35,23 @@ export class TrendPredictor {
     }
     
     const metricsToPredict = [
-      'weight', 'waist', 'hips', 'chest', 'shoulder', 'thigh', 'arm',
-      'muscleMass', 'bodyFatPercentage', 'estrogenLevel', 'testosteroneLevel'
+      'height',
+      'weight',
+      'shoulder',
+      'neck',
+      'chest',
+      'cupSize',
+      'waist',
+      'hips',
+      'thigh',
+      'calf',
+      'arm',
+      'muscleMass',
+      'bodyFatPercentage',
+      'libido',
+      'estrogenLevel',
+      'testosteroneLevel',
+      'menstruationPain'
     ];
     
     const predictions = {};

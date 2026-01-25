@@ -5975,6 +5975,12 @@ body.light-mode .modal-tab-btn.active {
     border: 1px solid var(--glass-border);
     border-radius: 8px;
     margin-bottom: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.comparison-result-item-wide {
+    grid-column: 1 / -1;
 }
 
 .comparison-result-item .metric-name {
@@ -5989,9 +5995,35 @@ body.light-mode .modal-tab-btn.active {
     margin-bottom: 5px;
 }
 
+.comparison-result-item .comparison-values.comparison-values-list {
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.comparison-result-item .comparison-values.comparison-values-list span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .comparison-result-item .comparison-change {
     font-weight: 600;
     color: var(--accent);
+    position: relative;
+    padding-bottom: 6px;
+}
+
+.comparison-result-item .comparison-change::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 4px;
+    width: var(--delta-bar, 0%);
+    background: currentColor;
+    opacity: 0.35;
+    border-radius: 999px;
 }
 
 .comparison-result-item .comparison-change.positive {
@@ -6000,6 +6032,12 @@ body.light-mode .modal-tab-btn.active {
 
 .comparison-result-item .comparison-change.negative {
     color: #ef4444;
+}
+
+@media (max-width: 768px) {
+    .comparison-result-item .comparison-values.comparison-values-list span {
+        white-space: normal;
+    }
 }
 
 .roadmap-deltas {
@@ -6022,8 +6060,8 @@ body.light-mode .modal-tab-btn.active {
 }
 
 .delta {
-    font-weight: 700;
-    font-size: 16px;
+    font-weight: 500;
+    font-size: 13px;
     color: var(--text-main);
 }
 
@@ -6037,6 +6075,105 @@ body.light-mode .modal-tab-btn.active {
 
 .delta.negative {
     color: #ef4444;
+}
+
+.diff-card-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.diff-card-row {
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.diff-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.diff-status-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    font-weight: 900;
+    font-size: 11px;
+    flex: 0 0 auto;
+}
+
+.diff-status-icon.present {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.18);
+}
+
+.diff-status-icon.absent {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.18);
+}
+
+.diff-card-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-main);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.diff-card-values {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.diff-value-col {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 10px 12px;
+}
+
+.diff-value-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+.diff-value-data {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--text-main);
+}
+
+.diff-empty {
+    color: var(--text-dim);
+    font-weight: 700;
+    padding: 8px 0;
+}
+
+@media (max-width: 768px) {
+    .diff-card-title {
+        white-space: normal;
+    }
+
+    .diff-card-values {
+        grid-template-columns: 1fr;
+    }
 }
 
 .roadmap-change-meta {

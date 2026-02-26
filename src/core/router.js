@@ -59,14 +59,12 @@ export function initRouter({ activateTab, closeAllModals } = {}) {
     // hashchange 이벤트 리스너 등록
     window.addEventListener('hashchange', _handleHashChange);
 
-    // 초기 해시 처리: 해시가 없으면 기본값 설정
+    // 초기 해시 처리
+    // ⚠️ 해시가 없을 때 URL을 바꾸지 않음 → PWA start_url(/ShiftV/) 일치 유지
+    // 브라우저 PWA 설치 버튼은 현재 URL이 start_url과 일치해야 표시됨
     const currentHash = _getHash();
     if (!currentHash || !ROUTE_MAP[currentHash]) {
-        // 해시 설정 (hashchange 이벤트 발생시키지 않고 직접 처리)
-        _suppressHashChange = true;
-        window.location.hash = '#' + DEFAULT_HASH;
-        _suppressHashChange = false;
-        // 기본 탭 활성화
+        // URL은 그대로 두고 기본 탭(sv)만 활성화
         _activateTabFn(ROUTE_MAP[DEFAULT_HASH]);
     } else {
         // 이미 유효한 해시가 있으면 해당 탭 활성화

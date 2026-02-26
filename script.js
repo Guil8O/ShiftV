@@ -150,21 +150,14 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log(`DEBUG: ShiftV App Initializing v${APP_VERSION}...`);
 
-    // ── 🚨 리다이렉트 로그인 결과 최우선 처리 (모바일/PWA) ──────────────
-    // Firebase redirect 결과를 앱 초기화 직후 즉시 처리하여 로그인 루프 방지
-    import('./src/firebase/auth.js').then(authMod => {
-        authMod.handleRedirectResult().then(user => {
-            if (user) {
-                console.log('✅ Redirect login completed early:', user.displayName || user.email);
-                // 라우터가 초기화된 상태라면 메인 탭으로 이동
-                if (window.location.hash === '' || window.location.hash === '#') {
-                    window.location.hash = '#sv';
-                }
-            }
-        }).catch(err => {
-            console.warn('Redirect result check (normal if not redirected):', err.message);
-        });
-    }).catch(() => { /* Firebase not available - skip */ });
+    // ── 화면 회전 잠금 (PWA/fullscreen) ──────────────────────────────
+    try {
+        if (screen.orientation && typeof screen.orientation.lock === 'function') {
+            screen.orientation.lock('portrait').catch(() => {
+                // lock()은 fullscreen 모드에서만 작동 — 일반 브라우저에선 무시
+            });
+        }
+    } catch (e) { /* Screen Orientation API 미지원 */ }
 
     // ── Inline SVG logo for theme tinting ─────────────────────────────
     (async () => {

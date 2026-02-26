@@ -42,7 +42,7 @@ export default defineConfig({
         scope: '/ShiftV/',
         id: '/ShiftV/',
         display: 'fullscreen',
-        orientation: 'any',
+        orientation: 'portrait',
         icons: [
           { src: 'android/android-launchericon-48-48.png', sizes: '48x48', type: 'image/png' },
           { src: 'android/android-launchericon-72-72.png', sizes: '72x72', type: 'image/png' },

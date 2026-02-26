@@ -1,8 +1,6 @@
 import { auth } from './firebase-config.js';
 import {
     signInWithPopup,
-    signInWithRedirect,
-    getRedirectResult,
     GoogleAuthProvider,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
@@ -25,40 +23,21 @@ export const authReady = new Promise((resolve) => {
 });
 
 /**
- * 리다이렉트 로그인 결과 처리
- * 앱 초기화 직후 호출하여 리다이렉트 로그인 성공 여부를 감지합니다.
- * @returns {Promise<import('firebase/auth').User|null>} 로그인된 사용자 또는 null
+ * 리다이렉트 로그인 결과 처리 (레거시 호환 - 더 이상 redirect 사용 안 함)
  */
 export async function handleRedirectResult() {
-    if (!auth) return null;
-    try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-            console.log("리다이렉트 로그인 성공:", result.user.displayName || result.user.email);
-            return result.user;
-        }
-        return null;
-    } catch (error) {
-        console.error("리다이렉트 로그인 실패:", error);
-        return null;
-    }
+    return null;
 }
 
 /**
  * 구글 로그인
- * GitHub Pages의 COOP 헤더가 signInWithPopup을 차단하므로
- * 모든 환경에서 signInWithRedirect 통일 사용
+ * signInWithPopup 사용 (signInWithRedirect는 SW 캐시와 충돌하여 사용 불가)
+ * COOP 경고가 콘솔에 뜨지만 실제 동작에는 영향 없음
  */
 export async function signInWithGoogle() {
     if (!auth) throw new Error('Firebase not configured');
-    try {
-        await signInWithRedirect(auth, googleProvider);
-        // signInWithRedirect는 페이지를 떠나므로 여기서 return되지 않음
-        return null;
-    } catch (error) {
-        console.error("Google Sign-In Error:", error);
-        throw error;
-    }
+    const result = await signInWithPopup(auth, googleProvider);
+    return result.user;
 }
 
 export async function signInWithEmail(email, password) {

@@ -13,7 +13,7 @@
     "standalone",
     "minimal-ui"
   ],
-  "orientation": "any",
+  "orientation": "portrait",
   "prefer_related_applications": false,
   "lang": "ko",
   "categories": [

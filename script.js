@@ -6302,7 +6302,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         quests: JSON.parse(localStorage.getItem('shiftv_quests') || '[]'),
                         targets,
                         translate,
-                        language: currentLanguage
+                        language: currentLanguage,
+                        mode: currentMode || 'mtf',
+                        biologicalSex: biologicalSex || 'male',
                     });
                     const fileName = await generator.generate(now.getFullYear(), now.getMonth());
                     pdfReportBtn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm mi-success">check_circle</span> ' + (translate('pdfSaved') || '저장 완료!');

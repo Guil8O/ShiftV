@@ -431,8 +431,10 @@ ${this._footer()}
             gauges.forEach(g => {
                 const r = ratios[g.k];
                 if (!r) return;
-                const val = r.value ?? r.ratio;
-                if (val == null) return;
+                const raw = r.value ?? r.ratio;
+                if (raw == null) return;
+                const val = Number(raw);
+                if (isNaN(val)) return;
 
                 /* position: 0% = male end, 100% = female end */
                 let pos = 50;

@@ -14,8 +14,13 @@ import {
     updatePlaceholders as _updatePlaceholders,
     renderNextMeasurementInfo as _renderNextMeasurementInfo,
 } from './src/ui/tabs/record-tab-helpers.js';
+import { initRouter, navigateToTab } from './src/core/router.js';
+import { createModalSystem } from './src/ui/modal-system.js';
+import * as dataManager from './src/core/data-manager.js';
+import { PRIMARY_DATA_KEY, SETTINGS_KEY, BODY_SIZE_KEYS as bodySizeKeys } from './src/constants.js';
+import { isIOS, getCSSVar as getCssVar, normalizeSymptomsArray, symptomsSignature } from './src/utils.js';
 
-const APP_VERSION = "2.0.0"; // 버전 업데이트
+const APP_VERSION = "2.0.0a"; // 버전 업데이트
 
 // Global Error Handler
 window.onerror = function (message, source, lineno, colno, error) {
@@ -66,98 +71,72 @@ function ensureAverageLinePluginRegistered() {
     });
 }
 
-function normalizeSymptomsArray(symptoms) {
-    if (!Array.isArray(symptoms) || symptoms.length === 0) return null;
-
-    const idMap = {
-        depression_lethargy: 'depression',
-        anxiety_restlessness: 'anxiety',
-        raynauds_paresthesia: 'paresthesia',
-        flushing_erythema: 'flushing',
-        skin_atrophy_bruising: 'skin_atrophy',
-        alopecia_mpb: 'male_pattern_baldness',
-        edema_moon_face: 'edema',
-        sarcopenia_weakness: 'sarcopenia',
-        voice_cracking_deepening: 'voice_change',
-        breast_budding_mastalgia: 'breast_budding',
-        gynecomastia_enlargement: 'gynecomastia',
-        palpitation_tachycardia: 'palpitation',
-        dvt_suspicion: 'dvt_symptoms'
-    };
-
-    const byId = new Map();
-    for (const s of symptoms) {
-        const rawId = s?.id;
-        if (!rawId) continue;
-        const id = idMap[rawId] || rawId;
-        const sev = Number.isFinite(Number(s?.severity)) ? Number(s.severity) : 3;
-        const prev = byId.get(id);
-        const next = { id, severity: Math.max(1, Math.min(5, sev)) };
-        if (!prev || next.severity > prev.severity) byId.set(id, next);
-    }
-
-    const out = [...byId.values()];
-    return out.length > 0 ? out : null;
-}
-
-function symptomsSignature(symptoms) {
-    if (!Array.isArray(symptoms) || symptoms.length === 0) return '';
-    return symptoms
-        .map(s => ({ id: s?.id || '', severity: Number.isFinite(Number(s?.severity)) ? Number(s.severity) : 3 }))
-        .filter(s => s.id)
-        .sort((a, b) => a.id.localeCompare(b.id))
-        .map(s => `${s.id}:${Math.max(1, Math.min(5, s.severity))}`)
-        .join('|');
-}
+// normalizeSymptomsArray, symptomsSignature → imported from src/utils.js
 
 function syncModuleLanguage(lang) {
     setCurrentLanguage(lang);
 }
 
-    function populateMedicationAutocomplete() {
-        const datalist = document.getElementById('medication-suggestions');
-        if (!datalist || !window.ShiftV_MedDB) {
-            // Retry once if DB not loaded yet
-            if (!window.ShiftV_MedDB) {
-                setTimeout(populateMedicationAutocomplete, 1000);
-            }
-            return;
+function populateMedicationAutocomplete() {
+    const datalist = document.getElementById('medication-suggestions');
+    if (!datalist || !window.ShiftV_MedDB) {
+        // Retry once if DB not loaded yet
+        if (!window.ShiftV_MedDB) {
+            setTimeout(populateMedicationAutocomplete, 1000);
         }
-
-        const allMeds = [];
-        const db = window.ShiftV_MedDB;
-        
-        const extract = (list) => {
-            if (Array.isArray(list)) {
-                list.forEach(item => {
-                    if (item.names) allMeds.push(...item.names);
-                });
-            }
-        };
-
-        if (db.ESTROGENS) {
-            extract(db.ESTROGENS.oral);
-            extract(db.ESTROGENS.transdermal);
-            extract(db.ESTROGENS.injectable);
-        }
-        extract(db.ANTI_ANDROGENS);
-        if (db.TESTOSTERONE) {
-            extract(db.TESTOSTERONE.longActing);
-            extract(db.TESTOSTERONE.mediumActing);
-            extract(db.TESTOSTERONE.topical);
-        }
-        if (db.SERM_AND_AI) {
-            extract(db.SERM_AND_AI.serm);
-        }
-
-        const uniqueNames = [...new Set(allMeds)].sort();
-        datalist.innerHTML = uniqueNames.map(name => `<option value="${escapeHTML(name)}">`).join('');
-        console.log("Autocomplete populated with " + uniqueNames.length + " items.");
+        return;
     }
+
+    const allMeds = [];
+    const db = window.ShiftV_MedDB;
+
+    const extract = (list) => {
+        if (Array.isArray(list)) {
+            list.forEach(item => {
+                if (item.names) allMeds.push(...item.names);
+            });
+        }
+    };
+
+    if (db.ESTROGENS) {
+        extract(db.ESTROGENS.oral);
+        extract(db.ESTROGENS.transdermal);
+        extract(db.ESTROGENS.injectable);
+    }
+    extract(db.ANTI_ANDROGENS);
+    if (db.TESTOSTERONE) {
+        extract(db.TESTOSTERONE.longActing);
+        extract(db.TESTOSTERONE.mediumActing);
+        extract(db.TESTOSTERONE.topical);
+    }
+    if (db.SERM_AND_AI) {
+        extract(db.SERM_AND_AI.serm);
+    }
+
+    const uniqueNames = [...new Set(allMeds)].sort();
+    datalist.innerHTML = uniqueNames.map(name => `<option value="${escapeHTML(name)}">`).join('');
+    console.log("Autocomplete populated with " + uniqueNames.length + " items.");
+}
 
 // --- Main Application Logic ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log(`DEBUG: ShiftV App Initializing v${APP_VERSION}...`);
+
+    // ── 🚨 리다이렉트 로그인 결과 최우선 처리 (모바일/PWA) ──────────────
+    // Firebase redirect 결과를 앱 초기화 직후 즉시 처리하여 로그인 루프 방지
+    import('./src/firebase/auth.js').then(authMod => {
+        authMod.handleRedirectResult().then(user => {
+            if (user) {
+                console.log('✅ Redirect login completed early:', user.displayName || user.email);
+                // 라우터가 초기화된 상태라면 메인 탭으로 이동
+                if (window.location.hash === '' || window.location.hash === '#') {
+                    window.location.hash = '#sv';
+                }
+            }
+        }).catch(err => {
+            console.warn('Redirect result check (normal if not redirected):', err.message);
+        });
+    }).catch(() => { /* Firebase not available - skip */ });
 
     // ── Inline SVG logo for theme tinting ─────────────────────────────
     (async () => {
@@ -181,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try { _notifications = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); } catch { _notifications = []; }
 
     function saveNotifications() {
-        try { localStorage.setItem(NOTIF_KEY, JSON.stringify(_notifications.slice(0, 100))); } catch {}
+        try { localStorage.setItem(NOTIF_KEY, JSON.stringify(_notifications.slice(0, 100))); } catch { }
     }
 
     function addNotification({ type = 'measurement', title = '', body = '', time = Date.now() } = {}) {
@@ -208,17 +187,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const typeInfo = {
-            measurement: { icon: 'straighten',  cls: 'notif-icon--measurement', label: translate('notifTypeMeasurement') },
-            diary:       { icon: 'book',         cls: 'notif-icon--diary',       label: translate('notifTypeDiary') },
-            quest:       { icon: 'emoji_events', cls: 'notif-icon--quest',       label: translate('notifTypeQuest') },
-            health:      { icon: 'favorite',     cls: 'notif-icon--health',      label: translate('notifTypeHealth') },
-            goal:        { icon: 'flag',         cls: 'notif-icon--goal',        label: translate('notifTypeGoal') },
+            measurement: { icon: 'straighten', cls: 'notif-icon--measurement', label: translate('notifTypeMeasurement') },
+            diary: { icon: 'book', cls: 'notif-icon--diary', label: translate('notifTypeDiary') },
+            quest: { icon: 'emoji_events', cls: 'notif-icon--quest', label: translate('notifTypeQuest') },
+            health: { icon: 'favorite', cls: 'notif-icon--health', label: translate('notifTypeHealth') },
+            goal: { icon: 'flag', cls: 'notif-icon--goal', label: translate('notifTypeGoal') },
         };
 
         const timeAgo = ts => {
             const diff = Date.now() - ts;
             const m = Math.floor(diff / 60000);
-            if (m < 1)  return translate('timeJustNow');
+            if (m < 1) return translate('timeJustNow');
             if (m < 60) return translate('timeMinutesAgo', { m });
             const h = Math.floor(m / 60);
             if (h < 24) return translate('timeHoursAgo', { h });
@@ -279,8 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderNotificationPanel();
 
     // --- State Variables ---
-    const PRIMARY_DATA_KEY = 'shiftV_Data_v1_1';
-    const SETTINGS_KEY = 'shiftV_Settings_v1_0';
+    // PRIMARY_DATA_KEY, SETTINGS_KEY → imported from src/constants.js
     let chartInstance = null;
     let medicationChartInstance = null;
     let hormoneChartInstance = null;
@@ -314,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalContent = document.getElementById('modal-content');
     const modalCloseBtn = document.getElementById('modal-close-btn');
     const notificationToggle = document.getElementById('notification-toggle');
-    
+
     const menstruationActiveInput = document.getElementById('menstruationActive');
     const menstruationPainInput = document.getElementById('menstruationPain');
     const menstruationPainValue = document.getElementById('menstruationPainValue');
@@ -330,25 +308,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-        // Handle Unit Selects Persistence
-        document.querySelectorAll('.unit-select').forEach(select => {
-            const persistKey = select.dataset.persist;
-            if (persistKey) {
-                // Load saved unit
-                const savedUnit = localStorage.getItem('shiftV_' + persistKey);
-                if (savedUnit) {
-                    select.value = savedUnit;
-                }
-                
-                // Save on change
-                select.addEventListener('change', (e) => {
-                    localStorage.setItem('shiftV_' + persistKey, e.target.value);
-                });
+    // Handle Unit Selects Persistence
+    document.querySelectorAll('.unit-select').forEach(select => {
+        const persistKey = select.dataset.persist;
+        if (persistKey) {
+            // Load saved unit
+            const savedUnit = localStorage.getItem('shiftV_' + persistKey);
+            if (savedUnit) {
+                select.value = savedUnit;
             }
-        });
-        
-        // Populate Medication Autocomplete if needed
-        setTimeout(populateMedicationAutocomplete, 500);
+
+            // Save on change
+            select.addEventListener('change', (e) => {
+                localStorage.setItem('shiftV_' + persistKey, e.target.value);
+            });
+        }
+    });
+
+    // Populate Medication Autocomplete if needed
+    setTimeout(populateMedicationAutocomplete, 500);
 
     // App Bar scroll behavior
     if (appBar) {
@@ -427,8 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log("DEBUG: DOM elements fetched.");
     // --- Constants for Measurement Keys (Using camelCase) ---
-    const bodySizeKeys = ['height', 'weight', 'shoulder', 'neck', 'chest', 'underBustCircumference', 'waist', 'hips', 'thigh', 'calf', 'arm'];
-    const healthKeys = ['muscleMass', 'bodyFatPercentage', 'libido', 'estrogenLevel', 'testosteroneLevel', 'healthScore'];
+    // bodySizeKeys → imported from src/constants.js (BODY_SIZE_KEYS as bodySizeKeys)
+    // healthKeys (사용되지 않아 제거됨)
     const medicationKeys_MtF = [];
     const medicationKeys_FtM = [];
     const baseNumericKeys = [
@@ -482,14 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Utility Functions ---
-
-    function isIOS() {
-        return [
-            'iPad Simulator', 'iPhone Simulator', 'iPod Simulator',
-            'iPad', 'iPhone', 'iPod'
-        ].includes(navigator.platform)
-            || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
-    }
+    // isIOS → imported from src/utils.js
 
     function translate(key, params = {}) {
         const langData = languages[currentLanguage] || languages.ko;
@@ -512,9 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveSettingsToStorage();
     };
 
-    function getCssVar(varName) {
-        return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-    }
+    // getCssVar → imported from src/utils.js (getCSSVar as getCssVar)
 
     function translateUI(context = document) {
         console.log(`DEBUG: Translating UI to ${currentLanguage} within context:`, context.id || context.tagName);
@@ -657,10 +626,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateAdvancedHormoneAnalytics() {
         if (measurements.length < 1) return null;
 
-        const analytics = { 
-            estrogenLevel: {}, 
-            testosteroneLevel: {}, 
-            influence: {}, 
+        const analytics = {
+            estrogenLevel: {},
+            testosteroneLevel: {},
+            influence: {},
             emax: {},
             etRatio: null,
             stability: {},
@@ -736,10 +705,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     male: { p10: 1.15, p25: 1.25, p50: 1.30, p75: 1.35, p90: 1.45 }
                 }
             };
-            
+
             const data = stats[type]?.[gender];
             if (!data) return null;
-            
+
             if (value <= data.p10) return { percentile: 10, text: translate('percentileTop10') };
             if (value <= data.p25) return { percentile: 25, text: translate('percentileTop25') };
             if (value <= data.p50) return { percentile: 50, text: translate('percentileAverage') };
@@ -747,23 +716,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (value <= data.p90) return { percentile: 90, text: translate('percentileBottom10') };
             return { percentile: 95, text: translate('percentileBottom5') };
         };
-        
+
         // 4. 신체 비율 분석 (어깨=너비, 나머지=둘레 인식)
-        
+
         // WHR (허리-엉덩이 비율): 둘레 / 둘레
         if (latest.waist && latest.hips) {
             const waistCircum = parseFloat(latest.waist);
             const hipCircum = parseFloat(latest.hips);
             const whr = waistCircum / hipCircum;
-            
+
             if (!isNaN(whr)) {
                 // WHR: 여성 0.7-0.8, 남성 0.9-1.0
                 const rawPosition = Math.min(Math.max(((whr - 0.7) / (1.0 - 0.7)) * 100, 0), 100);
-                
+
                 // 백분위 계산
                 const femalePercentile = calculatePercentile(whr, 'whr', 'female');
                 const malePercentile = calculatePercentile(whr, 'whr', 'male');
-                
+
                 analytics.bodyRatios.whr = {
                     value: whr,
                     position: 100 - rawPosition, // 반대로 (여성=오른쪽)
@@ -774,21 +743,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
         }
-        
+
         // Chest-Waist (가슴-허리 비율): 둘레 / 둘레
         if (latest.chest && latest.waist) {
             const chestCircum = parseFloat(latest.chest);
             const waistCircum = parseFloat(latest.waist);
             const cwr = chestCircum / waistCircum;
-            
+
             if (!isNaN(cwr)) {
                 // Chest-Waist: 여성 1.0-1.2, 남성 1.3-1.5
                 const rawPosition = Math.min(Math.max(((cwr - 1.0) / (1.5 - 1.0)) * 100, 0), 100);
-                
+
                 // 백분위 계산
                 const femalePercentile = calculatePercentile(cwr, 'chestWaist', 'female');
                 const malePercentile = calculatePercentile(cwr, 'chestWaist', 'male');
-                
+
                 analytics.bodyRatios.chestWaist = {
                     value: cwr,
                     position: 100 - rawPosition, // 반대로 (여성=오른쪽)
@@ -799,27 +768,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
         }
-        
+
         // Shoulder-Hip (어깨-엉덩이 비율): 너비 vs 둘레 - 어깨 둘레로 추정 변환
         if (latest.shoulder && latest.hips) {
             const shoulderWidth = parseFloat(latest.shoulder);
             const hipCircum = parseFloat(latest.hips);
-            
+
             // [NOTE] 중요: 어깨는 "너비"이고 엉덩이는 "둘레"
             // 어깨 너비를 어깨 둘레로 추정 변환: 어깨 둘레 ≈ 어깨 너비 × 2.8
             const shoulderCircumEstimated = shoulderWidth * 2.8;
-            
+
             // Shoulder/Hip 비율 (둘레 기준)
             const shr = shoulderCircumEstimated / hipCircum;
-            
+
             if (!isNaN(shr)) {
                 // Shoulder/Hip: 여성 1.0-1.1, 남성 1.25-1.35
                 const rawPosition = Math.min(Math.max(((shr - 1.0) / (1.35 - 1.0)) * 100, 0), 100);
-                
+
                 // 백분위 계산
                 const femalePercentile = calculatePercentile(shr, 'shoulderHip', 'female');
                 const malePercentile = calculatePercentile(shr, 'shoulderHip', 'male');
-                
+
                 analytics.bodyRatios.shoulderHip = {
                     value: shr,
                     position: 100 - rawPosition, // 반대로 (여성=오른쪽)
@@ -829,7 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     note: `어깨 너비 ${shoulderWidth}cm → 추정 둘레 ${shoulderCircumEstimated.toFixed(1)}cm`
                 };
-                
+
                 console.log(`Shoulder-Hip Ratio: Width ${shoulderWidth}cm → Est. Circumference ${shoulderCircumEstimated.toFixed(1)}cm / Hip ${hipCircum}cm = ${shr.toFixed(2)}`);
             }
         }
@@ -855,8 +824,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const allMedNames = [...new Set(doseMaps.flatMap(dm => Object.keys(dm)))];
             const drugStats = {};
-            allMedNames.forEach(name => drugStats[name] = { 
-                eDeltaSum: 0, tDeltaSum: 0, doseSum: 0, count: 0, weightSum: 0 
+            allMedNames.forEach(name => drugStats[name] = {
+                eDeltaSum: 0, tDeltaSum: 0, doseSum: 0, count: 0, weightSum: 0
             });
 
             // 먼저 모든 호르몬 변화를 수집하여 중앙값 계산 (이상치 필터링용)
@@ -956,16 +925,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (drugStats[drug].count >= 2 && drugStats[drug].doseSum > 0) {
                     const scoreE = drugStats[drug].eDeltaSum / drugStats[drug].doseSum;
                     const scoreT = drugStats[drug].tDeltaSum / drugStats[drug].doseSum;
-                    
+
                     // 신뢰도 계산 (0-1)
                     const countFactor = Math.min(drugStats[drug].count / 10, 1);
                     const weightFactor = Math.min(drugStats[drug].weightSum / 20, 1);
                     const confidence = (countFactor * 0.6 + weightFactor * 0.4);
-                    
+
                     if (Math.abs(scoreE) > 0.01 || Math.abs(scoreT) > 0.01) {
-                        influences[drug] = { 
-                            estrogen: scoreE, 
-                            testosterone: scoreT, 
+                        influences[drug] = {
+                            estrogen: scoreE,
+                            testosterone: scoreT,
                             confidence: confidence,
                             samples: drugStats[drug].count
                         };
@@ -1002,7 +971,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 7. Emax / Hill 모델 기반 분석 및 반응도(RF) 계산
         const E_max = 0.95;
         const EC_50 = 175; // 개선된 값 (WPATH SOC 8 기반)
-        
+
         // T0 설정 (성별 기반) - 표준 단위: ng/dL
         let T0 = 600; // 기본값 (남성)
         if (biologicalSex === 'female') {
@@ -1048,7 +1017,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 8. 현재 수치 평가 (간소화 - 목표치와 현재치 비교)
         const targetE = parseFloat(targets.estrogenLevel);
         const targetT = parseFloat(targets.testosteroneLevel);
-        
+
         if (!isNaN(latestE_pgml)) {
             if (!isNaN(targetE)) {
                 if (latestE_pgml > 300) {
@@ -1086,56 +1055,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Modal Bottom Sheet Functions ---
+    // 모달 시스템 초기화 (DOM 준비 후 바로 생성)
+    const modalSystem = createModalSystem({
+        modalOverlay,
+        modalTitle,
+        modalContent,
+        hormoneModalOverlay,
+        bodyElement,
+        translateUI,
+        onHormoneModalClose: () => {
+            if (medicationChartInstance) {
+                medicationChartInstance.destroy();
+                medicationChartInstance = null;
+            }
+            if (hormoneChartInstance) {
+                hormoneChartInstance.destroy();
+                hormoneChartInstance = null;
+            }
+        }
+    });
+
+    // 기존 코드와의 호환성을 위해 로컬 함수로 래핑
     function openModal(title, contentHTML) {
-        if (!modalOverlay || !modalTitle || !modalContent) return;
-
-        modalTitle.textContent = title;
-        modalContent.innerHTML = contentHTML;
-
-        translateUI(modalContent); // <<< 이 한 줄을 추가해주세요!
-
-        bodyElement.classList.add('modal-open');
-        modalOverlay.classList.add('visible');
+        modalSystem.openModal(title, contentHTML);
     }
 
     function closeModal() {
-        // 이미 닫혀있으면 아무것도 하지 않음
-        if (!modalOverlay || !modalOverlay.classList.contains('visible')) return;
-
-        const state = history.state;
-        if (state && typeof state.type === 'string' && state.type.startsWith('modal')) {
-            history.back();
-        } else {
-            // 히스토리 상태가 없는 경우에는 그냥 시각적으로만 닫기
-            closeAllModalsVisually();
-        }
+        modalSystem.closeModal();
     }
-    // --- Hormone Modal Functions ---
+
     function openHormoneModal() {
-        if (!hormoneModalOverlay) return;
-
-        // 모달을 열기 전에 내용을 먼저 채웁니다.
-        renderHormoneReport();
-
-        const hormoneModalContent = hormoneModalOverlay.querySelector('.modal-content'); // <<< 이 줄 추가
-        if (hormoneModalContent) {
-            hormoneModalContent.scrollTop = 0;
-            translateUI(hormoneModalContent); // <<< 이 한 줄을 추가해주세요!
-        }
-
-        bodyElement.classList.add('modal-open');
-        hormoneModalOverlay.classList.add('visible');
+        modalSystem.openHormoneModal(renderHormoneReport);
     }
 
     function closeHormoneModal() {
-        if (!hormoneModalOverlay || !hormoneModalOverlay.classList.contains('visible')) return;
-
-        const state = history.state;
-        if (state && state.type === 'modal-hormone') {
-            history.back();
-        } else {
-            closeAllModalsVisually();
-        }
+        modalSystem.closeHormoneModal();
     }
 
     // script.js (약 1080번째 줄 근처, 기존 openComparisonModal 부터 handleComparisonFilterClick 까지를 아래 코드로 교체)
@@ -1153,7 +1107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     language: currentLanguage || 'ko',
                     targets: targets || {}
                 };
-                pushHistoryState('modal-briefing');
+                history.pushState({ type: 'modal-briefing' }, '', '');
                 const modal = new BodyBriefingModal(measurements || [], userSettings);
                 modal.open();
             }).catch(error => {
@@ -1355,7 +1309,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxPointsPerView = 20;
         const minPointWidth = 45;
         const chartWrapper = ctx.canvas.closest('.chart-wrapper');
-        
+
         let chartInnerContainer = ctx.canvas.parentElement;
         if (!chartInnerContainer || !chartInnerContainer.classList.contains('chart-inner-container')) {
             chartInnerContainer = document.createElement('div');
@@ -1364,7 +1318,7 @@ document.addEventListener('DOMContentLoaded', () => {
             parent.insertBefore(chartInnerContainer, ctx.canvas);
             chartInnerContainer.appendChild(ctx.canvas);
         }
-        
+
         if (measurements.length > maxPointsPerView) {
             const neededWidth = measurements.length * minPointWidth;
             if (chartWrapper) {
@@ -1881,14 +1835,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="hormone-section-desc">${translate('currentLevelEvaluationDesc')}</p>
                 </div>
                 <div class="hormone-grid">`;
-            
+
             // Estrogen 평가
             if (analytics.estrogenLevel.current !== undefined) {
                 const targetE = parseFloat(targets.estrogenLevel);
                 const currentE = analytics.estrogenLevel.current;
                 let statusHTML = '';
                 let statusIcon = '';
-                
+
                 if (analytics.estrogenLevel.status === 'critical_high') {
                     statusHTML = `<div class="status-badge danger-badge"><span class="material-symbols-outlined status-icon mi-error">warning</span> ${translate('estrogen_critical_high')}</div>`;
                     statusIcon = '<span class="material-symbols-outlined status-icon mi-error">warning</span>';
@@ -1926,7 +1880,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const currentT = analytics.testosteroneLevel.current;
                 let statusHTML = '';
                 let statusIcon = '';
-                
+
                 if (analytics.testosteroneLevel.status === 'critical_low') {
                     statusHTML = `<div class="status-badge danger-badge"><span class="material-symbols-outlined status-icon mi-error">warning</span> ${translate('testosterone_critical_low')}</div>`;
                     statusIcon = '<span class="material-symbols-outlined status-icon mi-error">warning</span>';
@@ -1957,7 +1911,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${statusHTML}
                 </div>`;
             }
-            
+
             analysisHTML += `
                 </div>
             </div>`;
@@ -1969,7 +1923,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // E/T 비율 범위 표시
                 const maleRange = '< 5';
                 const femaleRange = '> 30';
-                
+
                 analysisHTML += `
                 <div class="hormone-section">
                     <div class="hormone-section-header">
@@ -2132,7 +2086,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     let statusText = '';
                     let statusIcon = '';
                     let statusClass = '';
-                    
+
                     if (analytics.stability.estrogenLevel.status === 'stable') {
                         statusText = translate('stability_stable');
                         statusIcon = '<span class="material-symbols-outlined status-icon mi-success">check_circle</span>';
@@ -2169,7 +2123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     let statusText = '';
                     let statusIcon = '';
                     let statusClass = '';
-                    
+
                     if (analytics.stability.testosteroneLevel.status === 'stable') {
                         statusText = translate('stability_stable');
                         statusIcon = '<span class="material-symbols-outlined status-icon mi-success">check_circle</span>';
@@ -2306,7 +2260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         else confidenceClass = 'low';
 
                         const drugLabel = translateIfExists(drug) || medicationNameMap?.get?.(drug) || drug;
-                        
+
                         return `
                         <div class="drug-card">
                             <div class="drug-card-header">
@@ -2360,7 +2314,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (analytics.bodyRatios.whr) {
                     const malePercent = analytics.bodyRatios.whr.percentiles?.male?.text || '-';
                     const femalePercent = analytics.bodyRatios.whr.percentiles?.female?.text || '-';
-                    
+
                     analysisHTML += `
                     <div class="body-ratio-card">
                         <h3 class="body-ratio-name"><span class="material-symbols-outlined mi-inline mi-sm">straighten</span> ${translate('waistHipRatio')}</h3>
@@ -2387,7 +2341,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (analytics.bodyRatios.chestWaist) {
                     const malePercent = analytics.bodyRatios.chestWaist.percentiles?.male?.text || '-';
                     const femalePercent = analytics.bodyRatios.chestWaist.percentiles?.female?.text || '-';
-                    
+
                     analysisHTML += `
                     <div class="body-ratio-card">
                         <h3 class="body-ratio-name"><span class="material-symbols-outlined mi-inline mi-sm">straighten</span> ${translate('chestWaistRatio')}</h3>
@@ -2414,7 +2368,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (analytics.bodyRatios.shoulderHip) {
                     const malePercent = analytics.bodyRatios.shoulderHip.percentiles?.male?.text || '-';
                     const femalePercent = analytics.bodyRatios.shoulderHip.percentiles?.female?.text || '-';
-                    
+
                     analysisHTML += `
                     <div class="body-ratio-card">
                         <h3 class="body-ratio-name"><span class="material-symbols-outlined mi-inline mi-sm">straighten</span> ${translate('shoulderHipRatio')}</h3>
@@ -2591,7 +2545,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const minPointWidth = 42;
         const medicationWrapper = medicationCtx.canvas.closest('.chart-wrapper');
         const hormoneWrapper = hormoneCtx.canvas.closest('.chart-wrapper');
-        
+
         // Medication 차트 컨테이너 설정
         let medInnerContainer = medicationCtx.canvas.parentElement;
         if (!medInnerContainer || !medInnerContainer.classList.contains('chart-inner-container')) {
@@ -2601,7 +2555,7 @@ document.addEventListener('DOMContentLoaded', () => {
             parent.insertBefore(medInnerContainer, medicationCtx.canvas);
             medInnerContainer.appendChild(medicationCtx.canvas);
         }
-        
+
         // Hormone 차트 컨테이너 설정
         let hormoneInnerContainer = hormoneCtx.canvas.parentElement;
         if (!hormoneInnerContainer || !hormoneInnerContainer.classList.contains('chart-inner-container')) {
@@ -2611,10 +2565,10 @@ document.addEventListener('DOMContentLoaded', () => {
             parent.insertBefore(hormoneInnerContainer, hormoneCtx.canvas);
             hormoneInnerContainer.appendChild(hormoneCtx.canvas);
         }
-        
+
         if (measurements.length > maxPointsPerView) {
             const neededWidth = measurements.length * minPointWidth;
-            
+
             if (medicationWrapper) {
                 medicationWrapper.style.overflowX = 'auto';
                 medicationWrapper.style.overflowY = 'hidden';
@@ -2623,7 +2577,7 @@ document.addEventListener('DOMContentLoaded', () => {
             medInnerContainer.style.height = '230px';
             medicationCtx.canvas.style.width = '100%';
             medicationCtx.canvas.style.height = '100%';
-            
+
             if (hormoneWrapper) {
                 hormoneWrapper.style.overflowX = 'auto';
                 hormoneWrapper.style.overflowY = 'hidden';
@@ -2640,7 +2594,7 @@ document.addEventListener('DOMContentLoaded', () => {
             medInnerContainer.style.height = '230px';
             medicationCtx.canvas.style.width = '100%';
             medicationCtx.canvas.style.height = '100%';
-            
+
             if (hormoneWrapper) {
                 hormoneWrapper.style.overflowX = 'hidden';
             }
@@ -3346,9 +3300,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 ddayLabel = `D-${daysUntil}`;
-                if (daysUntil <= 1)      { ddayClass = 'shortcut-dday--urgent'; }
+                if (daysUntil <= 1) { ddayClass = 'shortcut-dday--urgent'; }
                 else if (daysUntil <= 3) { ddayClass = 'shortcut-dday--soon'; }
-                else                     { ddayClass = 'shortcut-dday--ok'; }
+                else { ddayClass = 'shortcut-dday--ok'; }
                 detailText = translate('svcard_shortcut_countdown', { days: daysUntil });
             }
 
@@ -3701,78 +3655,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const settings = {
             language: currentLanguage,
             mode: currentMode,
-            theme: currentTheme, // *** 수정 4: 테마 설정 저장 ***
+            theme: currentTheme,
             initialSetupDone: isInitialSetupDone,
             selectedMetrics: selectedMetrics,
             notificationEnabled: notificationEnabled,
             biologicalSex: biologicalSex
         };
-        try {
-            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-            console.log("DEBUG: Settings saved", settings);
-        } catch (e) {
-            console.error("Error saving settings:", e);
+        if (!dataManager.saveSettings(settings)) {
             showPopup('savingError');
         }
     }
 
     function loadSettingsFromStorage() {
-        try {
-            const storedSettings = localStorage.getItem(SETTINGS_KEY);
-            if (storedSettings) {
-                const settings = JSON.parse(storedSettings);
-                currentLanguage = settings.language || 'ko';
-                setCurrentLanguage(currentLanguage);
-                currentMode = settings.mode || 'mtf';
-                currentTheme = settings.theme || 'system'; // *** 수정 4: 테마 설정 로드 ***
-                isInitialSetupDone = settings.initialSetupDone || false;
-                selectedMetrics = Array.isArray(settings.selectedMetrics) ? settings.selectedMetrics : ['weight'];
-                notificationEnabled = settings.notificationEnabled || false;
-                biologicalSex = settings.biologicalSex || 'male';
-                console.log("DEBUG: Settings loaded", settings);
-            } else {
-                console.log("DEBUG: No settings found, using defaults.");
-                currentLanguage = navigator.language.startsWith('ko') ? 'ko' : navigator.language.startsWith('ja') ? 'ja' : 'en';
-                setCurrentLanguage(currentLanguage);
-                currentMode = 'mtf';
-                currentTheme = 'system'; // *** 수정 4: 기본 테마 설정 ***
-                isInitialSetupDone = false;
-                selectedMetrics = ['weight'];
-                notificationEnabled = false;
-                biologicalSex = 'male';
-            }
-            // Update UI elements after loading settings
-            if (languageSelect) languageSelect.value = currentLanguage;
-            if (modeSelect) modeSelect.value = currentMode;
-            if (themeSelect) themeSelect.value = currentTheme; // *** 수정 4: 테마 드롭다운 업데이트 ***
-            if (notificationToggle) notificationToggle.checked = notificationEnabled;
-            if (sexSelect) sexSelect.value = biologicalSex;
-        } catch (e) {
-            console.error("Error loading settings:", e);
-            showPopup('loadingError');
-            // Fallback to defaults
-            currentLanguage = 'ko';
-            setCurrentLanguage(currentLanguage);
-            currentMode = 'mtf';
-            currentTheme = 'system';
-            notificationEnabled = false;
-            isInitialSetupDone = false;
-            selectedMetrics = ['weight'];
-            biologicalSex = 'male';
-        }
+        const { settings, isDefault } = dataManager.loadSettings();
+        currentLanguage = settings.language;
+        setCurrentLanguage(currentLanguage);
+        currentMode = settings.mode;
+        currentTheme = settings.theme;
+        isInitialSetupDone = settings.initialSetupDone;
+        selectedMetrics = Array.isArray(settings.selectedMetrics) ? settings.selectedMetrics : ['weight'];
+        notificationEnabled = settings.notificationEnabled;
+        biologicalSex = settings.biologicalSex;
+        console.log("DEBUG: Settings loaded", isDefault ? '(defaults)' : '', settings);
+
+        // Update UI elements after loading settings
+        if (languageSelect) languageSelect.value = currentLanguage;
+        if (modeSelect) modeSelect.value = currentMode;
+        if (themeSelect) themeSelect.value = currentTheme;
+        if (notificationToggle) notificationToggle.checked = notificationEnabled;
+        if (sexSelect) sexSelect.value = biologicalSex;
     }
 
     function savePrimaryDataToStorage() {
-        const dataToSave = {
-            measurements: measurements,
-            targets: targets,
-            notes: notes
-        };
-        try {
-            localStorage.setItem(PRIMARY_DATA_KEY, JSON.stringify(dataToSave));
-            console.log("DEBUG: Primary data saved.");
-        } catch (e) {
-            console.error("Error saving primary data:", e);
+        if (!dataManager.savePrimaryData({ measurements, targets, notes })) {
             showPopup('savingError');
         }
     }
@@ -4447,7 +4362,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const metricButtonColors = {};
-    
+
     // 미리 정의된 색상 팔레트 (다크/라이트 모드 최적화)
     const colorPalette = {
         dark: {
@@ -4475,16 +4390,16 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
         }
     };
-    
+
     // script.js 에서 renderChartSelector 함수를 찾아 교체
     function renderChartSelector() {
         if (!chartSelector) return;
         const availableKeys = getFilteredChartKeys();
         chartSelector.innerHTML = '';
-        
+
         const isLightMode = document.body.classList.contains('light-mode');
         const palette = isLightMode ? colorPalette.light : colorPalette.dark;
-        
+
         availableKeys.forEach((key, index) => {
             const button = document.createElement('button');
             button.classList.add('chart-select-button');
@@ -4619,11 +4534,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 data: measurements.map(m => m[metric] !== undefined && m[metric] !== null && m[metric] !== '' ? parseFloat(m[metric]) : NaN),
                 borderColor: color,
                 backgroundColor: color + '33',
-                fill: false, 
-                tension: 0.1, 
+                fill: false,
+                tension: 0.1,
                 pointRadius: 3,
                 pointHoverRadius: 5,
-                spanGaps: true, 
+                spanGaps: true,
                 borderWidth: 2,
                 parsing: { xAxisKey: 'x', yAxisKey: 'y' }
             };
@@ -4634,7 +4549,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxPointsPerView = 20;
         const minPointWidth = 40;
         const chartWrapper = ctx.canvas.closest('.chart-wrapper');
-        
+
         // 차트를 감싸는 내부 div가 있는지 확인하고 없으면 생성
         let chartInnerContainer = ctx.canvas.parentElement;
         if (!chartInnerContainer || !chartInnerContainer.classList.contains('chart-inner-container')) {
@@ -4644,7 +4559,7 @@ document.addEventListener('DOMContentLoaded', () => {
             parent.insertBefore(chartInnerContainer, ctx.canvas);
             chartInnerContainer.appendChild(ctx.canvas);
         }
-        
+
         if (measurements.length > maxPointsPerView) {
             const neededWidth = measurements.length * minPointWidth;
             // 외부 wrapper에 스크롤 설정
@@ -5096,7 +5011,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (window.medicationSelector) {
                 window.medicationSelector.reset();
             }
-            
+
             editIndexInput.value = index;
             // Initialize Unit Selects from Preference
             ['estrogenUnit', 'testosteroneUnit'].forEach(persistKey => {
@@ -5107,8 +5022,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-        // Initialize Form Title
-        updateFormTitle();
+            // Initialize Form Title
+            updateFormTitle();
             if (saveUpdateBtn) saveUpdateBtn.textContent = translate('edit');
             if (cancelEditBtn) cancelEditBtn.style.display = 'inline-block';
             activateTab('tab-record');
@@ -5128,7 +5043,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (form) form.reset();
         form.querySelectorAll('.invalid-input').forEach(el => el.classList.remove('invalid-input'));
         editIndexInput.value = '';
-        
+
         // Restore Unit Preferences
         ['estrogenUnit', 'testosteroneUnit'].forEach(persistKey => {
             const savedUnit = localStorage.getItem('shiftV_' + persistKey);
@@ -5137,7 +5052,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (select) select.value = savedUnit;
             }
         });
-        
+
         const lastMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
 
         // 증상 선택기: 마지막 기록을 기본값으로 유지 (약물 선택기와 동일한 UX)
@@ -5161,7 +5076,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error resetting medication selector:', error);
             }
         }
-        
+
         updateFormTitle();
         if (saveUpdateBtn) saveUpdateBtn.textContent = translate('saveRecord');
         if (cancelEditBtn) cancelEditBtn.style.display = 'none';
@@ -5264,7 +5179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentLanguage = event.target.value; console.log("DEBUG: Language changed to", currentLanguage);
 
         syncModuleLanguage(currentLanguage);
-        
+
         // 증상 선택기 언어 업데이트
         if (window.symptomSelector) {
             try {
@@ -5281,19 +5196,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error updating medication selector language:', error);
             }
         }
-        
+
         // 증상/약물 맵 무효화 (언어 변경 시 재생성)
         symptomLabelMap = null;
         symptomLabelMapPromise = null;
         medicationNameMap = null;
         medicationNameMapPromise = null;
-        
+
         saveSettingsToStorage(); applyLanguageToUI(); showPopup('popupSettingsSaved');
-        
+
         // 폼 타이틀 및 측정 정보 업데이트
         if (typeof updateFormTitle === 'function') updateFormTitle();
         if (typeof renderNextMeasurementInfo === 'function') renderNextMeasurementInfo();
-        
+
         // 기록 테이블 강제 재렌더링
         if (typeof renderHistoryTable === 'function') renderHistoryTable();
         if (typeof renderMyHistoryView === 'function') renderMyHistoryView();
@@ -5302,7 +5217,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Mode Change
     function handleModeChange(event) {
         currentMode = event.target.value; console.log("DEBUG: Mode changed to", currentMode);
-        
+
         // 증상 선택기 모드 업데이트
         if (window.symptomSelector) {
             try {
@@ -5319,7 +5234,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error updating medication selector mode:', error);
             }
         }
-        
+
         saveSettingsToStorage(); applyModeToUI(); showPopup('popupSettingsSaved');
     }
 
@@ -5373,10 +5288,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const allKeys = new Set();
             measurements.forEach(m => Object.keys(m).forEach(k => allKeys.add(k)));
             const headers = ['date', 'week', ...([...allKeys].filter(k => k !== 'date' && k !== 'week' && k !== 'timestamp').sort()), 'timestamp'];
-            
+
             // UTF-8 BOM for Excel compatibility
             let csv = '\ufeff' + headers.join(',') + '\n';
-            
+
             measurements.forEach(m => {
                 const row = headers.map(h => {
                     const val = m[h];
@@ -5677,11 +5592,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===============================================
     console.log("DEBUG: Setting up event listeners...");
     try {
-        // Tab Bar
+        // Tab Bar - 해시 라우팅을 통한 탭 전환
         tabBar.addEventListener('click', (e) => {
             const button = e.target.closest('.tab-button');
             if (button) {
-                activateTab(button.dataset.tab);
+                navigateToTab(button.dataset.tab);
             }
         });
 
@@ -5865,7 +5780,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     syncModuleLanguage(currentLanguage || 'ko');
                     // 히스토리에 모달 상태를 먼저 추가하여 연속 열기/닫기 시 버그 방지
-                    pushHistoryState('modal-action-guide');
+                    history.pushState({ type: 'modal-action-guide' }, '', '');
                     import('./src/ui/modals/action-guide-modal.js').then(module => {
                         const ActionGuideModal = module.ActionGuideModal || module.default;
                         const userSettings = {
@@ -6024,7 +5939,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Forms
         if (form) form.addEventListener('submit', handleFormSubmit);
         if (targetForm) targetForm.addEventListener('submit', handleTargetFormSubmit);
-        
+
         // Symptom Selector 초기화
         window.symptomSelector = null;
         try {
@@ -6090,7 +6005,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Photo Upload Handlers ---
         document.querySelectorAll('.photo-upload-slot input[type="file"]').forEach(input => {
-            input.addEventListener('change', function(e) {
+            input.addEventListener('change', function (e) {
                 const file = e.target.files[0];
                 if (!file) return;
                 const slot = this.closest('.photo-upload-slot');
@@ -6099,7 +6014,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Show preview
                 const reader = new FileReader();
-                reader.onload = function(ev) {
+                reader.onload = function (ev) {
                     preview.innerHTML = `<img src="${ev.target.result}" alt="${category}">`;
                     preview.classList.add('has-photo');
                 };
@@ -6240,16 +6155,10 @@ document.addEventListener('DOMContentLoaded', () => {
         restoreLocalAvatar();
 
         if (btnLoginGoogle && btnLogout && accountName && accountEmail) {
-            import('./src/firebase/auth.js').then(async authMod => {
-                let _currentUser = null; // track current auth state for avatar handler
+            import('./src/firebase/auth.js').then(authMod => {
+                // 리다이렉트 로그인 결과는 이미 앱 초기화 시 처리됨 (DOMContentLoaded 상단 참조)
 
-                if (authMod.initAuthOnce) {
-                    try {
-                        await authMod.initAuthOnce();
-                    } catch (e) {
-                        console.error('initAuthOnce error:', e);
-                    }
-                }
+                let _currentUser = null; // track current auth state for avatar handler
 
                 authMod.onAuthStateChanged(user => {
                     _currentUser = user;
@@ -6496,10 +6405,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Restore saved accent
             const savedAccent = localStorage.getItem('shiftV_accentColor') || 'violet';
             document.documentElement.setAttribute('data-accent', savedAccent);
-            
+
             const customPicker = document.getElementById('custom-accent-picker');
             const customBtn = document.getElementById('custom-color-btn');
-            
+
             if (savedAccent.startsWith('#')) {
                 if (customBtn) customBtn.classList.add('active');
                 if (customPicker) customPicker.value = savedAccent;
@@ -6507,7 +6416,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const activeChip = accentGrid.querySelector(`[data-accent="${savedAccent}"]`);
                 if (activeChip) activeChip.classList.add('active');
             }
-            
+
             accentGrid.addEventListener('click', (e) => {
                 const chip = e.target.closest('.accent-chip');
                 if (!chip || chip.id === 'custom-color-btn') return;
@@ -6519,7 +6428,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('shiftV_accentColor', accent);
                 applyTheme(); // Re-apply theme to clear custom colors
             });
-            
+
             // 버튼 클릭 → 숨겨진 input[type=color] 열기
             if (customBtn) {
                 customBtn.addEventListener('click', (e) => {
@@ -6607,7 +6516,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (aiCustomModel) aiCustomModel.value = localStorage.getItem('shiftV_aiCustomModel') || '';
             // Restore saved API key
             const savedKey = localStorage.getItem('shiftV_aiApiKey');
-            if (savedKey && aiKeyInput) { try { aiKeyInput.value = atob(savedKey); } catch {} }
+            if (savedKey && aiKeyInput) { try { aiKeyInput.value = atob(savedKey); } catch { } }
 
             aiProviderSelect.addEventListener('change', () => {
                 updateAiProviderUI(aiProviderSelect.value);
@@ -6677,7 +6586,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         // Save goal text with targets
         const origTargetSubmit = handleTargetFormSubmit;
-        handleTargetFormSubmit = function(e) {
+        handleTargetFormSubmit = function (e) {
             if (goalTextInput) {
                 localStorage.setItem('shiftV_goalText', goalTextInput.value);
             }
@@ -7172,132 +7081,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeAllModalsVisually() {
-        let aModalWasClosed = false;
-
-        // 모든 모달 오버레이를 확인합니다.
-        const allModalOverlays = [
-            document.getElementById('modal-bottom-sheet-overlay'),
-            document.getElementById('hormone-modal-overlay')
-        ];
-
-        allModalOverlays.forEach(overlay => {
-            if (overlay && overlay.classList.contains('visible')) {
-                overlay.classList.remove('visible');
-                aModalWasClosed = true;
-
-                // 특정 모달에만 필요한 후처리 (예: 차트 파괴)
-                if (overlay.id === 'hormone-modal-overlay') {
-                    if (medicationChartInstance) {
-                        medicationChartInstance.destroy();
-                        medicationChartInstance = null;
-                    }
-                    if (hormoneChartInstance) {
-                        hormoneChartInstance.destroy();
-                        hormoneChartInstance = null;
-                    }
-                }
-            }
-        });
-
-        if (aModalWasClosed) {
-            document.body.classList.remove('modal-open');
-        }
-
-        return aModalWasClosed;
+        return modalSystem.closeAllModalsVisually();
     }
 
 
-    /* --- PWA Navigation & Back Button Logic (New) --- */
-
-    /**
-     * 히스토리 상태를 관리하는 함수입니다.
-     * 앱의 주요 상태 변경(탭 이동, 모달 열기 등) 시 호출하세요.
-     */
-    function pushHistoryState(stateType, tabId = null) {
-        // 중복 상태 방지를 위해 현재 state 확인
-        const currentState = history.state;
-        if (currentState && currentState.type === stateType && currentState.tab === tabId) {
-            return;
-        }
-        history.pushState({ type: stateType, tab: tabId }, '', '');
-    }
-
-    // 1. 탭 변경 함수 수정 (기존 activateTab 함수 내부 상단에 추가)
-    /* 기존 activateTab 함수 찾아서 앞부분에 추가하세요 */
-    const _originalActivateTab = activateTab;
-    activateTab = function (targetTabId) {
-        // 탭 이동 시 히스토리 스택 추가
-        // 단, popstate 이벤트에 의해 호출된 경우는 제외해야 함(무한루프 방지)가 정석이나
-        // 간단 구현을 위해 여기서 pushState를 하고, popstate 핸들러에서 중복 처리를 제어
-        const currentState = history.state;
-        if (!currentState || currentState.tab !== targetTabId) {
-            // 모달이 열려있다면 모달을 닫는 동작이 우선이므로 탭 이동 기록은 신중해야 함
-            // 메인 탭이 아닌 다른 탭으로 갈 때 히스토리 추가
-            if (targetTabId !== 'tab-sv') {
-                pushHistoryState('tab', targetTabId);
-            }
-        }
-
-        _originalActivateTab(targetTabId);
-
-        // 만약 메인 탭('tab-sv')으로 돌아왔다면, 필요없는 히스토리를 정리하면 좋지만
-        // 모바일 브라우저 특성상 사용자가 뒤로가기를 연타할 것을 대비해
-        // 별도 처리 안 함.
-    };
-
-    // 2. 모달 열기 함수 수정 (openModal 내부 상단에 추가)
-    const _originalOpenModal = openModal;
-    openModal = function (title, contentHTML) {
-        pushHistoryState('modal'); // 모달 상태 푸시
-        _originalOpenModal(title, contentHTML);
-    };
-
-    // 2-1. 호르몬 모달 등 다른 모달 함수도 마찬가지
-    const _originalOpenHormoneModal = openHormoneModal;
-    openHormoneModal = function () {
-        pushHistoryState('modal-hormone');
-        _originalOpenHormoneModal();
-    };
-
-    // 3. 뒤로가기(PopState) 이벤트 핸들러 (기존 popstate 리스너 대체)
-    window.removeEventListener('popstate', window.onpopstate); // 혹시 모를 중복 제거
-    window.addEventListener('popstate', function (event) {
-
-        console.log("DEBUG: Popstate triggered", event.state);
-
-        // 1. 열려있는 모달이 있는지 확인 (최우선 순위)
-        // closeAllModalsVisually 함수가 true를 반환하면 모달을 닫았다는 뜻
-        if (closeAllModalsVisually()) {
-            console.log("Back button: Closed a modal");
-            return; // 모달만 닫고 종료
-        }
-
-        // 2. 탭 이동 처리
-        // 현재 히스토리 상태가 있다면 그에 맞춰 이동, 없다면 메인으로
-        if (event.state && event.state.type === 'tab') {
-            // 무한 루프 방지를 위해 내부 함수 직접 호출 또는 플래그 사용
-            // 여기서는 activateTab을 부르되, 내부에서 history.push를 안하도록 수정 필요하나
-            // 단순하게 기존 탭 활성화 함수 호출 (사용성상 큰 문제 없음)
-            _originalActivateTab(event.state.tab);
-            return;
-        }
-
-        // 3. 상태가 없거나(초기 상태), 메인 탭이 아닌 경우 -> 메인 탭으로 이동
-        const activeTab = document.querySelector('.tab-button.active')?.dataset.tab;
-        if (activeTab && activeTab !== 'tab-sv') {
-            console.log("Back button: Going to Home tab");
-            _originalActivateTab('tab-sv');
-            return;
-        }
-
-        // 4. 이미 메인 탭이고 모달도 없다면?
-        // 여기서 앱을 종료시킬지, 계속 유지할지 결정.
-        // PWA에서는 보통 여기서 종료되도록 두거나, 토스트 메시지("한번 더 누르면 종료")를 띄움.
-        console.log("Back button: Exiting app flow");
+    /* --- Hash Router 초기화 (PWA Navigation & Back Button) --- */
+    initRouter({
+        activateTab: activateTab,
+        closeAllModals: closeAllModalsVisually
     });
-
-    /* [중요] 초기 로드 시 히스토리 상태 초기화 */
-    // script.js 마지막 부분 Initialization 쪽에 추가
-    history.replaceState({ type: 'tab', tab: 'tab-sv' }, '', '');
+    console.log('DEBUG: Hash router initialized');
 
 });

@@ -48,9 +48,6 @@ self.addEventListener('fetch', function (event) {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
 
-  // Do not intercept Firebase Auth helpers/handlers
-  if (url.pathname.includes('/__/auth/') || url.pathname.includes('/__/firebase/')) return;
-
   // Cache-first for Google Fonts (Material Symbols woff2)
   if (url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com') {
     event.respondWith(

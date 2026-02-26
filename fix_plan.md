@@ -1,168 +1,147 @@
 # ShiftV 개선 및 최적화 보고서 (Fix Plan)
 
-본 보고서는 ShiftV 프로젝트의 현재 상태를 분석하고, 코드 구조, 성능, UI/UX 측면에서의 개선 방안을 구체적으로 제시합니다.
-
-## 1. 현재 상태 분석 (Current Status)
-
-### 1.1 구조적 문제 (Structural Issues)
-*   **Monolithic `script.js`**:
-    *   **위치**: `root/script.js`
-    *   **상태**: 약 7,300줄에 달하는 거대한 파일로, 앱의 모든 로직(라우팅, UI 조작, 데이터 처리, 이벤트 핸들링)이 뒤섞여 있습니다.
-    *   **문제**: 유지보수가 매우 어렵고, 가독성이 떨어지며, 전역 스코프 오염 위험이 높습니다.
-*   **Monolithic `index.html`**:
-    *   **위치**: `root/index.html`
-    *   **상태**: 약 1,400줄. 모든 모달(Modal)과 탭(Tab) 컨텐츠가 초기에 HTML로 작성되어 있습니다.
-    *   **문제**: 초기 로딩 시 불필요한 DOM 요소가 많아 메모리를 낭비하며, 파일이 길어 수정이 번거롭습니다.
-*   **Doctor Module의 UI 의존성**:
-    *   **위치**: `src/doctor-module/core/doctor-engine.js`
-    *   **상태**: 핵심 로직 엔진이 HTML 문자열(`<span>...</span>`)을 직접 생성하여 반환합니다.
-    *   **문제**: 비즈니스 로직과 뷰(View)가 강하게 결합되어 있어, 디자인 변경 시 로직 코드를 수정해야 합니다.
-
-### 1.2 코드 품질 및 최적화 (Code Quality & Optimization)
-*   **하드코딩된 문자열**: 다국어 지원(`translations.js`)이 있음에도 불구하고, `DoctorEngine` 및 HTML 곳곳에 한국어 문자열이 하드코딩되어 있습니다.
-*   **PWA 라우팅의 취약성**: `script.js` 하단의 `history.pushState` 및 `popstate` 처리가 함수 몽키패칭(Monkey Patching)으로 구현되어 있어 사이드 이펙트 발생 가능성이 높습니다.
-*   **인라인 SVG**: `index.html` 내부에 긴 SVG 코드가 반복적으로 포함되어 가독성을 해칩니다.
-
-### 1.3 UI/UX
-*   **장점**: `variables.css`를 통한 체계적인 MD3 토큰 및 다크모드/접근성(고대비, 동작 줄이기) 지원은 매우 우수합니다.
-*   **개선점**: 모달이 단순히 `display: none`으로 숨겨져 있어, 스크린 리더 등의 보조 기술에서 불필요하게 탐색될 수 있습니다.
+본 보고서는 기능과 UI의 파손 없이 안전하게 코드를 최적화하고 라우팅을 붙이는 구체적인 단계와 기술적 가이드라인을 제공합니다.
 
 ---
 
-## 2. 개선 제안 (Improvement Plan)
+## 1. 아키텍처 리팩토링 - 점진적 모듈 분리 전략 (UI 파손 방지)
 
-### 2.1 아키텍처 리팩토링 (Refactoring Architecture)
+`script.js`(약 7천 줄)을 한 번에 분리하면 UI 연결이 깨질 위험이 매우 큽니다. 따라서 **기능별로 하나씩 ES Module로 옮기되, 기존 `script.js`에서는 해당 모듈을 `import`해서 연결만 해두는 방식**으로 진행해야 합니다.
 
-**목표**: 모듈화 및 관심사 분리 (Separation of Concerns)
+### 점진적 분리 로드맵
 
-| 구분 | 현재 위치 | 변경 계획 | 상세 내용 |
-| :--- | :--- | :--- | :--- |
-| **진입점** | `script.js` | `src/main.js` | 앱 초기화, 전역 에러 핸들링, 서비스 워커 등록만 담당 |
-| **라우팅** | `script.js` (혼재) | `src/core/router.js` | History API 관리, 탭/모달 URL 동기화 로직 분리 |
-| **UI 관리** | `script.js` (혼재) | `src/ui/ui-manager.js` | DOM 조작, 모달 열기/닫기, 탭 전환 로직 중앙화 |
-| **이벤트** | `script.js` (혼재) | `src/core/event-bus.js` | 컴포넌트 간 통신을 위한 경량 이벤트 버스 도입 |
-| **닥터** | `DoctorEngine` | `DoctorEngine` + UI | `DoctorEngine`은 순수 데이터(JSON)만 반환, UI 렌더링은 별도 함수로 분리 |
+1. **상수 및 유틸리티 분리 (가장 안전함)**
+   - `constants.js` 생성: `PRIMARY_DATA_KEY`, `SETTINGS_KEY`, `bodySizeKeys` 등 이동.
+   - `utils.js` 생성: `isIOS()`, `normalizeSymptomsArray()`, `getCssVar()` 등 독립적인 함수 이동.
+2. **파이어베이스 & 인증 분리 (`auth.js`)**
+   - 구글 로그인, 이메일 로그인, `onAuthStateChanged` 관련 로직을 `src/firebase/auth.js`로 추출.
+   - 글로벌 객체 대신 초기화 함수 `initAuth()`를 만들어 `script.js`의 맨 위에서 실행.
+3. **UI 매니저 분리 (`ui-manager.js`)**
+   - 모달 열기/닫기(`openModal`, `closeModal` 등)와 알림 패널 관련 함수 이동.
+4. **차트 및 데이터 시각화 분리 (`chart-manager.js`)**
+   - `Chart.js`를 다루는 `renderMainChart`, `updateChart` 변수/함수 이동.
+5. **각 탭별 로직 분리 (`tabs/`)**
+   - `tab-sv.js`, `tab-record.js`, `tab-settings.js`, `tab-my.js` 등으로 분리하여 각 탭 요소의 이벤트 리스너 이동.
 
-### 2.2 기술적 구현 상세 (Technical Implementation)
+---
 
-#### A. 모듈 시스템 도입 (ES Modules)
-`script.js`를 기능별로 쪼개어 `src/` 하위로 이동시킵니다.
+## 2. 구글 로그인 "리다이렉트 무반응" 완벽 해결
 
-```javascript
-// src/main.js 예시
-import { Router } from './core/router.js';
-import { UIManager } from './ui/ui-manager.js';
-import { DoctorEngine } from './doctor-module/core/doctor-engine.js';
+초기화면으로 돌아오는 이유는 앱 진입 시 `getRedirectResult`를 처리하지 않기 때문입니다.
+`import { getRedirectResult, getAuth } from "firebase/auth";` 를 최상단에 추가하고 앱 초기화 로직에 바로 끼워넣어야 합니다.
 
-const app = {
-    init() {
-        this.router = new Router();
-        this.ui = new UIManager();
-        this.doctor = new DoctorEngine();
-        
-        this.router.on('routeChange', (route) => this.ui.render(route));
-        this.bindEvents();
-    },
-    // ...
-};
-
-document.addEventListener('DOMContentLoaded', () => app.init());
-```
-
-#### B. Doctor Engine 뷰 분리
-`DoctorEngine`의 `_generateSummaryMessage` 등이 HTML 태그를 반환하지 않고, 상태 코드나 객체를 반환하도록 수정합니다.
-
-**AS-IS (현재):**
-```javascript
-// doctor-engine.js
-if (status === 'optimal') {
-    return '<span class="mi-success">check_circle</span> 호르몬 수치가 이상적입니다.';
-}
-```
-
-**TO-BE (변경):**
-```javascript
-// doctor-engine.js
-return {
-    status: 'optimal',
-    messageKey: 'hormoneOptimal', // 번역 키 사용
-    type: 'success'
-};
-
-// src/ui/renderers/summary-renderer.js (새로 생성)
-function renderSummary(data) {
-    const icon = data.type === 'success' ? 'check_circle' : 'warning';
-    return `<span class="material-symbols-outlined mi-${data.type}">${icon}</span> ${translate(data.messageKey)}`;
-}
-```
-
-### 2.3 UI 시각화 구현 (UI Visualization)
-
-#### A. 동적 모달 시스템 (Dynamic Modal System)
-HTML에 모든 모달을 미리 적어두는 대신, `template` 태그나 JS 템플릿 리터럴을 사용하여 필요할 때 DOM에 렌더링합니다.
-
-```html
-<!-- index.html -->
-<template id="modal-template">
-    <div class="modal-overlay">
-        <div class="modal-content glass-card">
-            <div class="modal-header">
-                <h3 class="modal-title"></h3>
-                <button class="modal-close">×</button>
-            </div>
-            <div class="modal-body"></div>
-        </div>
-    </div>
-</template>
-```
+### 수정할 코드 (script.js 최상단 DOMContentLoaded 직후)
 
 ```javascript
-// src/ui/modal-system.js
-export class ModalSystem {
-    open(title, contentRenderFunction) {
-        const template = document.getElementById('modal-template');
-        const clone = template.content.cloneNode(true);
-        // ... 타이틀 설정 및 컨텐츠 삽입 ...
-        document.body.appendChild(clone);
-        // ... 애니메이션 및 이벤트 바인딩 ...
-    }
-}
-```
+import { getAuth, getRedirectResult } from "firebase/auth";
 
-#### B. 차트/그래프 컴포넌트화
-현재 `Chart.js` 설정이 산재되어 있습니다. 이를 `ChartComponent` 클래스로 캡슐화하여 재사용성을 높입니다.
-
-```javascript
-// src/ui/components/chart-component.js
-export class BaseChart {
-    constructor(canvasId, config) {
-        this.ctx = document.getElementById(canvasId).getContext('2d');
-        this.chart = new Chart(this.ctx, this.defaultConfig(config));
+document.addEventListener('DOMContentLoaded', async () => {
+    const auth = getAuth();
+    
+    // 1. 리다이렉트 로그인 결과 낚아채기
+    try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+            console.log("리다이렉트 로그인 성공:", result.user);
+            // 로그인 모달 숨기기 & 메인 탭(SV)으로 강제 라우팅
+            document.getElementById('auth-modal').style.display = 'none';
+            document.querySelector('.app-wrapper').style.display = 'block';
+            window.location.hash = '#sv'; 
+            return; // 로그인 처리가 끝났으므로 아래 로직 생략
+        }
+    } catch (error) {
+        console.error("리다이렉트 로그인 실패:", error);
     }
     
-    update(newData) {
-        this.chart.data = newData;
-        this.chart.update();
-    }
-    // ...
-}
+    // ... 기존 초기화 로직 (initializeApp 등) ...
+});
 ```
 
-### 2.4 최적화 및 정리 (Optimization & Cleanup)
+---
 
-1.  **Dead Code 제거**:
-    *   `script.js` 내 사용되지 않는 레거시 함수(이전 버전의 데이터 마이그레이션 로직 등) 식별 및 제거.
-    *   `scripts/` 폴더 내 사용하지 않는 Python/Node 스크립트 정리.
-2.  **중복 제거**:
-    *   `openModal`, `openHormoneModal`, `openBriefingModal` 등을 하나의 `ModalSystem.open(type, data)`으로 통합.
-    *   HTML 내 반복되는 SVG 아이콘을 `<svg><use href="#icon-id"></use></svg>` 형태로 변경하여 파일 크기 축소.
+## 3. PWA 및 모바일 대응을 위한 해시 기반 라우팅 (Hash Routing)
 
-## 3. 실행 로드맵 (Execution Roadmap)
+History API보다 **Hash(`#`) 라우팅을 추천**합니다. Vanilla JS와 Github Pages/Vercel 등 정적 호스팅 환경에서 서버 설정 없이 가장 안정적으로 모바일 "뒤로 가기" 버튼을 지원할 수 있습니다.
 
-1.  **1단계 (구조 분리)**: `script.js`를 여러 모듈 파일로 단순 분리 (기능 변경 없이 파일만 쪼개기).
-2.  **2단계 (Doctor 분리)**: `DoctorEngine`에서 UI 코드 제거 및 순수 로직화.
-3.  **3단계 (UI 시스템)**: `ModalSystem` 및 `Router` 클래스 구현 및 적용.
-4.  **4단계 (HTML 다이어트)**: `index.html`의 인라인 모달/SVG 제거 및 동적 로딩 적용.
-5.  **5단계 (테스트)**: 주요 시나리오(기록 저장, 분석 보기, 설정 변경) 테스트.
+### 핵심 동작 원리
+모달을 열거나 탭을 바꿀 때, 직접 `display: none`을 하는 대신 **URL의 Hash를 바꿉니다 (`window.location.hash = '#record'`)**. 그리고 Hash가 바뀔 때 이벤트를 수신해서 화면을 그립니다.
 
-이 보고서를 바탕으로 점진적인 리팩토링을 수행하면, 앱의 안정성과 유지보수성이 획기적으로 향상될 것입니다.
+### 라우팅 구현 코드 (router.js 생성 추천)
+
+```javascript
+// src/core/router.js
+export function initRouter() {
+    // 1. URL 해시 변경 감지
+    window.addEventListener('hashchange', handleRoute);
+    
+    // 2. 초기 로드 시 현재 해시에 맞는 화면 표시
+    if (!window.location.hash) {
+        window.location.hash = '#sv'; // 기본 탭
+    } else {
+        handleRoute();
+    }
+}
+
+function handleRoute() {
+    const hash = window.location.hash.replace('#', '');
+    const [path, param] = hash.split('/'); 
+    
+    // 예: #record, #my, #diary, #settings
+    switch (path) {
+        case 'sv':
+            switchTab('tab-sv');
+            closeAllModals();
+            break;
+        case 'record':
+            switchTab('tab-record');
+            closeAllModals();
+            break;
+        case 'settings':
+            switchTab('tab-settings');
+            closeAllModals();
+            break;
+        // 특정 기능 모달 예시 (#import-data)
+        case 'import-data':
+            openModal('import-modal-id');
+            break;
+        default:
+            switchTab('tab-sv');
+    }
+}
+
+// 기존 탭 전환 함수 연동
+function switchTab(tabId) {
+    // 기존의 탭 버튼 active 클래스 토글 로직을 여기에 넣습니다.
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    
+    document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+}
+
+// 기존 앱 코드에서 탭을 클릭할 때
+document.querySelectorAll('.tab-button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        // 직접 클래스를 바꾸지 않고 URL만 바꿈 (router가 처리하게 함)
+        const target = btn.getAttribute('data-tab').replace('tab-', '');
+        window.location.hash = `#${target}`;
+    });
+});
+```
+
+---
+
+## 4. UI 렌더링 최적화 (성능 개선)
+
+현재 `script.js`에는 매우 긴 HTML 문자열을 `innerHTML`로 넣는 카드를 렌더링하는 함수들이 있습니다. (`renderPersonaCard` 등).
+
+1. **DocumentFragment 사용**: 여러 요소를 루프로 생성할 때 DOM에 직접 `appendChild` 하지 않고 `DocumentFragment`에 모았다가 한 번에 추가하여 리플로우(Reflow)를 최소화합니다.
+2. **Lazy Loading (지연 로딩)**: `index.html` 하단에 있는 `<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>`를, 사용자가 **차트가 있는 탭(SV 탭)에 접속했을 때만 동적으로 동적으로 로드**하도록 변경합니다. 이러면 초기 앱 실행 속도(PWA)가 50% 이상 빨라집니다.
+3. **이벤트 위임(Event Delegation)**: 탭 안의 수많은 리스트나 버튼에 각각 `addEventListener`를 다는 대신, 부모 컨테이너에 하나만 달아서 `e.target`을 판별하도록 수정합니다. (현재 일부 적용되어 있으나 전체로 확대 권장)
+
+---
+
+## 🚀 실행 즉시 가이드
+1. 가장 먼저 **2번 항목(구글 리다이렉트 로그인 후처리)**을 `script.js` 최상단에 끼워넣어 인증 문제를 최우선으로 막으세요.
+2. 두 번째로 **3번 항목(해시 라우터)** 코드를 도입하여 모든 탭 버튼 클릭 이벤트를 `window.location.hash` 변경으로 치환하세요. 모바일 뒤로가기 문제가 완벽히 고쳐집니다.
+3. 이후 시간 날 때마다 `script.js`의 독립성 높은 함수부터 `src/` 로 분리(`export`/`import`)해 나가시면 기존 UI 파손 없이 앱이 가벼워집니다.

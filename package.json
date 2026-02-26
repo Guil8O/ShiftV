@@ -1,6 +1,6 @@
 {
   "name": "shiftv",
-  "version": "2.0.0",
+  "version": "2.0.0a",
   "description": "신체 변화 추적 앱 - 호르몬 치료 및 신체 측정 기록",
   "type": "module",
   "scripts": {
@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@material/material-color-utilities": "^0.4.0",
+    "@rollup/rollup-linux-x64-gnu": "^4.59.0",
     "browser-image-compression": "^2.0.2",
     "chart.js": "^4.4.0",
     "firebase": "^12.9.0",

@@ -260,6 +260,61 @@ export function logError(...args) {
     console.error('[ShiftV Error]', ...args);
 }
 
+/**
+ * 증상 배열 정규화
+ * 레거시 ID를 새 ID로 매핑하고, 중복 제거 및 severity 범위를 1~5로 제한
+ * @param {Array} symptoms - 증상 배열
+ * @returns {Array|null} 정규화된 증상 배열 또는 null
+ */
+export function normalizeSymptomsArray(symptoms) {
+    if (!Array.isArray(symptoms) || symptoms.length === 0) return null;
+
+    const idMap = {
+        depression_lethargy: 'depression',
+        anxiety_restlessness: 'anxiety',
+        raynauds_paresthesia: 'paresthesia',
+        flushing_erythema: 'flushing',
+        skin_atrophy_bruising: 'skin_atrophy',
+        alopecia_mpb: 'male_pattern_baldness',
+        edema_moon_face: 'edema',
+        sarcopenia_weakness: 'sarcopenia',
+        voice_cracking_deepening: 'voice_change',
+        breast_budding_mastalgia: 'breast_budding',
+        gynecomastia_enlargement: 'gynecomastia',
+        palpitation_tachycardia: 'palpitation',
+        dvt_suspicion: 'dvt_symptoms'
+    };
+
+    const byId = new Map();
+    for (const s of symptoms) {
+        const rawId = s?.id;
+        if (!rawId) continue;
+        const id = idMap[rawId] || rawId;
+        const sev = Number.isFinite(Number(s?.severity)) ? Number(s.severity) : 3;
+        const prev = byId.get(id);
+        const next = { id, severity: Math.max(1, Math.min(5, sev)) };
+        if (!prev || next.severity > prev.severity) byId.set(id, next);
+    }
+
+    const out = [...byId.values()];
+    return out.length > 0 ? out : null;
+}
+
+/**
+ * 증상 배열의 시그니처 문자열 생성 (변경 감지용)
+ * @param {Array} symptoms - 증상 배열
+ * @returns {string} 시그니처 문자열
+ */
+export function symptomsSignature(symptoms) {
+    if (!Array.isArray(symptoms) || symptoms.length === 0) return '';
+    return symptoms
+        .map(s => ({ id: s?.id || '', severity: Number.isFinite(Number(s?.severity)) ? Number(s.severity) : 3 }))
+        .filter(s => s.id)
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .map(s => `${s.id}:${Math.max(1, Math.min(5, s.severity))}`)
+        .join('|');
+}
+
 // Default export
 export default {
     formatDate,
@@ -283,5 +338,7 @@ export default {
     getCSSVar,
     setCSSVar,
     isValidNumber,
-    logError
+    logError,
+    normalizeSymptomsArray,
+    symptomsSignature
 };

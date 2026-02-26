@@ -56,10 +56,6 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff2}'],
-        navigateFallbackDenylist: [
-          /^\/__\/auth\//,
-          /^\/__\/firebase\//
-        ],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,

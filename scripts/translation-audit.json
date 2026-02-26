@@ -1,0 +1,820 @@
+{
+  "generatedAt": "2026-02-24T08:14:09.899Z",
+  "summary": {
+    "defined": {
+      "ko": 688,
+      "en": 688,
+      "ja": 688
+    },
+    "scannedFiles": 59,
+    "usedKeys": 501,
+    "deadKeys": 188,
+    "trulyDeadKeys": 153,
+    "possiblyDynamicDeadKeys": 35,
+    "missingKeys": 0,
+    "missingInEn": 0,
+    "missingInJa": 0,
+    "missingInKo": 0,
+    "emptyValues": 0,
+    "untranslated": 1,
+    "duplicateValues": 23,
+    "iconPatterns": 46,
+    "htmlInlineIcons": 0
+  },
+  "deadKeys": [
+    "actionGuideCategoryDiet",
+    "actionGuideCategoryExercise",
+    "actionGuideCategoryHabits",
+    "actionGuideCategoryMedication",
+    "alertBrowserNotSupportNotification",
+    "alertCannotFindNoteDelete",
+    "alertCannotFindNoteEdit",
+    "alertCannotFindRecordDelete",
+    "alertCannotFindRecordEdit",
+    "alertDeleteError",
+    "alertExportError",
+    "alertImportFileReadError",
+    "alertImportInvalidFile",
+    "alertImportReadError",
+    "alertInvalidIndex",
+    "alertLoadError",
+    "alertNoteContentMissing",
+    "alertSaveError",
+    "alertValidationError",
+    "antiAndrogen",
+    "antiEstrogen",
+    "bodyRatioTitle",
+    "chestWaistLabel",
+    "close",
+    "comparisonProgress",
+    "confirm",
+    "confirmDeleteNote",
+    "cupSize",
+    "currentLevelsEvaluationTitle",
+    "dataExported",
+    "dataImported",
+    "dataReset",
+    "dataSaved",
+    "daysAgo",
+    "daysUntil",
+    "diaryTextPlaceholder",
+    "drugInfluence",
+    "drugInfluenceConfidenceTitle",
+    "drugInfluenceHow",
+    "drugInfluenceHowTitle",
+    "estradiol",
+    "estrogenLevelExplanation",
+    "estrogenLevelUnit",
+    "formTitleEdit",
+    "healthAlertHighE2",
+    "healthAlertLowT",
+    "healthAlertsTitle",
+    "healthNotes",
+    "healthScore",
+    "healthStatus",
+    "hormoneAnalysisAvgChange",
+    "hormoneAnalysisNextWeek",
+    "hormoneExplanationDesc",
+    "hormoneExplanationTitle",
+    "hormoneLevelAboveTarget",
+    "hormoneLevelBelowTarget",
+    "hormoneLevelHigh",
+    "hormoneLevelLow",
+    "hormoneLevelNoTarget",
+    "hormoneLevelOptimal",
+    "hormoneLevelsExplained",
+    "hormoneStabilityTitle",
+    "hrtInfoDesc_ftm",
+    "hrtInfoDesc_mtf",
+    "importError",
+    "importSuccessRequiresReload",
+    "influenceAnalysisDesc",
+    "influenceSamplesLabel",
+    "initialSetupDesc",
+    "initialSetupTitle",
+    "invalidValue",
+    "labelBase",
+    "labelCompareTarget",
+    "language",
+    "libidoPlaceholder",
+    "loadingError",
+    "medicationOtherDose",
+    "medicationOtherName",
+    "medicationOtherNamePlaceholder",
+    "medicationsEmptyState",
+    "memo",
+    "menstruationActive",
+    "menstruationPain",
+    "metricArm",
+    "metricBodyFatPercentage",
+    "metricChest",
+    "metricHips",
+    "metricMuscleMass",
+    "metricShoulder",
+    "metricThigh",
+    "metricWaist",
+    "metricWeight",
+    "modalTabComparativeAnalysis",
+    "modalTabDetailedAnalysis",
+    "nextMeasurementInfo",
+    "nextMeasurementInfoOverdue",
+    "nextMeasurementInfoToday",
+    "noNotesYet",
+    "noTargetsYet",
+    "noteContentLabel",
+    "noteContentPlaceholder",
+    "noteDateCreated",
+    "noteDateUpdated",
+    "noteEditTitle",
+    "noteListTitle",
+    "noteNewTitle",
+    "notePreviewEmpty",
+    "noteSaved",
+    "noteTitleLabel",
+    "noteTitlePlaceholder",
+    "noteTitleUntitled",
+    "notificationToggleLabel",
+    "onboardingGoogleLogin",
+    "onboardingSelectLang",
+    "overviewTitle",
+    "photoLabel",
+    "popupAlreadyLatest",
+    "popupDataExportSuccess",
+    "popupDataImportSuccess",
+    "popupDataResetSuccess",
+    "popupDeleteSuccess",
+    "popupNoteDeleteSuccess",
+    "popupNoteSaveSuccess",
+    "popupNoteUpdateSuccess",
+    "popupOfflineForUpdate",
+    "popupSaveSuccess",
+    "popupSettingsSaved",
+    "popupTargetSaveSuccess",
+    "popupUpdateComplete",
+    "popupUpdateFailed",
+    "popupUpdateSuccess",
+    "progesterone",
+    "removeSymptom",
+    "reportGraphDesc",
+    "reportGraphTitle",
+    "reportInitialTitle",
+    "reportPrevWeekTitle",
+    "reportTargetTitle",
+    "reportTitle",
+    "resetDataTitle",
+    "responseFactorExplanation",
+    "rfMessage_high",
+    "rfMessage_low",
+    "rfMessage_negative",
+    "rfMessage_normal",
+    "rfMessage_very_high",
+    "rfMessage_very_low",
+    "roadmapChangeComparison",
+    "roadmapCompareFirst",
+    "roadmapComparePreviousWeek",
+    "roadmapFirst",
+    "roadmapPrevious",
+    "roadmapSelectDate",
+    "roadmapVsFirst",
+    "roadmapVsPrevious",
+    "saveNote",
+    "savingError",
+    "settingsSaved",
+    "shoulderHipLabel",
+    "showHistoryButton",
+    "showInputButton",
+    "skinCondition",
+    "skinConditionPlaceholder",
+    "sortBy",
+    "stability",
+    "svcard_action_guide_summary",
+    "svcard_guide_default",
+    "svcard_guide_negative_long",
+    "svcard_guide_negative_short",
+    "svcard_guide_positive_long",
+    "svcard_guide_positive_short",
+    "svcard_hormone_prediction",
+    "svcard_hormone_weekly_change",
+    "svcard_title_weekly_guide",
+    "swipeThresholdMet",
+    "targetItem",
+    "targetValue",
+    "targetsSaved",
+    "testosterone",
+    "testosteroneLevelExplanation",
+    "testosteroneLevelUnit",
+    "theme",
+    "timestamp",
+    "today",
+    "totalChangeWithInitial",
+    "unitCountPerWeek",
+    "unitMg",
+    "whrLabel"
+  ],
+  "trulyDeadKeys": [
+    "actionGuideCategoryDiet",
+    "actionGuideCategoryExercise",
+    "actionGuideCategoryHabits",
+    "actionGuideCategoryMedication",
+    "antiAndrogen",
+    "antiEstrogen",
+    "bodyRatioTitle",
+    "chestWaistLabel",
+    "close",
+    "comparisonProgress",
+    "confirm",
+    "cupSize",
+    "currentLevelsEvaluationTitle",
+    "dataExported",
+    "dataImported",
+    "dataReset",
+    "dataSaved",
+    "daysAgo",
+    "daysUntil",
+    "drugInfluence",
+    "drugInfluenceConfidenceTitle",
+    "drugInfluenceHow",
+    "drugInfluenceHowTitle",
+    "estradiol",
+    "estrogenLevelExplanation",
+    "estrogenLevelUnit",
+    "formTitleEdit",
+    "healthAlertHighE2",
+    "healthAlertLowT",
+    "healthAlertsTitle",
+    "healthNotes",
+    "healthScore",
+    "healthStatus",
+    "hormoneAnalysisAvgChange",
+    "hormoneAnalysisNextWeek",
+    "hormoneExplanationDesc",
+    "hormoneExplanationTitle",
+    "hormoneLevelAboveTarget",
+    "hormoneLevelBelowTarget",
+    "hormoneLevelHigh",
+    "hormoneLevelLow",
+    "hormoneLevelNoTarget",
+    "hormoneLevelOptimal",
+    "hormoneLevelsExplained",
+    "hormoneStabilityTitle",
+    "hrtInfoDesc_ftm",
+    "hrtInfoDesc_mtf",
+    "importError",
+    "importSuccessRequiresReload",
+    "influenceAnalysisDesc",
+    "influenceSamplesLabel",
+    "initialSetupDesc",
+    "initialSetupTitle",
+    "invalidValue",
+    "language",
+    "loadingError",
+    "medicationOtherDose",
+    "medicationOtherName",
+    "medicationsEmptyState",
+    "memo",
+    "menstruationActive",
+    "menstruationPain",
+    "modalTabComparativeAnalysis",
+    "modalTabDetailedAnalysis",
+    "nextMeasurementInfo",
+    "nextMeasurementInfoOverdue",
+    "nextMeasurementInfoToday",
+    "noNotesYet",
+    "noTargetsYet",
+    "noteContentLabel",
+    "noteDateCreated",
+    "noteDateUpdated",
+    "noteEditTitle",
+    "noteListTitle",
+    "noteNewTitle",
+    "notePreviewEmpty",
+    "noteSaved",
+    "noteTitleLabel",
+    "noteTitleUntitled",
+    "notificationToggleLabel",
+    "overviewTitle",
+    "photoLabel",
+    "popupAlreadyLatest",
+    "popupDataExportSuccess",
+    "popupDataImportSuccess",
+    "popupDataResetSuccess",
+    "popupDeleteSuccess",
+    "popupNoteDeleteSuccess",
+    "popupNoteSaveSuccess",
+    "popupNoteUpdateSuccess",
+    "popupOfflineForUpdate",
+    "popupSaveSuccess",
+    "popupSettingsSaved",
+    "popupTargetSaveSuccess",
+    "popupUpdateComplete",
+    "popupUpdateFailed",
+    "popupUpdateSuccess",
+    "progesterone",
+    "removeSymptom",
+    "reportGraphDesc",
+    "reportGraphTitle",
+    "reportInitialTitle",
+    "reportPrevWeekTitle",
+    "reportTargetTitle",
+    "reportTitle",
+    "resetDataTitle",
+    "responseFactorExplanation",
+    "rfMessage_high",
+    "rfMessage_low",
+    "rfMessage_negative",
+    "rfMessage_normal",
+    "rfMessage_very_high",
+    "rfMessage_very_low",
+    "roadmapChangeComparison",
+    "roadmapCompareFirst",
+    "roadmapComparePreviousWeek",
+    "roadmapFirst",
+    "roadmapPrevious",
+    "roadmapSelectDate",
+    "roadmapVsFirst",
+    "roadmapVsPrevious",
+    "saveNote",
+    "savingError",
+    "settingsSaved",
+    "shoulderHipLabel",
+    "showHistoryButton",
+    "showInputButton",
+    "skinCondition",
+    "sortBy",
+    "stability",
+    "svcard_action_guide_summary",
+    "svcard_guide_default",
+    "svcard_guide_negative_long",
+    "svcard_guide_negative_short",
+    "svcard_guide_positive_long",
+    "svcard_guide_positive_short",
+    "svcard_hormone_prediction",
+    "svcard_hormone_weekly_change",
+    "svcard_title_weekly_guide",
+    "swipeThresholdMet",
+    "targetItem",
+    "targetValue",
+    "targetsSaved",
+    "testosterone",
+    "testosteroneLevelExplanation",
+    "testosteroneLevelUnit",
+    "theme",
+    "timestamp",
+    "today",
+    "totalChangeWithInitial",
+    "unitCountPerWeek",
+    "unitMg",
+    "whrLabel"
+  ],
+  "possiblyDynamicDeadKeys": [
+    "alertBrowserNotSupportNotification",
+    "alertCannotFindNoteDelete",
+    "alertCannotFindNoteEdit",
+    "alertCannotFindRecordDelete",
+    "alertCannotFindRecordEdit",
+    "alertDeleteError",
+    "alertExportError",
+    "alertImportFileReadError",
+    "alertImportInvalidFile",
+    "alertImportReadError",
+    "alertInvalidIndex",
+    "alertLoadError",
+    "alertNoteContentMissing",
+    "alertSaveError",
+    "alertValidationError",
+    "confirmDeleteNote",
+    "diaryTextPlaceholder",
+    "labelBase",
+    "labelCompareTarget",
+    "libidoPlaceholder",
+    "medicationOtherNamePlaceholder",
+    "metricArm",
+    "metricBodyFatPercentage",
+    "metricChest",
+    "metricHips",
+    "metricMuscleMass",
+    "metricShoulder",
+    "metricThigh",
+    "metricWaist",
+    "metricWeight",
+    "noteContentPlaceholder",
+    "noteTitlePlaceholder",
+    "onboardingGoogleLogin",
+    "onboardingSelectLang",
+    "skinConditionPlaceholder"
+  ],
+  "missingKeys": [],
+  "missingInEn": [],
+  "missingInJa": [],
+  "missingInKo": [],
+  "emptyValues": [],
+  "untranslated": [
+    {
+      "type": "untranslated",
+      "lang": "en",
+      "key": "target",
+      "value": "target"
+    }
+  ],
+  "duplicateValues": [
+    {
+      "value": "저장 완료!",
+      "keys": [
+        "dataSaved",
+        "pdfSaved"
+      ]
+    },
+    {
+      "value": "다이어리",
+      "keys": [
+        "tabDiary",
+        "fabAddDiary",
+        "diaryTabTitle"
+      ]
+    },
+    {
+      "value": "신체 사진",
+      "keys": [
+        "photoLabel",
+        "categoryPhotos"
+      ]
+    },
+    {
+      "value": "진행 중",
+      "keys": [
+        "svcard_quest_active",
+        "inProgress"
+      ]
+    },
+    {
+      "value": "목표 달성률",
+      "keys": [
+        "svcard_persona_targets",
+        "briefingTargetAchievement"
+      ]
+    },
+    {
+      "value": "오늘의 기분, 이벤트, 신체 변화 등을 자유롭게 기록해보세요...",
+      "keys": [
+        "recordKeepsPlaceholder",
+        "recordKeeps"
+      ]
+    },
+    {
+      "value": "이 브라우저는 알림을 지원하지 않아요.",
+      "keys": [
+        "alertBrowserNotSupportNotification",
+        "notificationNotSupported"
+      ]
+    },
+    {
+      "value": "주간 변화량",
+      "keys": [
+        "svcard_hormone_weekly_change",
+        "weeklyChange"
+      ]
+    },
+    {
+      "value": "현재 수치 평가",
+      "keys": [
+        "currentLevelEvaluation",
+        "currentLevelsEvaluationTitle"
+      ]
+    },
+    {
+      "value": "미래 예측",
+      "keys": [
+        "hormoneAnalysisTitlePrediction",
+        "briefingFuturePrediction"
+      ]
+    },
+    {
+      "value": "최적 범위입니다",
+      "keys": [
+        "estrogen_optimal",
+        "testosterone_optimal",
+        "hormoneLevelOptimal"
+      ]
+    },
+    {
+      "value": "목표보다 높습니다",
+      "keys": [
+        "estrogen_above_target",
+        "testosterone_above_target",
+        "hormoneLevelAboveTarget"
+      ]
+    },
+    {
+      "value": "목표보다 낮습니다",
+      "keys": [
+        "estrogen_below_target",
+        "testosterone_below_target",
+        "hormoneLevelBelowTarget"
+      ]
+    },
+    {
+      "value": "호르몬 수치 이해하기",
+      "keys": [
+        "understandingHormones",
+        "hormoneExplanationTitle"
+      ]
+    },
+    {
+      "value": "신체 비율 분석",
+      "keys": [
+        "bodyRatioAnalysisTitle",
+        "bodyRatioTitle",
+        "briefingBodyRatio"
+      ]
+    },
+    {
+      "value": "가슴-허리 비율",
+      "keys": [
+        "chestWaistRatio",
+        "chestWaistLabel",
+        "ratioChestWaist"
+      ]
+    },
+    {
+      "value": "어깨-엉덩이 비율",
+      "keys": [
+        "shoulderHipRatio",
+        "shoulderHipLabel"
+      ]
+    },
+    {
+      "value": "whr (허리-엉덩이 비율)",
+      "keys": [
+        "whrLabel",
+        "ratioWHR"
+      ]
+    },
+    {
+      "value": "테마 설정",
+      "keys": [
+        "themeSettingsTitle",
+        "onboardingThemeTitle"
+      ]
+    },
+    {
+      "value": "google로 로그인",
+      "keys": [
+        "onboardingGoogleLogin",
+        "authGoogleLogin"
+      ]
+    },
+    {
+      "value": "잠시 후 다시 시도하세요",
+      "keys": [
+        "aiRateLimitedHint",
+        "aiServerErrorHint"
+      ]
+    },
+    {
+      "value": "체지방률",
+      "keys": [
+        "metricBodyFatPercentage",
+        "bodyFat"
+      ]
+    },
+    {
+      "value": "회원가입",
+      "keys": [
+        "authGoToSignUp",
+        "authEmailSignUp"
+      ]
+    }
+  ],
+  "iconStats": [
+    {
+      "key": "saveRecord",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "saveTarget",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "saveNote",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "popupSaveSuccess",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "popupUpdateSuccess",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "popupNoteSaveSuccess",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "popupNoteUpdateSuccess",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "popupDataExportSuccess",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "popupDataImportSuccess",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "popupDataResetSuccess",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "healthWarnings",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "personaTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "myTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "recordKeepsLabel",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "svcard_title_highlights",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "svcard_title_targets",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "svcard_title_hormones",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "svcard_title_keeps",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "svcard_guide_default",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "svcard_title_action_guide",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "emaxTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "rfMessage_high",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "rfMessage_low",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "rfMessage_negative",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "healthAlertHighE2",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "healthAlertLowT",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "inputDescription",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "categoryBodySize",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "categoryHealth",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "categoryMedication",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "historyTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "reportTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "reportPrevWeekTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "reportInitialTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "reportTargetTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "targetAchieved",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "targetTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "overviewTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "noteListTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "settingsTitle",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "dataManagementDesc",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "testNotificationBody",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "resetWarning",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "privacyInfo",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "popupAlreadyLatest",
+      "iconPattern": true,
+      "htmlInline": false
+    },
+    {
+      "key": "noAlerts",
+      "iconPattern": true,
+      "htmlInline": false
+    }
+  ]
+}

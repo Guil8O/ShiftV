@@ -1,0 +1,177 @@
+/* src/styles/animations.css */
+
+/* 
+  Material Design 3 (MD3) Motion Easing Curves
+*/
+:root {
+  --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0.0, 0.0, 1.0);
+  --md-sys-motion-easing-standard: cubic-bezier(0.2, 0.0, 0, 1.0);
+  --md-sys-motion-easing-decelerated: cubic-bezier(0.0, 0.0, 0.0, 1.0);
+  --md-sys-motion-easing-accelerated: cubic-bezier(0.3, 0.0, 1.0, 1.0);
+  
+  --md-sys-motion-duration-short1: 50ms;
+  --md-sys-motion-duration-short2: 100ms;
+  --md-sys-motion-duration-short3: 150ms;
+  --md-sys-motion-duration-short4: 200ms;
+  --md-sys-motion-duration-medium1: 250ms;
+  --md-sys-motion-duration-medium2: 300ms;
+  --md-sys-motion-duration-medium3: 350ms;
+  --md-sys-motion-duration-medium4: 400ms;
+  --md-sys-motion-duration-long1: 450ms;
+  --md-sys-motion-duration-long2: 500ms;
+  --md-sys-motion-duration-long3: 550ms;
+  --md-sys-motion-duration-long4: 600ms;
+}
+
+/* =========================================
+   Keyframes
+   ========================================= */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-20px); }
+  60% { transform: translateY(-10px); }
+}
+
+/* =========================================
+   Utility Classes
+   ========================================= */
+
+.animate-fade-in {
+  animation: fadeIn var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard) forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-emphasized) forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* =========================================
+   Reduced Motion
+   ========================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================
+   MD3 Ripple Effect
+   ========================================= */
+@keyframes md3-ripple-expand {
+  0% {
+    transform: scale(0);
+    opacity: var(--md3-ripple-opacity, 0.12);
+  }
+  60% {
+    opacity: var(--md3-ripple-opacity, 0.12);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+.md3-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  pointer-events: none;
+  animation: md3-ripple-expand 450ms var(--md-sys-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1)) forwards;
+  z-index: 0;
+}
+
+/* Ensure content stays above ripple */
+.btn-filled > *:not(.md3-ripple),
+.btn-filled-tonal > *:not(.md3-ripple),
+.btn-text > *:not(.md3-ripple),
+.btn-outlined > *:not(.md3-ripple),
+.btn-elevated > *:not(.md3-ripple),
+.glass-button > *:not(.md3-ripple),
+.icon-button > *:not(.md3-ripple) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Darker ripple for filled surfaces */
+.btn-filled .md3-ripple {
+  --md3-ripple-opacity: 0.16;
+}
+
+.icon-button .md3-ripple,
+.btn-text .md3-ripple {
+  --md3-ripple-opacity: 0.08;
+}

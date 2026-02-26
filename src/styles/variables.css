@@ -1,0 +1,310 @@
+/**
+ * ShiftV CSS Variables
+ * 
+ * 모든 CSS 변수를 중앙 집중식으로 관리
+ * @file variables.css
+ */
+
+:root {
+    /* ==================== */
+    /* Color Scheme */
+    /* ==================== */
+    color-scheme: light dark;
+
+    /* ==================== */
+    /* Typography */
+    /* ==================== */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-size-xs: 0.75rem;      /* 12px */
+    --font-size-sm: 0.875rem;     /* 14px */
+    --font-size-base: 1rem;       /* 16px */
+    --font-size-lg: 1.125rem;     /* 18px */
+    --font-size-xl: 1.25rem;      /* 20px */
+    --font-size-2xl: 1.5rem;      /* 24px */
+    --font-size-3xl: 1.875rem;    /* 30px */
+    --font-size-4xl: 2.25rem;     /* 36px */
+    
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+
+    /* ==================== */
+    /* Spacing */
+    /* ==================== */
+    --spacing-xxs: 0.125rem; /* 2px */
+    --spacing-xs: 0.25rem;   /* 4px */
+    --spacing-1-5: 0.375rem; /* 6px */
+    --spacing-sm: 0.5rem;    /* 8px */
+    --spacing-2-5: 0.625rem; /* 10px */
+    --spacing-3: 0.75rem;    /* 12px */
+    --spacing-md: 1rem;      /* 16px */
+    --spacing-5: 1.25rem;    /* 20px */
+    --spacing-lg: 1.5rem;    /* 24px */
+    --spacing-xl: 2rem;      /* 32px */
+    --spacing-2xl: 3rem;     /* 48px */
+    --spacing-3xl: 4rem;     /* 64px */
+
+    /* ==================== */
+    /* Border Radius */
+    /* ==================== */
+    --radius-xs: var(--md-sys-shape-corner-extra-small);
+    --radius-sm: var(--md-sys-shape-corner-small);
+    --radius-md: var(--md-sys-shape-corner-medium);
+    --radius-m: var(--md-sys-shape-corner-medium);
+    --radius-lg: var(--md-sys-shape-corner-large);
+    --radius-s: var(--md-sys-shape-corner-small);
+    --radius-l: var(--md-sys-shape-corner-large);
+    --radius-xl: var(--md-sys-shape-corner-extra-large);
+    --radius-2xl: var(--md-sys-shape-corner-extra-large);
+    --radius-3xl: var(--md-sys-shape-corner-extra-large);
+    --radius-full: var(--md-sys-shape-corner-full);
+
+    /* ==================== */
+    /* Transitions */
+    /* ==================== */
+    --transition-fast: all 0.15s ease-out;
+    --transition-medium: all 0.3s ease-out;
+    --transition-slow: all 0.5s ease-out;
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* ==================== */
+    /* Shadows */
+    /* ==================== */
+    --shadow-xs: var(--md-sys-elevation-1);
+    --shadow-sm: var(--md-sys-elevation-2);
+    --shadow-md: var(--md-sys-elevation-3);
+    --shadow-lg: var(--md-sys-elevation-4);
+    --shadow-xl: var(--md-sys-elevation-5);
+    --shadow-2xl: var(--md-sys-elevation-5);
+
+    /* ==================== */
+    /* Z-Index Scale */
+    /* ==================== */
+    --z-index-dropdown: 1000;
+    --z-index-sticky: 1020;
+    --z-index-fixed: 1030;
+    --z-index-modal-backdrop: 1040;
+    --z-index-modal: 1050;
+    --z-index-popover: 1060;
+    --z-index-tooltip: 1070;
+
+    /* ==================== */
+    /* Breakpoints (M3 Adaptive Layout) */
+    /* ==================== */
+    /* NOTE: CSS custom properties cannot be used in @media queries.
+       These are reference constants for JS access via getComputedStyle().          */
+    --bp-medium:   600;   /* < 600px = Compact,  ≥ 600px = Medium                  */
+    --bp-expanded: 840;   /* ≥ 840px = Expanded   (Navigation Rail: 80px)           */
+    --bp-large:   1200;   /* ≥ 1200px = Large      (Extended Rail: 200px)           */
+
+    /* ==================== */
+    /* Dark Mode Colors (Default) */
+    /* ==================== */
+    --bg-main: var(--md-sys-color-background);
+    --bg-secondary: var(--md-sys-color-surface);
+    --bg-tertiary: var(--md-sys-color-surface-variant);
+    
+    --text-main: var(--md-sys-color-on-background);
+    --text-dim: var(--md-sys-color-on-surface-variant);
+    --text-dim2: var(--md-sys-color-outline);
+    --text-inverse: var(--md-sys-color-on-primary);
+    
+    --primary: var(--md-sys-color-primary);
+    --primary-hover: var(--md-sys-color-primary-container);
+    --primary-active: var(--md-sys-color-primary);
+    
+    --accent: var(--md-sys-color-secondary);
+    --accent-hover: var(--md-sys-color-secondary-container);
+    --accent-active: var(--md-sys-color-secondary);
+    
+    --secondary: var(--md-sys-color-tertiary);
+    --secondary-hover: var(--md-sys-color-tertiary-container);
+    --secondary-active: var(--md-sys-color-tertiary);
+    
+    --success: #55f0d0;
+    --success-hover: #75ffe0;
+    --success-active: #35e0c0;
+    
+    --warning: #ffcc66;
+    --warning-hover: #ffdd88;
+    --warning-active: #ffbb44;
+    --warning-text: #ffddaa;
+    
+    --danger: var(--md-sys-color-error);
+    --danger-hover: var(--md-sys-color-error-container);
+    --danger-active: var(--md-sys-color-error);
+    
+    --info: #66aaff;
+    --info-hover: #88bbff;
+    --info-active: #4499ff;
+
+    /* ==================== */
+    /* MD3 Surface System */
+    /* ==================== */
+    --glass-bg: var(--md-sys-color-surface-container, #201F23);
+    --glass-bg-light: var(--md-sys-color-surface-container-high, #2A292D);
+    --glass-border: var(--md-sys-color-outline-variant, #44464F);
+    --glass-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+    --glass-shadow-floating: 0 1px 3px rgba(0,0,0,0.3), 0 4px 8px 3px rgba(0,0,0,0.15);
+    --glass-glow: none;
+    --glass-blur: none;
+
+    /* ==================== */
+    /* Modal */
+    /* ==================== */
+    --modal-bg: var(--md-sys-color-surface-container-high, #2A292D);
+    --modal-border: var(--md-sys-color-outline-variant, #44464F);
+    --modal-radius: 28px;
+    --modal-floating-margin: 16px;
+    --modal-backdrop: rgba(0, 0, 0, 0.6);
+
+    /* ==================== */
+    /* Input */
+    /* ==================== */
+    --input-bg: var(--md-sys-color-surface-container-highest, #353438);
+    --input-border: var(--md-sys-color-outline, #8F9099);
+    --input-focus-border: var(--md-sys-color-primary);
+    --input-focus-glow: none;
+    --input-placeholder: var(--text-dim);
+    --input-disabled-bg: var(--md-sys-color-surface-container, #201F23);
+    --input-disabled-text: var(--text-dim2);
+
+    /* ==================== */
+    /* Tab Bar */
+    /* ==================== */
+    --tab-bar-bg: var(--md-sys-color-surface-container, #201F23);
+    --tab-active-bg: var(--md-sys-color-secondary-container);
+    --tab-active-text: var(--md-sys-color-on-secondary-container);
+    --tab-inactive-text: var(--md-sys-color-on-surface-variant);
+    --tab-hover-bg: var(--md-sys-color-surface-container-high, #2A292D);
+
+    /* ==================== */
+    /* Table */
+    /* ==================== */
+    --table-header-bg: var(--md-sys-color-surface-container-high, #2A292D);
+    --table-row-stripe-bg: var(--md-sys-color-surface-container-low, rgba(255,255,255,0.03));
+    --table-row-hover-bg: var(--md-sys-color-surface-container-highest, #353438);
+    --table-border: var(--md-sys-color-outline-variant, #44464F);
+
+    /* ==================== */
+    /* Chart */
+    /* ==================== */
+    --chart-button-bg: var(--md-sys-color-surface-container, #201F23);
+    --chart-wrapper-bg: var(--md-sys-color-surface-container-low, #1C1B20);
+    --chart-grid-color: var(--md-sys-color-outline-variant, #44464F);
+    --chart-tooltip-bg: var(--md-sys-color-surface-container-high, #2A292D);
+
+    /* ==================== */
+    /* Gradients */
+    /* ==================== */
+    --bg-gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    --bg-gradient-success: linear-gradient(135deg, var(--success) 0%, #35e0c0 100%);
+    --bg-gradient-danger: linear-gradient(135deg, var(--danger) 0%, #ff3355 100%);
+}
+
+/* ==================== */
+/* Light Mode */
+/* ==================== */
+body.light-mode {
+    --bg-main: var(--md-sys-color-background);
+    --bg-secondary: var(--md-sys-color-surface);
+    --bg-tertiary: var(--md-sys-color-surface-variant);
+    
+    --text-main: var(--md-sys-color-on-background);
+    --text-dim: var(--md-sys-color-on-surface-variant);
+    --text-dim2: var(--md-sys-color-outline);
+    --text-inverse: var(--md-sys-color-on-primary);
+    
+    --primary: var(--md-sys-color-primary);
+    --primary-hover: var(--md-sys-color-primary-container);
+    --primary-active: var(--md-sys-color-primary);
+    
+    --accent: var(--md-sys-color-secondary);
+    --accent-hover: var(--md-sys-color-secondary-container);
+    --accent-active: var(--md-sys-color-secondary);
+    
+    --success: #008060;
+    --success-hover: #00a080;
+    --success-active: #006040;
+    
+    --secondary: var(--md-sys-color-tertiary);
+    --secondary-hover: var(--md-sys-color-tertiary-container);
+    --secondary-active: var(--md-sys-color-tertiary);
+    
+    --warning: #ff9800;
+    --warning-hover: #ffb020;
+    --warning-active: #e08000;
+    --warning-text: #8B0000;
+    
+    --danger: var(--md-sys-color-error);
+    --danger-hover: var(--md-sys-color-error-container);
+    --danger-active: var(--md-sys-color-error);
+    
+    --info: #2196f3;
+    --info-hover: #42a5f5;
+    --info-active: #1976d2;
+
+    /* MD3 Surface System - Light Mode */
+    --glass-bg: var(--md-sys-color-surface-container, #F2F0F4);
+    --glass-bg-light: var(--md-sys-color-surface-container-high, #ECE9EE);
+    --glass-border: var(--md-sys-color-outline-variant, #C6C5D0);
+    --glass-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+    --glass-shadow-floating: 0 1px 3px rgba(0,0,0,0.3), 0 4px 8px 3px rgba(0,0,0,0.15);
+    --glass-glow: none;
+
+    /* Modal - Light Mode */
+    --modal-bg: var(--md-sys-color-surface-container-high, #ECE9EE);
+    --modal-border: var(--md-sys-color-outline-variant, #C6C5D0);
+    --modal-backdrop: rgba(0, 0, 0, 0.4);
+
+    /* Input - Light Mode */
+    --input-bg: var(--md-sys-color-surface-container-highest, #E5E3E7);
+    --input-border: var(--md-sys-color-outline, #767680);
+    --input-focus-border: var(--md-sys-color-primary);
+    --input-focus-glow: none;
+
+    /* Tab Bar - Light Mode */
+    --tab-bar-bg: var(--md-sys-color-surface-container, #F2F0F4);
+    --tab-active-bg: var(--md-sys-color-secondary-container);
+    --tab-active-text: var(--md-sys-color-on-secondary-container);
+
+    /* Table - Light Mode */
+    --table-header-bg: var(--md-sys-color-surface-container-high);
+    --table-row-stripe-bg: var(--md-sys-color-surface-container-low, #F8F6FA);
+    --table-row-hover-bg: var(--md-sys-color-surface-container-highest);
+
+    /* Chart - Light Mode */
+    --chart-button-bg: var(--md-sys-color-surface-container);
+    --chart-wrapper-bg: var(--md-sys-color-surface-container-low);
+    --chart-grid-color: var(--md-sys-color-outline-variant);
+
+    /* Gradients - Light Mode */
+    --bg-gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+}
+
+/* ==================== */
+/* High Contrast Mode */
+/* ==================== */
+@media (prefers-contrast: high) {
+    :root {
+        --text-main: #ffffff;
+        --bg-main: #000000;
+        --glass-border: rgba(255, 255, 255, 0.5);
+    }
+}
+
+/* ==================== */
+/* Reduced Motion */
+/* ==================== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

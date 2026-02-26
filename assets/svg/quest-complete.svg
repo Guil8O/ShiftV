@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <g class="confetti" fill="var(--md-sys-color-primary)">
+    <circle cx="50" cy="50" r="5" class="particle p1" />
+    <circle cx="50" cy="50" r="5" class="particle p2" />
+    <circle cx="50" cy="50" r="5" class="particle p3" />
+    <circle cx="50" cy="50" r="5" class="particle p4" />
+    <circle cx="50" cy="50" r="5" class="particle p5" />
+  </g>
+  <style>
+    .particle { animation: burst 1s ease-out forwards; }
+    .p1 { animation-name: burst1; }
+    .p2 { animation-name: burst2; }
+    .p3 { animation-name: burst3; }
+    .p4 { animation-name: burst4; }
+    .p5 { animation-name: burst5; }
+    @keyframes burst1 { to { transform: translate(-30px, -30px) scale(0); opacity: 0; } }
+    @keyframes burst2 { to { transform: translate(30px, -30px) scale(0); opacity: 0; } }
+    @keyframes burst3 { to { transform: translate(-30px, 30px) scale(0); opacity: 0; } }
+    @keyframes burst4 { to { transform: translate(30px, 30px) scale(0); opacity: 0; } }
+    @keyframes burst5 { to { transform: translate(0, -40px) scale(0); opacity: 0; } }
+  </style>
+</svg>

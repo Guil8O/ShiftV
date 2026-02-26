@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="40" fill="none" stroke="var(--md-sys-color-primary)" stroke-width="4" class="ripple" />
+  <circle cx="50" cy="50" r="20" fill="none" stroke="var(--md-sys-color-secondary)" stroke-width="4" class="ripple delay" />
+  <style>
+    .ripple {
+      animation: ripple-anim 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+    .delay {
+      animation-delay: 1s;
+    }
+    @keyframes ripple-anim {
+      0% { transform: scale(0); opacity: 1; }
+      100% { transform: scale(1); opacity: 0; }
+    }
+  </style>
+</svg>

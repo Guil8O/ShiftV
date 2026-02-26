@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="color-scheme" content="light dark">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="ShiftV — 칔설한 신체 변화를 기록하고 시각화하는 개인 맞칔형 컨디션 트래커">
+    <title>ShiftV - 당신의 변화를 기록하세요</title>
+
+    <link rel="manifest" href="manifest.json">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ShiftV">
+    <meta name="theme-color" content="#1a1a3a">
+    <link rel="apple-touch-icon" sizes="180x180" href="ios/180.png">
+    
+    <!-- Google Fonts: Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Material Symbols Outlined — variable icon font -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+    
+    <!-- MD3 Tokens & Base Styles -->
+    <link rel="stylesheet" href="src/styles/md3-tokens.css">
+    <link rel="stylesheet" href="src/styles/variables.css">
+    <link rel="stylesheet" href="src/styles/base.css">
+    <link rel="stylesheet" href="src/styles/animations.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@material/material-color-utilities@0.3.0/dist/index.min.js"></script>
+    <script src="src/utils/color-generator.js"></script>
+</head>
+
+<body class="dark-mode">
+
+    <!-- 초기 설정 모달 -->
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-card">
+            <div class="auth-logo-container">
+                <div id="auth-logo-anim"></div>
+            </div>
+            <h2 id="auth-title" data-lang-key="authLoginTitle">로그인</h2>
+            
+            <div id="auth-login-view">
+                <button id="btn-google-login" class="glass-button primary" style="width: 100%; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+                    <span data-lang-key="authGoogleLogin">Google로 로그인</span>
+                </button>
+                
+                <div class="divider" style="text-align: center; margin: 16px 0; color: var(--text-dim); font-size: 0.9em;">또는</div>
+                
+                <div class="form-group">
+                    <input type="email" id="login-email" placeholder="이메일" data-lang-key="authEmailPlaceholder" aria-label="Email">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="login-password" placeholder="비밀번호" data-lang-key="authPasswordPlaceholder" aria-label="Password">
+                </div>
+                <button id="btn-email-login" class="glass-button" style="width: 100%; margin-bottom: 16px;" data-lang-key="authEmailLogin">이메일로 로그인</button>
+                
+                <div style="text-align: center; font-size: 0.9em;">
+                    <span data-lang-key="authNoAccount">계정이 없으신가요?</span>
+                    <a href="#" id="link-to-signup" style="color: var(--primary); text-decoration: none; font-weight: bold;" data-lang-key="authGoToSignUp">회원가입</a>
+                </div>
+            </div>
+
+            <div id="auth-signup-view" style="display: none;">
+                <div class="form-group">
+                    <input type="text" id="signup-name" placeholder="이름 (닉네임)" data-lang-key="authNamePlaceholder" aria-label="Name">
+                </div>
+                <div class="form-group">
+                    <input type="email" id="signup-email" placeholder="이메일" data-lang-key="authEmailPlaceholder" aria-label="Email">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="signup-password" placeholder="비밀번호 (6자 이상)" data-lang-key="authPasswordPlaceholder" aria-label="Password">
+                </div>
+                <button id="btn-email-signup" class="glass-button primary" style="width: 100%; margin-bottom: 16px;" data-lang-key="authEmailSignUp">회원가입</button>
+                
+                <div style="text-align: center; font-size: 0.9em;">
+                    <span data-lang-key="authHasAccount">이미 계정이 있으신가요?</span>
+                    <a href="#" id="link-to-login" style="color: var(--primary); text-decoration: none; font-weight: bold;" data-lang-key="authGoToLogin">로그인</a>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 24px;">
+                <button id="btn-skip-auth" class="glass-button" style="background: transparent; border: 1px solid var(--glass-border); color: var(--text-dim);" data-lang-key="authSkip">로그인 없이 시작하기 (로컬 모드)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-wrapper">
+
+        <!-- 탭 바 -->
+        <div class="tab-bar" role="navigation" aria-label="주 메뉴">
+            <div class="tab-group" role="tablist" aria-label="탭 네비게이션">
+                <!-- 1. 메인 탭 (구 SV) -->
+                <button class="tab-button active" data-tab="tab-sv" data-lang-key="tabMain"
+                    role="tab" aria-selected="true" aria-controls="tab-sv" id="tab-btn-sv">
+                    <div class="active-tab-indicator"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+                        fill="currentColor">
+                        <path d="M0 0h24v24H0V0z" fill="none" />
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z" />
+                    </svg>
+                    <span>메인</span>
+                </button>
+            </div>
+            <div class="tab-group" role="tablist">
+                <!-- 2. 기록하기 탭 -->
+                <button class="tab-button" data-tab="tab-record" data-lang-key="tabRecord"
+                    role="tab" aria-selected="false" aria-controls="tab-record" id="tab-btn-record">
+                    <div class="active-tab-indicator"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24px"
+                        height="24px">
+                        <path d="M0 0h24v24H0V0z" fill="none" />
+                        <path
+                            d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                    </svg>
+                    <span>기록하기</span>
+                </button>
+                <!-- 3. 다이어리 탭 -->
+                <button class="tab-button" data-tab="tab-diary" data-lang-key="tabDiary"
+                    role="tab" aria-selected="false" aria-controls="tab-diary" id="tab-btn-diary">
+                    <div class="active-tab-indicator"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor">
+                        <path d="M0 0h24v24H0V0z" fill="none"/>
+                        <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+                    </svg>
+                    <span>다이어리</span>
+                </button>
+                <!-- 4. 마이 탭 -->
+                <button class="tab-button" data-tab="tab-my" data-lang-key="tabMy"
+                    role="tab" aria-selected="false" aria-controls="tab-my" id="tab-btn-my">
+                    <div class="active-tab-indicator"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+                        fill="currentColor">
+                        <path d="M0 0h24v24H0V0z" fill="none" />
+                        <path
+                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                    <span>마이</span>
+                </button>
+            </div>
+            <div class="tab-group" role="tablist">
+                <!-- 5. 설정 탭 -->
+                <button class="tab-button" data-tab="tab-settings" data-lang-key="tabSettings"
+                    role="tab" aria-selected="false" aria-controls="tab-settings" id="tab-btn-settings">
+                    <div class="active-tab-indicator"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                        <path
+                            d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z" />
+                        <path
+                            d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.902 3.433 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zM8 13a5 5 0 1 1 0-10 5 5 0 0 1 0 10z" />
+                    </svg>
+                    <span>설정</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- App Bar -->
+            <header class="app-bar">
+                <div class="app-bar-title">
+                    <img class="app-bar-logo app-bar-logo--dark" src="assets/title-dark.png" alt="ShiftV">
+                    <img class="app-bar-logo app-bar-logo--light" src="assets/title-light.png" alt="ShiftV">
+                    <div id="app-bar-logo-svg" class="app-bar-logo app-bar-logo--svg" aria-label="ShiftV"></div>
+                </div>
+                <div class="app-bar-actions">
+                    <button class="icon-button" id="btn-notifications" aria-label="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
+                        <span class="notif-badge" id="notif-badge" style="display:none"></span>
+                    </button>
+                </div>
+
+                <!-- Notification Panel -->
+                <div id="notification-panel" class="notification-panel" aria-hidden="true">
+                    <div class="notification-panel-header">
+                        <span class="notification-panel-title">알림</span>
+                        <button class="icon-button notification-panel-close" id="notif-panel-close" aria-label="Close">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                        </button>
+                    </div>
+                    <div id="notif-list" class="notif-list">
+                        <div class="notif-empty">새 알림이 없어요</div>
+                    </div>
+                    <div class="notification-panel-footer">
+                        <button class="notif-clear-btn" id="notif-clear-all">모두 지우기</button>
+                    </div>
+                </div>
+                <div id="notif-backdrop" class="notif-backdrop"></div>
+            </header>
+
+            <div class="tab-contents">
+
+                <!-- 측정 입력 탭 -->
+                <!-- ▼▼▼ '기록하기' 탭의 전체 내용을 아래 코드로 교체하세요 ▼▼▼ -->
+                <div id="tab-record" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-record">
+
+                    <!-- "입력" 화면 -->
+                    <div id="record-input-view">
+                        <h2 id="form-title" data-lang-key="formTitleNew">측정 시작하기</h2>
+                        <div class="glass-card">
+                            <div id="next-measurement-info" class="next-measurement-info">
+                                <p data-lang-key="nextMeasurementInfoNoData">마지막 측정일을 기준으로 다음 예정일을 계산해요.</p>
+                            </div>
+
+                            <form id="measurement-form" novalidate>
+                                <input type="hidden" id="edit-index" value="">
+                                <p class="description" data-lang-key="inputDescription">모든 항목은 선택 사항이에요! <span class="material-symbols-outlined mi-inline mi-sm">sentiment_satisfied</span></p>
+
+                                <!-- '신체 사이즈' 아코디언 -->
+                                <details class="accordion-group" open>
+                                    <summary class="accordion-title" data-lang-key="categoryBodySize">신체 사이즈</summary>
+                                    <div class="accordion-content">
+                                        <div class="input-grid">
+                                            <!-- 신체 사이즈 입력 필드들 -->
+                                            <div class="form-group"><label for="height" data-lang-key="height">신장
+                                                    (cm)</label><input type="number" id="height" name="height"
+                                                    step="0.1" min="0" placeholder="cm"></div>
+                                            <div class="form-group"><label for="weight" data-lang-key="weight">체중
+                                                    (kg)</label><input type="number" id="weight" name="weight"
+                                                    step="0.01" min="0" placeholder="kg"></div>
+                                            <div class="form-group"><label for="shoulder" data-lang-key="shoulder">어깨너비
+                                                    (cm)</label><input type="number" id="shoulder" name="shoulder"
+                                                    step="0.1" min="0" placeholder="cm"></div>
+                                            <div class="form-group"><label for="neck" data-lang-key="neck">목둘레
+                                                    (cm)</label><input type="number" id="neck" name="neck" step="0.1"
+                                                    min="0.1" placeholder="cm"></div>
+                                            <div class="form-group"><label for="chest" data-lang-key="chest">윗 가슴 둘레
+                                                    (cm)</label><input type="number" id="chest" name="chest" step="0.1"
+                                                    min="0" placeholder="cm"></div>
+                                            <div class="form-group"><label for="underBustCircumference" data-lang-key="underBustCircumference">아랫 가슴
+                                                    둘레
+                                                    (cm)</label><input type="number" id="underBustCircumference" name="underBustCircumference"
+                                                    step="0.1" min="0" placeholder="cm"></div>
+                                            <div class="form-group"><label for="waist" data-lang-key="waist">허리둘레
+                                                    (cm)</label><input type="number" id="waist" name="waist" step="0.1"
+                                                    min="0" placeholder="cm"></div>
+                                            <div class="form-group"><label for="hips" data-lang-key="hips">엉덩이둘레
+                                                    (cm)</label><input type="number" id="hips" name="hips" step="0.1"
+                                                    min="0" placeholder="cm"></div>
+                                            <div class="form-group"><label for="thigh" data-lang-key="thigh">허벅지둘레
+                                                    (cm)</label><input type="number" id="thigh" name="thigh" step="0.1"
+                                                    min="0" placeholder="cm"></div>
+                                            <div class="form-group"><label for="calf" data-lang-key="calf">종아리둘레
+                                                    (cm)</label><input type="number" id="calf" name="calf" step="0.1"
+                                                    min="0" placeholder="cm"></div>
+                                            <div class="form-group"><label for="arm" data-lang-key="arm">팔뚝둘레
+                                                    (cm)</label><input type="number" id="arm" name="arm" step="0.1"
+                                                    min="0" placeholder="cm"></div>
+                                        </div>
+                                    </div>
+                                </details>
+
+                                <!-- '건강' 아코디언 -->
+                                <details class="accordion-group">
+                                    <summary class="accordion-title" data-lang-key="categoryHealth">건강</summary>
+                                    <div class="accordion-content" id="record-health-content">
+                                        <div class="input-grid">
+                                            <!-- 건강 관련 입력 필드들 -->
+                                            <div class="form-group"><label for="muscleMass"
+                                                    data-lang-key="muscleMass">근육량
+                                                    (kg)</label><input type="number" id="muscleMass" name="muscleMass"
+                                                    step="0.1" min="0" placeholder="kg"></div>
+                                            <div class="form-group"><label for="bodyFatPercentage"
+                                                    data-lang-key="bodyFatPercentage">체지방률 (%)</label><input
+                                                    type="number" id="bodyFatPercentage" name="bodyFatPercentage"
+                                                    step="0.1" min="0" placeholder="%"></div>
+                                            
+                                            <!-- Hormone Levels with Unit Select -->
+                                            <div class="form-group">
+                                                <label for="estrogenLevel" data-lang-key="estrogenLevel">에스트로겐 수치</label>
+                                                <div class="input-with-unit">
+                                                    <input type="number" id="estrogenLevel" name="estrogenLevel" step="0.1" min="0" placeholder="Value">
+                                                    <select id="estrogenUnit" class="unit-select" data-persist="estrogenUnit">
+                                                        <option value="pg/ml">pg/mL</option>
+                                                        <option value="pmol/L">pmol/L</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="testosteroneLevel" data-lang-key="testosteroneLevel">테스토스테론 수치</label>
+                                                <div class="input-with-unit">
+                                                    <input type="number" id="testosteroneLevel" name="testosteroneLevel" step="0.1" min="0" placeholder="Value">
+                                                    <select id="testosteroneUnit" class="unit-select" data-persist="testosteroneUnit">
+                                                        <option value="ng/dl">ng/dL</option>
+                                                        <option value="nmol/L">nmol/L</option>
+                                                        <option value="ng/ml">ng/mL</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group"><label for="libido" data-lang-key="libido">성욕
+                                                    (회/주)</label><input type="number" id="libido" name="libido"
+                                                    step="0.1" min="0" placeholder="number"></div>
+
+                                            <div id="cycle-tracker-group" class="form-group" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--glass-border);">
+                                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                                    <div class="md3-switch">
+                                                        <input type="checkbox" id="menstruationActive" name="menstruationActive">
+                                                        <span class="md3-switch-track"></span>
+                                                        <span class="md3-switch-thumb"></span>
+                                                    </div>
+                                                    <span data-lang-key="menstruationLabel">월경 발생 여부</span>
+                                                </label>
+                                                <div id="menstruation-pain-group" style="display: none; margin-top: 10px;">
+                                                    <label data-lang-key="cyclePainLabel">강도 (1-5)</label>
+                                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                                        <input type="range" id="menstruationPain" name="menstruationPain" min="1" max="5" value="1" style="flex: 1;">
+                                                        <span id="menstruationPainValue" style="width: 30px; text-align: center;">1</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- 증상 선택 시스템 (새로운 구조) -->
+                                            <div class="form-group form-group-full-width">
+                                                <label data-lang-key="symptomsLabel">증상 선택</label>
+                                                <p class="description" data-lang-key="symptomsDescription">
+                                                    경험하고 있는 증상을 선택하고 심각도를 표시하세요. (여러 개 선택 가능)
+                                                </p>
+                                                <div id="symptoms-container" class="symptoms-container">
+                                                    <!-- 증상 항목들이 동적으로 추가됩니다 -->
+                                                </div>
+                                                <button type="button" id="add-symptom-btn" class="glass-button add-btn" data-lang-key="addSymptom">
+                                                    <span class="material-symbols-outlined mi-sm">add</span> 증상 추가
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </details>
+
+                                <!-- '마법' 아코디언 -->
+                                <details class="accordion-group">
+                                    <summary class="accordion-title" data-lang-key="categoryMedication">마법</summary>
+                                    <div class="accordion-content">
+                                        <div class="input-grid">
+                                            <!-- 약물 선택 시스템 -->
+                                            <div class="form-group form-group-full-width">
+                                                <label data-lang-key="medicationsLabel">약물 선택</label>
+                                                <p class="description" data-lang-key="medicationsDescription">자주 투여하는 약물은 목록으로 추가해두면 다음 기록 때 자동으로 유지됩니다.</p>
+                                                <div id="medications-container" class="medications-container"></div>
+                                                <button type="button" id="add-medication-btn" class="glass-button add-btn" data-lang-key="addMedication">
+                                                    <span class="material-symbols-outlined mi-sm">add</span> 약물 추가
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </details>
+
+                                <!-- '사진' 아코디언 (NEW) -->
+                                <details class="accordion-group">
+                                    <summary class="accordion-title" data-lang-key="categoryPhotos">신체 사진</summary>
+                                    <div class="accordion-content">
+                                        <p class="description" data-lang-key="photosDescription">변화 기록을 위해 사진을 등록하세요. 업로드 시 자동 압축됩니다.</p>
+                                        <div class="photo-upload-grid">
+                                            <div class="photo-upload-slot" data-category="face">
+                                                <label class="photo-upload-label">
+                                                    <input type="file" accept="image/*" capture="environment" class="photo-input" data-category="face" style="display:none">
+                                                    <div class="photo-preview-circle" id="photo-preview-face">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                                    </div>
+                                                    <span data-lang-key="photoFace">얼굴</span>
+                                                </label>
+                                            </div>
+                                            <div class="photo-upload-slot" data-category="front">
+                                                <label class="photo-upload-label">
+                                                    <input type="file" accept="image/*" capture="environment" class="photo-input" data-category="front" style="display:none">
+                                                    <div class="photo-preview-circle" id="photo-preview-front">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                                                    </div>
+                                                    <span data-lang-key="photoFront">정면</span>
+                                                </label>
+                                            </div>
+                                            <div class="photo-upload-slot" data-category="side">
+                                                <label class="photo-upload-label">
+                                                    <input type="file" accept="image/*" capture="environment" class="photo-input" data-category="side" style="display:none">
+                                                    <div class="photo-preview-circle" id="photo-preview-side">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                                                    </div>
+                                                    <span data-lang-key="photoSide">측면</span>
+                                                </label>
+                                            </div>
+                                            <div class="photo-upload-slot" data-category="back">
+                                                <label class="photo-upload-label">
+                                                    <input type="file" accept="image/*" capture="environment" class="photo-input" data-category="back" style="display:none">
+                                                    <div class="photo-preview-circle" id="photo-preview-back">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61z"/></svg>
+                                                    </div>
+                                                    <span data-lang-key="photoBack">후면</span>
+                                                </label>
+                                            </div>
+                                            <div class="photo-upload-slot" data-category="other">
+                                                <label class="photo-upload-label">
+                                                    <input type="file" accept="image/*" capture="environment" class="photo-input" data-category="other" style="display:none">
+                                                    <div class="photo-preview-circle" id="photo-preview-other">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2h-3zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8h-3zM5 19l3-4 2 3 3-4 4 5H5z"/></svg>
+                                                    </div>
+                                                    <span data-lang-key="photoOther">기타</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div id="photo-upload-progress" class="photo-upload-progress" style="display:none;">
+                                            <div class="md3-progress-bar">
+                                                <div class="md3-progress-bar-indicator" id="photo-progress-indicator"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </details>
+
+                                <!-- 하단 버튼 그룹 -->
+                                <div class="button-group">
+                                    <button type="submit" id="save-update-button" class="glass-button primary"
+                                        data-lang-key="saveRecord"><span class="material-symbols-outlined mi-inline mi-sm">check</span> 기록하기</button>
+                                    <button type="button" id="cancel-edit-button" class="glass-button"
+                                        style="display: none;" data-lang-key="cancelEdit">수정 취소</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+
+                </div>
+                <!-- ▲▲▲ '기록하기' 탭 완료 ▲▲▲ -->
+
+
+                <!-- ▼▼▼ 3. '변화 보고서' 탭을 'SV' 탭으로 변경 (id="tab-main") ▼▼▼ -->
+                <div id="tab-sv" class="tab-content active" role="tabpanel" aria-labelledby="tab-btn-sv">
+
+                    <!-- Streak Strip -->
+                    <div class="streak-strip-container" id="streak-strip-container"></div>
+
+                    <!-- 새로운 SV 그리드 컨테이너 -->
+                    <div class="sv-grid">
+                        <!-- 1. 기록하기(shortcut) -->
+                        <div id="sv-card-shortcut" class="sv-card">
+                            <!-- 내용은 JS로 채워짐 -->
+                        </div>
+
+                        <!-- 2. 계정/프로필 카드 -->
+                        <div id="sv-card-persona" class="sv-card sv-card--clickable">
+                            <!-- JS로 완전히 채워짐 (renderPersonaCard) -->
+                        </div>
+
+                        <!-- 3. 다이어리 요약 카드 -->
+                        <div id="sv-card-diary" class="sv-card sv-card--clickable">
+                            <!-- JS로 완전히 채워짐 (renderDiaryCard) -->
+                        </div>
+
+                        <!-- 3. 퀘스트 진행 카드 -->
+                        <div id="sv-card-quest" class="sv-card sv-card--clickable">
+                            <!-- JS로 완전히 채워짐 (renderQuestCard) -->
+                        </div>
+
+                        <!-- 4. 최근 변화 하이라이트 카드 -->
+                        <div id="sv-card-highlights" class="sv-card carousel-container">
+                            <h3 id="sv-card-highlights-title">
+                                <!-- JS에서 제목 채움 -->
+                            </h3>
+                            <div class="carousel-wrapper">
+                                <div id="sv-card-highlights-content" class="carousel-content">
+                                    <!-- JS에서 캐러셀 아이템 채움 -->
+                                </div>
+                                <button class="carousel-nav-btn prev" aria-label="Previous">
+                                    ‹</button>
+                                <button class="carousel-nav-btn next" aria-label="Next">›</button>
+                            </div>
+                            <div id="sv-card-highlights-dots" class="carousel-dots">
+                                <!-- JS에서 페이지 점 채움 -->
+                            </div>
+                        </div>
+
+                        <!-- 5. 가이드 카드 -->
+                        <div id="sv-card-guide" class="sv-card sv-card-widget carousel-container">
+                            <h3 id="sv-card-guide-title">
+                                <!-- JS에서 제목 채움 -->
+                            </h3>
+                            <div class="carousel-wrapper">
+                                <div id="sv-card-guide-content" class="carousel-content">
+                                    <!-- JS에서 캐러셀 아이템 채움 -->
+                                </div>
+                                <button class="carousel-nav-btn prev" aria-label="Previous">‹</button>
+                                <button class="carousel-nav-btn next" aria-label="Next">›</button>
+                            </div>
+                            <div id="sv-card-guide-dots" class="carousel-dots">
+                                <!-- JS에서 페이지 점 채움 -->
+                            </div>
+                        </div>
+
+                        <!-- 6. 건강 분석 카드 -->
+                        <div id="sv-card-health" class="sv-card sv-card--clickable">
+                            <!-- JS로 완전히 채워짐 (renderHealthCard) -->
+                        </div>
+
+                        <!-- 7. 변화 로드맵 카드 (건강 옆) -->
+                        <div id="sv-card-targets" class="sv-card sv-card--clickable">
+                            <!-- 내용은 JS로 채워짐 -->
+                        </div>
+
+                        <!-- 8. 호르몬 분석 카드 -->
+                        <div id="sv-card-hormones" class="sv-card sv-card--clickable">
+                            <!-- JS로 완전히 채워짐 (renderHormonesCard) -->
+                        </div>
+
+                    </div>
+                </div>
+                <!-- ▲▲▲ 'SV' 탭 완료 ▲▲▲ -->
+
+                <!-- 3. 마이 탭 -->
+                <div id="tab-my" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-my">
+                    <h2 data-lang-key="myTitle"><span class="material-symbols-outlined mi-inline">person</span> 마이 페이지</h2>
+
+                    <!-- 0. 계정 관리 섹션 -->
+                    <div class="my-section glass-card account-section">
+                        <div class="account-header">
+                            <div class="account-avatar" id="account-avatar">
+                                <!-- avatar photo (hidden until loaded) -->
+                                <img id="account-avatar-img" src="" alt="avatar" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:inherit;">
+                                <!-- fallback SVG shown when no photo -->
+                                <svg id="account-avatar-placeholder" width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                <!-- edit overlay button -->
+                                <label for="account-avatar-input" class="account-avatar-edit-btn" id="account-avatar-edit-btn" aria-label="아바타 변경">
+                                    <span class="material-symbols-outlined" style="font-size:14px;line-height:1;">photo_camera</span>
+                                </label>
+                                <input type="file" id="account-avatar-input" accept="image/*" style="display:none;">
+                            </div>
+                            <div class="account-info">
+                                <span class="account-name" id="account-name" data-lang-key="accountLocalUser">로컬 사용자</span>
+                                <span class="account-email" id="account-email" data-lang-key="accountNotLoggedIn">로그인하지 않음</span>
+                            </div>
+                        </div>
+                        <div class="account-actions">
+                            <button class="glass-button" id="btn-login-google" data-lang-key="loginWithGoogle">Google 로그인</button>
+                            <button class="glass-button" id="btn-logout" style="display:none;" data-lang-key="logout">로그아웃</button>
+                        </div>
+                    </div>
+
+                    <!-- 0.5 페르소나 설정 -->
+                    <div class="my-section glass-card">
+                        <h3 data-lang-key="personaTitle"><span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 내 프로필</h3>
+                        <div class="persona-grid">
+                            <div class="form-group">
+                                <label data-lang-key="nickname">닉네임</label>
+                                <input type="text" id="persona-nickname" maxlength="20" placeholder="">
+                            </div>
+                            <div class="form-group">
+                                <label data-lang-key="birthdate">생년월일</label>
+                                <input type="date" id="persona-birthdate">
+                            </div>
+                        </div>
+                        <button class="glass-button primary" id="save-persona-btn" data-lang-key="saveProfile">프로필 저장</button>
+                    </div>
+
+                    <!-- 1. 목표 설정 섹션 -->
+                    <div class="my-section glass-card">
+                        <h3 data-lang-key="targetTitle"><span class="material-symbols-outlined mi-inline mi-sm">favorite</span> 나만의 목표 설정</h3>
+                        <form id="target-form">
+                            <p class="description" data-lang-key="targetDescription">원하는 목표 수치를 입력해주세요. 메인 탭에서 달성률을 확인할
+                                수 있어요.</p>
+                            <div class="target-grid">
+                                <!-- JS에 의해 목표 입력 필드가 채워짐 -->
+                            </div>
+                            <div class="form-group" style="margin-top:16px;">
+                                <label data-lang-key="goalTextLabel">상세 목표 메모</label>
+                                <textarea id="goal-text-input" class="goal-textarea" maxlength="500" rows="4"
+                                    data-lang-key-placeholder="goalTextPlaceholder" placeholder="달성하고 싶은 구체적인 목표를 자유롭게 적어보세요..."></textarea>
+                                <div class="goal-char-counter"><span id="goal-char-count">0</span>/500</div>
+                            </div>
+                            <div class="goal-actions">
+                                <button type="submit" id="save-targets-button" class="glass-button primary"
+                                    data-lang-key="saveTarget"><span class="material-symbols-outlined mi-inline mi-sm">fitness_center</span> 목표 저장!</button>
+                                <button type="button" id="ai-goal-analysis-btn" class="ai-enhanced-badge"
+                                    style="margin-left:0;"><span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> <span data-lang-key="aiGoalAnalysis">AI 목표 분석</span></button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- AI Goal Analysis Result -->
+                    <div id="ai-goal-result" class="my-section glass-card" style="display:none;">
+                        <h3><span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> <span data-lang-key="aiGoalResultTitle">AI 목표 분석 결과</span></h3>
+                        <div id="ai-goal-result-content"></div>
+                    </div>
+
+                    <!-- 2. 상세 기록 확인 섹션 (나중에 '기록하기' 탭의 기록 뷰를 이곳으로 완전히 옮길 수 있습니다) -->
+                    <div class="my-section glass-card">
+                        <h3 data-lang-key="historyTitle"><span class="material-symbols-outlined mi-inline mi-sm">manage_search</span> 측정 기록 꼼꼼히 보기</h3>
+                        <p class="description" data-lang-key="historyDescription">(표가 화면보다 넓으면 좌우로 스크롤해보세요!)</p>
+                        <!-- 기록 확인 컴포넌트 -->
+                        <div id="my-history-view-container">
+                            <div id="my-history-filter-controls"></div>
+                            <div id="my-history-cards-container" class="history-view"></div>
+                            <div id="my-history-table-container"
+                                class="history-view table-responsive horizontal-scroll"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 설정 탭 -->
+                <div id="tab-settings" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-settings">
+                        <h2 data-lang-key="settingsTitle"><span class="material-symbols-outlined mi-inline">settings</span> 설정</h2>
+
+
+
+                        <div class="settings-section glass-card">
+                            <div class="setting-item">
+                                <h3 data-lang-key="languageSettingsTitle" id="language-settings-title">언어 설정</h3>
+                                <select id="language-select" aria-label="Language">
+                                    <option value="ko">한국어</option>
+                                    <option value="en">English</option>
+                                    <option value="ja">日本語</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- [수정] 생물학적 성별 설정 -->
+                        <div class="settings-section glass-card">
+                            <div class="setting-item">
+                                <h3 data-lang-key="sexSettingsTitle">생물학적 성별 설정</h3>
+                                <select id="sex-select" aria-label="Biological sex">
+                                    <option value="male" data-lang-key="sexMale">남성</option>
+                                    <option value="female" data-lang-key="sexFemale">여성</option>
+                                    <option value="other" data-lang-key="sexOther">기타-무성별</option>
+                                </select>
+                            </div>
+                            <p class="description" data-lang-key="sexSettingsDesc">자연 호르몬 회복률 계산에 사용됩니다.</p>
+                        </div>
+
+                        <!-- [수정] 모드 설정 -->
+                        <div class="settings-section glass-card">
+                            <div class="setting-item">
+                                <h3 data-lang-key="modeSettingsTitle" id="mode-settings-title">모드 설정</h3>
+                                <select id="mode-select" aria-label="Mode">
+                                    <option value="mtf" data-lang-key="modeMtf">여성화</option>
+                                    <option value="ftm" data-lang-key="modeFtm">남성화</option>
+                                </select>
+                            </div>
+                            <p class="description" data-lang-key="modeSettingsDesc" id="mode-settings-description">목표하는
+                                신체 변화 방향을 선택해주세요.</p>
+                        </div>
+
+                        <!-- [수정] 테마 설정 -->
+                        <div class="settings-section glass-card">
+                            <div class="setting-item">
+                                <h3 data-lang-key="themeSettingsTitle">테마 설정</h3>
+                                <select id="theme-select" aria-label="Theme">
+                                    <option value="system" data-lang-key="themeSystem">기기 값 참조</option>
+                                    <option value="light" data-lang-key="themeLight">라이트 모드</option>
+                                    <option value="dark" data-lang-key="themeDark">다크 모드</option>
+                                </select>
+                            </div>
+                            <!-- Accent Color Picker -->
+                            <div class="accent-color-grid" id="accent-color-grid">
+                                <button class="accent-chip" data-accent="rose" style="background:#B02F5B" aria-label="Rose" title="Rose"></button>
+                                <button class="accent-chip" data-accent="coral" style="background:#9B406B" aria-label="Coral" title="Coral"></button>
+                                <button class="accent-chip" data-accent="amber" style="background:#855400" aria-label="Amber" title="Amber"></button>
+                                <button class="accent-chip" data-accent="gold" style="background:#8E4E00" aria-label="Gold" title="Gold"></button>
+                                <button class="accent-chip" data-accent="lime" style="background:#1A6C30" aria-label="Lime" title="Lime"></button>
+                                <button class="accent-chip" data-accent="teal" style="background:#006A60" aria-label="Teal" title="Teal"></button>
+                                <button class="accent-chip" data-accent="cyan" style="background:#006874" aria-label="Cyan" title="Cyan"></button>
+                                <button class="accent-chip" data-accent="sky" style="background:#006493" aria-label="Sky" title="Sky"></button>
+                                <button class="accent-chip" data-accent="indigo" style="background:#4355B9" aria-label="Indigo" title="Indigo"></button>
+                                <button class="accent-chip" data-accent="violet" style="background:#7A4A9E" aria-label="Violet" title="Violet"></button>
+                                <div class="custom-color-picker-wrapper" style="position: relative; display: inline-block;">
+                                    <input type="color" id="custom-accent-picker" style="opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer;">
+                                    <button class="accent-chip custom-color-btn" id="custom-color-btn" style="background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);" aria-label="Custom Color" title="Custom Color"></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI API Settings -->
+                        <div class="settings-section glass-card">
+                            <h3 data-lang-key="aiApiTitle"><span class="material-symbols-outlined mi-inline mi-sm">smart_toy</span> AI 설정</h3>
+                            <p class="description" data-lang-key="aiApiDesc">AI 기능을 활성화하려면 API 키를 입력하세요.</p>
+                            <div class="form-group">
+                                <label data-lang-key="aiApiProvider">API 제공자</label>
+                                <select id="ai-api-provider" aria-label="AI Provider">
+                                    <option value="openai">OpenAI (GPT)</option>
+                                    <option value="anthropic">Anthropic (Claude)</option>
+                                    <option value="gemini">Google Gemini</option>
+                                    <option value="deepseek">DeepSeek</option>
+                                    <option value="custom" data-lang-key="aiOtherProvider">커스텀 (OpenAI 호환)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="ai-model-group">
+                                <label data-lang-key="aiApiModel">모델</label>
+                                <select id="ai-api-model" aria-label="AI Model">
+                                </select>
+                            </div>
+                            <div class="form-group" id="ai-custom-endpoint-group" style="display:none;">
+                                <label data-lang-key="aiCustomEndpoint">커스텀 API 엔드포인트</label>
+                                <input type="text" id="ai-custom-endpoint" placeholder="https://api.example.com/v1/chat/completions" autocomplete="off">
+                            </div>
+                            <div class="form-group" id="ai-custom-model-group" style="display:none;">
+                                <label data-lang-key="aiCustomModel">커스텀 모델명</label>
+                                <input type="text" id="ai-custom-model" placeholder="model-name" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label data-lang-key="aiApiKey">API Key</label>
+                                <div class="api-key-input-wrapper">
+                                    <input type="password" id="ai-api-key" placeholder="sk-..." autocomplete="off">
+                                    <button type="button" class="icon-button api-key-toggle" id="ai-key-toggle" aria-label="Show key">
+                                        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <button class="glass-button" id="ai-test-connection" data-lang-key="aiTestConnection">연결 테스트</button>
+                            <p class="description" id="ai-test-result" style="margin-top:8px;"></p>
+                        </div>
+
+                        <div class="settings-section glass-card">
+                            <div class="setting-item">
+                                <h3 data-lang-key="notificationSettingsTitle"
+                                    style="margin: 0; color: var(--primary); font-size: 1.2em;">알림 설정</h3>
+                                <label class="md3-switch">
+                                    <input type="checkbox" id="notification-toggle">
+                                    <span class="md3-switch-track"></span>
+                                    <span class="md3-switch-thumb"></span>
+                                </label>
+                            </div>
+                            <div>
+                                <p class="description" data-lang-key="notificationSettingsDesc"
+                                    style="margin-top: 15px;">마지막 측정일로부터 7일이 지나면
+                                    알려드려요.
+                                    알림을 받으려면 브라우저의 권한 허용이 필요해요.</p>
+                            </div>
+                        </div>
+
+
+                        <div class="settings-section glass-card">
+                            <h3 data-lang-key="dataManagementTitle" id="data-management-title">데이터 백업 & 복원</h3>
+                            <p class="description" data-lang-key="dataManagementDesc" id="data-management-description">
+                                모든
+                                기록을 파일
+                                하나로 저장하거나 복원할 수 있어요. 가끔 백업해두면 안심이에요! <span class="material-symbols-outlined mi-inline mi-sm">sentiment_satisfied</span></p>
+                            <div class="button-group">
+                                <button type="button" id="export-data-button" class="glass-button"
+                                    data-lang-key="exportData">파일
+                                    저장하기</button>
+                                <button type="button" id="export-csv-button" class="glass-button"
+                                    data-lang-key="exportCSV">CSV 내보내기</button>
+                                <button type="button" id="import-data-button" class="glass-button"
+                                    data-lang-key="importData">파일
+                                    불러오기</button>
+                            </div>
+                            <button type="button" id="cloud-sync-button" class="glass-button" style="width:100%; margin-top:8px;"
+                                data-lang-key="cloudSync"><span class="material-symbols-outlined mi-inline mi-sm">cloud_sync</span> 클라우드 동기화</button>
+                            <button type="button" id="pdf-report-button" class="glass-button" style="width:100%; margin-top:8px;"
+                                data-lang-key="pdfReport"><span class="material-symbols-outlined mi-inline mi-sm">description</span> 이번 달 리포트 저장</button>
+                            <input type="file" id="import-file-input" accept=".json" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0;">
+                            <p class="warning"><strong data-lang-key="warning">주의!</strong> <span
+                                    data-lang-key="importWarning">복원하면
+                                    지금 브라우저에 있는 모든 데이터가 파일 내용으로 완전히 대체돼요!</span></p>
+                        </div>
+
+                        <div class="settings-section glass-card">
+                            <h3 data-lang-key="notificationSettingsTitle"><span class="material-symbols-outlined mi-inline mi-sm">notifications</span> 알림 설정</h3>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label for="reminder-interval" data-lang-key="reminderInterval">측정 리마인더</label>
+                                <select id="reminder-interval" class="glass-select" style="width:100%;padding:10px;border-radius:12px;" aria-label="Reminder interval">
+                                    <option value="off" data-lang-key="reminderOff">비활성화</option>
+                                    <option value="daily" data-lang-key="reminderDaily">매일</option>
+                                    <option value="weekly" data-lang-key="reminderWeekly">주 1회</option>
+                                    <option value="biweekly" data-lang-key="reminderBiweekly">2주 1회</option>
+                                </select>
+                            </div>
+                            <button type="button" id="test-notification-btn" class="glass-button" style="width:100%;"
+                                data-lang-key="testNotification"><span class="material-symbols-outlined mi-inline mi-sm">notifications_active</span> 테스트 알림 보내기</button>
+                            <p class="hint-text" style="margin-top:8px;font-size:0.8rem;opacity:0.7;" data-lang-key="notificationHint">
+                                PWA로 설치하면 알림이 더 잘 작동해요!</p>
+                        </div>
+
+                        <div class="settings-section glass-card">
+                            <h3 data-lang-key="dataUpdateAndResetTitle">데이터 업데이트 및 초기화</h3>
+                            <div class="button-group">
+                                <button type="button" id="check-for-updates-button" class="glass-button"
+                                    data-lang-key="checkForUpdatesButton">업데이트 확인</button>
+                                <button type="button" id="reset-data-button" class="glass-button danger"
+                                    data-lang-key="resetDataButton">모든 데이터 초기화</button>
+                            </div>
+                            <button type="button" id="rerun-onboarding-btn" class="glass-button" style="width:100%; margin-top:8px;"
+                                data-lang-key="rerunOnboarding"><span class="material-symbols-outlined mi-inline mi-sm">rocket_launch</span> 온보딩 다시 보기</button>
+                            <p class="warning" id="reset-data-warning"><strong data-lang-key="severeWarning">정말정말
+                                    주의!</strong>
+                                <span data-lang-key="resetWarning"><span class="material-symbols-outlined mi-inline mi-sm mi-error">warning</span> 데이터 초기화는 모든 기록(측정, 목표, 다이어리)을 영구적으로 삭제합니다! 초기화 전에
+                                    꼭!
+                                    데이터를 파일로
+                                    백업해주세요.</span>
+                            </p>
+                        </div>
+                        <div class="settings-section info glass-card">
+                            <h3 data-lang-key="infoTitle" id="info-title">정보</h3>
+                            <p><span data-lang-key="versionLabel">버전:</span> <span
+                                    id="app-version-display-footer">1.4</span>
+                            </p>
+                            <p data-lang-key="privacyInfo" id="privacy-info">이 앱은 오프라인 작동하며 모든 데이터는 브라우저에만 안전하게 저장됩니다!
+                                <span class="material-symbols-outlined mi-inline mi-sm">sentiment_satisfied</span>
+                            </p>
+                            <p style="margin-top: 15px;"><strong>Made by MUMU</strong> <span class="material-symbols-outlined mi-inline mi-sm mi-primary">favorite</span></p>
+                            <p style="margin-top: 20px;" data-lang-key="developerMessage" id="developer-message">이 작은
+                                도구가
+                                당신의
+                                소중한 여정에 즐거움과 도움이 되기를 바라요!</p>
+                            <p>© 2025. MUMU. All rights reserved.</p>
+                            <p style="margin-top:12px; font-size:11px; color:var(--text-dim2, #888); line-height:1.5;">Emoji graphics by Google (<a href="https://fonts.google.com/noto/specimen/Noto+Emoji" target="_blank" rel="noopener" style="color:inherit;">Noto Emoji</a>), licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener" style="color:inherit;">CC BY 4.0</a>.</p>
+                        </div>
+
+                </div>
+
+                <!-- 다이어리 탭 -->
+                <div id="tab-diary" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-diary" style="display: none;">
+                    <!-- Calendar Header -->
+                    <div class="diary-calendar-header">
+                        <button class="icon-button" id="diary-prev-month" aria-label="Previous month">
+                            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg>
+                        </button>
+                        <h2 class="diary-month-title" id="diary-month-title">2025년 1월</h2>
+                        <button class="icon-button" id="diary-next-month" aria-label="Next month">
+                            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Calendar Grid -->
+                    <div class="diary-calendar glass-card">
+                        <div class="diary-weekday-row">
+                            <span data-lang-key="daySun">일</span>
+                            <span data-lang-key="dayMon">월</span>
+                            <span data-lang-key="dayTue">화</span>
+                            <span data-lang-key="dayWed">수</span>
+                            <span data-lang-key="dayThu">목</span>
+                            <span data-lang-key="dayFri">금</span>
+                            <span data-lang-key="daySat">토</span>
+                        </div>
+                        <div class="diary-day-grid" id="diary-day-grid">
+                            <!-- JS renders day cells here -->
+                        </div>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div id="diary-empty-state" class="glass-card" style="display:none; text-align:center; padding: 32px 16px;">
+                        <p data-lang-key="diaryEmptyMessage">아직 작성된 다이어리가 없어요.</p>
+                        <p data-lang-key="diaryEmptyHint" style="font-size:13px; opacity:0.7;">날짜를 탭하여 기분과 일기를 작성해보세요</p>
+                    </div>
+
+                    <!-- Inline Action Buttons (replaces floating FABs) -->
+                    <div class="diary-inline-actions">
+                        <button class="btn-filled-tonal diary-action-btn" id="fab-add-diary" aria-label="Write today's diary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                            <span data-lang-key="fabAddDiary">다이어리</span>
+                        </button>
+                        <button class="btn-filled-tonal diary-action-btn" id="fab-add-quest" aria-label="Add quest">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                            <span data-lang-key="fabAddQuest">퀘스트</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Diary Bottom Sheet -->
+                <div class="diary-bottom-sheet" id="diary-bottom-sheet">
+                    <div class="diary-sheet-backdrop" id="diary-sheet-backdrop"></div>
+                    <div class="diary-sheet-surface">
+                        <div class="diary-sheet-handle"></div>
+                        <div class="diary-sheet-header">
+                            <h3 class="diary-sheet-date" id="diary-sheet-date">2025-01-01</h3>
+                            <button class="icon-button" id="diary-sheet-close" aria-label="Close">
+                                <svg width="24" height="24" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/></svg>
+                            </button>
+                        </div>
+
+                        <!-- Evaluation Mood (평가 계열) -->
+                        <div class="diary-sheet-section">
+                            <label class="diary-sheet-label" data-lang-key="diaryEvaluationLabel">오늘 기분</label>
+                            <div class="diary-eval-row" id="diary-mood-selector">
+                                <button type="button" class="diary-eval-chip" data-evaluation="great"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f604/512.gif" class="noto-emoji" alt="😄" loading="lazy"><span data-lang-key="diaryMoodGreat">아주 좋음</span></button>
+                                <button type="button" class="diary-eval-chip" data-evaluation="good"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif" class="noto-emoji" alt="😊" loading="lazy"><span data-lang-key="diaryMoodGood">좋음</span></button>
+                                <button type="button" class="diary-eval-chip" data-evaluation="okay"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif" class="noto-emoji" alt="😐" loading="lazy"><span data-lang-key="diaryMoodOkay">보통</span></button>
+                                <button type="button" class="diary-eval-chip" data-evaluation="bad"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f61e/512.gif" class="noto-emoji" alt="😞" loading="lazy"><span data-lang-key="diaryMoodBad">나쁨</span></button>
+                                <button type="button" class="diary-eval-chip" data-evaluation="terrible"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f616/512.gif" class="noto-emoji" alt="😖" loading="lazy"><span data-lang-key="diaryMoodTerrible">끔찍함</span></button>
+                            </div>
+                        </div>
+
+                        <!-- Secondary Emotion (주요 감정) -->
+                        <div class="diary-sheet-section">
+                            <label class="diary-sheet-label" data-lang-key="diaryEmotionLabel">주요 감정</label>
+                            <div class="diary-emotion-grid" id="diary-emotion-selector">
+                                <button type="button" class="diary-emotion-chip" data-emotion="sad"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f622/512.gif" class="noto-emoji" alt="😢" loading="lazy"><span data-lang-key="diaryEmotionSad">슬픔</span></button>
+                                <button type="button" class="diary-emotion-chip" data-emotion="dizzy"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f635/512.gif" class="noto-emoji" alt="😵" loading="lazy"><span data-lang-key="diaryEmotionDizzy">어지러움</span></button>
+                                <button type="button" class="diary-emotion-chip" data-emotion="angry"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif" class="noto-emoji" alt="😡" loading="lazy"><span data-lang-key="diaryEmotionAngry">화남</span></button>
+                                <button type="button" class="diary-emotion-chip" data-emotion="surprised"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f62e/512.gif" class="noto-emoji" alt="😮" loading="lazy"><span data-lang-key="diaryEmotionSurprised">놀람</span></button>
+                                <button type="button" class="diary-emotion-chip" data-emotion="shocked"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f631/512.gif" class="noto-emoji" alt="😱" loading="lazy"><span data-lang-key="diaryEmotionShocked">충격</span></button>
+                                <button type="button" class="diary-emotion-chip" data-emotion="bored"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f611/512.gif" class="noto-emoji" alt="😑" loading="lazy"><span data-lang-key="diaryEmotionBored">심심함</span></button>
+                                <button type="button" class="diary-emotion-chip" data-emotion="excited"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f970/512.gif" class="noto-emoji" alt="🥰" loading="lazy"><span data-lang-key="diaryEmotionExcited">설렘</span></button>
+                                <button type="button" class="diary-emotion-chip" data-emotion="love"><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2764_fe0f/512.gif" class="noto-emoji" alt="❤️" loading="lazy"><span data-lang-key="diaryEmotionLove">사랑</span></button>
+                            </div>
+                        </div>
+
+                        <!-- Score Slider -->
+                        <div class="diary-sheet-section">
+                            <label class="diary-sheet-label diary-score-label-row">
+                                <span data-lang-key="diaryScoreLabel">오늘 하루 평점</span>
+                                <span class="diary-score-value" id="diary-score-display">—</span>
+                            </label>
+                            <div class="diary-score-row">
+                                <span class="diary-score-min">1</span>
+                                <input type="range" id="diary-score-slider" min="1" max="10" value="5" step="1" class="diary-score-slider">
+                                <span class="diary-score-max">10</span>
+                            </div>
+                        </div>
+
+                        <!-- Free text -->
+                        <div class="diary-sheet-section">
+                            <label class="diary-sheet-label" data-lang-key="diaryTextLabel">오늘의 일기</label>
+                            <div class="diary-textarea-wrapper">
+                                <textarea id="diary-text" class="diary-textarea" maxlength="500" placeholder="" data-lang-placeholder="diaryTextPlaceholder" rows="5"></textarea>
+                                <span class="diary-char-counter"><span id="diary-char-count">0</span>/500</span>
+                            </div>
+                        </div>
+
+                        <!-- Quest progress (rendered by JS) -->
+                        <div class="diary-sheet-section" id="diary-quest-section" style="display:none;">
+                            <label class="diary-sheet-label" data-lang-key="questProgressLabel">퀘스트 진행</label>
+                            <div id="diary-quest-list">
+                                <!-- JS renders active quests here -->
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="diary-sheet-actions">
+                            <button class="btn-text" id="diary-delete-btn" data-lang-key="delete" style="color:var(--md-sys-color-error, #B3261E);">삭제</button>
+                            <button class="btn-filled" id="diary-save-btn" data-lang-key="save">저장</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <div id="save-popup" class="popup"></div>
+
+
+
+    <!-- Body Briefing Modal Template -->
+    <div id="body-briefing-view" class="modal-tab-content" style="display: none;">
+        <div class="modal-content-wrapper">
+            <!-- 탭 전환 버튼 -->
+            <div class="modal-tab-switcher">
+                <button class="modal-tab-btn active" data-tab="briefing-summary"
+                    data-lang-key="modalTabBriefingSummary">요약</button>
+                <button class="modal-tab-btn" data-tab="briefing-health"
+                    data-lang-key="modalTabBriefingHealth">건강지표</button>
+                <button class="modal-tab-btn" data-tab="briefing-detail"
+                    data-lang-key="modalTabBriefingDetail">상세</button>
+            </div>
+
+            <!-- 1. 요약 탭 (새로운 구조) -->
+            <div id="briefing-summary-view" class="modal-tab-content active">
+                <div class="hormone-report-container">
+                <!-- 전체 목표 달성률 프로그래스 바 -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">1</span>
+                            <span data-lang-key="briefingOverallProgress">전체 목표 달성률</span>
+                        </h2>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar-wrapper">
+                            <div id="briefing-overall-progress-bar" class="progress-bar">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-info">
+                                <span id="briefing-progress-percentage">0%</span>
+                                <span id="briefing-progress-count">(0/0)</span>
+                            </div>
+                        </div>
+                        <div class="progress-change-info">
+                            <span data-lang-key="briefingWeeklyChange">주간 변화:</span>
+                            <span id="briefing-weekly-change">+0%</span>
+                            <span data-lang-key="briefingMonthlyAvg">월평균:</span>
+                            <span id="briefing-monthly-avg">+0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 전체 신체 변화 바 (여성화/남성화) -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">2</span>
+                            <span data-lang-key="briefingBodyChange">전체 신체 변화</span>
+                        </h2>
+                    </div>
+                    <div class="body-change-container">
+                        <div class="body-change-bar-wrapper">
+                            <div id="briefing-body-change-bar" class="body-change-bar">
+                                <div class="body-change-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="body-change-info">
+                                <span id="briefing-body-change-score">0</span>
+                                <span id="briefing-body-change-label">(-)</span>
+                            </div>
+                        </div>
+                        <div class="body-change-details">
+                            <div class="change-item">
+                                <span data-lang-key="briefingPreviousWeek">지난주:</span>
+                                <span id="briefing-prev-week">0</span>
+                            </div>
+                            <div class="change-item">
+                                <span data-lang-key="briefingMonthlyAvg">월평균:</span>
+                                <span id="briefing-monthly-score">0</span>
+                            </div>
+                            <div class="change-item">
+                                <span data-lang-key="briefingTarget">목표:</span>
+                                <span id="briefing-target-score">85</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 목표 달성률 -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">3</span>
+                            <span data-lang-key="briefingTargetAchievement">목표 달성률</span>
+                        </h2>
+                    </div>
+                    <div id="briefing-target-achievement-list" class="target-achievement-list">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 신체 비율 분석 -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">4</span>
+                            <span data-lang-key="briefingBodyRatio">신체 비율 분석</span>
+                        </h2>
+                    </div>
+                    <div id="briefing-body-ratio-container" class="body-ratio-container">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 미래 예측 -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">5</span>
+                            <span data-lang-key="briefingFuturePrediction">미래 예측</span>
+                        </h2>
+                    </div>
+                    <div id="briefing-predictions-container" class="predictions-container">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 건강 경고 알림 -->
+                <div class="briefing-section hormone-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">6</span>
+                            <span data-lang-key="briefingHealthAlerts">건강 경고 알림</span>
+                        </h2>
+                    </div>
+                    <div id="briefing-alerts-container" class="alerts-container">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 안전 평가 (SafetyEngine) -->
+                <div class="briefing-section hormone-section" id="briefing-safety-section">
+                    <div class="hormone-section-header">
+                        <h2 class="hormone-section-title">
+                            <span class="section-number">7</span>
+                            <span data-lang-key="briefingSafetyAssessment">약물 안전 평가</span>
+                        </h2>
+                        <p class="section-subtitle" data-lang-key="briefingSafetySubtitle" style="font-size:12px; color:var(--text-secondary); margin: 2px 0 8px 0;">
+                            약물·증상 기반 위험 도메인 분석 (확정 진단 아님 — 의료진 확인 필수)
+                        </p>
+                    </div>
+                    <!-- 도메인 점수 바 -->
+                    <div id="briefing-safety-scores" class="safety-scores-grid"></div>
+                    <!-- 안전 알림 목록 -->
+                    <div id="briefing-safety-alerts" class="safety-alerts-list"></div>
+                    <!-- 권장 검사 목록 -->
+                    <div id="briefing-safety-tests" class="safety-tests-list"></div>
+                    <!-- 교육 포인트 -->
+                    <div id="briefing-safety-education" class="safety-education-list"></div>
+                    <!-- 면책조항 -->
+                    <p id="briefing-safety-disclaimer" class="safety-disclaimer"></p>
+                </div>
+                </div>
+            </div>
+
+            <!-- 2. 건강지표 탭 (신체 측정 오버레이 + Radar Chart) -->
+            <div id="briefing-health-view" class="modal-tab-content">
+                <div class="hormone-report-container">
+                    <!-- 신체 측정 오버레이 (Phase 8) -->
+                    <div class="briefing-section hormone-section">
+                        <div class="hormone-section-header">
+                            <h2 class="hormone-section-title">
+                                <span class="material-symbols-outlined mi-inline">accessibility_new</span>
+                                <span data-lang-key="briefingBodyMeasurements">신체 측정 오버레이</span>
+                            </h2>
+                        </div>
+                        <div id="briefing-body-silhouette" class="briefing-body-silhouette"></div>
+                    </div>
+                    <!-- 건강지표 레이더 -->
+                    <div class="briefing-section hormone-section">
+                        <div class="hormone-section-header">
+                            <h2 class="hormone-section-title">
+                                <span class="material-symbols-outlined mi-inline">monitoring</span>
+                                <span data-lang-key="briefingHealthRadar">건강지표 레이더</span>
+                            </h2>
+                        </div>
+                        <div class="radar-chart-container">
+                            <canvas id="briefing-radar-chart"></canvas>
+                        </div>
+                        <div id="briefing-radar-legend" class="radar-legend"></div>
+                        <div id="briefing-radar-details" class="radar-details"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 상세 탭 (기존 그래프 유지) -->
+            <div id="briefing-detail-view" class="modal-tab-content">
+                <div class="comparison-report-container">
+                    <!-- 필터 버튼 섹션 -->
+                    <div id="briefing-filter-controls" class="comparison-filter-controls">
+                        <!-- JS에서 필터 버튼 생성 -->
+                    </div>
+                    <!-- 메인 그래프 섹션 -->
+                    <div class="chart-section">
+                        <div class="hormone-legend-controls" id="briefing-legend-controls"></div>
+                        <div class="chart-wrapper">
+                            <canvas id="briefing-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="briefing-selected-week-data-container" class="selected-week-data-container">
+                        <h4 id="briefing-selected-week-data-title"></h4>
+                        <div id="briefing-selected-week-data-content" class="selected-week-data-content"
+                            style="display: none;">
+                            <!-- JS에 의해 데이터가 채워지는 곳 -->
+                        </div>
+                        <p id="briefing-data-placeholder" class="placeholder-text" data-lang-key="graphClickPrompt">
+                            <!-- JS에 의해 안내 문구가 채워지는 곳 -->
+                        </p>
+                    </div>
+
+                    <!-- 상세 데이터 테이블 섹션 -->
+                    <div id="briefing-table-container" class="table-responsive horizontal-scroll">
+                        <!-- JS에서 상세 테이블 생성 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Roadmap Modal Template -->
+    <div id="change-roadmap-view" class="modal-tab-content" style="display: none;">
+        <div class="modal-content-wrapper">
+            <!-- 탭 전환 버튼 -->
+            <div class="modal-tab-switcher">
+                <button class="modal-tab-btn active" data-tab="roadmap-summary"
+                    data-lang-key="modalTabRoadmapSummary">요약</button>
+                <button class="modal-tab-btn" data-tab="roadmap-detail"
+                    data-lang-key="modalTabRoadmapDetail">상세</button>
+            </div>
+
+            <!-- 1. 요약 탭 -->
+            <div id="roadmap-summary-view" class="modal-tab-content active">
+                <!-- 전체 진행도 -->
+                <div class="roadmap-section">
+                    <h3 data-lang-key="roadmapOverallProgress">전체 진행도</h3>
+                    <div class="roadmap-progress-container">
+                        <div class="roadmap-progress-bar">
+                            <div id="roadmap-progress-fill" class="roadmap-progress-fill" style="width: 0%"></div>
+                            <div id="roadmap-progress-segments" class="roadmap-progress-segments"></div>
+                            <div id="roadmap-progress-ticks" class="roadmap-progress-ticks"></div>
+                            <svg id="roadmap-progress-trajectory" class="roadmap-progress-trajectory" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"></svg>
+                            <div id="roadmap-progress-marker-start" class="roadmap-progress-marker start"></div>
+                            <div id="roadmap-progress-marker-current" class="roadmap-progress-marker current"></div>
+                            <div id="roadmap-progress-marker-target" class="roadmap-progress-marker target"></div>
+                        </div>
+                        <div class="roadmap-progress-labels">
+                            <span data-lang-key="roadmapStart">시작</span>
+                            <span id="roadmap-current-week">Week 0</span>
+                            <span id="roadmap-target-week">Week 0</span>
+                        </div>
+                        <div class="roadmap-progress-info">
+                            <span data-lang-key="roadmapAchievementRate">전체 달성률:</span>
+                            <span id="roadmap-achievement-rate">0%</span>
+                            <span id="roadmap-achievement-count">(0/0 목표)</span>
+                        </div>
+                        <div id="roadmap-progress-note" class="roadmap-progress-note" style="display:none;"></div>
+                    </div>
+                </div>
+
+                <!-- 타임라인 -->
+                <div class="roadmap-section">
+                    <h3 data-lang-key="roadmapTimeline">타임라인</h3>
+                    <div id="roadmap-timeline-container" class="timeline-container">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 월별 요약 -->
+                <div class="roadmap-section">
+                    <h3 data-lang-key="roadmapMonthlySummary">월별 요약</h3>
+                    <div class="roadmap-standout">
+                        <h4 data-lang-key="roadmapStandoutChanges">가장 눈에 띄는 변화</h4>
+                        <div id="roadmap-standout-container" class="roadmap-standout-list"></div>
+                    </div>
+                    <div id="roadmap-monthly-summary-container" class="monthly-summary-container">
+                        <!-- JS에서 동적 생성 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 상세 탭 -->
+            <div id="roadmap-detail-view" class="modal-tab-content">
+                <div class="modal-tab-switcher roadmap-detail-switcher">
+                    <button class="modal-tab-btn active" data-subtab="roadmap-detail-graph" data-lang-key="roadmapDetailedGraph">상세 그래프</button>
+                    <button class="modal-tab-btn" data-subtab="roadmap-detail-change" data-lang-key="roadmapChangeComparison">변화</button>
+                    <button class="modal-tab-btn" data-subtab="roadmap-detail-compare" data-lang-key="roadmapCompareSpecificDate">특정일과 비교</button>
+                </div>
+
+                <div id="roadmap-detail-graph-view" class="modal-tab-content active">
+                    <div class="roadmap-section">
+                        <div class="hormone-legend-controls" id="roadmap-legend-controls"></div>
+                        <div class="chart-wrapper">
+                            <canvas id="roadmap-chart"></canvas>
+                        </div>
+                        <div id="roadmap-selected-week-data-container" class="selected-week-data-container">
+                            <h4 id="roadmap-selected-week-data-title"></h4>
+                            <div id="roadmap-selected-week-data-content" class="selected-week-data-content" style="display:none;"></div>
+                            <p id="roadmap-data-placeholder" class="placeholder-text" data-lang-key="graphClickPrompt"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="roadmap-detail-change-view" class="modal-tab-content">
+                    <div class="roadmap-section">
+                        <div id="roadmap-change-comparison" class="roadmap-change-comparison"></div>
+                    </div>
+                </div>
+
+                <div id="roadmap-detail-compare-view" class="modal-tab-content">
+                    <div class="roadmap-section">
+                        <div class="date-selector-container roadmap-date-compare">
+                            <div class="date-selector-field">
+                                <label for="roadmap-compare-base-select" data-lang-key="roadmapBaseDate">기준일</label>
+                                <select id="roadmap-compare-base-select"></select>
+                            </div>
+                            <div class="date-selector-field">
+                                <label for="roadmap-compare-target-select" data-lang-key="roadmapCompareDate">비교일</label>
+                                <select id="roadmap-compare-target-select"></select>
+                            </div>
+                        </div>
+                        <div class="roadmap-compare-actions">
+                            <button type="button" class="roadmap-action-btn" data-action="set-base-latest" data-lang-key="roadmapSetBaseLatest">기준=현재</button>
+                            <button type="button" class="roadmap-action-btn" data-action="set-compare-prev" data-lang-key="roadmapSetComparePrev">비교=지난주</button>
+                            <button type="button" class="roadmap-action-btn" data-action="set-compare-first" data-lang-key="roadmapSetCompareFirst">비교=처음</button>
+                            <button type="button" class="roadmap-action-btn" data-action="swap-dates" data-lang-key="roadmapSwapDates">바꾸기</button>
+                        </div>
+                        <div id="roadmap-compare-specific" class="comparison-results"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="action-guide-view" class="modal-tab-content" style="display: none;">
+        <div class="action-guide">
+            <!-- Tab Bar -->
+            <div class="action-guide-tabs">
+                <button class="action-guide-tab active" data-ag-tab="recommend" data-lang-key="actionGuideTabRecommended">추천 액션</button>
+                <button class="action-guide-tab" data-ag-tab="ai" data-lang-key="actionGuideTabAI">AI 추천</button>
+            </div>
+
+            <!-- Tab: Recommend -->
+            <div class="action-guide-tab-panel active" id="ag-panel-recommend">
+                <div class="action-guide-hero">
+                    <div class="action-guide-hero-title" data-lang-key="actionGuideNextMeasurement">다음 측정일</div>
+                    <div class="action-guide-hero-main">
+                        <div id="action-guide-dday" class="action-guide-dday"></div>
+                        <div id="action-guide-next-date" class="action-guide-next-date"></div>
+                    </div>
+                    <div id="action-guide-next-message" class="action-guide-hero-sub"></div>
+                </div>
+
+                <div class="action-guide-section">
+                    <div class="action-guide-section-title" data-lang-key="actionGuideRecommendations">추천 액션</div>
+                    <div id="action-guide-recommendations" class="action-guide-recommendations"></div>
+                </div>
+
+                <div class="action-guide-section">
+                    <div class="action-guide-section-title" data-lang-key="actionGuidePerformance">최근 성과 피드백</div>
+                    <div id="action-guide-performance" class="action-guide-performance"></div>
+                </div>
+
+                <div class="action-guide-section action-guide-med-ai-card" id="action-guide-medication-ai-section" style="display:none;">
+                    <div class="action-guide-med-ai-inner">
+                        <div class="action-guide-med-ai-icon">
+                            <span class="material-symbols-outlined">medication</span>
+                        </div>
+                        <div class="action-guide-med-ai-body">
+                            <div class="action-guide-med-ai-title" data-lang-key="aiMedicationSectionTitle">AI 약물 맞춤 조언</div>
+                            <div class="action-guide-med-ai-desc" data-lang-key="aiMedicationSectionDesc">현재 복용 중인 약물과 호르몬 수치를 기반으로 AI가 맞춤형 조언을 제공합니다.</div>
+                        </div>
+                        <button class="btn-filled-tonal action-guide-med-ai-btn" id="ai-medication-btn">
+                            <span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span>
+                            <span data-lang-key="aiMedicationBtnLabel">AI 조언 받기</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: AI Recommendations -->
+            <div class="action-guide-tab-panel" id="ag-panel-ai">
+                <div class="ag-ai-prompt-area">
+                    <textarea id="ag-ai-prompt" class="ag-ai-prompt-input" rows="3" data-lang-key-placeholder="actionGuideAIPromptPlaceholder" placeholder="원하는 추천 사항을 입력하세요 (예: 어깨를 넓히고 싶어요, 체지방을 줄이고 싶어요...)"></textarea>
+                    <button class="btn-filled ag-ai-generate-btn" id="ag-ai-generate-btn">
+                        <span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span>
+                        <span data-lang-key="actionGuideAIGenerateBtn">AI 추천 생성</span>
+                    </button>
+                </div>
+                <div id="ag-ai-results" class="ag-ai-results"></div>
+                <div class="ag-ai-disclaimer" data-lang-key="actionGuideAIDisclaimer">AI가 생성한 추천 액션입니다. AI는 실수를 할 수 있습니다.</div>
+            </div>
+        </div>
+    </div>
+    <div id="modal-bottom-sheet-overlay" class="modal-bottom-sheet-overlay">
+        <div id="modal-bottom-sheet" class="modal-bottom-sheet">
+            <div class="modal-header">
+                <div class="modal-handle"></div>
+                <h3 id="modal-title" class="modal-title"></h3>
+                <button id="modal-close-btn" class="modal-close-btn" aria-label="Close">×</button>
+            </div>
+            <div id="modal-content" class="modal-content">
+                <!-- 상세 내용이 여기에 동적으로 삽입됩니다. -->
+            </div>
+        </div>
+    </div>
+    <div id="hormone-modal-overlay" class="modal-bottom-sheet-overlay">
+        <div id="hormone-modal" class="modal-bottom-sheet">
+            <div class="modal-header">
+                <div class="modal-handle"></div>
+                <h3 id="hormone-modal-title" class="modal-title"></h3>
+                <button id="hormone-modal-close-btn" class="modal-close-btn" aria-label="Close">×</button>
+            </div>
+            <div class="modal-content">
+                <div class="hormone-report-container">
+                    <div class="chart-section" id="hormone-analysis-text">
+                        <!-- 자바스크립트가 이 안에 "최근 2주 분석" 내용을 채울 것입니다. -->
+                    </div>
+                    <div class="chart-section">
+                        <h4 data-lang-key="medicationHistoryTitle">투여량 변화</h4>
+                        <div class="hormone-legend-controls" id="medication-legend-controls"></div> <!-- 이 줄 추가 -->
+                        <div class="chart-wrapper">
+                            <canvas id="medication-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-section">
+                        <h4 data-lang-key="hormoneLevelHistoryTitle">호르몬 수치 변화</h4>
+                        <div class="hormone-legend-controls" id="hormone-legend-controls"></div> <!-- 이 줄 추가 -->
+                        <div class="chart-wrapper">
+                            <canvas id="hormone-chart"></canvas>
+                        </div>
+                    </div>
+
+
+                    <!-- 선택된 주차 데이터 표시 영역 -->
+                    <div id="selected-week-data-container" class="selected-week-data-container">
+                        <h4 id="selected-week-data-title"></h4>
+                        <div id="selected-week-data-content" class="selected-week-data-content" style="display: none;">
+                            <!-- JS에 의해 데이터가 채워지는 곳 -->
+                        </div>
+                        <p id="hormone-data-placeholder" class="placeholder-text" data-lang-key="graphClickPrompt">
+                            <!-- JS에 의해 안내 문구가 채워지는 곳 -->
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Duplicate Date Dialog -->
+    <div class="date-conflict-dialog" id="date-conflict-dialog" style="display:none;">
+        <div class="dialog-surface">
+            <h2 class="dialog-title" data-lang-key="duplicateDateTitle">중복된 날짜</h2>
+            <p class="dialog-content" data-lang-key="duplicateDateMsg">이 날짜에 이미 기록이 있습니다. 덮어쓰시겠습니까?</p>
+            <div class="dialog-actions">
+                <button class="btn-text" id="date-conflict-cancel" data-lang-key="cancel">취소</button>
+                <button class="btn-filled" id="date-conflict-overwrite" data-lang-key="overwrite">덮어쓰기</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="src/bridge.js"></script>
+    <script type="module" src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => console.log('Service Worker Registered:', registration.scope))
+                    .catch(error => console.log('Service Worker Registration Failed:', error));
+            });
+        } else {
+            console.log('Service Worker not supported by this browser.');
+        }
+    </script>
+
+</body>
+
+</html>

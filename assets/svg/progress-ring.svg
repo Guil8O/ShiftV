@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="40" fill="none" stroke="var(--md-sys-color-surface-variant)" stroke-width="8" />
+  <circle cx="50" cy="50" r="40" fill="none" stroke="var(--md-sys-color-primary)" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="251.2" class="progress" />
+  <style>
+    .progress {
+      animation: fill-progress 2s ease-out forwards;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+    @keyframes fill-progress {
+      to { stroke-dashoffset: 0; }
+    }
+  </style>
+</svg>

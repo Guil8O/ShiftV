@@ -6083,28 +6083,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if (exportDataButton) exportDataButton.addEventListener('click', exportMeasurementData);
         if (exportCsvButton) exportCsvButton.addEventListener('click', exportCSV);
 
-        // Cloud Sync button
+        // Cloud Sync buttons (upload / download split)
         const cloudSyncBtn = document.getElementById('cloud-sync-button');
-        if (cloudSyncBtn) {
-            cloudSyncBtn.addEventListener('click', async () => {
-                try {
-                    const syncMod = await import('./src/firebase/sync.js');
-                    const SyncManager = syncMod.SyncManager || syncMod.default;
-                    cloudSyncBtn.disabled = true;
-                    cloudSyncBtn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm">hourglass_top</span> ' + (translate('cloudSyncing') || '동기화 중...');
-                    const syncManager = new SyncManager();
-                    await syncManager.syncAll();
-                    cloudSyncBtn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm mi-success">check_circle</span> ' + (translate('cloudSyncDone') || '동기화 완료!');
-                    setTimeout(() => {
-                        cloudSyncBtn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm">cloud_sync</span> ' + (translate('cloudSync') || '클라우드 동기화');
-                        cloudSyncBtn.disabled = false;
-                    }, 2000);
-                } catch (err) {
-                    console.error('Cloud sync error:', err);
-                    cloudSyncBtn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm mi-error">error</span> ' + (translate('cloudSyncError') || '동기화 실패');
-                    cloudSyncBtn.disabled = false;
-                }
-            });
+        const cloudSyncSplit = document.getElementById('cloud-sync-split');
+        const cloudUploadBtn = document.getElementById('cloud-upload-btn');
+        const cloudDownloadBtn = document.getElementById('cloud-download-btn');
+
+        async function _withCloudBtn(btn, label, action) {
+            try {
+                const syncMod = await import('./src/firebase/sync.js');
+                const SyncManager = syncMod.SyncManager || syncMod.default;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm">hourglass_top</span> ' + (translate('cloudSyncing') || '처리 중...');
+                const syncManager = new SyncManager();
+                await action(syncManager);
+                btn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm mi-success">check_circle</span> ' + (translate('cloudSyncDone') || '완료!');
+                setTimeout(() => { btn.innerHTML = label; btn.disabled = false; }, 2000);
+            } catch (err) {
+                console.error('Cloud sync error:', err);
+                btn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm mi-error">error</span> ' + (translate('cloudSyncError') || '실패');
+                btn.disabled = false;
+            }
+        }
+        if (cloudUploadBtn) {
+            cloudUploadBtn.addEventListener('click', () => _withCloudBtn(
+                cloudUploadBtn,
+                '<span class="material-symbols-outlined mi-inline mi-sm">cloud_upload</span> ' + (translate('cloudUpload') || '클라우드에 저장'),
+                sm => sm.pushToCloud()
+            ));
+        }
+        if (cloudDownloadBtn) {
+            cloudDownloadBtn.addEventListener('click', () => _withCloudBtn(
+                cloudDownloadBtn,
+                '<span class="material-symbols-outlined mi-inline mi-sm">cloud_download</span> ' + (translate('cloudDownload') || '클라우드에서 불러오기'),
+                async sm => { await sm.pullFromCloud(); window.location.reload(); }
+            ));
         }
 
         // ── Avatar helpers ─────────────────────────────────────────────────
@@ -6188,7 +6201,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         accountEmail.textContent = user.email || '';
                         btnLoginGoogle.style.display = 'none';
                         btnLogout.style.display = 'inline-block';
-                        if (cloudSyncBtn) cloudSyncBtn.style.display = 'inline-block';
+                        if (cloudSyncSplit) cloudSyncSplit.style.display = 'flex';
                         // Prefer local cached avatar, else Google photo, else placeholder
                         const cached = localStorage.getItem('shiftV_avatarLocal');
                         if (cached) {
@@ -6203,7 +6216,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         accountEmail.textContent = translate('accountNotLoggedIn') || '로그인하지 않음';
                         btnLoginGoogle.style.display = 'inline-block';
                         btnLogout.style.display = 'none';
-                        if (cloudSyncBtn) cloudSyncBtn.style.display = 'none';
+                        if (cloudSyncSplit) cloudSyncSplit.style.display = 'none';
                         restoreLocalAvatar();
                     }
                 });

@@ -748,8 +748,14 @@
                                     data-lang-key="importData">파일
                                     불러오기</button>
                             </div>
-                            <button type="button" id="cloud-sync-button" class="glass-button" style="width:100%; margin-top:8px;"
+                            <button type="button" id="cloud-sync-button" class="glass-button" style="width:100%; margin-top:8px; display:none;"
                                 data-lang-key="cloudSync"><span class="material-symbols-outlined mi-inline mi-sm">cloud_sync</span> 클라우드 동기화</button>
+                            <div id="cloud-sync-split" style="display:none; margin-top:8px; gap:8px;" class="button-group">
+                                <button type="button" id="cloud-upload-btn" class="glass-button" style="flex:1;"
+                                    data-lang-key="cloudUpload"><span class="material-symbols-outlined mi-inline mi-sm">cloud_upload</span> 클라우드에 저장</button>
+                                <button type="button" id="cloud-download-btn" class="glass-button" style="flex:1;"
+                                    data-lang-key="cloudDownload"><span class="material-symbols-outlined mi-inline mi-sm">cloud_download</span> 클라우드에서 불러오기</button>
+                            </div>
                             <button type="button" id="pdf-report-button" class="glass-button" style="width:100%; margin-top:8px;"
                                 data-lang-key="pdfReport"><span class="material-symbols-outlined mi-inline mi-sm">description</span> 이번 달 리포트 저장</button>
                             <input type="file" id="import-file-input" accept=".json" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0;">

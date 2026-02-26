@@ -7,9 +7,8 @@
   "start_url": "/ShiftV/",
   "scope": "/ShiftV/",
   "id": "/ShiftV/",
-  "display": "fullscreen",
+  "display": "standalone",
   "display_override": [
-    "fullscreen",
     "standalone",
     "minimal-ui"
   ],

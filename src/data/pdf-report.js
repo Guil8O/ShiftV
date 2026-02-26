@@ -1,21 +1,10 @@
 /**
  * PDF Monthly Report Generator
  * Generates a monthly report PDF with body changes, quest progress, diary mood calendar, and streak stats.
- * Uses jsPDF loaded from CDN.
+ * Uses jsPDF from npm package (bundled by Vite).
  */
 
-const JSPDF_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js';
-
-async function loadJsPDF() {
-    if (window.jspdf) return window.jspdf;
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = JSPDF_CDN;
-        script.onload = () => resolve(window.jspdf);
-        script.onerror = () => reject(new Error('Failed to load jsPDF'));
-        document.head.appendChild(script);
-    });
-}
+import { jsPDF } from 'jspdf';
 
 export class PDFReportGenerator {
     constructor({ measurements, diary, quests, targets, translate, language }) {
@@ -28,8 +17,6 @@ export class PDFReportGenerator {
     }
 
     async generate(year, month) {
-        const jspdf = await loadJsPDF();
-        const { jsPDF } = jspdf;
         const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
         const pageW = doc.internal.pageSize.getWidth();

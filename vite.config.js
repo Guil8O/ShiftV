@@ -41,7 +41,7 @@ export default defineConfig({
         start_url: '/ShiftV/',
         scope: '/ShiftV/',
         id: '/ShiftV/',
-        display: 'fullscreen',
+        display: 'standalone',
         orientation: 'portrait',
         icons: [
           { src: 'android/android-launchericon-48-48.png', sizes: '48x48', type: 'image/png' },
@@ -50,7 +50,7 @@ export default defineConfig({
           { src: 'android/android-launchericon-144-144.png', sizes: '144x144', type: 'image/png' },
           { src: 'android/android-launchericon-192-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'android/android-launchericon-512-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'ios/180.png', sizes: '180x180', type: 'image/png', purpose: 'apple touch icon' },
+          { src: 'ios/180.png', sizes: '180x180', type: 'image/png', purpose: 'any' },
           { src: 'ios/512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
         ]
       },

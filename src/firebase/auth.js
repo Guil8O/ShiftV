@@ -24,6 +24,14 @@ export async function initAuthOnce() {
     if (initAuthPromise) return initAuthPromise;
 
     initAuthPromise = (async () => {
+        if (!auth) {
+            if (!authReadyResolved) {
+                authReadyResolved = true;
+                authReadyResolve(null);
+            }
+            return;
+        }
+
         await setPersistence(auth, browserLocalPersistence);
 
         try {
@@ -52,6 +60,10 @@ export async function initAuthOnce() {
 
 export async function signInWithGoogle() {
     try {
+        if (!auth) {
+            throw new Error('Firebase auth is not configured (missing VITE_FIREBASE_* env).');
+        }
+
         const isStandalone =
             window.matchMedia?.('(display-mode: standalone)')?.matches ||
             window.navigator.standalone === true;
@@ -116,6 +128,7 @@ export async function signUpWithEmail(email, password) {
 
 export async function signOut() {
     try {
+        if (!auth) return;
         await firebaseSignOut(auth);
     } catch (error) {
         console.error("Sign-Out Error:", error);
@@ -124,5 +137,9 @@ export async function signOut() {
 }
 
 export function onAuthStateChanged(callback) {
+    if (!auth) {
+        queueMicrotask(() => callback(null));
+        return () => {};
+    }
     return firebaseOnAuthStateChanged(auth, callback);
 }

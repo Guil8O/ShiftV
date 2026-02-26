@@ -15,12 +15,30 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+function isFirebaseConfigured(cfg) {
+  const apiKey = (cfg?.apiKey ?? '').trim();
+  const authDomain = (cfg?.authDomain ?? '').trim();
+  const projectId = (cfg?.projectId ?? '').trim();
 
-// Initialize Firebase services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+  if (!apiKey || !authDomain || !projectId) return false;
+  if (apiKey === 'your_api_key_here') return false;
+  return true;
+}
+
+export const firebaseEnabled = isFirebaseConfigured(firebaseConfig);
+
+let app = null;
+export let auth = null;
+export let db = null;
+export let storage = null;
+
+if (firebaseEnabled) {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
+} else {
+  console.warn('[Firebase] Disabled (missing VITE_FIREBASE_* env). Running in local-only mode.');
+}
 
 export default app;

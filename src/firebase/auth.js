@@ -17,6 +17,7 @@ const googleProvider = new GoogleAuthProvider();
  * sync.js 등에서 await authReady 로 사용
  */
 export const authReady = new Promise((resolve) => {
+    if (!auth) { resolve(null); return; }
     const unsubscribe = firebaseOnAuthStateChanged(auth, (user) => {
         unsubscribe();
         resolve(user);
@@ -29,6 +30,7 @@ export const authReady = new Promise((resolve) => {
  * @returns {Promise<import('firebase/auth').User|null>} 로그인된 사용자 또는 null
  */
 export async function handleRedirectResult() {
+    if (!auth) return null;
     try {
         const result = await getRedirectResult(auth);
         if (result) {
@@ -47,6 +49,7 @@ export async function handleRedirectResult() {
  * 모바일/PWA 환경에서는 signInWithRedirect, 데스크탑에서는 signInWithPopup 사용
  */
 export async function signInWithGoogle() {
+    if (!auth) throw new Error('Firebase not configured');
     try {
         const isMobileOrPWA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
             || window.matchMedia('(display-mode: standalone)').matches
@@ -69,6 +72,7 @@ export async function signInWithGoogle() {
 }
 
 export async function signInWithEmail(email, password) {
+    if (!auth) throw new Error('Firebase not configured');
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         return userCredential.user;
@@ -79,6 +83,7 @@ export async function signInWithEmail(email, password) {
 }
 
 export async function signUpWithEmail(email, password) {
+    if (!auth) throw new Error('Firebase not configured');
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         return userCredential.user;
@@ -89,6 +94,7 @@ export async function signUpWithEmail(email, password) {
 }
 
 export async function signOut() {
+    if (!auth) return;
     try {
         await firebaseSignOut(auth);
     } catch (error) {
@@ -98,5 +104,6 @@ export async function signOut() {
 }
 
 export function onAuthStateChanged(callback) {
+    if (!auth) { callback(null); return () => {}; }
     return firebaseOnAuthStateChanged(auth, callback);
 }

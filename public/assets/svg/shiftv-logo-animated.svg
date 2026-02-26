@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+  <g fill="none" stroke="var(--md-sys-color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 20 80 Q 40 20 60 80 T 100 80" class="draw" />
+    <path d="M 120 20 L 140 80 L 160 20" class="draw delay" />
+    <path d="M 180 20 L 180 80" class="draw delay2" />
+  </g>
+  <style>
+    .draw {
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      animation: draw-anim 2s ease-in-out forwards;
+    }
+    .delay { animation-delay: 0.5s; }
+    .delay2 { animation-delay: 1s; }
+    @keyframes draw-anim {
+      to { stroke-dashoffset: 0; }
+    }
+  </style>
+</svg>

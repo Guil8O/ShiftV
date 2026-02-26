@@ -32,31 +32,40 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['assets/**/*', 'android/**/*', 'ios/**/*', 'textures/**/*', 'windows11/**/*'],
       manifest: {
         name: 'ShiftV',
         short_name: 'ShiftV',
         description: 'ShiftV는 여러분의 꾸준한 신체 변화 과정을 간편하게 기록하고, 한눈에 변화를 추적하며 목표를 향해 나아갈 수 있도록 돕는 개인 맞춤형 기록 앱입니다.',
         theme_color: '#270082',
         background_color: '#1E1E48',
+        start_url: '/ShiftV/',
+        scope: '/ShiftV/',
+        id: '/ShiftV/',
         display: 'fullscreen',
         orientation: 'any',
         icons: [
-          {
-            src: 'android/android-launchericon-192-192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'android/android-launchericon-512-512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
+          { src: 'android/android-launchericon-48-48.png', sizes: '48x48', type: 'image/png' },
+          { src: 'android/android-launchericon-72-72.png', sizes: '72x72', type: 'image/png' },
+          { src: 'android/android-launchericon-96-96.png', sizes: '96x96', type: 'image/png' },
+          { src: 'android/android-launchericon-144-144.png', sizes: '144x144', type: 'image/png' },
+          { src: 'android/android-launchericon-192-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'android/android-launchericon-512-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'ios/180.png', sizes: '180x180', type: 'image/png', purpose: 'apple touch icon' },
+          { src: 'ios/512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff2}'],
+        globPatterns: ['**/*.{js,css,html,woff2}'],
+        navigateFallback: null,
         runtimeCaching: [
+          {
+            urlPattern: /\.(png|jpg|jpeg|svg|gif|ico|webp)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'image-cache',
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 }
+            }
+          },
           {
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
             handler: 'CacheFirst',
@@ -64,7 +73,7 @@ export default defineConfig({
               cacheName: 'cdn-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                maxAgeSeconds: 60 * 60 * 24 * 365
               },
               cacheableResponse: {
                 statuses: [0, 200]

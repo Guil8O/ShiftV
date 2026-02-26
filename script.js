@@ -118,6 +118,34 @@ function populateMedicationAutocomplete() {
     console.log("Autocomplete populated with " + uniqueNames.length + " items.");
 }
 
+// ── PWA Install Prompt ──────────────────────────────────────────────
+let _deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    _deferredInstallPrompt = e;
+    // 설치 가능 → 설정 탭에 설치 버튼 표시
+    const section = document.getElementById('pwa-install-section');
+    if (section) section.style.display = '';
+});
+window.addEventListener('appinstalled', () => {
+    _deferredInstallPrompt = null;
+    const section = document.getElementById('pwa-install-section');
+    if (section) section.style.display = 'none';
+    console.log('[PWA] App installed successfully');
+});
+
+// ── Clean up legacy service workers ─────────────────────────────────
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (const reg of registrations) {
+            // VitePWA의 sw.js는 유지, 레거시 service-worker.js는 제거
+            if (reg.active && reg.active.scriptURL.includes('service-worker.js')) {
+                reg.unregister().then(() => console.log('[SW] Legacy service-worker.js unregistered'));
+            }
+        }
+    });
+}
+
 // --- Main Application Logic ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log(`DEBUG: ShiftV App Initializing v${APP_VERSION}...`);
@@ -6314,6 +6342,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('Onboarding re-run error:', err);
                 }
             });
+        }
+
+        // --- PWA Install Button ---
+        const pwaInstallBtn = document.getElementById('pwa-install-btn');
+        if (pwaInstallBtn) {
+            pwaInstallBtn.addEventListener('click', async () => {
+                if (!_deferredInstallPrompt) return;
+                _deferredInstallPrompt.prompt();
+                const { outcome } = await _deferredInstallPrompt.userChoice;
+                console.log('[PWA] Install prompt outcome:', outcome);
+                _deferredInstallPrompt = null;
+                const section = document.getElementById('pwa-install-section');
+                if (section) section.style.display = 'none';
+            });
+        }
+        // 이미 PWA로 실행 중이면 설치 섹션 숨김
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            const section = document.getElementById('pwa-install-section');
+            if (section) section.style.display = 'none';
         }
 
         // --- Notification Reminder ---

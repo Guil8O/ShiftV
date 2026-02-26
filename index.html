@@ -9,7 +9,7 @@
     <meta name="description" content="ShiftV — 칔설한 신체 변화를 기록하고 시각화하는 개인 맞칔형 컨디션 트래커">
     <title>ShiftV - 당신의 변화를 기록하세요</title>
 
-    <link rel="manifest" href="manifest.json">
+    <!-- VitePWA auto-injects manifest.webmanifest link -->
 
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -758,6 +758,15 @@
                                     지금 브라우저에 있는 모든 데이터가 파일 내용으로 완전히 대체돼요!</span></p>
                         </div>
 
+                        <!-- PWA 설치 (모바일 웹 전용, 이미 설치된 경우 숨김) -->
+                        <div class="settings-section glass-card" id="pwa-install-section" style="display:none;">
+                            <h3><span class="material-symbols-outlined mi-inline mi-sm">install_mobile</span> <span data-lang-key="pwaInstallTitle">앱 설치</span></h3>
+                            <p style="font-size:0.85rem;opacity:0.8;margin-bottom:12px;" data-lang-key="pwaInstallDesc">홈 화면에 추가하면 더 빠르고 안정적으로 사용할 수 있어요.</p>
+                            <button type="button" id="pwa-install-btn" class="glass-button" style="width:100%;">
+                                <span class="material-symbols-outlined mi-inline mi-sm">download</span> <span data-lang-key="pwaInstallButton">ShiftV 설치하기</span>
+                            </button>
+                        </div>
+
                         <div class="settings-section glass-card">
                             <h3 data-lang-key="notificationSettingsTitle"><span class="material-symbols-outlined mi-inline mi-sm">notifications</span> 알림 설정</h3>
                             <div class="form-group" style="margin-bottom:12px;">
@@ -1408,17 +1417,7 @@
 
     <script type="module" src="src/bridge.js"></script>
     <script type="module" src="script.js"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(registration => console.log('Service Worker Registered:', registration.scope))
-                    .catch(error => console.log('Service Worker Registration Failed:', error));
-            });
-        } else {
-            console.log('Service Worker not supported by this browser.');
-        }
-    </script>
+    <!-- VitePWA autoUpdate handles SW registration via registerSW.js -->
 
 </body>
 

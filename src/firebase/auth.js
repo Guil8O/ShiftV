@@ -46,25 +46,15 @@ export async function handleRedirectResult() {
 
 /**
  * 구글 로그인
- * 모바일/PWA 환경에서는 signInWithRedirect, 데스크탑에서는 signInWithPopup 사용
+ * GitHub Pages의 COOP 헤더가 signInWithPopup을 차단하므로
+ * 모든 환경에서 signInWithRedirect 통일 사용
  */
 export async function signInWithGoogle() {
     if (!auth) throw new Error('Firebase not configured');
     try {
-        const isMobileOrPWA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-            || window.matchMedia('(display-mode: standalone)').matches
-            || window.navigator.standalone === true;
-
-        if (isMobileOrPWA) {
-            // 모바일/PWA: 리다이렉트 방식 (팝업 차단 회피)
-            await signInWithRedirect(auth, googleProvider);
-            // signInWithRedirect는 페이지를 떠나므로 여기서 return되지 않음
-            return null;
-        } else {
-            // 데스크탑: 팝업 방식 (기존 동작 유지)
-            const result = await signInWithPopup(auth, googleProvider);
-            return result.user;
-        }
+        await signInWithRedirect(auth, googleProvider);
+        // signInWithRedirect는 페이지를 떠나므로 여기서 return되지 않음
+        return null;
     } catch (error) {
         console.error("Google Sign-In Error:", error);
         throw error;

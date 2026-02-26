@@ -61,7 +61,8 @@ export async function initAuthOnce() {
 export async function signInWithGoogle() {
     try {
         if (!auth) {
-            throw new Error('Firebase auth is not configured (missing VITE_FIREBASE_* env).');
+            console.warn('[Auth] Firebase not configured; Google Sign-In disabled (local-only mode).');
+            return null;
         }
 
         const isStandalone =
@@ -108,6 +109,10 @@ export async function ensureLoginOrShowUI() {
 
 export async function signInWithEmail(email, password) {
     try {
+        if (!auth) {
+            console.warn('[Auth] Firebase not configured; Email Sign-In disabled (local-only mode).');
+            return null;
+        }
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         return userCredential.user;
     } catch (error) {
@@ -118,6 +123,10 @@ export async function signInWithEmail(email, password) {
 
 export async function signUpWithEmail(email, password) {
     try {
+        if (!auth) {
+            console.warn('[Auth] Firebase not configured; Email Sign-Up disabled (local-only mode).');
+            return null;
+        }
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         return userCredential.user;
     } catch (error) {

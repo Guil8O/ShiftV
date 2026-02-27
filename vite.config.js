@@ -21,7 +21,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'chart': ['chart.js'],
+          // chart.js is loaded via CDN <script defer> — not bundled
           'firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
           'utils': ['pako', 'browser-image-compression']
         }

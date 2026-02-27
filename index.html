@@ -31,9 +31,10 @@
     <link rel="stylesheet" href="src/styles/base.css">
     <link rel="stylesheet" href="src/styles/animations.css">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@material/material-color-utilities@0.3.0/dist/index.min.js"></script>
-    <script src="src/utils/color-generator.js"></script>
+    <!-- chart.js: defer keeps execution order & unblocks HTML parsing -->
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- @material/material-color-utilities removed — color-generator.js is standalone -->
+    <script defer src="src/utils/color-generator.js"></script>
 </head>
 
 <body class="dark-mode">

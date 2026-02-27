@@ -1128,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     language: currentLanguage || 'ko',
                     targets: targets || {}
                 };
-                history.pushState({ type: 'modal-briefing' }, '', '');
+                history.pushState({ type: 'modal-briefing' }, '', location.href);
                 const modal = new BodyBriefingModal(measurements || [], userSettings);
                 modal.open();
             }).catch(error => {
@@ -5801,7 +5801,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     syncModuleLanguage(currentLanguage || 'ko');
                     // 히스토리에 모달 상태를 먼저 추가하여 연속 열기/닫기 시 버그 방지
-                    history.pushState({ type: 'modal-action-guide' }, '', '');
+                    history.pushState({ type: 'modal-action-guide' }, '', location.href);
                     import('./src/ui/modals/action-guide-modal.js').then(module => {
                         const ActionGuideModal = module.ActionGuideModal || module.default;
                         const userSettings = {

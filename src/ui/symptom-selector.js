@@ -6,6 +6,7 @@
 
 import { SYMPTOM_DATABASE } from '../doctor-module/data/symptom-database.js';
 import { translateUI, setCurrentLanguage, translate } from '../translations.js';
+import { svgIcon } from './icon-paths.js';
 
 // 카테고리 번역 맵
 const SYMPTOM_CATEGORY_TRANSLATIONS = {
@@ -87,7 +88,7 @@ export class SymptomSelector {
     if (this.symptoms.length === 0) {
       this.container.innerHTML = `
         <div class="symptoms-empty-state">
-          <div class="symptoms-empty-state-icon"><span class="material-symbols-outlined mi-xl">stethoscope</span></div>
+          <div class="symptoms-empty-state-icon">${svgIcon('stethoscope', 'mi-xl')}</div>
           <p data-lang-key="symptomsEmptyState">증상이 없으면 추가 버튼을 눌러 증상을 선택하세요.</p>
         </div>
       `;
@@ -193,7 +194,7 @@ export class SymptomSelector {
         ${this.renderSymptomSelect(symptom.id, symptom.symptomId)}
         ${this.renderSeveritySelector(symptom.id, symptom.severity)}
         <button type="button" class="remove-symptom-btn" data-remove-id="${symptom.id}">
-          <span class="material-symbols-outlined mi-sm">close</span>
+          ${svgIcon('close', 'mi-sm')}
         </button>
       </div>
     `;
@@ -282,7 +283,7 @@ export class SymptomSelector {
         <span class="severity-star ${filled}" 
               data-star="${id}" 
               data-value="${i}">
-          <span class="material-symbols-outlined mi-sm${i <= severity ? ' mi-filled' : ''}">${i <= severity ? 'star' : 'star_border'}</span>
+          ${svgIcon(i <= severity ? 'star' : 'star_border', 'mi-sm' + (i <= severity ? ' mi-filled' : ''))}
         </span>
       `;
     }
@@ -334,11 +335,11 @@ export class SymptomSelector {
       if (value <= severity) {
         star.classList.remove('empty');
         star.classList.add('filled');
-        star.innerHTML = '<span class="material-symbols-outlined mi-sm mi-filled">star</span>';
+        star.innerHTML = svgIcon('star', 'mi-sm mi-filled');
       } else {
         star.classList.remove('filled');
         star.classList.add('empty');
-        star.innerHTML = '<span class="material-symbols-outlined mi-sm">star_border</span>';
+        star.innerHTML = svgIcon('star_border', 'mi-sm');
       }
     });
   }

@@ -4,6 +4,7 @@
  * 다국어 지원을 위한 번역 데이터 및 함수
  * @module translations
  */
+import { svgIcon } from './ui/icon-paths.js';
 
 /**
  * 언어별 번역 데이터
@@ -2330,8 +2331,8 @@ export function getCurrentLanguage() {
 export function parseIconPatterns(text) {
     if (!text || !text.includes('{{icon:')) return text;
     return text.replace(/\{\{icon:([^}:]+)(?::([^}]*))?\}\}/g, (_, name, classes) => {
-        const cls = classes ? `material-symbols-outlined ${classes}` : 'material-symbols-outlined mi-inline mi-sm';
-        return `<span class="${cls}">${name}</span>`;
+        const cls = classes ? classes : 'mi-inline mi-sm';
+        return svgIcon(name, cls);
     });
 }
 

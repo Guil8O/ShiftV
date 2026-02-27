@@ -1,3 +1,4 @@
+import { svgIcon } from '../../ui/icon-paths.js';
 /**
  * FTM Analyzer
  * 
@@ -473,13 +474,13 @@ export class FTMAnalyzer {
     const percentage = totalChanges > 0 ? (positiveChanges / totalChanges) * 100 : 0;
     
     if (percentage >= 80) {
-      return '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> 훌륭합니다! 신체가 남성적으로 재형성되고 있습니다!';
+      return svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 훌륭합니다! 신체가 남성적으로 재형성되고 있습니다!';
     } else if (percentage >= 60) {
-      return '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 좋은 진행 상황입니다. 계속 유지하세요!';
+      return svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 좋은 진행 상황입니다. 계속 유지하세요!';
     } else if (percentage >= 40) {
-      return '<span class="material-symbols-outlined mi-inline mi-sm">trending_up</span> 진행 중입니다. 운동과 식단을 재검토하세요.';
+      return svgIcon('trending_up', 'mi-inline mi-sm') + ' 진행 중입니다. 운동과 식단을 재검토하세요.';
     } else {
-      return '<span class="material-symbols-outlined mi-inline mi-sm mi-warning">warning</span> 개선이 필요합니다. 근력 운동을 늘리세요.';
+      return svgIcon('warning', 'mi-inline mi-sm mi-warning') + ' 개선이 필요합니다. 근력 운동을 늘리세요.';
     }
   }
   
@@ -837,13 +838,13 @@ export class FTMAnalyzer {
   
   _getMasculinizationMessage(score) {
     if (score >= 85) {
-      return '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> 훌륭합니다! 남성화가 매우 잘 진행되고 있습니다!';
+      return svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 훌륭합니다! 남성화가 매우 잘 진행되고 있습니다!';
     } else if (score >= 70) {
-      return '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 남성화가 순조롭게 진행 중입니다!';
+      return svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 남성화가 순조롭게 진행 중입니다!';
     } else if (score >= 50) {
-      return '<span class="material-symbols-outlined mi-inline mi-sm">trending_up</span> 중간 정도 진행되었습니다. 계속 노력하세요!';
+      return svgIcon('trending_up', 'mi-inline mi-sm') + ' 중간 정도 진행되었습니다. 계속 노력하세요!';
     } else if (score >= 30) {
-      return '<span class="material-symbols-outlined mi-inline mi-sm">spa</span> 초기 단계입니다. 시간과 인내가 필요합니다.';
+      return svgIcon('spa', 'mi-inline mi-sm') + ' 초기 단계입니다. 시간과 인내가 필요합니다.';
     } else {
       return '시작 단계입니다. 꾸준한 관리가 중요합니다.';
     }

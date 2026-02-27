@@ -8,6 +8,7 @@ import { DoctorEngine } from '../../doctor-module/core/doctor-engine.js';
 import { translate, translateUI, getCurrentLanguage } from '../../translations.js';
 import { SYMPTOM_DATABASE } from '../../doctor-module/data/symptom-database.js';
 import { MEDICATION_DATABASE, getAllMedications } from '../../doctor-module/data/medication-database.js';
+import { svgIcon } from '../icon-paths.js';
 
 const ensureAverageLinePluginRegistered = () => {
   if (typeof Chart === 'undefined') return;
@@ -252,7 +253,7 @@ export class BodyBriefingModal {
       // 상태 메시지
       let statusMessage;
       if (achievement.status === 'achieved') {
-        statusMessage = achievement.message ? translate(achievement.message) : `<span class="material-symbols-outlined mi-inline mi-sm mi-success">check_circle</span> ${translate('achieved')}`;
+        statusMessage = achievement.message ? translate(achievement.message) : `${svgIcon('check_circle', 'mi-inline mi-sm mi-success')} ${translate('achieved')}`;
       } else {
         const params = {};
         if (achievement.weeksRemaining !== undefined) {
@@ -493,7 +494,7 @@ export class BodyBriefingModal {
         </div>
         <div class="ratio-bar-container">
           <div class="ratio-icon-group">
-            <span class="ratio-icon male"><span class="material-symbols-outlined mi-inline mi-sm">male</span></span>
+            <span class="ratio-icon male">${svgIcon('male', 'mi-inline mi-sm')}</span>
             <span class="ratio-percentile">${malePercent}</span>
           </div>
           <div class="ratio-bar">
@@ -501,7 +502,7 @@ export class BodyBriefingModal {
             <div class="ratio-bar-marker" style="left: ${position}%;"></div>
           </div>
           <div class="ratio-icon-group">
-            <span class="ratio-icon female"><span class="material-symbols-outlined mi-inline mi-sm">female</span></span>
+            <span class="ratio-icon female">${svgIcon('female', 'mi-inline mi-sm')}</span>
             <span class="ratio-percentile">${femalePercent}</span>
           </div>
         </div>
@@ -780,7 +781,7 @@ export class BodyBriefingModal {
     
     const items = alerts.map(alert => {
       const level = alert.level || 'info';
-      const icon = level === 'critical' ? '<span class="material-symbols-outlined mi-sm mi-error">emergency</span>' : (level === 'warning' ? '<span class="material-symbols-outlined mi-sm mi-warning">warning</span>' : '<span class="material-symbols-outlined mi-sm mi-on-surface">info</span>');
+      const icon = level === 'critical' ? svgIcon('emergency', 'mi-sm mi-error') : (level === 'warning' ? svgIcon('warning', 'mi-sm mi-warning') : svgIcon('info', 'mi-sm mi-on-surface'));
       
       return `
         <div class="alert-item ${level}">
@@ -863,10 +864,10 @@ export class BodyBriefingModal {
     if (alertsEl) {
       const alertItems = alerts.map(alert => {
         const levelIcon = alert.level === 'critical'
-          ? '<span class="material-symbols-outlined mi-sm mi-error">emergency</span>'
+          ? svgIcon('emergency', 'mi-sm mi-error')
           : alert.level === 'warning'
-          ? '<span class="material-symbols-outlined mi-sm mi-warning">warning</span>'
-          : '<span class="material-symbols-outlined mi-sm mi-on-surface">info</span>';
+          ? svgIcon('warning', 'mi-sm mi-warning')
+          : svgIcon('info', 'mi-sm mi-on-surface');
 
         const triggeredMedTags = (alert.triggeredMeds || [])
           .map(m => `<span class="safety-tag safety-tag-med">${m.replace(/_/g, ' ')}</span>`)
@@ -901,10 +902,10 @@ export class BodyBriefingModal {
       const testsTitle = lang === 'ko' ? '권장 검사' : lang === 'ja' ? '推奨検査' : 'Recommended Tests';
       const testItems = recommendedTests.map(test => {
         const priorityIcon = test.priority === 'critical'
-          ? '<span class="material-symbols-outlined mi-sm mi-error" style="font-size:16px;">priority_high</span>'
+          ? svgIcon('priority_high', 'mi-sm mi-error')
           : test.priority === 'warning'
-          ? '<span class="material-symbols-outlined mi-sm mi-warning" style="font-size:16px;">report</span>'
-          : '<span class="material-symbols-outlined mi-sm" style="font-size:16px;">check_circle</span>';
+          ? svgIcon('report', 'mi-sm mi-warning')
+          : svgIcon('check_circle', 'mi-sm');
 
         return `
           <div class="safety-test-item safety-test-${test.priority}">
@@ -919,7 +920,7 @@ export class BodyBriefingModal {
       });
       testsEl.innerHTML = `
         <h4 class="safety-subsection-title" style="margin: 12px 0 8px; font-size: 14px; font-weight: 600;">
-          <span class="material-symbols-outlined mi-inline mi-sm">labs</span>
+          ${svgIcon('labs', 'mi-inline mi-sm')}
           ${testsTitle}
         </h4>
         ${testItems.join('')}
@@ -934,13 +935,13 @@ export class BodyBriefingModal {
       const eduTitle = lang === 'ko' ? '약물 안전 정보' : lang === 'ja' ? '薬物安全情報' : 'Drug Safety Information';
       const eduItems = educationPoints.map(pt => `
         <div class="safety-edu-item">
-          <span class="material-symbols-outlined mi-inline mi-sm">${pt.icon || 'info'}</span>
+          ${svgIcon(pt.icon || 'info', 'mi-inline mi-sm')}
           <span class="safety-edu-text">${pt.text}</span>
         </div>
       `);
       eduEl.innerHTML = `
         <h4 class="safety-subsection-title" style="margin: 12px 0 8px; font-size: 14px; font-weight: 600;">
-          <span class="material-symbols-outlined mi-inline mi-sm">menu_book</span>
+          ${svgIcon('menu_book', 'mi-inline mi-sm')}
           ${eduTitle}
         </h4>
         ${eduItems.join('')}

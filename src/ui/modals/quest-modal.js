@@ -9,6 +9,7 @@
 import { today as getToday } from '../../utils.js';
 import { BaseModal } from './base-modal.js';
 import { chartZoomState, ensureChartWrapperContainer, applyChartZoom, ensureChartZoomControls } from '../chart-zoom.js';
+import { svgIcon } from '../icon-paths.js';
 
 const STORAGE_KEY = 'shiftv_quests';
 
@@ -28,12 +29,12 @@ const LINKABLE_FIELDS = [
 ];
 
 const CATEGORIES = [
-    { key: 'body', icon: '<span class="material-symbols-outlined category-icon">fitness_center</span>', ko: '신체', en: 'Body', ja: '身体' },
-    { key: 'exercise', icon: '<span class="material-symbols-outlined category-icon">directions_run</span>', ko: '운동', en: 'Exercise', ja: '運動' },
-    { key: 'diet', icon: '<span class="material-symbols-outlined category-icon">restaurant</span>', ko: '식단', en: 'Diet', ja: '食事' },
-    { key: 'lifestyle', icon: '<span class="material-symbols-outlined category-icon">dark_mode</span>', ko: '생활', en: 'Lifestyle', ja: '生活' },
-    { key: 'hormone', icon: '<span class="material-symbols-outlined category-icon">medication</span>', ko: '호르몬', en: 'Hormone', ja: 'ホルモン' },
-    { key: 'custom', icon: '<span class="material-symbols-outlined category-icon">auto_awesome</span>', ko: '기타', en: 'Custom', ja: 'その他' },
+    { key: 'body', icon: svgIcon('fitness_center', 'category-icon'), ko: '신체', en: 'Body', ja: '身体' },
+    { key: 'exercise', icon: svgIcon('directions_run', 'category-icon'), ko: '운동', en: 'Exercise', ja: '運動' },
+    { key: 'diet', icon: svgIcon('restaurant', 'category-icon'), ko: '식단', en: 'Diet', ja: '食事' },
+    { key: 'lifestyle', icon: svgIcon('dark_mode', 'category-icon'), ko: '생활', en: 'Lifestyle', ja: '生活' },
+    { key: 'hormone', icon: svgIcon('medication', 'category-icon'), ko: '호르몬', en: 'Hormone', ja: 'ホルモン' },
+    { key: 'custom', icon: svgIcon('auto_awesome', 'category-icon'), ko: '기타', en: 'Custom', ja: 'その他' },
 ];
 
 const DAY_KEYS = [
@@ -289,7 +290,7 @@ export class QuestModal extends BaseModal {
         if (sorted.length === 0) {
             container.innerHTML = `
                 <div class="quest-empty-state">
-                    <div class="quest-empty-icon"><span class="material-symbols-outlined mi-xl">target</span></div>
+                    <div class="quest-empty-icon">${svgIcon('target', 'mi-xl')}</div>
                     <p>${this._t('questEmptyMessage')}</p>
                     <p class="quest-empty-hint">${this._t('questEmptyHint')}</p>
                 </div>
@@ -375,7 +376,8 @@ export class QuestModal extends BaseModal {
                         const q = this.quests.find(q => q.id === id);
                         const isProgress = q?.trackingType === 'progress';
                         if (wrap) wrap.innerHTML = `<input class="quest-history-edit-input" type="number" value="${btn.dataset.value}" ${isProgress ? 'min="0" max="100"' : ''} step="${isProgress ? '1' : 'any'}">`;
-                        btn.querySelector('.material-symbols-outlined').textContent = 'check';
+                        const iconEl = btn.querySelector('.svg-icon');
+                        if (iconEl) iconEl.outerHTML = svgIcon('check', 'mi-sm');
                     }
                 });
             });
@@ -473,14 +475,14 @@ export class QuestModal extends BaseModal {
             } else if (trackingType === 'linked') {
                 sideHtml = `
             <div class="quest-card-side quest-card-side--linked">
-                <span class="material-symbols-outlined quest-linked-icon">link</span>
+                ${svgIcon('link', 'quest-linked-icon')}
                 <span class="quest-side-label">${this._t('questLinkedLabel')}</span>
             </div>`;
             } else {
                 sideHtml = `
             <div class="quest-card-side">
                 <button class="quest-record-btn" aria-label="${this._t('questRecordBtn')}">
-                    <span class="material-symbols-outlined">add_circle</span>
+                    ${svgIcon('add_circle')}
                 </button>
                 ${lastRecordDate ? `
                 <div class="quest-side-last">
@@ -496,22 +498,22 @@ export class QuestModal extends BaseModal {
             <div class="quest-card ${statusClass} ${pinnedClass}" data-id="${quest.id}">
                 <div class="quest-card-top">
                     <div class="quest-card-badges">
-                        ${quest.pinned ? '<span class="quest-badge pin"><span class="material-symbols-outlined mi-sm">push_pin</span></span>' : ''}
-                        ${quest.favorited ? '<span class="quest-badge fav"><span class="material-symbols-outlined mi-sm mi-filled">star</span></span>' : ''}
+                        ${quest.pinned ? `<span class="quest-badge pin">${svgIcon('push_pin', 'mi-sm')}</span>` : ''}
+                        ${quest.favorited ? `<span class="quest-badge fav">${svgIcon('star', 'mi-sm mi-filled')}</span>` : ''}
                         <span class="quest-badge cat">${cat.icon} ${cat[this.language] || cat.en}</span>
-                        ${trackingType === 'linked' ? `<span class="quest-badge linked"><span class="material-symbols-outlined mi-sm">link</span> ${this._fieldLabel(quest.linkedMeasurementField)}</span>` : ''}
-                        ${trackingType === 'dday' ? `<span class="quest-badge dday"><span class="material-symbols-outlined mi-sm">event</span> D-Day</span>` : ''}
-                        ${trackingType === 'progress' ? `<span class="quest-badge progress"><span class="material-symbols-outlined mi-sm">tune</span></span>` : ''}
-                        ${quest.status === 'completed' ? `<span class="quest-badge done"><span class="material-symbols-outlined mi-sm mi-success">check_circle</span></span>` : ''}
+                        ${trackingType === 'linked' ? `<span class="quest-badge linked">${svgIcon('link', 'mi-sm')} ${this._fieldLabel(quest.linkedMeasurementField)}</span>` : ''}
+                        ${trackingType === 'dday' ? `<span class="quest-badge dday">${svgIcon('event', 'mi-sm')} D-Day</span>` : ''}
+                        ${trackingType === 'progress' ? `<span class="quest-badge progress">${svgIcon('tune', 'mi-sm')}</span>` : ''}
+                        ${quest.status === 'completed' ? `<span class="quest-badge done">${svgIcon('check_circle', 'mi-sm mi-success')}</span>` : ''}
                     </div>
                     <div class="quest-card-menu">
                         <button class="quest-card-menu-btn" aria-label="Menu">⋮</button>
                         <div class="quest-card-menu-dropdown">
-                            <button data-action="pin">${quest.pinned ? '<span class="material-symbols-outlined mi-sm">push_pin</span> ' + this._t('questUnpin') : '<span class="material-symbols-outlined mi-sm">push_pin</span> ' + this._t('questPin')}</button>
-                            <button data-action="fav">${quest.favorited ? '<span class="material-symbols-outlined mi-sm mi-filled">star</span> ' + this._t('questUnfav') : '<span class="material-symbols-outlined mi-sm">star_border</span> ' + this._t('questFav')}</button>
-                            <button data-action="edit"><span class="material-symbols-outlined mi-sm">edit</span> ${this._t('edit')}</button>
-                            ${quest.status !== 'completed' ? `<button data-action="complete"><span class="material-symbols-outlined mi-sm mi-success">check_circle</span> ${this._t('questComplete')}</button>` : ''}
-                            <button data-action="delete" class="quest-menu-danger"><span class="material-symbols-outlined mi-sm">delete</span> ${this._t('delete')}</button>
+                            <button data-action="pin">${quest.pinned ? svgIcon('push_pin', 'mi-sm') + '' + this._t('questUnpin') : svgIcon('push_pin', 'mi-sm') + '' + this._t('questPin')}</button>
+                            <button data-action="fav">${quest.favorited ? svgIcon('star', 'mi-sm mi-filled') + '' + this._t('questUnfav') : svgIcon('star_border', 'mi-sm') + '' + this._t('questFav')}</button>
+                            <button data-action="edit">${svgIcon('edit', 'mi-sm')} ${this._t('edit')}</button>
+                            ${quest.status !== 'completed' ? `<button data-action="complete">${svgIcon('check_circle', 'mi-sm mi-success')} ${this._t('questComplete')}</button>` : ''}
+                            <button data-action="delete" class="quest-menu-danger">${svgIcon('delete', 'mi-sm')} ${this._t('delete')}</button>
                         </div>
                     </div>
                 </div>
@@ -557,7 +559,7 @@ export class QuestModal extends BaseModal {
                     ${sideHtml}
                 </div>
                 <button class="quest-detail-toggle" aria-label="Toggle detail">
-                    <span class="material-symbols-outlined mi-sm">expand_more</span>
+                    ${svgIcon('expand_more', 'mi-sm')}
                     <span class="quest-detail-label">${this._t('questDetailView')}</span>
                 </button>
                 <div class="quest-detail-panel" style="display:none;">
@@ -581,7 +583,7 @@ export class QuestModal extends BaseModal {
         if (quest.targetDate) {
             const { label: dDayLabel, cls: dDayClass } = this._dDayInfo(quest.targetDate);
             dDayHtml = `<div class="quest-detail-dday ${dDayClass}">
-                <span class="material-symbols-outlined mi-sm">calendar_today</span>
+                ${svgIcon('calendar_today', 'mi-sm')}
                 <span class="quest-dday-label">${dDayLabel}</span>
                 <span class="quest-dday-date">${quest.targetDate}</span>
             </div>`;
@@ -640,7 +642,7 @@ export class QuestModal extends BaseModal {
         } else if (history.length >= 2) {
             chartHtml = `<div class="quest-detail-chart-section">
                 <h4 class="quest-detail-section-title">
-                    <span class="material-symbols-outlined mi-sm">show_chart</span>
+                    ${svgIcon('show_chart', 'mi-sm')}
                     ${this._t('questHistoryTitle')}
                 </h4>
                 <div class="quest-chart-wrapper">
@@ -652,7 +654,7 @@ export class QuestModal extends BaseModal {
                </div>`;
         } else {
             chartHtml = `<div class="quest-detail-no-history">
-                <span class="material-symbols-outlined mi-md">timeline</span>
+                ${svgIcon('timeline', 'mi-md')}
                 <p>${this._t('questNoHistory')}</p>
                </div>`;
         }
@@ -660,7 +662,7 @@ export class QuestModal extends BaseModal {
         // Linked field info
         const linkedHtml = isLinked
             ? `<div class="quest-detail-linked">
-                <span class="material-symbols-outlined mi-sm">link</span>
+                ${svgIcon('link', 'mi-sm')}
                 ${this._t('questFieldLinked')}: <strong>${this._fieldLabel(quest.linkedMeasurementField)}</strong>
                </div>` : '';
 
@@ -692,17 +694,17 @@ export class QuestModal extends BaseModal {
                     <span class="quest-history-value-badge">${display}</span>
                 </div>
                 <button class="quest-history-edit-btn" data-date="${h.date}" data-value="${h.value}" aria-label="Edit">
-                    <span class="material-symbols-outlined mi-sm">edit</span>
+                    ${svgIcon('edit', 'mi-sm')}
                 </button>
                 <button class="quest-history-delete-btn" data-date="${h.date}" aria-label="Delete">
-                    <span class="material-symbols-outlined mi-sm">close</span>
+                    ${svgIcon('close', 'mi-sm')}
                 </button>
             </div>`;
         }).join('');
         return `
         <div class="quest-history-list-section">
             <h4 class="quest-detail-section-title">
-                <span class="material-symbols-outlined mi-sm">history</span>
+                ${svgIcon('history', 'mi-sm')}
                 기록 히스토리
             </h4>
             <div class="quest-history-list">${rows}</div>
@@ -730,7 +732,7 @@ export class QuestModal extends BaseModal {
             return `
                 <div class="quest-dday-main">
                     <span class="quest-dday-chip ${cls}">${label}</span>
-                    <span class="quest-dday-date"><span class="material-symbols-outlined mi-sm mi-inline">event</span> ${quest.targetDate}</span>
+                    <span class="quest-dday-date">${svgIcon('event', 'mi-sm mi-inline')} ${quest.targetDate}</span>
                 </div>
                 <div class="quest-progress-bar mt-xs">
                     <div class="quest-progress-fill" style="width:${pct}%;"></div>
@@ -855,7 +857,7 @@ export class QuestModal extends BaseModal {
                     infoCard.style.display = '';
                     infoCard.innerHTML = `
                         <div class="qpic-header">
-                            <span class="material-symbols-outlined mi-sm">touch_app</span>
+                            ${svgIcon('touch_app', 'mi-sm')}
                             ${h.date.replace(/-/g, '.')}
                         </div>
                         <div class="qpic-grid">
@@ -964,7 +966,7 @@ export class QuestModal extends BaseModal {
         return `
         <div class="quest-dday-calendar">
             <h4 class="quest-detail-section-title">
-                <span class="material-symbols-outlined mi-sm">event</span>
+                ${svgIcon('event', 'mi-sm')}
                 ${this._t('questDdayCalendar')}
             </h4>
             <div class="qcal-countdown ${dDayResult.cls}">
@@ -1015,13 +1017,13 @@ export class QuestModal extends BaseModal {
 
         const typeGrid = TRACKING_TYPES.map(t => `
             <button type="button" class="quest-selector-btn ${currentType === t.key ? 'active' : ''}" data-type="${t.key}">
-                <span class="material-symbols-outlined">${t.icon}</span>
+                ${svgIcon(t.icon)}
                 <span class="quest-selector-label">${this._t(t.labelKey)}</span>
             </button>`).join('');
 
         const catGrid = CATEGORIES.map(c => `
             <button type="button" class="quest-selector-btn ${currentCategory === c.key ? 'active' : ''}" data-cat="${c.key}">
-                <span class="material-symbols-outlined">${c.icon.replace(/<[^>]+>/g, '').replace(/^\s+|\s+$/g, '') || c.key}</span>
+                ${c.icon}
                 <span class="quest-selector-label">${c[this.language] || c.en}</span>
             </button>`).join('');
 
@@ -1099,7 +1101,7 @@ export class QuestModal extends BaseModal {
                             <input type="range" id="qt-progress-init" min="0" max="100" step="1" value="${Math.round(q.progressValue || 0)}">
                         </div>
                         <p class="quest-tracking-hint">
-                            <span class="material-symbols-outlined mi-sm mi-inline">info</span>
+                            ${svgIcon('info', 'mi-sm mi-inline')}
                             ${this._t('questProgressHint')}
                         </p>
                     </div>
@@ -1116,7 +1118,7 @@ export class QuestModal extends BaseModal {
                     <!-- Alarm section -->
                     <div class="quest-form-group quest-alarm-section">
                         <div class="quest-alarm-header">
-                            <span class="material-symbols-outlined mi-sm">alarm</span>
+                            ${svgIcon('alarm', 'mi-sm')}
                             <span>${this._t('questAlarm')}</span>
                             <label class="quest-alarm-toggle-wrap">
                                 <input type="checkbox" id="quest-alarm-enabled" ${q.alarm?.enabled ? 'checked' : ''}>

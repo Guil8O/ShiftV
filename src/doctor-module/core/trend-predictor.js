@@ -1,3 +1,4 @@
+import { svgIcon } from '../../ui/icon-paths.js';
 /**
  * Trend Predictor
  * 
@@ -405,13 +406,13 @@ export class TrendPredictor {
   getProgressMessage(status, achieved, total) {
     switch (status) {
       case 'all_achieved':
-        return `<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> 모든 목표 달성! (${achieved}/${total})`;
+        return `${svgIcon('celebration', 'mi-inline mi-sm mi-success')} 모든 목표 달성! (${achieved}/${total})`;
       case 'more_than_half':
-        return `<span class="material-symbols-outlined mi-inline mi-sm">fitness_center</span> 절반 이상 달성! (${achieved}/${total})`;
+        return `${svgIcon('fitness_center', 'mi-inline mi-sm')} 절반 이상 달성! (${achieved}/${total})`;
       case 'in_progress':
-        return `<span class="material-symbols-outlined mi-inline mi-sm">trending_up</span> 진행 중 (${achieved}/${total} 달성)`;
+        return `${svgIcon('trending_up', 'mi-inline mi-sm')} 진행 중 (${achieved}/${total} 달성)`;
       case 'just_started':
-        return `<span class="material-symbols-outlined mi-inline mi-sm">spa</span> 시작 단계 (${achieved}/${total} 달성)`;
+        return `${svgIcon('spa', 'mi-inline mi-sm')} 시작 단계 (${achieved}/${total} 달성)`;
       case 'no_targets':
         return '목표를 설정하지 않았습니다.';
       case 'no_data':

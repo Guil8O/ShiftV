@@ -794,9 +794,13 @@
 }
 
 .chip-assist .material-symbols-outlined,
+.chip-assist .svg-icon,
 .chip-filter .material-symbols-outlined,
+.chip-filter .svg-icon,
 .chip-input .material-symbols-outlined,
-.chip-suggestion .material-symbols-outlined {
+.chip-input .svg-icon,
+.chip-suggestion .material-symbols-outlined,
+.chip-suggestion .svg-icon {
     font-size: 18px;
 }
 
@@ -1940,7 +1944,8 @@ details[open] > .accordion-title::before {
     -webkit-tap-highlight-color: transparent;
 }
 
-.mood-chip .material-symbols-outlined {
+.mood-chip .material-symbols-outlined,
+.mood-chip .svg-icon {
     font-size: var(--md-sys-typescale-headline-small-size);
 }
 
@@ -2070,18 +2075,21 @@ details[open] > .accordion-title::before {
     transform: scale(1.2);
 }
 
-.severity-star.filled .material-symbols-outlined {
+.severity-star.filled .material-symbols-outlined,
+.severity-star.filled .svg-icon {
     color: #F5C518;          /* gold */
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }
 
-.severity-star.empty .material-symbols-outlined {
+.severity-star.empty .material-symbols-outlined,
+.severity-star.empty .svg-icon {
     color: var(--text-dim);
     font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 }
 
 /* pointer-events on inner icon — route clicks to outer span */
-.severity-star .material-symbols-outlined {
+.severity-star .material-symbols-outlined,
+.severity-star .svg-icon {
     pointer-events: none;
     font-size: 22px;
 }
@@ -4159,7 +4167,8 @@ details[open] > .accordion-title::before {
     flex-shrink: 0;
 }
 
-.action-guide-med-ai-icon .material-symbols-outlined {
+.action-guide-med-ai-icon .material-symbols-outlined,
+.action-guide-med-ai-icon .svg-icon {
     font-size: 24px;
 }
 
@@ -4344,7 +4353,8 @@ details[open] > .accordion-title::before {
     color: var(--md-sys-color-secondary, var(--primary));
 }
 
-.md3-dialog-icon .material-symbols-outlined {
+.md3-dialog-icon .material-symbols-outlined,
+.md3-dialog-icon .svg-icon {
     font-size: var(--md-sys-typescale-headline-small-size);
 }
 
@@ -4402,29 +4412,35 @@ details[open] > .accordion-title::before {
 /* ==================== */
 /* Material Symbols Inline Helpers */
 /* ==================== */
-.material-symbols-outlined.mi-inline {
+.material-symbols-outlined.mi-inline,
+.svg-icon.mi-inline {
     vertical-align: middle;
     font-size: 20px;
     line-height: 1;
 }
 
-.material-symbols-outlined.mi-sm {
+.material-symbols-outlined.mi-sm,
+.svg-icon.mi-sm {
     font-size: 18px;
 }
 
-.material-symbols-outlined.mi-error {
+.material-symbols-outlined.mi-error,
+.svg-icon.mi-error {
     color: var(--danger);
 }
 
-.material-symbols-outlined.mi-warning {
+.material-symbols-outlined.mi-warning,
+.svg-icon.mi-warning {
     color: var(--md-sys-color-warning, #ffb74d);
 }
 
-.material-symbols-outlined.mi-on-surface {
+.material-symbols-outlined.mi-on-surface,
+.svg-icon.mi-on-surface {
     color: var(--text-secondary);
 }
 
-.material-symbols-outlined.mi-primary {
+.material-symbols-outlined.mi-primary,
+.svg-icon.mi-primary {
     color: var(--primary);
 }
 
@@ -5661,7 +5677,8 @@ tbody tr:hover {
     overflow: hidden;
 }
 
-.quest-selector-btn .material-symbols-outlined {
+.quest-selector-btn .material-symbols-outlined,
+.quest-selector-btn .svg-icon {
     font-size: 18px;
     flex-shrink: 0;
     opacity: 0.7;
@@ -5685,7 +5702,8 @@ tbody tr:hover {
     font-weight: var(--md-sys-typescale-label-large-weight);
 }
 
-.quest-selector-btn.active .material-symbols-outlined {
+.quest-selector-btn.active .material-symbols-outlined,
+.quest-selector-btn.active .svg-icon {
     opacity: 1;
 }
 
@@ -5908,7 +5926,8 @@ tbody tr:hover {
     transform: scale(1.1);
 }
 
-.quest-record-btn .material-symbols-outlined {
+.quest-record-btn .material-symbols-outlined,
+.quest-record-btn .svg-icon {
     font-size: 22px;
 }
 
@@ -6170,7 +6189,8 @@ tbody tr:hover {
         width: 36px;
         height: 36px;
     }
-    .quest-card-side .quest-record-btn .material-symbols-outlined {
+    .quest-card-side .quest-record-btn .material-symbols-outlined,
+        .quest-card-side .quest-record-btn .svg-icon {
         font-size: 26px;
     }
     .quest-card-title {
@@ -6199,7 +6219,8 @@ tbody tr:hover {
     height: 44px;
 }
 
-.quest-card-side .quest-record-btn .material-symbols-outlined {
+.quest-card-side .quest-record-btn .material-symbols-outlined,
+.quest-card-side .quest-record-btn .svg-icon {
     font-size: 32px;
 }
 
@@ -6443,11 +6464,13 @@ tbody tr:hover {
 
 .quest-detail-toggle:hover { color: var(--primary); }
 
-.quest-detail-toggle .material-symbols-outlined {
+.quest-detail-toggle .material-symbols-outlined,
+.quest-detail-toggle .svg-icon {
     transition: transform var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
 }
 
-.quest-detail-toggle.expanded .material-symbols-outlined {
+.quest-detail-toggle.expanded .material-symbols-outlined,
+.quest-detail-toggle.expanded .svg-icon {
     transform: rotate(180deg);
 }
 
@@ -6774,7 +6797,8 @@ tbody tr:hover {
     color: var(--text-dim2);
 }
 
-.quest-detail-no-history .material-symbols-outlined {
+.quest-detail-no-history .material-symbols-outlined,
+.quest-detail-no-history .svg-icon {
     font-size: 32px;
     margin-bottom: var(--spacing-sm);
     opacity: 0.4;
@@ -6798,7 +6822,8 @@ tbody tr:hover {
     margin-top: var(--spacing-sm);
 }
 
-.quest-detail-linked .material-symbols-outlined {
+.quest-detail-linked .material-symbols-outlined,
+.quest-detail-linked .svg-icon {
     color: var(--primary);
 }
 
@@ -7163,7 +7188,8 @@ tbody tr:hover {
     color: var(--md-sys-color-error, #FF5449);
 }
 
-.health-card-critical .material-symbols-outlined {
+.health-card-critical .material-symbols-outlined,
+.health-card-critical .svg-icon {
     color: var(--md-sys-color-error, #FF5449);
     font-size: 14px !important;
     flex-shrink: 0;
@@ -7174,7 +7200,8 @@ tbody tr:hover {
     color: var(--warning, #FFB400);
 }
 
-.health-card-warning .material-symbols-outlined {
+.health-card-warning .material-symbols-outlined,
+.health-card-warning .svg-icon {
     color: var(--warning, #FFB400);
     font-size: 14px !important;
     flex-shrink: 0;
@@ -7220,7 +7247,8 @@ tbody tr:hover {
     line-height: 1.4;
 }
 
-.health-chip .material-symbols-outlined {
+.health-chip .material-symbols-outlined,
+.health-chip .svg-icon {
     font-size: 14px !important;
     flex-shrink: 0;
 }
@@ -7231,7 +7259,8 @@ tbody tr:hover {
     color: color-mix(in oklch, var(--primary) 80%, #4CAF50 20%);
 }
 
-.health-chip--good .material-symbols-outlined {
+.health-chip--good .material-symbols-outlined,
+.health-chip--good .svg-icon {
     color: color-mix(in oklch, var(--primary) 60%, #4CAF50 40%);
 }
 
@@ -7240,7 +7269,8 @@ tbody tr:hover {
     color: color-mix(in oklch, var(--primary) 30%, #FFB400 70%);
 }
 
-.health-chip--warning .material-symbols-outlined {
+.health-chip--warning .material-symbols-outlined,
+.health-chip--warning .svg-icon {
     color: color-mix(in oklch, var(--primary) 20%, #FFB400 80%);
 }
 
@@ -7249,7 +7279,8 @@ tbody tr:hover {
     color: color-mix(in oklch, var(--primary) 15%, #FF5449 85%);
 }
 
-.health-chip--critical .material-symbols-outlined {
+.health-chip--critical .material-symbols-outlined,
+.health-chip--critical .svg-icon {
     color: color-mix(in oklch, var(--primary) 10%, #FF5449 90%);
 }
 
@@ -7459,7 +7490,8 @@ tbody tr:hover {
     border-radius: 6px;
 }
 
-.shc-badge .material-symbols-outlined {
+.shc-badge .material-symbols-outlined,
+.shc-badge .svg-icon {
     font-size: 14px !important;
 }
 
@@ -7539,7 +7571,8 @@ tbody tr:hover {
 
 .symptom-insight-item:last-child { margin-bottom: 0; }
 
-.symptom-insight-item .material-symbols-outlined {
+.symptom-insight-item .material-symbols-outlined,
+.symptom-insight-item .svg-icon {
     color: var(--primary);
     flex-shrink: 0;
     margin-top: 1px;
@@ -8303,6 +8336,7 @@ body.modal-open {
 }
 
 .onboarding-step-icon .material-symbols-outlined,
+.onboarding-step-icon .svg-icon,
 .mi-xl {
     font-size: var(--md-sys-typescale-headline-large-size);
     color: var(--primary);

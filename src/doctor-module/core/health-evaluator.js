@@ -1,3 +1,4 @@
+import { svgIcon } from '../../ui/icon-paths.js';
 /**
  * Health Evaluator
  * 
@@ -339,9 +340,9 @@ export class HealthEvaluator {
     if (mode === 'mtf') {
       switch (category) {
         case 'very_feminine':
-          return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> 매우 여성적인 체형입니다!', en: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> Very feminine body shape!', ja: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> とても女性的な体型です！' });
+          return this._t({ ko: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 매우 여성적인 체형입니다!', en: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' Very feminine body shape!', ja: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' とても女性的な体型です！' });
         case 'feminine':
-          return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 여성적인 체형입니다.', en: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> Feminine body shape.', ja: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 女性的な体型です。' });
+          return this._t({ ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 여성적인 체형입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Feminine body shape.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 女性的な体型です。' });
         case 'neutral':
           return this._t({
             ko: '진행 중 - 더 여성적인 체형을 위해 노력하세요.',
@@ -358,9 +359,9 @@ export class HealthEvaluator {
     } else if (mode === 'ftm') {
       switch (category) {
         case 'very_masculine':
-          return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> 매우 남성적인 체형입니다!', en: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> Very masculine body shape!', ja: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> とても男性的な体型です！' });
+          return this._t({ ko: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 매우 남성적인 체형입니다!', en: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' Very masculine body shape!', ja: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' とても男性的な体型です！' });
         case 'masculine':
-          return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 남성적인 체형입니다.', en: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> Masculine body shape.', ja: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 男性的な体型です。' });
+          return this._t({ ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 남성적인 체형입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Masculine body shape.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 男性的な体型です。' });
         case 'neutral':
           return this._t({
             ko: '진행 중 - 더 남성적인 체형을 위해 노력하세요.',
@@ -443,12 +444,12 @@ export class HealthEvaluator {
       switch (category) {
         case 'very_masculine':
           return this._t({
-            ko: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> 매우 넓은 어깨! V자 체형 완성!',
-            en: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> Very broad shoulders! V-shape achieved!',
-            ja: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> とても広い肩幅！V字体型の完成！'
+            ko: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 매우 넓은 어깨! V자 체형 완성!',
+            en: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' Very broad shoulders! V-shape achieved!',
+            ja: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' とても広い肩幅！V字体型の完成！'
           });
         case 'masculine':
-          return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 남성적인 어깨입니다.', en: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> Masculine shoulders.', ja: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 男性的な肩です。' });
+          return this._t({ ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 남성적인 어깨입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Masculine shoulders.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 男性的な肩です。' });
         case 'neutral':
           return this._t({
             ko: '진행 중 - 어깨 운동을 늘리세요.',
@@ -465,9 +466,9 @@ export class HealthEvaluator {
     } else if (mode === 'mtf') {
       switch (category) {
         case 'very_feminine':
-          return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> 여성적인 어깨 비율입니다!', en: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> Feminine shoulder ratio!', ja: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> 女性的な肩の比率です！' });
+          return this._t({ ko: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 여성적인 어깨 비율입니다!', en: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' Feminine shoulder ratio!', ja: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 女性的な肩の比率です！' });
         case 'feminine':
-          return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 좋은 비율입니다.', en: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> Great ratio.', ja: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 良い比率です。' });
+          return this._t({ ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 좋은 비율입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Great ratio.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 良い比率です。' });
         case 'neutral':
           return this._t({
             ko: '진행 중 - 허리를 줄이는 데 집중하세요.',
@@ -634,9 +635,9 @@ export class HealthEvaluator {
     if (mode === 'ftm') {
       switch (category) {
         case 'very_high':
-          return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm">fitness_center</span> 매우 높은 근육량!', en: '<span class="material-symbols-outlined mi-inline mi-sm">fitness_center</span> Very high muscle mass!', ja: '<span class="material-symbols-outlined mi-inline mi-sm">fitness_center</span> とても高い筋肉量！' });
+          return this._t({ ko: svgIcon('fitness_center', 'mi-inline mi-sm') + ' 매우 높은 근육량!', en: svgIcon('fitness_center', 'mi-inline mi-sm') + ' Very high muscle mass!', ja: svgIcon('fitness_center', 'mi-inline mi-sm') + ' とても高い筋肉量！' });
         case 'high':
-          return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 좋은 근육량입니다.', en: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> Good muscle mass.', ja: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 良い筋肉量です。' });
+          return this._t({ ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 좋은 근육량입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Good muscle mass.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 良い筋肉量です。' });
         case 'normal':
           return this._t({ ko: '보통 수준입니다.', en: 'Average level.', ja: '普通のレベルです。' });
         case 'low':
@@ -657,12 +658,12 @@ export class HealthEvaluator {
         case 'high':
           return this._t({ ko: '약간 높습니다.', en: 'Slightly high.', ja: 'やや高めです。' });
         case 'normal':
-          return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 적절한 수준입니다.', en: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> Appropriate level.', ja: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 適切なレベルです。' });
+          return this._t({ ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 적절한 수준입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Appropriate level.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 適切なレベルです。' });
         case 'low':
           return this._t({
-            ko: '<span class="material-symbols-outlined mi-inline mi-sm mi-warning">warning</span> 근육량이 너무 낮습니다. 건강을 위해 약간의 근력 운동이 필요합니다.',
-            en: '<span class="material-symbols-outlined mi-inline mi-sm mi-warning">warning</span> Muscle mass is too low. Some strength training is recommended for health.',
-            ja: '<span class="material-symbols-outlined mi-inline mi-sm mi-warning">warning</span> 筋肉量が低すぎます。健康のために軽い筋トレが推奨されます。'
+            ko: svgIcon('warning', 'mi-inline mi-sm mi-warning') + ' 근육량이 너무 낮습니다. 건강을 위해 약간의 근력 운동이 필요합니다.',
+            en: svgIcon('warning', 'mi-inline mi-sm mi-warning') + ' Muscle mass is too low. Some strength training is recommended for health.',
+            ja: svgIcon('warning', 'mi-inline mi-sm mi-warning') + ' 筋肉量が低すぎます。健康のために軽い筋トレが推奨されます。'
           });
       }
     }
@@ -1033,18 +1034,18 @@ export class HealthEvaluator {
     
     if (score >= 80) {
       return this._t(
-        { ko: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> 훌륭합니다! {direction} 진행이 매우 잘 되고 있습니다!', en: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> Excellent! Your {direction} is going very well!', ja: '<span class="material-symbols-outlined mi-inline mi-sm mi-success">celebration</span> 素晴らしいです！{direction}の進行はとても順調です！' },
+        { ko: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 훌륭합니다! {direction} 진행이 매우 잘 되고 있습니다!', en: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' Excellent! Your {direction} is going very well!', ja: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 素晴らしいです！{direction}の進行はとても順調です！' },
         { direction }
       );
     } else if (score >= 60) {
       return this._t(
-        { ko: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 좋습니다! {direction}가 순조롭게 진행 중입니다.', en: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> Great! Your {direction} is progressing smoothly.', ja: '<span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> 良い感じです！{direction}は順調に進んでいます。' },
+        { ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 좋습니다! {direction}가 순조롭게 진행 중입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Great! Your {direction} is progressing smoothly.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 良い感じです！{direction}は順調に進んでいます。' },
         { direction }
       );
     } else if (score >= 40) {
-      return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm">trending_up</span> 진행 중입니다. 꾸준히 노력하세요!', en: '<span class="material-symbols-outlined mi-inline mi-sm">trending_up</span> In progress. Keep it up!', ja: '<span class="material-symbols-outlined mi-inline mi-sm">trending_up</span> 進行中です。継続して頑張りましょう！' });
+      return this._t({ ko: svgIcon('trending_up', 'mi-inline mi-sm') + ' 진행 중입니다. 꾸준히 노력하세요!', en: svgIcon('trending_up', 'mi-inline mi-sm') + ' In progress. Keep it up!', ja: svgIcon('trending_up', 'mi-inline mi-sm') + ' 進行中です。継続して頑張りましょう！' });
     } else if (score >= 20) {
-      return this._t({ ko: '<span class="material-symbols-outlined mi-inline mi-sm">spa</span> 초기 단계입니다. 시간이 필요합니다.', en: '<span class="material-symbols-outlined mi-inline mi-sm">spa</span> Early stage. It takes time.', ja: '<span class="material-symbols-outlined mi-inline mi-sm">spa</span> 初期段階です。時間が必要です。' });
+      return this._t({ ko: svgIcon('spa', 'mi-inline mi-sm') + ' 초기 단계입니다. 시간이 필요합니다.', en: svgIcon('spa', 'mi-inline mi-sm') + ' Early stage. It takes time.', ja: svgIcon('spa', 'mi-inline mi-sm') + ' 初期段階です。時間が必要です。' });
     } else {
       return this._t({ ko: '시작 단계입니다. 인내심을 가지고 꾸준히 관리하세요.', en: 'Just getting started. Be patient and stay consistent.', ja: '開始段階です。焦らず継続して管理しましょう。' });
     }

@@ -1,5 +1,6 @@
 import { DoctorEngine } from '../../doctor-module/core/doctor-engine.js';
 import { translate, getCurrentLanguage } from '../../translations.js';
+import { svgIcon } from '../icon-paths.js';
 
 export class ActionGuideModal {
   constructor(measurements, userSettings) {
@@ -93,7 +94,7 @@ export class ActionGuideModal {
     let apiKey = '';
     try { apiKey = atob(encodedKey); } catch { apiKey = ''; }
     if (!apiKey) {
-      resultsEl.innerHTML = `<div class="ag-ai-no-key"><span class="material-symbols-outlined mi-inline">key_off</span> ${translate('actionGuideAINoApiKey')}</div>`;
+      resultsEl.innerHTML = `<div class="ag-ai-no-key">${svgIcon('key_off', 'mi-inline')} ${translate('actionGuideAINoApiKey')}</div>`;
       return;
     }
 
@@ -115,7 +116,7 @@ export class ActionGuideModal {
     } catch (err) {
       console.error('AI Action Guide error:', err);
       const detail = err?.message || '';
-      resultsEl.innerHTML = `<div class="ag-ai-error"><span class="material-symbols-outlined mi-inline">error</span> ${translate('actionGuideAIError')}${detail ? `<br><small style="opacity:0.7;word-break:break-all">${detail}</small>` : ''}<br><small style="opacity:0.4">Console(F12) 에서 상세 로그를 확인하세요</small></div>`;
+      resultsEl.innerHTML = `<div class="ag-ai-error">${svgIcon('error', 'mi-inline')} ${translate('actionGuideAIError')}${detail ? `<br><small style="opacity:0.7;word-break:break-all">${detail}</small>` : ''}<br><small style="opacity:0.4">Console(F12) 에서 상세 로그를 확인하세요</small></div>`;
     } finally {
       if (btn) btn.disabled = false;
     }
@@ -353,10 +354,10 @@ JSON ONLY.`;
     }
 
     const byCategory = {
-      exercise: { icon: '<span class="material-symbols-outlined category-icon">fitness_center</span>', titleKey: 'actionGuideCategoryExercise' },
-      diet: { icon: '<span class="material-symbols-outlined category-icon">restaurant</span>', titleKey: 'actionGuideCategoryDiet' },
-      medication: { icon: '<span class="material-symbols-outlined category-icon">medication</span>', titleKey: 'actionGuideCategoryMedication' },
-      habits: { icon: '<span class="material-symbols-outlined category-icon">psychology</span>', titleKey: 'actionGuideCategoryHabits' }
+      exercise: { icon: svgIcon('fitness_center', 'category-icon'), titleKey: 'actionGuideCategoryExercise' },
+      diet: { icon: svgIcon('restaurant', 'category-icon'), titleKey: 'actionGuideCategoryDiet' },
+      medication: { icon: svgIcon('medication', 'category-icon'), titleKey: 'actionGuideCategoryMedication' },
+      habits: { icon: svgIcon('psychology', 'category-icon'), titleKey: 'actionGuideCategoryHabits' }
     };
 
     const sections = Object.keys(byCategory).map(key => {
@@ -384,7 +385,7 @@ JSON ONLY.`;
       return;
     }
 
-    container.innerHTML = `<div class="ag-ai-badge"><span class="material-symbols-outlined mi-inline mi-sm">auto_awesome</span> AI Generated</div>` + sections.join('');
+    container.innerHTML = `<div class="ag-ai-badge">${svgIcon('auto_awesome', 'mi-inline mi-sm')} AI Generated</div>` + sections.join('');
   }
 
   renderHero(next) {
@@ -773,10 +774,10 @@ JSON ONLY.`;
     };
 
     const byCategory = {
-      exercise: { icon: '<span class="material-symbols-outlined category-icon">fitness_center</span>', titleKey: 'actionGuideCategoryExercise' },
-      diet: { icon: '<span class="material-symbols-outlined category-icon">restaurant</span>', titleKey: 'actionGuideCategoryDiet' },
-      medication: { icon: '<span class="material-symbols-outlined category-icon">medication</span>', titleKey: 'actionGuideCategoryMedication' },
-      habits: { icon: '<span class="material-symbols-outlined category-icon">psychology</span>', titleKey: 'actionGuideCategoryHabits' }
+      exercise: { icon: svgIcon('fitness_center', 'category-icon'), titleKey: 'actionGuideCategoryExercise' },
+      diet: { icon: svgIcon('restaurant', 'category-icon'), titleKey: 'actionGuideCategoryDiet' },
+      medication: { icon: svgIcon('medication', 'category-icon'), titleKey: 'actionGuideCategoryMedication' },
+      habits: { icon: svgIcon('psychology', 'category-icon'), titleKey: 'actionGuideCategoryHabits' }
     };
 
     const renderItems = (items) => {

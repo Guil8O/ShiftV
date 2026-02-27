@@ -8,6 +8,7 @@
  */
 
 import { dateToString, today as getToday } from '../../utils.js';
+import { svgIcon } from '../icon-paths.js';
 
 const DIARY_KEY = 'shiftv_diary';
 const DATA_KEY = 'shiftV_Data_v1_1';
@@ -32,18 +33,18 @@ export class StreakStrip {
         this.container.innerHTML = `
             <div class="streak-strip">
                 <div class="streak-chip ${streak > 0 ? 'active' : 'inactive'}">
-                    <span class="streak-chip-icon">${streak > 0 ? '<span class="material-symbols-outlined mi-sm mi-primary">local_fire_department</span>' : '<span class="material-symbols-outlined mi-sm">hotel</span>'}</span>
+                    <span class="streak-chip-icon">${streak > 0 ? svgIcon('local_fire_department', 'mi-sm mi-primary') : svgIcon('hotel', 'mi-sm')}</span>
                     <span class="streak-chip-value">${streak}</span>
                     <span class="streak-chip-label">${streak > 0 ? 'day streak' : 'start today!'}</span>
                 </div>
                 <div class="streak-chip">
-                    <span class="streak-chip-icon"><span class="material-symbols-outlined mi-sm">monitoring</span></span>
+                    <span class="streak-chip-icon">${svgIcon('monitoring', 'mi-sm')}</span>
                     <span class="streak-chip-value">${monthCount}</span>
                     <span class="streak-chip-label">this month</span>
                 </div>
                 ${questPct !== null ? `
                 <div class="streak-chip">
-                    <span class="streak-chip-icon"><span class="material-symbols-outlined mi-sm">target</span></span>
+                    <span class="streak-chip-icon">${svgIcon('target', 'mi-sm')}</span>
                     <span class="streak-chip-value">${questPct}%</span>
                     <span class="streak-chip-label">quest</span>
                 </div>` : ''}

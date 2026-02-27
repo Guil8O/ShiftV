@@ -12,6 +12,7 @@
 
 import { translate, getCurrentLanguage } from '../../translations.js';
 import { addCarouselArrows, addCarouselDots } from '../utils/carousel-frame.js';
+import { svgIcon } from '../icon-paths.js';
 
 // ─── Helpers ──────────────────────────────────────────
 function esc(str) {
@@ -83,7 +84,7 @@ export function renderDiaryCard(cardEl) {
         // Empty state
         cardEl.innerHTML = `
             <div class="sv-card-content svcard-diary-empty">
-                <span class="material-symbols-outlined" style="font-size:40px;color:var(--md-sys-color-primary);opacity:0.8">add_circle</span>
+                ${svgIcon('add_circle', 'mi-2xl mi-primary', 40)}
                 <h3 class="sv-card-label">${translate('diaryTabTitle') || '다이어리'}</h3>
                 <p class="sv-card-desc">${translate('svcard_diary_add') || '감정 일기 추가'}</p>
             </div>`;
@@ -123,7 +124,7 @@ export function renderQuestCard(cardEl) {
     if (!Array.isArray(quests) || quests.length === 0) {
         cardEl.innerHTML = `
             <div class="sv-card-content">
-                <span class="material-symbols-outlined mi-xl" style="color:var(--md-sys-color-primary)">emoji_events</span>
+                ${svgIcon('emoji_events', 'mi-xl mi-primary')}
                 <h3 class="sv-card-label">${translate('questTitle') || '퀘스트'}</h3>
                 <p class="sv-card-desc">${translate('svcard_quest_empty') || '퀘스트를 시작해보세요'}</p>
             </div>`;
@@ -156,7 +157,7 @@ export function renderQuestCard(cardEl) {
 
             return `
                 <div class="svcard-quest-item ${done ? 'done' : ''}">
-                    <span class="svcard-quest-item-icon material-symbols-outlined mi-sm">${done ? 'check_circle' : 'radio_button_unchecked'}</span>
+                    ${svgIcon(done ? 'check_circle' : 'radio_button_unchecked', 'svcard-quest-item-icon mi-sm')}
                     <span class="svcard-quest-item-title">${esc(q.title || q.name || '')}</span>
                     <span class="svcard-quest-item-pct">${pct}%</span>
                 </div>`;
@@ -165,7 +166,7 @@ export function renderQuestCard(cardEl) {
         return `
             <div class="svcard-quest-slide">
                 <div class="svcard-quest-slide-header">
-                    <span class="material-symbols-outlined mi-sm" style="color:var(--md-sys-color-primary)">${icon}</span>
+                    ${svgIcon(icon, 'mi-sm mi-primary')}
                     <span class="svcard-quest-cat-label">${label}</span>
                     <span class="svcard-quest-count">${active}/${total}</span>
                 </div>
@@ -186,7 +187,7 @@ export function renderQuestCard(cardEl) {
 
     cardEl.innerHTML = `
         <div class="svcard-quest-header">
-            <span class="material-symbols-outlined" style="color:var(--md-sys-color-primary)">emoji_events</span>
+            ${svgIcon('emoji_events', 'mi-primary')}
             <h3 class="sv-card-label">${translate('questTitle') || '퀘스트'}</h3>
             <span class="svcard-quest-total">${totalActive}</span>
         </div>
@@ -208,7 +209,7 @@ export function renderHealthCard(cardEl, measurements) {
     if (!measurements || measurements.length === 0) {
         cardEl.innerHTML = `
             <div class="sv-card-content">
-                <span class="material-symbols-outlined mi-xl" style="color:var(--md-sys-color-primary)">local_hospital</span>
+                ${svgIcon('local_hospital', 'mi-xl mi-primary')}
                 <h3 class="sv-card-label">${translate('healthModalTitle') || '건강 분석'}</h3>
                 <p class="sv-card-desc">${translate('svcard_health_empty') || '기록을 추가하면 건강 분석이 시작됩니다'}</p>
             </div>`;
@@ -244,7 +245,7 @@ export function renderHealthCard(cardEl, measurements) {
         ? `<div class="svcard-health-warnings">
             ${warnings.map(w => `
                 <div class="svcard-health-warning-item">
-                    <span class="material-symbols-outlined mi-sm" style="color:var(--warning,#FFB400)">${w.icon}</span>
+                    ${svgIcon(w.icon, 'mi-sm mi-warning')}
                     <span>${w.text}</span>
                 </div>`).join('')}
            </div>`
@@ -252,7 +253,7 @@ export function renderHealthCard(cardEl, measurements) {
 
     cardEl.innerHTML = `
         <div class="sv-card-content">
-            <span class="material-symbols-outlined mi-xl" style="color:${statusColor}">${statusIcon}</span>
+            <span style="color:${statusColor}">${svgIcon(statusIcon, 'mi-xl')}</span>
             <h3 class="sv-card-label">${translate('healthModalTitle') || '건강 분석'}</h3>
             ${warningListHTML}
         </div>`;
@@ -309,7 +310,7 @@ export function renderPersonaCard(cardEl, { measurements, targets, currentMode }
     const avatarHTML = avatarUrl
         ? `<img class="svcard-persona-avatar" src="${esc(avatarUrl)}" alt="">`
         : `<div class="svcard-persona-avatar svcard-persona-avatar--default">
-               <span class="material-symbols-outlined" style="font-size:28px">person</span>
+               ${svgIcon('person', '', 28)}
            </div>`;
 
     let slide1 = `
@@ -317,7 +318,7 @@ export function renderPersonaCard(cardEl, { measurements, targets, currentMode }
             ${avatarHTML}
             <div class="svcard-persona-name">${esc(displayName)}</div>
             <div class="svcard-persona-mode">
-                <span class="material-symbols-outlined mi-sm">${modeIcon}</span>
+                ${svgIcon(modeIcon, 'mi-sm')}
                 ${modeLabel}
             </div>
             ${goalText ? `<div class="svcard-persona-goal">${esc(goalText)}</div>` : ''}
@@ -364,7 +365,7 @@ export function renderPersonaCard(cardEl, { measurements, targets, currentMode }
             slide2 = `
                 <div class="svcard-persona-slide">
                     <h4 class="svcard-persona-target-title">
-                        <span class="material-symbols-outlined mi-sm">flag</span>
+                        ${svgIcon('flag', 'mi-sm')}
                         ${translate('svcard_persona_targets') || '목표 달성률'}
                     </h4>
                     <div class="svcard-target-scroll">

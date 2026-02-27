@@ -8,6 +8,7 @@
 
 import { DoctorEngine } from '../../doctor-module/core/doctor-engine.js';
 import { translate, getCurrentLanguage } from '../../translations.js';
+import { svgIcon } from '../icon-paths.js';
 
 export class HealthModal {
     constructor(measurements, userSettings) {
@@ -57,7 +58,7 @@ export class HealthModal {
         overlay.innerHTML = `
             <div class="health-modal-surface">
                 <div class="health-modal-header">
-                    <h2 class="health-modal-title"><span class="material-symbols-outlined mi-inline">local_hospital</span> ${translate('healthModalTitle') || '건강 분석'}</h2>
+                    <h2 class="health-modal-title">${svgIcon('local_hospital', 'mi-inline')} ${translate('healthModalTitle') || '건강 분석'}</h2>
                     <button class="icon-button health-modal-close" aria-label="Close">
                         <svg width="24" height="24" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/></svg>
                     </button>
@@ -97,7 +98,7 @@ export class HealthModal {
 
         return `
             <div class="health-warnings-section">
-                <h3 class="health-section-title">${translate('healthWarnings') || '<span class="material-symbols-outlined mi-inline mi-sm">warning</span> 건강 경고'}</h3>
+                <h3 class="health-section-title">${translate('healthWarnings') || svgIcon('warning', 'mi-inline mi-sm') + ' 건강 경고'}</h3>
                 ${warnings.map(w => `
                     <div class="health-warning-card severity-${w.severity || 'info'}">
                         <div class="warning-header">
@@ -105,7 +106,7 @@ export class HealthModal {
                             <span class="warning-title">${w.title || w.message || ''}</span>
                         </div>
                         ${w.description ? `<p class="warning-description">${w.description}</p>` : ''}
-                        ${w.recommendation ? `<p class="warning-recommendation"><span class="material-symbols-outlined mi-inline mi-sm">lightbulb</span> ${w.recommendation}</p>` : ''}
+                        ${w.recommendation ? `<p class="warning-recommendation">${svgIcon('lightbulb', 'mi-inline mi-sm')} ${w.recommendation}</p>` : ''}
                     </div>
                 `).join('')}
             </div>
@@ -125,7 +126,7 @@ export class HealthModal {
     _renderNoWarnings() {
         return `
             <div class="health-no-warnings">
-                <div style="font-size: 48px; margin-bottom: 12px;"><span class="material-symbols-outlined mi-2xl mi-success">check_circle</span></div>
+                <div style="font-size: 48px; margin-bottom: 12px;">${svgIcon('check_circle', 'mi-2xl mi-success')}</div>
                 <p class="no-warnings-text">${translate('healthNoWarnings') || '현재 건강 경고가 없습니다.'}</p>
                 <p class="no-warnings-hint">${translate('healthNoWarningsHint') || '건강한 상태를 유지하고 계세요!'}</p>
             </div>
@@ -136,7 +137,7 @@ export class HealthModal {
         const mode = this.userSettings?.mode || 'mtf';
         return `
             <div class="health-hrt-section">
-                <h3 class="health-section-title"><span class="material-symbols-outlined mi-inline">vaccines</span> ${translate('hrtInfoTitle') || 'HRT 목표 정보'}</h3>
+                <h3 class="health-section-title">${svgIcon('vaccines', 'mi-inline')} ${translate('hrtInfoTitle') || 'HRT 목표 정보'}</h3>
                 <div class="hrt-info-card">
                     <p>${translate('hrtInfoDesc_' + mode) || this._getDefaultHRTInfo(mode)}</p>
                 </div>
@@ -167,7 +168,7 @@ export class HealthModal {
         if (Array.isArray(symptomData.insights) && symptomData.insights.length > 0) {
             const insightItems = symptomData.insights.map(insight => `
                 <div class="symptom-insight-item">
-                    <span class="material-symbols-outlined mi-inline mi-sm">lightbulb</span>
+                    ${svgIcon('lightbulb', 'mi-inline mi-sm')}
                     <span>${typeof insight === 'string' ? insight : insight.message || insight.text || JSON.stringify(insight)}</span>
                 </div>
             `).join('');
@@ -183,7 +184,7 @@ export class HealthModal {
                 const colorClass = direction === 'improving' ? 'trend-good' : direction === 'worsening' ? 'trend-bad' : 'trend-neutral';
                 return `
                     <div class="symptom-trend-chip ${colorClass}">
-                        <span class="material-symbols-outlined mi-sm">${icon}</span>
+                        ${svgIcon(icon, 'mi-sm')}
                         <span>${label}</span>
                     </div>
                 `;
@@ -197,7 +198,7 @@ export class HealthModal {
             if (cycle.phase || cycle.recommendation) {
                 sections.push(`
                     <div class="hormone-cycle-info">
-                        ${cycle.phase ? `<div class="cycle-phase"><span class="material-symbols-outlined mi-inline mi-sm">schedule</span> ${translate('hormoneCyclePhase') || '호르몬 주기'}: <strong>${cycle.phase}</strong></div>` : ''}
+                        ${cycle.phase ? `<div class="cycle-phase">${svgIcon('schedule', 'mi-inline mi-sm')} ${translate('hormoneCyclePhase') || '호르몬 주기'}: <strong>${cycle.phase}</strong></div>` : ''}
                         ${cycle.recommendation ? `<p class="cycle-recommendation">${cycle.recommendation}</p>` : ''}
                     </div>
                 `);
@@ -208,7 +209,7 @@ export class HealthModal {
 
         return `
             <div class="health-symptom-section">
-                <h3 class="health-section-title"><span class="material-symbols-outlined mi-inline">monitor_heart</span> ${translate('symptomAnalysisTitle') || '증상 분석'}</h3>
+                <h3 class="health-section-title">${svgIcon('monitor_heart', 'mi-inline')} ${translate('symptomAnalysisTitle') || '증상 분석'}</h3>
                 ${sections.join('')}
             </div>
         `;
@@ -243,7 +244,7 @@ export class HealthModal {
                 .map(([cat, items]) => `
                     <div class="resolution-category">
                         <span class="resolution-cat-label">
-                            <span class="material-symbols-outlined mi-sm">${categoryIcons[cat] || 'info'}</span>
+                            ${svgIcon(categoryIcons[cat] || 'info', 'mi-sm')}
                             ${categoryLabels[cat] || cat}
                         </span>
                         <ul class="resolution-list">
@@ -254,7 +255,7 @@ export class HealthModal {
 
             const hospitalHTML = c.hospitalAdvice ? `
                 <div class="hospital-advice hospital-${c.hospitalAdvice.level}">
-                    <span class="material-symbols-outlined mi-inline mi-sm">${c.hospitalAdvice.level === 'critical' ? 'emergency' : 'local_hospital'}</span>
+                    ${svgIcon(c.hospitalAdvice.level === 'critical' ? 'emergency' : 'local_hospital', 'mi-inline mi-sm')}
                     ${c.hospitalAdvice.message}
                 </div>
             ` : '';
@@ -275,7 +276,7 @@ export class HealthModal {
         return `
             <div class="health-causes-section">
                 <h3 class="health-section-title">
-                    <span class="material-symbols-outlined mi-inline">account_tree</span>
+                    ${svgIcon('account_tree', 'mi-inline')}
                     ${translate('symptomCauseTitle') || (lang === 'ko' ? '증상 원인 분석 & 해소 추천' : 'Symptom Causes & Recommendations')}
                 </h3>
                 ${items}
@@ -289,12 +290,12 @@ export class HealthModal {
         const items = patterns.map(p => `
             <div class="compound-pattern-card severity-${p.severity}">
                 <div class="compound-header">
-                    <span class="material-symbols-outlined mi-inline mi-sm">${p.severity === 'critical' ? 'emergency' : 'warning'}</span>
+                    ${svgIcon(p.severity === 'critical' ? 'emergency' : 'warning', 'mi-inline mi-sm')}
                     <strong>${p.label}</strong>
                 </div>
                 <p class="compound-description">${p.description}</p>
                 <div class="compound-action">
-                    <span class="material-symbols-outlined mi-inline mi-sm">arrow_forward</span>
+                    ${svgIcon('arrow_forward', 'mi-inline mi-sm')}
                     ${p.action}
                 </div>
                 <div class="compound-matched">
@@ -306,7 +307,7 @@ export class HealthModal {
         return `
             <div class="health-compound-section">
                 <h3 class="health-section-title">
-                    <span class="material-symbols-outlined mi-inline">hub</span>
+                    ${svgIcon('hub', 'mi-inline')}
                     ${translate('compoundSymptomTitle') || '복합 증상 패턴'}
                 </h3>
                 ${items}
@@ -335,7 +336,7 @@ export class HealthModal {
         return `
             <div class="health-hormone-range-section">
                 <h3 class="health-section-title">
-                    <span class="material-symbols-outlined mi-inline">labs</span>
+                    ${svgIcon('labs', 'mi-inline')}
                     ${translate('hormoneRangeTitle') || '호르몬 범위 평가'}
                 </h3>
                 ${items.join('')}

@@ -20,10 +20,11 @@
  * CSS classes produced:
  *   .card-filled / .card-outlined / .card-elevated  (MD3 base — from style.css)
  *   .card-frame                                     (frame utility marker)
- *   .card-frame__icon                               — material symbol icon
+ *   .card-frame__icon                               — SVG icon
  *   .card-frame__title                              — primary text
  *   .card-frame__desc                               — supporting text
  */
+import { svgIcon } from '../icon-paths.js';
 
 /**
  * HTML-escape helper
@@ -82,7 +83,7 @@ export function createCard({
     } else {
         const parts = [];
         if (icon) {
-            parts.push(`<span class="card-frame__icon material-symbols-outlined mi-md">${_esc(icon)}</span>`);
+            parts.push(svgIcon(icon, 'card-frame__icon mi-md'));
         }
         if (title) {
             parts.push(`<div class="card-frame__title">${_esc(title)}</div>`);

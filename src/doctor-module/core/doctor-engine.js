@@ -13,6 +13,7 @@ import { SymptomAnalyzer } from './symptom-analyzer.js';
 import { TrendPredictor } from './trend-predictor.js';
 import { RecommendationEngine } from './recommendation-engine.js';
 import { SafetyEngine } from './safety-engine.js';
+import { svgIcon } from '../../ui/icon-paths.js';
 
 // ========================================
 // 1. 의사 엔진 클래스
@@ -658,9 +659,9 @@ export class DoctorEngine {
     // 호르몬 상태
     if (healthEval.hormones) {
       if (healthEval.hormones.status === 'optimal') {
-        messages.push('<span class="material-symbols-outlined mi-inline mi-sm mi-success">check_circle</span> 호르몬 수치가 이상적입니다.');
+        messages.push(svgIcon('check_circle', 'mi-inline mi-sm mi-success') + ' 호르몬 수치가 이상적입니다.');
       } else if (healthEval.hormones.status === 'warning') {
-        messages.push('<span class="material-symbols-outlined mi-inline mi-sm mi-warning">warning</span> 호르몬 수치 조정이 필요합니다.');
+        messages.push(svgIcon('warning', 'mi-inline mi-sm mi-warning') + ' 호르몬 수치 조정이 필요합니다.');
       }
     }
     
@@ -1362,7 +1363,7 @@ export class DoctorEngine {
     // 연속 기록 확인
     if (this.measurements.length >= 4) {
       messages.push({
-        icon: '<span class="material-symbols-outlined mi-sm">local_fire_department</span>',
+        icon: svgIcon('local_fire_department', 'mi-sm'),
         text: this._t({
           ko: '연속 {weeks}주 기록 중! 대단해요!',
           en: 'Streak: {weeks} weeks of logging!',
@@ -1385,7 +1386,7 @@ export class DoctorEngine {
     
     if (achievements.length > 0) {
       messages.push({
-        icon: '<span class="material-symbols-outlined mi-sm mi-success">celebration</span>',
+        icon: svgIcon('celebration', 'mi-sm mi-success'),
         text: this._t({
           ko: '{items} 목표 달성!',
           en: 'Goal achieved: {items}',
@@ -1404,7 +1405,7 @@ export class DoctorEngine {
         const weightChange = first.weight - last.weight;
         if (Math.abs(weightChange) >= 1) {
           messages.push({
-            icon: '<span class="material-symbols-outlined mi-sm">fitness_center</span>',
+            icon: svgIcon('fitness_center', 'mi-sm'),
             text: this._t({
               ko: '지난 달 체중 {sign}{value}kg!',
               en: 'Last month weight {sign}{value}kg!',
@@ -1421,7 +1422,7 @@ export class DoctorEngine {
     // 기본 격려 메시지
     if (messages.length === 0) {
       messages.push({
-        icon: '<span class="material-symbols-outlined mi-sm">auto_awesome</span>',
+        icon: svgIcon('auto_awesome', 'mi-sm'),
         text: this._t({
           ko: '꾸준한 노력이 결과를 만듭니다. 계속 진행하세요!',
           en: 'Consistency creates results. Keep going!',

@@ -9,6 +9,7 @@ import { MEDICATION_DATABASE, getAllMedications } from '../../doctor-module/data
 import { SYMPTOM_DATABASE } from '../../doctor-module/data/symptom-database.js';
 import { translate, getCurrentLanguage } from '../../translations.js';
 import { timestampToDateString } from '../../utils.js';
+import { svgIcon } from '../icon-paths.js';
 
 // ========================================
 // 1. Change Roadmap Modal 클래스
@@ -1640,12 +1641,12 @@ export class ChangeRoadmapModal {
   
   getMilestoneIcon(type) {
     const icons = {
-      start: '<span class="material-symbols-outlined mi-sm">location_on</span>',
-      achievement: '<span class="material-symbols-outlined mi-sm mi-success">celebration</span>',
+      start: svgIcon('location_on', 'mi-sm'),
+      achievement: svgIcon('celebration', 'mi-sm mi-success'),
       current: '●',
-      prediction: '<span class="material-symbols-outlined mi-sm">auto_awesome</span>',
-      milestone: '<span class="material-symbols-outlined mi-sm">target</span>',
-      warning: '<span class="material-symbols-outlined mi-sm mi-warning">warning</span>',
+      prediction: svgIcon('auto_awesome', 'mi-sm'),
+      milestone: svgIcon('target', 'mi-sm'),
+      warning: svgIcon('warning', 'mi-sm mi-warning'),
       normal: '○'
     };
     return icons[type] || '○';

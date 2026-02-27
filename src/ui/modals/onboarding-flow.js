@@ -7,6 +7,7 @@
 // Import directly from shared translation module
 import { translate, getCurrentLanguage, setCurrentLanguage } from '../../translations.js';
 import { signInWithGoogle } from '../../firebase/auth.js';
+import { svgIcon } from '../icon-paths.js';
 const setLanguage = (lang) => {
     setCurrentLanguage(lang);
     // Also sync with script.js's local currentLanguage
@@ -262,7 +263,7 @@ export class OnboardingFlow {
     _step2Account(el) {
         el.innerHTML = `
             <div class="onboarding-step-center">
-                <div class="onboarding-step-icon"><span class="material-symbols-outlined mi-xl">cloud</span></div>
+                <div class="onboarding-step-icon">${svgIcon('cloud', 'mi-xl')}</div>
                 <h2>${translate('onboardingAccountTitle') || '계정 연동'}</h2>
                 <p class="onboarding-sub">${translate('onboardingAccountSub') || '데이터를 안전하게 클라우드에 백업하세요'}</p>
                 <div class="onboarding-account-options">
@@ -297,7 +298,7 @@ export class OnboardingFlow {
         const d = this.tempData;
         el.innerHTML = `
             <div class="onboarding-step-center">
-                <div class="onboarding-step-icon"><span class="material-symbols-outlined mi-xl">auto_awesome</span></div>
+                <div class="onboarding-step-icon">${svgIcon('auto_awesome', 'mi-xl')}</div>
                 <h2>${translate('onboardingPersonaTitle') || '프로필 설정'}</h2>
                 <div class="onboarding-form">
                     <div class="quest-form-group">
@@ -333,7 +334,7 @@ export class OnboardingFlow {
     _step4Goals(el) {
         el.innerHTML = `
             <div class="onboarding-step-center">
-                <div class="onboarding-step-icon"><span class="material-symbols-outlined mi-xl">target</span></div>
+                <div class="onboarding-step-icon">${svgIcon('target', 'mi-xl')}</div>
                 <h2>${translate('onboardingGoalsTitle') || '나의 목표'}</h2>
                 <p class="onboarding-sub">${translate('onboardingGoalsSub') || '달성하고 싶은 목표를 간단히 적어보세요'}</p>
                 <div class="onboarding-form">
@@ -363,12 +364,12 @@ export class OnboardingFlow {
 
         el.innerHTML = `
             <div class="onboarding-step-center">
-                <div class="onboarding-step-icon"><span class="material-symbols-outlined mi-xl">palette</span></div>
+                <div class="onboarding-step-icon">${svgIcon('palette', 'mi-xl')}</div>
                 <h2>${translate('onboardingThemeTitle') || '테마 선택'}</h2>
                 <div class="onboarding-theme-toggle">
-                    <button class="onboarding-theme-btn ${currentTheme === 'light' ? 'active' : ''}" data-theme="light"><span class="material-symbols-outlined mi-inline mi-sm">light_mode</span> Light</button>
-                    <button class="onboarding-theme-btn ${currentTheme === 'dark' ? 'active' : ''}" data-theme="dark"><span class="material-symbols-outlined mi-inline mi-sm">dark_mode</span> Dark</button>
-                    <button class="onboarding-theme-btn ${currentTheme === 'system' ? 'active' : ''}" data-theme="system"><span class="material-symbols-outlined mi-inline mi-sm">settings</span> System</button>
+                    <button class="onboarding-theme-btn ${currentTheme === 'light' ? 'active' : ''}" data-theme="light">${svgIcon('light_mode', 'mi-inline mi-sm')} Light</button>
+                    <button class="onboarding-theme-btn ${currentTheme === 'dark' ? 'active' : ''}" data-theme="dark">${svgIcon('dark_mode', 'mi-inline mi-sm')} Dark</button>
+                    <button class="onboarding-theme-btn ${currentTheme === 'system' ? 'active' : ''}" data-theme="system">${svgIcon('settings', 'mi-inline mi-sm')} System</button>
                 </div>
                 <div class="accent-color-grid" style="margin-top:20px;">
                     ${accentColors.map(c => `
@@ -471,20 +472,20 @@ export class OnboardingFlow {
     _step6GuideTour(el) {
         el.innerHTML = `
             <div class="onboarding-step-center">
-                <div class="onboarding-step-icon"><span class="material-symbols-outlined mi-xl">home</span></div>
+                <div class="onboarding-step-icon">${svgIcon('home', 'mi-xl')}</div>
                 <h2>${translate('onboardingTourTitle') || '준비 완료!'}</h2>
                 <p class="onboarding-sub">${translate('onboardingTourSub') || '홈 화면에서 시작해보세요'}</p>
                 <div class="onboarding-tour-cards">
                     <div class="onboarding-tour-card">
-                        <span><span class="material-symbols-outlined">monitoring</span></span>
+                        <span>${svgIcon('monitoring')}</span>
                         <p>${translate('onboardingTourChart') || '차트에서 변화 추이를 확인하세요'}</p>
                     </div>
                     <div class="onboarding-tour-card">
-                        <span><span class="material-symbols-outlined">target</span></span>
+                        <span>${svgIcon('target')}</span>
                         <p>${translate('onboardingTourGuide') || '액션 가이드로 맞춤 추천을 받으세요'}</p>
                     </div>
                     <div class="onboarding-tour-card">
-                        <span><span class="material-symbols-outlined">menu_book</span></span>
+                        <span>${svgIcon('menu_book')}</span>
                         <p>${translate('onboardingTourDiary') || '다이어리로 매일을 기록하세요'}</p>
                     </div>
                 </div>

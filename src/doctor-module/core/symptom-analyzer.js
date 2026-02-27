@@ -9,6 +9,7 @@
  */
 
 import { SYMPTOM_DATABASE } from '../data/symptom-database.js';
+import { svgIcon } from '../../ui/icon-paths.js';
 
 // ========================================
 // 1. 증상 분석기 클래스
@@ -194,7 +195,7 @@ export class SymptomAnalyzer {
       alerts.push({
         level: 'critical',
         category: 'circulatory',
-        icon: '<span class="material-symbols-outlined mi-sm mi-error">emergency</span>',
+        icon: svgIcon('emergency', 'mi-sm mi-error'),
         title: '심부정맥 혈전증 의심',
         description: '종아리 또는 다리의 부기와 통증은 혈전의 징후일 수 있습니다.',
         action: '즉시 병원 응급실을 방문하세요!',
@@ -210,7 +211,7 @@ export class SymptomAnalyzer {
       alerts.push({
         level: 'critical',
         category: 'liver',
-        icon: '<span class="material-symbols-outlined mi-sm mi-warning">warning</span>',
+        icon: svgIcon('warning', 'mi-sm mi-warning'),
         title: '간 기능 이상 의심',
         description: '황달 증상은 간 독성의 징후일 수 있습니다.',
         action: '즉시 의사와 상담하고 혈액 검사를 받으세요',
@@ -225,7 +226,7 @@ export class SymptomAnalyzer {
       alerts.push({
         level: 'critical',
         category: 'liver',
-        icon: '<span class=\"material-symbols-outlined mi-sm mi-warning\">warning</span>',
+        icon: svgIcon('warning', 'mi-sm mi-warning'),
         title: '간 비대 의심',
         description: '오른쪽 윗배의 통증은 간 비대의 징후일 수 있습니다.',
         action: '의사 상담 및 간 기능 검사 필요',
@@ -244,7 +245,7 @@ export class SymptomAnalyzer {
       alerts.push({
         level: 'critical',
         category: 'cardiovascular',
-        icon: '<span class="material-symbols-outlined mi-sm mi-error">favorite</span>',
+        icon: svgIcon('favorite', 'mi-sm mi-error'),
         title: '심혈관 증상 주의',
         description: '심한 두근거림 또는 호흡 곤란은 심혈관 문제를 나타낼 수 있습니다.',
         action: '즉시 의사 상담 필요',
@@ -277,7 +278,7 @@ export class SymptomAnalyzer {
       warnings.push({
         level: 'warning',
         category: 'mental_health',
-        icon: '<span class="material-symbols-outlined mi-sm">psychology</span>',
+        icon: svgIcon('psychology', 'mi-sm'),
         title: '정신 건강 증상 주의',
         description: `${mentalSymptoms.length}개의 정신 건강 관련 증상이 보고되었습니다.`,
         symptoms: mentalSymptoms.map(s => this.getSymptomName(s.id)),
@@ -304,7 +305,7 @@ export class SymptomAnalyzer {
       warnings.push({
         level: 'warning',
         category: 'skin',
-        icon: '<span class="material-symbols-outlined mi-sm">dermatology</span>',
+        icon: svgIcon('dermatology', 'mi-sm'),
         title: '피부 트러블',
         description: '호르몬 변화로 인한 피부 트러블이 있습니다.',
         symptoms: skinSymptoms.map(s => this.getSymptomName(s.id)),
@@ -332,7 +333,7 @@ export class SymptomAnalyzer {
       warnings.push({
         level: 'warning',
         category: 'sexual_health',
-        icon: '<span class="material-symbols-outlined mi-sm">favorite</span>',
+        icon: svgIcon('favorite', 'mi-sm'),
         title: '성기능 변화',
         description: '호르몬 변화로 인한 성기능 변화가 있습니다.',
         symptoms: sexualSymptoms.map(s => this.getSymptomName(s.id)),
@@ -366,7 +367,7 @@ export class SymptomAnalyzer {
       warnings.push({
         level: 'warning',
         category: 'fitness',
-        icon: '<span class="material-symbols-outlined mi-sm">fitness_center</span>',
+        icon: svgIcon('fitness_center', 'mi-sm'),
         title: '근력 및 체력 저하',
         description: '근육량 감소 또는 피로감이 있습니다.',
         symptoms: muscleSymptoms.map(s => this.getSymptomName(s.id)),
@@ -392,7 +393,7 @@ export class SymptomAnalyzer {
       warnings.push({
         level: 'warning',
         category: 'hair',
-        icon: '<span class="material-symbols-outlined mi-sm">content_cut</span>',
+        icon: svgIcon('content_cut', 'mi-sm'),
         title: '탈모 진행',
         description: '탈모가 진행되고 있습니다.',
         symptoms: hairLossSymptoms.map(s => this.getSymptomName(s.id)),
@@ -438,7 +439,7 @@ export class SymptomAnalyzer {
     const mildCount = symptoms.filter(s => s.severity <= 2).length;
     
     if (severeCount > 0) {
-      return `<span class="material-symbols-outlined mi-inline mi-sm mi-warning">warning</span> ${severeCount}개의 심각한 증상이 보고되었습니다. 즉시 의사와 상담하세요.`;
+      return `${svgIcon('warning', 'mi-inline mi-sm mi-warning')} ${severeCount}개의 심각한 증상이 보고되었습니다. 즉시 의사와 상담하세요.`;
     }
     
     if (moderateCount >= 3) {
@@ -475,7 +476,7 @@ export class SymptomAnalyzer {
     if (unexpectedSymptoms.length > 0) {
       insights.push({
         type: 'unexpected',
-        icon: '<span class="material-symbols-outlined mi-sm">search</span>',
+        icon: svgIcon('search', 'mi-sm'),
         title: '예상 밖의 증상',
         description: `${this.mode === 'mtf' ? 'MTF' : 'FTM'} 전환에서 흔하지 않은 증상이 나타났습니다.`,
         symptoms: unexpectedSymptoms.map(s => this.getSymptomName(s.id)),
@@ -495,7 +496,7 @@ export class SymptomAnalyzer {
         if (improvedSymptoms.length > 0) {
           insights.push({
             type: 'improvement',
-            icon: '<span class="material-symbols-outlined mi-sm mi-success">auto_awesome</span>',
+            icon: svgIcon('auto_awesome', 'mi-sm mi-success'),
             title: '증상 개선',
             description: `${improvedSymptoms.length}개의 증상이 지난주보다 호전되었습니다!`,
             symptoms: improvedSymptoms.map(s => this.getSymptomName(s.id)),
@@ -536,7 +537,7 @@ export class SymptomAnalyzer {
         if (moodSymptoms.length > 0) {
           return {
             type: 'correlation',
-            icon: '<span class="material-symbols-outlined mi-sm">link</span>',
+            icon: svgIcon('link', 'mi-sm'),
             title: '호르몬 수치와 증상 연관성',
             description: '낮은 에스트로겐 수치가 기분 변화와 관련이 있을 수 있습니다.',
             estrogenLevel: measurement.estrogenLevel,
@@ -555,7 +556,7 @@ export class SymptomAnalyzer {
         if (masculineSymptoms.length > 0) {
           return {
             type: 'correlation',
-            icon: '<span class="material-symbols-outlined mi-sm">link</span>',
+            icon: svgIcon('link', 'mi-sm'),
             title: '테스토스테론 억제 부족',
             description: '높은 테스토스테론 수치가 원치 않는 남성화 증상을 유발할 수 있습니다.',
             testosteroneLevel: measurement.testosteroneLevel,
@@ -575,7 +576,7 @@ export class SymptomAnalyzer {
         if (highTSymptoms.length > 0) {
           return {
             type: 'correlation',
-            icon: '<span class="material-symbols-outlined mi-sm">link</span>',
+            icon: svgIcon('link', 'mi-sm'),
             title: '높은 테스토스테론 부작용',
             description: '테스토스테론 수치가 높아 부작용이 나타나고 있습니다.',
             testosteroneLevel: measurement.testosteroneLevel,
@@ -594,7 +595,7 @@ export class SymptomAnalyzer {
         if (lowTSymptoms.length > 0) {
           return {
             type: 'correlation',
-            icon: '<span class="material-symbols-outlined mi-sm">link</span>',
+            icon: svgIcon('link', 'mi-sm'),
             title: '낮은 테스토스테론 증상',
             description: '테스토스테론 수치가 낮아 관련 증상이 나타날 수 있습니다.',
             testosteroneLevel: measurement.testosteroneLevel,
@@ -623,7 +624,7 @@ export class SymptomAnalyzer {
       if (earlyMTFSymptoms.length >= 2) {
         return {
           type: 'typical',
-          icon: '<span class="material-symbols-outlined mi-sm">assignment</span>',
+          icon: svgIcon('assignment', 'mi-sm'),
           title: 'MTF 전형적인 초기 증상',
           description: '이러한 증상은 MTF 전환 초기에 매우 흔합니다.',
           symptoms: earlyMTFSymptoms.map(s => this.getSymptomName(s.id)),
@@ -641,7 +642,7 @@ export class SymptomAnalyzer {
       if (earlyFTMSymptoms.length >= 2) {
         return {
           type: 'typical',
-          icon: '<span class="material-symbols-outlined mi-sm">assignment</span>',
+          icon: svgIcon('assignment', 'mi-sm'),
           title: 'FTM 전형적인 초기 증상',
           description: '이러한 증상은 FTM 전환 초기에 매우 흔합니다.',
           symptoms: earlyFTMSymptoms.map(s => this.getSymptomName(s.id)),

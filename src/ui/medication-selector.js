@@ -1,3 +1,4 @@
+import { svgIcon } from './icon-paths.js';
 import {
   ESTROGENS,
   PROGESTOGENS,
@@ -201,7 +202,7 @@ export class MedicationSelector {
     if (this.medications.length === 0) {
       this.container.innerHTML = `
         <div class="medications-empty-state">
-          <div class="medications-empty-state-icon"><span class="material-symbols-outlined mi-xl">medication</span></div>
+          <div class="medications-empty-state-icon">${svgIcon('medication', 'mi-xl')}</div>
           <p>${t('emptyState', this.language)}</p>
         </div>
       `;
@@ -265,7 +266,7 @@ export class MedicationSelector {
           value="${med.dose ?? ''}"
         />
         ${this.renderUnitSelect(med.id, med.unit)}
-        <button type="button" class="remove-medication-btn" data-remove-medication="${med.id}"><span class="material-symbols-outlined mi-sm">close</span></button>
+        <button type="button" class="remove-medication-btn" data-remove-medication="${med.id}">${svgIcon('close', 'mi-sm')}</button>
       </div>
     `;
   }

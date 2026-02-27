@@ -6,6 +6,7 @@
 
 import { translate, getCurrentLanguage } from '../../translations.js';
 import { BaseModal } from './base-modal.js';
+import { svgIcon } from '../icon-paths.js';
 
 const AI_CACHE_KEY = 'shiftv_ai_cache';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
@@ -522,8 +523,8 @@ Keep total response under 800 words. Be specific, not generic.`;
     _render() {
         const isMed = this.mode === 'medication';
         const headerTitle = isMed
-            ? `<span class="material-symbols-outlined mi-inline">medication</span> ${translate('aiMedicationTitle') || 'AI 약물 조언'}`
-            : `<span class="material-symbols-outlined mi-inline">auto_awesome</span> AI ${translate('actionGuideModalTitle') || 'Action Guide'}`;
+            ? `${svgIcon('medication', 'mi-inline')} ${translate('aiMedicationTitle') || 'AI 약물 조언'}`
+            : `${svgIcon('auto_awesome', 'mi-inline')} AI ${translate('actionGuideModalTitle') || 'Action Guide'}`;
 
         const overlay = this._mount('ai-advisor-overlay', `
             <div class="ai-advisor-surface">
@@ -579,7 +580,7 @@ Keep total response under 800 words. Be specific, not generic.`;
         if (!apiKey) {
             contentEl.innerHTML = `
                 <div class="ai-advisor-error">
-                    <div class="ai-advisor-error-icon"><span class="material-symbols-outlined mi-xl">vpn_key</span></div>
+                    <div class="ai-advisor-error-icon">${svgIcon('vpn_key', 'mi-xl')}</div>
                     <p>${translate('aiNoApiKey') || 'API 키가 설정되지 않았습니다'}</p>
                     <p class="ai-advisor-error-hint">${translate('aiNoApiKeyHint') || '설정 → AI API에서 키를 입력하세요'}</p>
                 </div>
@@ -618,11 +619,11 @@ Keep total response under 800 words. Be specific, not generic.`;
 
             contentEl.innerHTML = `
                 <div class="ai-advisor-error">
-                    <div class="ai-advisor-error-icon"><span class="material-symbols-outlined mi-xl">${icon}</span></div>
+                    <div class="ai-advisor-error-icon">${svgIcon(icon, 'mi-xl')}</div>
                     <p>${translate('aiError') || 'AI 응답을 받을 수 없습니다'}</p>
                     <p class="ai-advisor-error-hint">${this._escHtml(error.message)}</p>
                     <button class="ai-advisor-refresh btn-filled-tonal" onclick="this.closest('.ai-advisor-overlay').__refreshFn?.()">
-                        <span class="material-symbols-outlined mi-inline mi-sm">refresh</span> ${translate('aiRetry') || '다시 시도'}
+                        ${svgIcon('refresh', 'mi-inline mi-sm')} ${translate('aiRetry') || '다시 시도'}
                     </button>
                 </div>
             `;
@@ -737,13 +738,13 @@ Keep total response under 800 words. Be specific, not generic.`;
     /** Wrap formatted HTML with cache badge and refresh button */
     _wrapResponse(html, fromCache) {
         const cacheLabel = fromCache ?
-            `<div class="ai-advisor-cache-badge"><span class="material-symbols-outlined mi-inline mi-sm">schedule</span> ${translate('aiCached') || '캐시됨 (24시간)'}</div>` : '';
+            `<div class="ai-advisor-cache-badge">${svgIcon('schedule', 'mi-inline mi-sm')} ${translate('aiCached') || '캐시됨 (24시간)'}</div>` : '';
 
         return `
             ${cacheLabel}
             <div class="ai-advisor-response">${html}</div>
             <button class="ai-advisor-refresh btn-text" onclick="this.closest('.ai-advisor-overlay').__refreshFn?.()">
-                <span class="material-symbols-outlined mi-inline mi-sm">refresh</span> ${translate('aiRefresh') || '새로 분석하기'}
+                ${svgIcon('refresh', 'mi-inline mi-sm')} ${translate('aiRefresh') || '새로 분석하기'}
             </button>
         `;
     }

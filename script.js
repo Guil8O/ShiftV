@@ -19,6 +19,7 @@ import { createModalSystem } from './src/ui/modal-system.js';
 import * as dataManager from './src/core/data-manager.js';
 import { PRIMARY_DATA_KEY, SETTINGS_KEY, BODY_SIZE_KEYS as bodySizeKeys } from './src/constants.js';
 import { isIOS, getCSSVar as getCssVar, normalizeSymptomsArray, symptomsSignature } from './src/utils.js';
+import { svgIcon, replaceMaterialIcons } from './src/ui/icon-paths.js';
 
 const APP_VERSION = "2.0.0a"; // 버전 업데이트
 
@@ -150,6 +151,19 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log(`DEBUG: ShiftV App Initializing v${APP_VERSION}...`);
 
+    // ── Replace all Material Symbols font icons with inline SVGs ─────
+    replaceMaterialIcons(document.body);
+
+    // ── Auto-replace font icons in dynamically added DOM content ──────
+    const iconObserver = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+            for (const node of m.addedNodes) {
+                if (node.nodeType === 1) replaceMaterialIcons(node);
+            }
+        }
+    });
+    iconObserver.observe(document.body, { childList: true, subtree: true });
+
     // ── 화면 회전 잠금 (PWA/fullscreen) ──────────────────────────────
     try {
         if (screen.orientation && typeof screen.orientation.lock === 'function') {
@@ -229,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const info = typeInfo[n.type] || typeInfo.measurement;
             return `<div class="notif-item${n.read ? '' : ' unread'}" data-id="${n.id}" onclick="(function(el){const id=el.dataset.id;window._markNotifRead(id);})(this)">
                 <div class="notif-icon ${info.cls}">
-                    <span class="material-symbols-outlined" style="font-size:18px">${info.icon}</span>
+                    ${svgIcon(info.icon)}
                 </div>
                 <div class="notif-content">
                     <div class="notif-title">${escapeHTML(n.title)}</div>
@@ -1810,7 +1824,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="sv-metric-value">${formatValue(item.value, item.key)}</span>
             </div>
             <div class="sv-metric-footer">
-                <span class="material-symbols-outlined sv-metric-icon ${changeClass}">${changeIcon}</span>
+                ${svgIcon(changeIcon, 'sv-metric-icon ' + changeClass)}
                 <span class="sv-metric-change ${changeClass}">${translate('svcard_change_vs_last_week')} ${changeText}</span>
             </div>
         </div>`;
@@ -1865,20 +1879,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 let statusIcon = '';
 
                 if (analytics.estrogenLevel.status === 'critical_high') {
-                    statusHTML = `<div class="status-badge danger-badge"><span class="material-symbols-outlined status-icon mi-error">warning</span> ${translate('estrogen_critical_high')}</div>`;
-                    statusIcon = '<span class="material-symbols-outlined status-icon mi-error">warning</span>';
+                    statusHTML = `<div class="status-badge danger-badge">${svgIcon('warning', 'status-icon mi-error')} ${translate('estrogen_critical_high')}</div>`;
+                    statusIcon = svgIcon('warning', 'status-icon mi-error');
                 } else if (analytics.estrogenLevel.status === 'optimal') {
-                    statusHTML = `<div class="status-badge optimal-badge"><span class="material-symbols-outlined status-icon mi-success">check_circle</span> ${translate('estrogen_optimal')}</div>`;
-                    statusIcon = '<span class="material-symbols-outlined status-icon mi-success">check_circle</span>';
+                    statusHTML = `<div class="status-badge optimal-badge">${svgIcon('check_circle', 'status-icon mi-success')} ${translate('estrogen_optimal')}</div>`;
+                    statusIcon = svgIcon('check_circle', 'status-icon mi-success');
                 } else if (analytics.estrogenLevel.status === 'above_target') {
-                    statusHTML = `<div class="status-badge above-badge"><span class="material-symbols-outlined status-icon">arrow_upward</span> ${translate('estrogen_above_target')}</div>`;
-                    statusIcon = '<span class="material-symbols-outlined status-icon">arrow_upward</span>';
+                    statusHTML = `<div class="status-badge above-badge">${svgIcon('arrow_upward', 'status-icon')} ${translate('estrogen_above_target')}</div>`;
+                    statusIcon = svgIcon('arrow_upward', 'status-icon');
                 } else if (analytics.estrogenLevel.status === 'below_target') {
-                    statusHTML = `<div class="status-badge below-badge"><span class="material-symbols-outlined status-icon">arrow_downward</span> ${translate('estrogen_below_target')}</div>`;
-                    statusIcon = '<span class="material-symbols-outlined status-icon">arrow_downward</span>';
+                    statusHTML = `<div class="status-badge below-badge">${svgIcon('arrow_downward', 'status-icon')} ${translate('estrogen_below_target')}</div>`;
+                    statusIcon = svgIcon('arrow_downward', 'status-icon');
                 } else {
                     statusHTML = `<div class="status-badge neutral-badge">${translate('no_target_set')}</div>`;
-                    statusIcon = '<span class="material-symbols-outlined status-icon">remove</span>';
+                    statusIcon = svgIcon('remove', 'status-icon');
                 }
 
                 analysisHTML += `
@@ -1903,20 +1917,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 let statusIcon = '';
 
                 if (analytics.testosteroneLevel.status === 'critical_low') {
-                    statusHTML = `<div class="status-badge danger-badge"><span class="material-symbols-outlined status-icon mi-error">warning</span> ${translate('testosterone_critical_low')}</div>`;
-                    statusIcon = '<span class="material-symbols-outlined status-icon mi-error">warning</span>';
+                    statusHTML = `<div class="status-badge danger-badge">${svgIcon('warning', 'status-icon mi-error')} ${translate('testosterone_critical_low')}</div>`;
+                    statusIcon = svgIcon('warning', 'status-icon mi-error');
                 } else if (analytics.testosteroneLevel.status === 'optimal') {
-                    statusHTML = `<div class="status-badge optimal-badge"><span class="material-symbols-outlined status-icon mi-success">check_circle</span> ${translate('testosterone_optimal')}</div>`;
-                    statusIcon = '<span class="material-symbols-outlined status-icon mi-success">check_circle</span>';
+                    statusHTML = `<div class="status-badge optimal-badge">${svgIcon('check_circle', 'status-icon mi-success')} ${translate('testosterone_optimal')}</div>`;
+                    statusIcon = svgIcon('check_circle', 'status-icon mi-success');
                 } else if (analytics.testosteroneLevel.status === 'above_target') {
-                    statusHTML = `<div class="status-badge above-badge"><span class="material-symbols-outlined status-icon">arrow_upward</span> ${translate('testosterone_above_target')}</div>`;
-                    statusIcon = '<span class="material-symbols-outlined status-icon">arrow_upward</span>';
+                    statusHTML = `<div class="status-badge above-badge">${svgIcon('arrow_upward', 'status-icon')} ${translate('testosterone_above_target')}</div>`;
+                    statusIcon = svgIcon('arrow_upward', 'status-icon');
                 } else if (analytics.testosteroneLevel.status === 'below_target') {
-                    statusHTML = `<div class="status-badge below-badge"><span class="material-symbols-outlined status-icon">arrow_downward</span> ${translate('testosterone_below_target')}</div>`;
-                    statusIcon = '<span class="material-symbols-outlined status-icon">arrow_downward</span>';
+                    statusHTML = `<div class="status-badge below-badge">${svgIcon('arrow_downward', 'status-icon')} ${translate('testosterone_below_target')}</div>`;
+                    statusIcon = svgIcon('arrow_downward', 'status-icon');
                 } else {
                     statusHTML = `<div class="status-badge neutral-badge">${translate('no_target_set')}</div>`;
-                    statusIcon = '<span class="material-symbols-outlined status-icon">remove</span>';
+                    statusIcon = svgIcon('remove', 'status-icon');
                 }
 
                 analysisHTML += `
@@ -1957,7 +1971,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="hormone-card ratio-card">
                         <div class="ratio-bar-container">
                             <div class="ratio-icon-group">
-                                <span class="ratio-icon male"><span class="material-symbols-outlined mi-sm">male</span></span>
+                                <span class="ratio-icon male">${svgIcon('male', 'mi-sm')}</span>
                                 <span class="ratio-percentile">${maleRange}</span>
                             </div>
                             <div class="ratio-bar">
@@ -1965,7 +1979,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="ratio-bar-marker" style="left: ${analytics.etRatio.position}%;"></div>
                             </div>
                             <div class="ratio-icon-group">
-                                <span class="ratio-icon female"><span class="material-symbols-outlined mi-sm">female</span></span>
+                                <span class="ratio-icon female">${svgIcon('female', 'mi-sm')}</span>
                                 <span class="ratio-percentile">${femaleRange}</span>
                             </div>
                         </div>
@@ -1990,7 +2004,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 
                 <div class="info-card">
-                    <h4 class="info-card-title"><span class="material-symbols-outlined mi-inline mi-sm">lightbulb</span> ${translate('understandingHormones')}</h4>
+                    <h4 class="info-card-title">${svgIcon('lightbulb', 'mi-inline mi-sm')} ${translate('understandingHormones')}</h4>
                     <div class="info-card-content">
                         <p><strong>${translate('estrogenLevel').split('(')[0]}:</strong> ${translate('estrogenExplanation')}</p>
                         <p><strong>${translate('testosteroneLevel').split('(')[0]}:</strong> ${translate('testosteroneExplanation')}</p>
@@ -2051,13 +2065,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const suppressionValue = formatChange(analytics.emax.dailySuppression);
 
                 let rfColorClass = '';
-                let rfIcon = '<span class="material-symbols-outlined status-icon">monitoring</span>';
+                let rfIcon = svgIcon('monitoring', 'status-icon');
                 if (analytics.emax.messageKey === 'rfMessage_very_high' || analytics.emax.messageKey === 'rfMessage_high') {
                     rfColorClass = 'positive';
-                    rfIcon = '<span class="material-symbols-outlined status-icon mi-success">check_circle</span>';
+                    rfIcon = svgIcon('check_circle', 'status-icon mi-success');
                 } else if (analytics.emax.messageKey === 'rfMessage_low' || analytics.emax.messageKey === 'rfMessage_very_low' || analytics.emax.messageKey === 'rfMessage_negative') {
                     rfColorClass = 'negative';
-                    rfIcon = '<span class="material-symbols-outlined status-icon mi-error">warning</span>';
+                    rfIcon = svgIcon('warning', 'status-icon mi-error');
                 }
 
                 analysisHTML += `
@@ -2110,15 +2124,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (analytics.stability.estrogenLevel.status === 'stable') {
                         statusText = translate('stability_stable');
-                        statusIcon = '<span class="material-symbols-outlined status-icon mi-success">check_circle</span>';
+                        statusIcon = svgIcon('check_circle', 'status-icon mi-success');
                         statusClass = 'stable';
                     } else if (analytics.stability.estrogenLevel.status === 'moderate') {
                         statusText = translate('stability_moderate');
-                        statusIcon = '<span class="material-symbols-outlined status-icon mi-warning">swap_vert</span>';
+                        statusIcon = svgIcon('swap_vert', 'status-icon mi-warning');
                         statusClass = 'moderate';
                     } else {
                         statusText = translate('stability_unstable');
-                        statusIcon = '<span class="material-symbols-outlined status-icon mi-error">warning</span>';
+                        statusIcon = svgIcon('warning', 'status-icon mi-error');
                         statusClass = 'unstable';
                     }
 
@@ -2147,15 +2161,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (analytics.stability.testosteroneLevel.status === 'stable') {
                         statusText = translate('stability_stable');
-                        statusIcon = '<span class="material-symbols-outlined status-icon mi-success">check_circle</span>';
+                        statusIcon = svgIcon('check_circle', 'status-icon mi-success');
                         statusClass = 'stable';
                     } else if (analytics.stability.testosteroneLevel.status === 'moderate') {
                         statusText = translate('stability_moderate');
-                        statusIcon = '<span class="material-symbols-outlined status-icon mi-warning">swap_vert</span>';
+                        statusIcon = svgIcon('swap_vert', 'status-icon mi-warning');
                         statusClass = 'moderate';
                     } else {
                         statusText = translate('stability_unstable');
-                        statusIcon = '<span class="material-symbols-outlined status-icon mi-error">warning</span>';
+                        statusIcon = svgIcon('warning', 'status-icon mi-error');
                         statusClass = 'unstable';
                     }
 
@@ -2205,12 +2219,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="prediction-display">
                             <div class="prediction-item">
-                                <span class="prediction-label"><span class="material-symbols-outlined status-icon">trending_up</span> ${translate('predictedNextWeek')}</span>
+                                <span class="prediction-label">${svgIcon('trending_up', 'status-icon')} ${translate('predictedNextWeek')}</span>
                                 <span class="prediction-value">${analytics.estrogenLevel.predictedNext ? analytics.estrogenLevel.predictedNext.toFixed(1) : '-'}</span>
                             </div>
                             ${targets.estrogenLevel ? `
                             <div class="prediction-item">
-                                <span class="prediction-label"><span class="material-symbols-outlined status-icon">target</span> ${translate('daysToTarget')}</span>
+                                <span class="prediction-label">${svgIcon('target', 'status-icon')} ${translate('daysToTarget')}</span>
                                 <span class="prediction-value">${getDayText(analytics.estrogenLevel.daysToTarget)}</span>
                                 <span class="prediction-target">${translate('targetLabelShort', { value: targets.estrogenLevel })}</span>
                             </div>` : ''}
@@ -2223,12 +2237,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="prediction-display">
                             <div class="prediction-item">
-                                <span class="prediction-label"><span class="material-symbols-outlined status-icon">trending_up</span> ${translate('predictedNextWeek')}</span>
+                                <span class="prediction-label">${svgIcon('trending_up', 'status-icon')} ${translate('predictedNextWeek')}</span>
                                 <span class="prediction-value">${analytics.testosteroneLevel.predictedNext ? analytics.testosteroneLevel.predictedNext.toFixed(1) : '-'}</span>
                             </div>
                             ${targets.testosteroneLevel ? `
                             <div class="prediction-item">
-                                <span class="prediction-label"><span class="material-symbols-outlined status-icon">target</span> ${translate('daysToTarget')}</span>
+                                <span class="prediction-label">${svgIcon('target', 'status-icon')} ${translate('daysToTarget')}</span>
                                 <span class="prediction-value">${getDayText(analytics.testosteroneLevel.daysToTarget)}</span>
                                 <span class="prediction-target">${translate('targetLabelShort', { value: targets.testosteroneLevel })}</span>
                             </div>` : ''}
@@ -2255,11 +2269,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         <div class="info-card-grid">
                             <div class="info-card mini">
-                                <h4 class="info-card-title"><span class="material-symbols-outlined mi-inline mi-sm">info</span> ${translate('drugInfluenceHowItWorks')}</h4>
+                                <h4 class="info-card-title">${svgIcon('info', 'mi-inline mi-sm')} ${translate('drugInfluenceHowItWorks')}</h4>
                                 <p class="info-card-text">${translate('drugInfluenceHowItWorksDesc')}</p>
                             </div>
                             <div class="info-card mini">
-                                <h4 class="info-card-title"><span class="material-symbols-outlined mi-inline mi-sm">monitoring</span> ${translate('drugInfluenceConfidence')}</h4>
+                                <h4 class="info-card-title">${svgIcon('monitoring', 'mi-inline mi-sm')} ${translate('drugInfluenceConfidence')}</h4>
                                 <p class="info-card-text">${translate('drugInfluenceConfidenceDesc')}</p>
                             </div>
                         </div>
@@ -2285,7 +2299,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         return `
                         <div class="drug-card">
                             <div class="drug-card-header">
-                                <h3 class="drug-name"><span class="material-symbols-outlined mi-inline mi-sm">medication</span> ${drugLabel}</h3>
+                                <h3 class="drug-name">${svgIcon('medication', 'mi-inline mi-sm')} ${drugLabel}</h3>
                                 <div class="drug-samples">${effects.samples} ${translate('samples')}</div>
                             </div>
                             <div class="drug-influences">
@@ -2338,10 +2352,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     analysisHTML += `
                     <div class="body-ratio-card">
-                        <h3 class="body-ratio-name"><span class="material-symbols-outlined mi-inline mi-sm">straighten</span> ${translate('waistHipRatio')}</h3>
+                        <h3 class="body-ratio-name">${svgIcon('straighten', 'mi-inline mi-sm')} ${translate('waistHipRatio')}</h3>
                         <div class="ratio-bar-container">
                             <div class="ratio-icon-group">
-                                <span class="ratio-icon male"><span class="material-symbols-outlined mi-sm">male</span></span>
+                                <span class="ratio-icon male">${svgIcon('male', 'mi-sm')}</span>
                                 <span class="ratio-percentile">${malePercent}</span>
                             </div>
                             <div class="ratio-bar">
@@ -2349,7 +2363,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="ratio-bar-marker" style="left: ${analytics.bodyRatios.whr.position}%;"></div>
                             </div>
                             <div class="ratio-icon-group">
-                                <span class="ratio-icon female"><span class="material-symbols-outlined mi-sm">female</span></span>
+                                <span class="ratio-icon female">${svgIcon('female', 'mi-sm')}</span>
                                 <span class="ratio-percentile">${femalePercent}</span>
                             </div>
                         </div>
@@ -2365,10 +2379,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     analysisHTML += `
                     <div class="body-ratio-card">
-                        <h3 class="body-ratio-name"><span class="material-symbols-outlined mi-inline mi-sm">straighten</span> ${translate('chestWaistRatio')}</h3>
+                        <h3 class="body-ratio-name">${svgIcon('straighten', 'mi-inline mi-sm')} ${translate('chestWaistRatio')}</h3>
                         <div class="ratio-bar-container">
                             <div class="ratio-icon-group">
-                                <span class="ratio-icon male"><span class="material-symbols-outlined mi-sm">male</span></span>
+                                <span class="ratio-icon male">${svgIcon('male', 'mi-sm')}</span>
                                 <span class="ratio-percentile">${malePercent}</span>
                             </div>
                             <div class="ratio-bar">
@@ -2376,7 +2390,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="ratio-bar-marker" style="left: ${analytics.bodyRatios.chestWaist.position}%;"></div>
                             </div>
                             <div class="ratio-icon-group">
-                                <span class="ratio-icon female"><span class="material-symbols-outlined mi-sm">female</span></span>
+                                <span class="ratio-icon female">${svgIcon('female', 'mi-sm')}</span>
                                 <span class="ratio-percentile">${femalePercent}</span>
                             </div>
                         </div>
@@ -2392,10 +2406,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     analysisHTML += `
                     <div class="body-ratio-card">
-                        <h3 class="body-ratio-name"><span class="material-symbols-outlined mi-inline mi-sm">straighten</span> ${translate('shoulderHipRatio')}</h3>
+                        <h3 class="body-ratio-name">${svgIcon('straighten', 'mi-inline mi-sm')} ${translate('shoulderHipRatio')}</h3>
                         <div class="ratio-bar-container">
                             <div class="ratio-icon-group">
-                                <span class="ratio-icon male"><span class="material-symbols-outlined mi-sm">male</span></span>
+                                <span class="ratio-icon male">${svgIcon('male', 'mi-sm')}</span>
                                 <span class="ratio-percentile">${malePercent}</span>
                             </div>
                             <div class="ratio-bar">
@@ -2403,7 +2417,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="ratio-bar-marker" style="left: ${analytics.bodyRatios.shoulderHip.position}%;"></div>
                             </div>
                             <div class="ratio-icon-group">
-                                <span class="ratio-icon female"><span class="material-symbols-outlined mi-sm">female</span></span>
+                                <span class="ratio-icon female">${svgIcon('female', 'mi-sm')}</span>
                                 <span class="ratio-percentile">${femalePercent}</span>
                             </div>
                         </div>
@@ -2846,10 +2860,10 @@ document.addEventListener('DOMContentLoaded', () => {
         titleEl.innerHTML = `${translate('svcard_title_action_guide')}`;
 
         const metaByCategory = {
-            exercise: { icon: '<span class="material-symbols-outlined category-icon">fitness_center</span>', titleKey: 'actionGuideCategoryExercise' },
-            diet: { icon: '<span class="material-symbols-outlined category-icon">restaurant</span>', titleKey: 'actionGuideCategoryDiet' },
-            medication: { icon: '<span class="material-symbols-outlined category-icon">medication</span>', titleKey: 'actionGuideCategoryMedication' },
-            habits: { icon: '<span class="material-symbols-outlined category-icon">psychology</span>', titleKey: 'actionGuideCategoryHabits' }
+            exercise: { icon: svgIcon('fitness_center', 'category-icon'), titleKey: 'actionGuideCategoryExercise' },
+            diet: { icon: svgIcon('restaurant', 'category-icon'), titleKey: 'actionGuideCategoryDiet' },
+            medication: { icon: svgIcon('medication', 'category-icon'), titleKey: 'actionGuideCategoryMedication' },
+            habits: { icon: svgIcon('psychology', 'category-icon'), titleKey: 'actionGuideCategoryHabits' }
         };
 
         const categoryKeys = ['exercise', 'diet', 'medication', 'habits'];
@@ -3022,7 +3036,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${showTarget ? `<span class="shc-target">${translate('svcard_label_target')} ${formatValue(target, h.key)}</span>` : ''}
                     </div>
                     <div class="shc-badge status-badge ${badge.cls}">
-                        <span class="material-symbols-outlined">${badge.icon}</span>
+                        ${svgIcon(badge.icon)}
                     </div>
                 </div>`;
         }).join('');
@@ -3163,7 +3177,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             return `${title}
                 <div class="health-preview">
-                    <span class="material-symbols-outlined mi-sm">shield</span>
+                    ${svgIcon('shield', 'mi-sm')}
                     <span>${translate('svcard_health_tap')}</span>
                 </div>
                 <div id="health-card-alerts" class="health-card-alerts-container"></div>`;
@@ -3193,7 +3207,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const okLabel = translate('health_no_issues') || (currentLanguage === 'ja' ? '特に問題なし' : currentLanguage === 'en' ? 'No issues detected' : '특이사항 없음');
                     alertsEl.innerHTML = `
                         <div class="health-chip health-chip--good">
-                            <span class="material-symbols-outlined">check_circle</span>
+                            ${svgIcon('check_circle')}
                             <span>${okLabel}</span>
                         </div>`;
                     return;
@@ -3210,7 +3224,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const msg = alert.title || alert.message || alert.description || '';
                     html += `
                         <div class="health-chip ${cls}">
-                            <span class="material-symbols-outlined">${icon}</span>
+                            ${svgIcon(icon)}
                             <span>${msg}</span>
                         </div>`;
                 });
@@ -3274,7 +3288,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 svCardShortcut.style.setProperty('--shortcut-bg-pct', '8%');
                 svCardShortcut.innerHTML = `
                     <div class="shortcut-card shortcut--new">
-                        <span class="material-symbols-outlined shortcut-new-icon">add_circle</span>
+                        ${svgIcon('add_circle', 'shortcut-new-icon')}
                         <div class="shortcut-detail">${translate('svcard_shortcut_new')}</div>
                     </div>`;
                 return;
@@ -3543,7 +3557,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const labelsRow = cardKeys.map(key => `<th class="label">${translate(key).split('(')[0].trim()}</th>`).join('');
             const valuesRow = cardKeys.map(key => {
-                if (key === 'menstruationActive') return `<td class="value">${m.menstruationActive === true ? '<span class="material-symbols-outlined status-icon mi-success">check</span>' : '-'}</td>`;
+                if (key === 'menstruationActive') return `<td class="value">${m.menstruationActive === true ? svgIcon('check', 'status-icon mi-success') : '-'}</td>`;
                 return `<td class="value">${formatValue(m[key], key)}</td>`;
             }).join('');
 
@@ -3621,7 +3635,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let value = '-';
                 if (key === 'date') value = formatTimestamp(m.timestamp, true);
                 else if (key === 'week') value = m.week;
-                else if (key === 'menstruationActive') value = m.menstruationActive === true ? '<span class="material-symbols-outlined status-icon mi-success">check</span>' : '-';
+                else if (key === 'menstruationActive') value = m.menstruationActive === true ? svgIcon('check', 'status-icon mi-success') : '-';
                 else value = formatValue(m[key], key);
                 if (key === 'memo' && value.length > 20) {
                     value = value.substring(0, 20) + '...';
@@ -4119,7 +4133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (key === 'week') { value = m.week ?? i; }
                     else if (key === 'date') { value = displayDate; }
                     else if (key === 'menstruationActive') {
-                        value = m.menstruationActive === true ? '<span class="material-symbols-outlined status-icon mi-success">check</span>' : '-';
+                        value = m.menstruationActive === true ? svgIcon('check', 'status-icon mi-success') : '-';
                     }
                     else { value = formatValue(m[key], key); }
                     tableHTML += `<td>${value}</td>`;
@@ -6094,28 +6108,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 const syncMod = await import('./src/firebase/sync.js');
                 const SyncManager = syncMod.SyncManager || syncMod.default;
                 btn.disabled = true;
-                btn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm">hourglass_top</span> ' + (translate('cloudSyncing') || '처리 중...');
+                btn.innerHTML = svgIcon('hourglass_top', 'mi-inline mi-sm') + ' ' + (translate('cloudSyncing') || '처리 중...');
                 const syncManager = new SyncManager();
                 await action(syncManager);
-                btn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm mi-success">check_circle</span> ' + (translate('cloudSyncDone') || '완료!');
+                btn.innerHTML = svgIcon('check_circle', 'mi-inline mi-sm mi-success') + ' ' + (translate('cloudSyncDone') || '완료!');
                 setTimeout(() => { btn.innerHTML = label; btn.disabled = false; }, 2000);
             } catch (err) {
                 console.error('Cloud sync error:', err);
-                btn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm mi-error">error</span> ' + (translate('cloudSyncError') || '실패');
+                btn.innerHTML = svgIcon('error', 'mi-inline mi-sm mi-error') + ' ' + (translate('cloudSyncError') || '실패');
                 btn.disabled = false;
             }
         }
         if (cloudUploadBtn) {
             cloudUploadBtn.addEventListener('click', () => _withCloudBtn(
                 cloudUploadBtn,
-                '<span class="material-symbols-outlined mi-inline mi-sm">cloud_upload</span> ' + (translate('cloudUpload') || '클라우드에 저장'),
+                svgIcon('cloud_upload', 'mi-inline mi-sm') + ' ' + (translate('cloudUpload') || '클라우드에 저장'),
                 sm => sm.pushToCloud()
             ));
         }
         if (cloudDownloadBtn) {
             cloudDownloadBtn.addEventListener('click', () => _withCloudBtn(
                 cloudDownloadBtn,
-                '<span class="material-symbols-outlined mi-inline mi-sm">cloud_download</span> ' + (translate('cloudDownload') || '클라우드에서 불러오기'),
+                svgIcon('cloud_download', 'mi-inline mi-sm') + ' ' + (translate('cloudDownload') || '클라우드에서 불러오기'),
                 async sm => { await sm.pullFromCloud(); window.location.reload(); }
             ));
         }
@@ -6292,7 +6306,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pdfReportBtn.addEventListener('click', async () => {
                 try {
                     pdfReportBtn.disabled = true;
-                    pdfReportBtn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm">hourglass_top</span> ' + (translate('pdfGenerating') || '생성 중...');
+                    pdfReportBtn.innerHTML = svgIcon('hourglass_top', 'mi-inline mi-sm') + ' ' + (translate('pdfGenerating') || '생성 중...');
                     const mod = await import(`./src/data/pdf-report.js`);
                     const PDFReportGenerator = mod.PDFReportGenerator || mod.default;
                     const now = new Date();
@@ -6307,15 +6321,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         biologicalSex: biologicalSex || 'male',
                     });
                     const fileName = await generator.generate(now.getFullYear(), now.getMonth());
-                    pdfReportBtn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm mi-success">check_circle</span> ' + (translate('pdfSaved') || '저장 완료!');
+                    pdfReportBtn.innerHTML = svgIcon('check_circle', 'mi-inline mi-sm mi-success') + ' ' + (translate('pdfSaved') || '저장 완료!');
                     showPopup((translate('pdfSavedAs') || '저장됨: ') + fileName, 3000);
                     setTimeout(() => {
-                        pdfReportBtn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm">description</span> ' + (translate('pdfReport') || '이번 달 리포트 저장');
+                        pdfReportBtn.innerHTML = svgIcon('description', 'mi-inline mi-sm') + ' ' + (translate('pdfReport') || '이번 달 리포트 저장');
                         pdfReportBtn.disabled = false;
                     }, 2000);
                 } catch (err) {
                     console.error('PDF report error:', err);
-                    pdfReportBtn.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm mi-error">error</span> ' + (translate('pdfError') || '생성 실패');
+                    pdfReportBtn.innerHTML = svgIcon('error', 'mi-inline mi-sm mi-error') + ' ' + (translate('pdfError') || '생성 실패');
                     pdfReportBtn.disabled = false;
                 }
             });
@@ -6596,15 +6610,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('shiftV_aiCustomModel', aiCustomModel?.value || '');
                 }
                 // Test connection
-                if (aiTestResult) aiTestResult.innerHTML = '<span class="material-symbols-outlined mi-inline mi-sm">hourglass_top</span> 연결 테스트 중...';
+                if (aiTestResult) aiTestResult.innerHTML = svgIcon('hourglass_top', 'mi-inline mi-sm') + ' 연결 테스트 중...';
                 try {
                     const mod = await import(`./src/ui/modals/ai-advisor-modal.js`);
                     const AIAdvisorModal = mod.AIAdvisorModal || mod.default;
                     const advisor = new AIAdvisorModal([], {});
                     const response = await advisor._callApi('Say "Connection successful!" in one sentence.');
-                    if (aiTestResult) aiTestResult.innerHTML = `<span style="color:var(--success,#4caf50)"><span class="material-symbols-outlined mi-inline mi-sm mi-success">check_circle</span> 연결 성공! 응답: ${response.slice(0, 80)}...</span>`;
+                    if (aiTestResult) aiTestResult.innerHTML = `<span style="color:var(--success,#4caf50)">${svgIcon('check_circle', 'mi-inline mi-sm mi-success')} 연결 성공! 응답: ${response.slice(0, 80)}...</span>`;
                 } catch (e) {
-                    if (aiTestResult) aiTestResult.innerHTML = `<span style="color:var(--error,#ef4444)"><span class="material-symbols-outlined mi-inline mi-sm mi-error">error</span> 연결 실패: ${e.message}</span>`;
+                    if (aiTestResult) aiTestResult.innerHTML = `<span style="color:var(--error,#ef4444)">${svgIcon('error', 'mi-inline mi-sm mi-error')} 연결 실패: ${e.message}</span>`;
                 }
             });
         }
@@ -6670,7 +6684,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const advisor = new AIAdvisorModal(measurements || [], userSettings);
                     const { apiKey } = advisor._getApiConfig();
                     if (!apiKey) {
-                        resultContent.innerHTML = `<p><span class="material-symbols-outlined mi-inline mi-sm mi-warning">vpn_key</span> ${translate('aiNoApiKey')}</p><p class="ai-advisor-error-hint">${translate('aiNoApiKeyHint')}</p>`;
+                        resultContent.innerHTML = `<p>${svgIcon('vpn_key', 'mi-inline mi-sm mi-warning')} ${translate('aiNoApiKey')}</p><p class="ai-advisor-error-hint">${translate('aiNoApiKeyHint')}</p>`;
                         return;
                     }
                     const goalText = goalTextInput?.value || '';
@@ -6684,7 +6698,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     resultContent.innerHTML = `<p>${html}</p>`;
                 } catch (err) {
                     console.error('AI Goal analysis error:', err);
-                    resultContent.innerHTML = `<p><span class="material-symbols-outlined mi-inline mi-sm mi-error">warning</span> ${translate('aiError')}</p><p class="ai-advisor-error-hint">${err.message}</p>`;
+                    resultContent.innerHTML = `<p>${svgIcon('warning', 'mi-inline mi-sm mi-error')} ${translate('aiError')}</p><p class="ai-advisor-error-hint">${err.message}</p>`;
                 }
             });
         }

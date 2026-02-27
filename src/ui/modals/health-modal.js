@@ -166,12 +166,27 @@ export class HealthModal {
 
         // Insights
         if (Array.isArray(symptomData.insights) && symptomData.insights.length > 0) {
-            const insightItems = symptomData.insights.map(insight => `
-                <div class="symptom-insight-item">
-                    ${svgIcon('lightbulb', 'mi-inline mi-sm')}
-                    <span>${typeof insight === 'string' ? insight : insight.message || insight.text || JSON.stringify(insight)}</span>
-                </div>
-            `).join('');
+            const insightItems = symptomData.insights.map(insight => {
+                if (typeof insight === 'string') {
+                    return `<div class="symptom-insight-item">${svgIcon('lightbulb', 'mi-inline mi-sm')} <span>${insight}</span></div>`;
+                }
+                const icon = insight.icon || svgIcon('lightbulb', 'mi-inline mi-sm');
+                const title = insight.title || '';
+                const desc = insight.description || insight.message || insight.text || '';
+                const advice = insight.advice || '';
+                const symptoms = Array.isArray(insight.symptoms) ? insight.symptoms : [];
+                return `
+                    <div class="symptom-insight-item">
+                        ${icon}
+                        <div class="insight-body">
+                            ${title ? `<strong>${title}</strong>` : ''}
+                            ${desc ? `<span>${desc}</span>` : ''}
+                            ${symptoms.length ? `<div class="insight-symptoms">${symptoms.map(s => `<span class="cause-chip">${s}</span>`).join('')}</div>` : ''}
+                            ${advice ? `<p class="insight-advice">${svgIcon('lightbulb', 'mi-inline mi-sm')} ${advice}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
             sections.push(insightItems);
         }
 

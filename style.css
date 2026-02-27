@@ -7854,6 +7854,32 @@ tbody tr:hover {
     margin-bottom: var(--spacing-1-5);
 }
 
+.symptom-insight-item .insight-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+.symptom-insight-item .insight-body strong {
+    color: var(--text-primary);
+    font-size: var(--md-sys-typescale-body-medium-size);
+}
+.symptom-insight-item .insight-symptoms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+}
+.symptom-insight-item .insight-advice {
+    margin: 4px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--primary);
+    font-size: var(--md-sys-typescale-label-small-size);
+}
+
 .symptom-insight-item:last-child { margin-bottom: 0; }
 
 .symptom-insight-item .material-symbols-outlined,

@@ -4429,6 +4429,65 @@ details[open] > .accordion-title::before {
 }
 
 /* ==================== */
+/* SVG Icon Inline Helpers (replacing font icons) */
+/* ==================== */
+.svg-icon {
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.svg-icon.mi-inline {
+    width: 20px;
+    height: 20px;
+}
+
+.svg-icon.mi-sm {
+    width: 18px;
+    height: 18px;
+}
+
+.svg-icon.mi-md {
+    width: 24px;
+    height: 24px;
+}
+
+.svg-icon.mi-xl {
+    width: 32px;
+    height: 32px;
+}
+
+.svg-icon.mi-2xl {
+    width: 40px;
+    height: 40px;
+}
+
+.svg-icon.mi-error {
+    color: var(--danger);
+}
+
+.svg-icon.mi-warning {
+    color: var(--md-sys-color-warning, #ffb74d);
+}
+
+.svg-icon.mi-on-surface {
+    color: var(--text-secondary);
+}
+
+.svg-icon.mi-primary {
+    color: var(--primary);
+}
+
+.svg-icon.mi-success {
+    color: var(--md-sys-color-success, #4caf50);
+}
+
+.svg-icon.mi-filled {
+    fill: currentColor;
+}
+
+/* ==================== */
 /* Tables (Data) */
 /* ==================== */
 table {

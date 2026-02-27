@@ -23,6 +23,44 @@ import { svgIcon, replaceMaterialIcons } from './src/ui/icon-paths.js';
 
 const APP_VERSION = "2.0.0a"; // 버전 업데이트
 
+// ── Photo compression & storage helpers ──────────────────────────────
+async function processAndStorePhotos(pendingPhotos) {
+    if (!pendingPhotos || typeof pendingPhotos !== 'object') return null;
+    const photos = {};
+    for (const [category, file] of Object.entries(pendingPhotos)) {
+        if (!file) continue;
+        try {
+            // Compress via canvas (no external lib needed for quick inline)
+            const dataUrl = await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    const MAX = 600;
+                    let w = img.width, h = img.height;
+                    if (w > MAX || h > MAX) {
+                        const ratio = Math.min(MAX / w, MAX / h);
+                        w = Math.round(w * ratio);
+                        h = Math.round(h * ratio);
+                    }
+                    const c = document.createElement('canvas');
+                    c.width = w; c.height = h;
+                    c.getContext('2d').drawImage(img, 0, 0, w, h);
+                    resolve(c.toDataURL('image/webp', 0.65));
+                };
+                img.onerror = reject;
+                const reader = new FileReader();
+                reader.onload = e => { img.src = e.target.result; };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            photos[category] = dataUrl;
+            console.log(`[Photo] Compressed ${category}: ${(dataUrl.length / 1024).toFixed(0)}KB`);
+        } catch (err) {
+            console.error(`[Photo] Failed to process ${category}:`, err);
+        }
+    }
+    return Object.keys(photos).length > 0 ? photos : null;
+}
+
 // ── Lazy-load Chart.js on demand (not at page load) ──────────────────
 let _chartJsLoaded = typeof Chart !== 'undefined';
 function loadChartJS() {
@@ -4957,8 +4995,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const saved = await handleSaveMeasurement();
         if (!saved) return;
 
+        // Process pending photos → data URLs stored in measurement.photos
+        const pendingPhotos = saved.data._pendingPhotos;
+        const photoData = await processAndStorePhotos(pendingPhotos);
+        delete saved.data._pendingPhotos;
+
         if (saved.isEdit) {
             if (saved.indexToUpdate >= 0 && saved.indexToUpdate < measurements.length) {
+                // Merge new photos with existing, keeping old ones not re-uploaded
+                const existingPhotos = measurements[saved.indexToUpdate].photos || {};
+                saved.data.photos = photoData ? { ...existingPhotos, ...photoData } : existingPhotos;
                 measurements[saved.indexToUpdate] = saved.data;
                 showPopup('popupUpdateSuccess');
             } else {
@@ -4972,14 +5018,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (existingIndex >= 0) {
                 const shouldOverwrite = await showDuplicateDateDialog(saved.data.date);
                 if (!shouldOverwrite) return;
-                // Overwrite existing
+                // Overwrite existing, merge photos
+                const existingPhotos = measurements[existingIndex].photos || {};
+                saved.data.photos = photoData ? { ...existingPhotos, ...photoData } : (Object.keys(existingPhotos).length ? existingPhotos : null);
                 measurements[existingIndex] = { ...measurements[existingIndex], ...saved.data };
                 showPopup('popupUpdateSuccess');
             } else {
                 const fullMeasurementData = {};
-                [...baseNumericKeys, ...textKeys, 'symptoms', 'medications', 'date', 'week', 'timestamp'].forEach(key => {
+                [...baseNumericKeys, ...textKeys, 'symptoms', 'medications', 'photos', 'date', 'week', 'timestamp'].forEach(key => {
                     fullMeasurementData[key] = saved.data.hasOwnProperty(key) ? saved.data[key] : null;
                 });
+                fullMeasurementData.photos = photoData || null;
                 measurements.push(fullMeasurementData);
                 showPopup('popupSaveSuccess');
             }
@@ -4988,8 +5037,7 @@ document.addEventListener('DOMContentLoaded', () => {
             calculateAndAddWeekNumbers();
         }
 
-        // Clean up pending photos reference (not persisted in measurement data)
-        delete saved.data._pendingPhotos;
+        // Photos already stored in measurement.photos above
 
         savePrimaryDataToStorage();
 

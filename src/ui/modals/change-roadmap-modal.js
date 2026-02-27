@@ -349,8 +349,8 @@ export class ChangeRoadmapModal {
     // 상세 그래프
     this.renderDetailedGraph(roadmap.detailedGraph);
     
-    // 변화 비교
-    this.renderChangeComparison(roadmap.changeComparison);
+    // 사진 비교 탭
+    this.renderPhotoComparison();
     
     // 특정일 비교 옵션
     this.renderDateSelector(roadmap.specificDateComparison);
@@ -598,304 +598,113 @@ export class ChangeRoadmapModal {
   }
   
   /**
-   * 변화 비교 렌더링
+   * 사진 비교 렌더링
    */
-  renderChangeComparison(comparison) {
-    const container = this.$('#roadmap-change-comparison');
-    if (!container || !comparison || !comparison.withPreviousWeek || !comparison.withFirstMeasurement) return;
+  renderPhotoComparison() {
+    const leftSelect = this.$('#photo-compare-left-select');
+    const rightSelect = this.$('#photo-compare-right-select');
+    const grid = this.$('#photo-compare-grid');
+    const swapBtn = this.$('#photo-compare-swap');
+    if (!leftSelect || !rightSelect || !grid) return;
 
-    const prev = comparison.withPreviousWeek;
-    const first = comparison.withFirstMeasurement;
-    const latest = this.measurements[this.measurements.length - 1];
+    // Collect dates that have photos
+    const datesWithPhotos = this.measurements
+      .filter(m => m.photos && typeof m.photos === 'object' && Object.keys(m.photos).length > 0)
+      .map(m => m.date)
+      .filter(Boolean);
 
-    const latestDate = latest?.date || '';
-    const prevDate = prev?.comparisonDate || '';
-    const firstDate = first?.comparisonDate || '';
+    // Also add all dates (even without photos) for completeness
+    const allDates = this.measurements.map(m => m.date).filter(Boolean);
+    
+    const buildOptions = (dates, selectedVal) => {
+      return dates.map(d => {
+        const hasPhotos = datesWithPhotos.includes(d);
+        const label = hasPhotos ? `📷 ${d}` : d;
+        return `<option value="${d}" ${d === selectedVal ? 'selected' : ''}>${label}</option>`;
+      }).join('');
+    };
 
-    const keys = [...new Set([
-      ...Object.keys(prev.differences || {}),
-      ...Object.keys(first.differences || {})
-    ])];
+    const latest = allDates[allDates.length - 1] || '';
+    const first = allDates[0] || '';
 
-    const preferredOrder = [
-      'height', 'weight', 'shoulder', 'neck', 'chest', 'underBustCircumference', 'waist', 'hips', 'thigh', 'calf', 'arm',
-      'muscleMass', 'bodyFatPercentage', 'estrogenLevel', 'testosteroneLevel', 'libido'
+    leftSelect.innerHTML = buildOptions(allDates, latest);
+    rightSelect.innerHTML = buildOptions(allDates, first);
+
+    const render = () => this._renderPhotoGrid(leftSelect.value, rightSelect.value, grid);
+    leftSelect.addEventListener('change', render);
+    rightSelect.addEventListener('change', render);
+    if (swapBtn) {
+      swapBtn.addEventListener('click', () => {
+        const tmp = leftSelect.value;
+        leftSelect.value = rightSelect.value;
+        rightSelect.value = tmp;
+        render();
+      });
+    }
+
+    render();
+  }
+
+  /**
+   * 사진 비교 그리드 렌더링
+   */
+  _renderPhotoGrid(leftDate, rightDate, container) {
+    if (!container) return;
+    const leftM = this.measurements.find(m => m.date === leftDate);
+    const rightM = this.measurements.find(m => m.date === rightDate);
+    const leftPhotos = leftM?.photos || {};
+    const rightPhotos = rightM?.photos || {};
+
+    const CATEGORIES = [
+      { key: 'face', icon: 'person', label: translate('photoFace') || '얼굴' },
+      { key: 'front', icon: 'accessibility_new', label: translate('photoFront') || '정면' },
+      { key: 'side', icon: 'directions_run', label: translate('photoSide') || '측면' },
+      { key: 'back', icon: 'arrow_downward', label: translate('photoBack') || '후면' },
+      { key: 'other', icon: 'photo_camera', label: translate('photoOther') || '기타' },
     ];
-    const rank = new Map(preferredOrder.map((k, i) => [k, i]));
-    keys.sort((a, b) => {
-      const ra = rank.has(a) ? rank.get(a) : 9999;
-      const rb = rank.has(b) ? rank.get(b) : 9999;
-      if (ra !== rb) return ra - rb;
-      return String(a).localeCompare(String(b));
-    });
 
-    const rows = keys.map(metric => {
-      const p = prev.differences?.[metric];
-      const f = first.differences?.[metric];
-      const cur = latest?.[metric];
-      if (cur === null || cur === undefined || cur === '') return '';
+    const hasAnyPhoto = CATEGORIES.some(c => leftPhotos[c.key] || rightPhotos[c.key]);
 
-      const unit = this.getMetricUnit(metric);
-      const metricLabel = this.getMetricName(metric);
+    if (!hasAnyPhoto) {
+      container.innerHTML = `
+        <div class="photo-compare-empty">
+          ${svgIcon('photo_camera', '', 48)}
+          <p>${translate('photoCompareEmpty') || '비교할 사진이 없습니다.'}</p>
+          <p class="photo-compare-hint">${translate('photoCompareHint') || '기록하기 탭에서 신체 사진을 등록하면 여기서 비교할 수 있어요!'}</p>
+        </div>
+      `;
+      return;
+    }
 
-      const renderDelta = (d) => {
-        if (!d) return '<span class="delta muted">-</span>';
-        const n = Number(d.change);
-        const cls = n > 0 ? 'positive' : (n < 0 ? 'negative' : '');
-        const sign = n > 0 ? '+' : '';
-        const pct = d.percentChange === '-' ? '-' : `${sign}${d.percentChange}%`;
-        return `<span class="delta ${cls}">${sign}${d.change}${unit} (${pct})</span>`;
+    const rows = CATEGORIES.map(cat => {
+      const left = leftPhotos[cat.key];
+      const right = rightPhotos[cat.key];
+      if (!left && !right) return '';
+
+      const renderCell = (src, date) => {
+        if (!src) return `<div class="photo-compare-cell empty"><div class="photo-compare-placeholder">${svgIcon(cat.icon, '', 32)}<span>${translate('noPhoto') || '사진 없음'}</span></div></div>`;
+        return `<div class="photo-compare-cell"><img src="${src}" alt="${cat.label} ${date}" loading="lazy"><span class="photo-compare-date-label">${date}</span></div>`;
       };
 
       return `
-        <div class="comparison-result-item">
-          <div class="metric-name">${metricLabel}</div>
-          <div class="comparison-values">
-            <span>${cur} ${unit}</span>
+        <div class="photo-compare-row">
+          <div class="photo-compare-category">
+            ${svgIcon(cat.icon, 'mi-inline', 18)}
+            <span>${cat.label}</span>
           </div>
-          <div class="roadmap-deltas">
-            <div class="delta-row"><span class="delta-label">${translate('roadmapVsPrevious') || 'vs 지난주'}</span>${renderDelta(p)}</div>
-            <div class="delta-row"><span class="delta-label">${translate('roadmapVsFirst') || 'vs 처음'}</span>${renderDelta(f)}</div>
+          <div class="photo-compare-pair">
+            ${renderCell(left, leftDate)}
+            ${renderCell(right, rightDate)}
           </div>
         </div>
       `;
     }).join('');
 
-    const toSymptomMap = (m) => {
-      const map = new Map();
-      (Array.isArray(m?.symptoms) ? m.symptoms : []).forEach(s => {
-        const id = s?.id;
-        if (!id) return;
-        const sev = Number(s?.severity);
-        map.set(id, Number.isFinite(sev) ? sev : null);
-      });
-      return map;
-    };
-    const diffSymptomMap = (a, b) => {
-      const A = toSymptomMap(a);
-      const B = toSymptomMap(b);
-      const items = [];
-      
-      // Added or Changed
-      A.forEach((v, k) => {
-        const name = this.getSymptomName(k);
-        if (!B.has(k)) {
-          items.push(`<div class="diff-item added"><span class="diff-icon">+</span> <span class="diff-text">${name} (${v})</span></div>`);
-        } else if (B.get(k) !== v) {
-          // Changed
-          items.push(`<div class="diff-item changed"><span class="diff-icon">!</span> <span class="diff-text">${name} (${B.get(k)}→${v})</span></div>`);
-        }
-      });
-      
-      // Removed
-      B.forEach((v, k) => {
-        if (!A.has(k)) {
-          const name = this.getSymptomName(k);
-          items.push(`<div class="diff-item removed"><span class="diff-icon">X</span> <span class="diff-text">${name}</span></div>`);
-        }
-      });
-      
-      if (items.length === 0) return '<span class="diff-none">-</span>';
-      return `<div class="diff-list">${items.join('')}</div>`;
-    };
-    const formatSymptoms = (m) => {
-      const items = (Array.isArray(m?.symptoms) ? m.symptoms : [])
-        .filter(s => s && s.id)
-        .map(s => {
-          const sev = Number(s?.severity);
-          const name = this.getSymptomName(s.id);
-          return Number.isFinite(sev) ? `${name}(${sev})` : name;
-        });
-      if (items.length === 0) return '-';
-      return `<ul class="value-list">${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
-    };
-
-    const toMedicationMap = (m) => {
-      const map = new Map();
-      (Array.isArray(m?.medications) ? m.medications : []).forEach(x => {
-        const id = x?.id || x?.medicationId;
-        if (!id) return;
-        const unit = x?.unit || '';
-        const key = `${id}__${unit}`;
-        const dose = Number(x?.dose);
-        map.set(key, { dose: Number.isFinite(dose) ? dose : null, name: this.getMedicationName(id), unit });
-      });
-      return map;
-    };
-    const diffMedicationMap = (a, b) => {
-      const A = toMedicationMap(a);
-      const B = toMedicationMap(b);
-      const items = [];
-      
-      A.forEach((val, key) => {
-        const name = val.name;
-        const unit = val.unit;
-        if (!B.has(key)) {
-          items.push(`<div class="diff-item added"><span class="diff-icon">+</span> <span class="diff-text">${name} ${val.dose}${unit}</span></div>`);
-        } else {
-          const prev = B.get(key);
-          if (prev.dose !== val.dose) {
-             items.push(`<div class="diff-item changed"><span class="diff-icon">!</span> <span class="diff-text">${name} ${prev.dose}→${val.dose}${unit}</span></div>`);
-          }
-        }
-      });
-      
-      B.forEach((val, key) => {
-        if (!A.has(key)) {
-          items.push(`<div class="diff-item removed"><span class="diff-icon">X</span> <span class="diff-text">${val.name}</span></div>`);
-        }
-      });
-      
-      if (items.length === 0) return '<span class="diff-none">-</span>';
-      return `<div class="diff-list">${items.join('')}</div>`;
-    };
-    const formatMedications = (m) => {
-      const items = (Array.isArray(m?.medications) ? m.medications : [])
-        .filter(x => x && (x.id || x.medicationId))
-        .map(x => {
-          const id = x.id || x.medicationId;
-          const dose = Number(x.dose);
-          const unit = x.unit || '';
-          const name = this.getMedicationName(id);
-          return Number.isFinite(dose) ? `${name} ${dose}${unit}` : `${name}`;
-        });
-      if (items.length === 0) return '-';
-      return `<ul class="value-list">${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
-    };
-
-    const renderDiffCard = (title, diffHTML) => {
-      return `
-        <div class="comparison-result-item comparison-result-item-wide">
-          <div class="metric-name">${title}</div>
-          ${diffHTML}
-        </div>
-      `;
-    };
-
-    const diffSymptomCard = (latest, prev, label) => {
-      const A = toSymptomMap(latest);
-      const B = toSymptomMap(prev);
-      const allKeys = new Set([...A.keys(), ...B.keys()]);
-      
-      const rows = [];
-      allKeys.forEach(k => {
-        const name = this.getSymptomName(k);
-        const cur = A.get(k);
-        const past = B.get(k);
-        
-        let statusIcon = '';
-        let statusClass = '';
-        
-        if (cur !== undefined && cur !== null) {
-          // 현재 있음 (O)
-          statusIcon = 'O'; 
-          statusClass = 'present';
-        } else {
-          // 현재 없음 (X)
-          statusIcon = 'X';
-          statusClass = 'absent';
-        }
-        
-        const curText = (cur !== undefined && cur !== null) ? `${cur}` : 'X';
-        const pastText = (past !== undefined && past !== null) ? `${past}` : 'X';
-        
-        rows.push(`
-          <div class="diff-card-row">
-            <div class="diff-card-header">
-              <span class="diff-status-icon ${statusClass}">${statusIcon}</span>
-              <span class="diff-card-title">${name}${cur !== undefined && cur !== null ? `(${cur})` : ''}</span>
-            </div>
-            <div class="diff-card-values">
-              <div class="diff-value-col">
-                <span class="diff-value-label">${label}</span>
-                <span class="diff-value-data">${pastText}</span>
-              </div>
-              <div class="diff-value-col">
-                <span class="diff-value-label">${translate('roadmapCurrent') || '현재'}</span>
-                <span class="diff-value-data">${curText}</span>
-              </div>
-            </div>
-          </div>
-        `);
-      });
-      
-      if (rows.length === 0) return '<div class="diff-empty">-</div>';
-      return `<div class="diff-card-list">${rows.join('')}</div>`;
-    };
-
-    const diffMedicationCard = (latest, prev, label) => {
-      const A = toMedicationMap(latest);
-      const B = toMedicationMap(prev);
-      const allKeys = new Set([...A.keys(), ...B.keys()]);
-      
-      const rows = [];
-      allKeys.forEach(k => {
-        const curVal = A.get(k);
-        const pastVal = B.get(k);
-        
-        // 이름과 단위는 둘 중 하나에서 가져옴
-        const name = curVal?.name || pastVal?.name || k;
-        const unit = curVal?.unit || pastVal?.unit || '';
-        
-        const curDose = curVal?.dose;
-        const pastDose = pastVal?.dose;
-        
-        let statusIcon = '';
-        let statusClass = '';
-        
-        if (curDose !== undefined && curDose !== null) {
-          statusIcon = 'O';
-          statusClass = 'present';
-        } else {
-          statusIcon = 'X';
-          statusClass = 'absent';
-        }
-        
-        const curText = (curDose !== undefined && curDose !== null) ? `${curDose}${unit}` : 'X';
-        const pastText = (pastDose !== undefined && pastDose !== null) ? `${pastDose}${unit}` : 'X';
-        
-        rows.push(`
-          <div class="diff-card-row">
-            <div class="diff-card-header">
-              <span class="diff-status-icon ${statusClass}">${statusIcon}</span>
-              <span class="diff-card-title">${name}</span>
-            </div>
-            <div class="diff-card-values">
-              <div class="diff-value-col">
-                <span class="diff-value-label">${label}</span>
-                <span class="diff-value-data">${pastText}</span>
-              </div>
-              <div class="diff-value-col">
-                <span class="diff-value-label">${translate('roadmapCurrent') || '현재'}</span>
-                <span class="diff-value-data">${curText}</span>
-              </div>
-            </div>
-          </div>
-        `);
-      });
-      
-      if (rows.length === 0) return '<div class="diff-empty">-</div>';
-      return `<div class="diff-card-list">${rows.join('')}</div>`;
-    };
-
-    const listRows = `
-      ${renderDiffCard(translate('symptoms') || '증상', diffSymptomCard(latest, this.measurements[this.measurements.length - 2], translate('roadmapPrevious') || '지난주'))}
-      ${renderDiffCard(translate('medications') || '약물', diffMedicationCard(latest, this.measurements[this.measurements.length - 2], translate('roadmapPrevious') || '지난주'))}
-    `;
-
-    const header = `
-      <div class="roadmap-change-meta">
-        <div class="roadmap-pill">${translate('roadmapCurrent') || '현재'}: ${latestDate}</div>
-        <div class="roadmap-pill">${translate('roadmapPrevious') || '지난주'}: ${prevDate}</div>
-        <div class="roadmap-pill">${translate('roadmapFirst') || '처음'}: ${firstDate}</div>
-      </div>
-    `;
-
-    container.innerHTML = header + `<div class="comparison-results">${rows}${listRows}</div>`;
+    container.innerHTML = rows;
   }
   
   /**
-   * 비교 결과 렌더링
+   * 비교 결과 렌더링 (리디자인 - 카드 스타일)
    */
   renderComparisonResults(differences) {
     if (!differences) return '';
@@ -915,27 +724,32 @@ export class ChangeRoadmapModal {
     const items = metrics.map(metric => {
       const diff = differences[metric];
       const change = parseFloat(diff.change);
-      const changeClass = change > 0 ? 'positive' : (change < 0 ? 'negative' : '');
+      const changeClass = change > 0 ? 'positive' : (change < 0 ? 'negative' : 'neutral');
       const changeSign = change > 0 ? '+' : '';
       const pct = parseFloat(diff.percentChange);
       const bar = Number.isFinite(pct) ? Math.min(100, Math.abs(pct) * 2) : 0;
+      const icon = change > 0 ? svgIcon('arrow_upward', 'delta-arrow', 14) : (change < 0 ? svgIcon('arrow_downward', 'delta-arrow', 14) : '');
       
       return `
-        <div class="comparison-result-item">
-          <div class="metric-name">${this.getMetricName(metric)}</div>
-          <div class="comparison-values">
-            <span>${diff.comparison} ${this.getMetricUnit(metric)}</span>
-            <span>→</span>
-            <span>${diff.current} ${this.getMetricUnit(metric)}</span>
+        <div class="compare-metric-card ${changeClass}">
+          <div class="compare-metric-header">
+            <span class="compare-metric-name">${this.getMetricName(metric)}</span>
+            <span class="compare-metric-unit">${this.getMetricUnit(metric)}</span>
           </div>
-          <div class="comparison-change ${changeClass}" style="--delta-bar:${bar}%;">
-            ${changeSign}${diff.change} ${this.getMetricUnit(metric)} (${changeSign}${diff.percentChange}%)
+          <div class="compare-metric-values">
+            <span class="compare-val compare-val--old">${diff.comparison}</span>
+            <span class="compare-arrow">${svgIcon('arrow_forward', '', 14)}</span>
+            <span class="compare-val compare-val--new">${diff.current}</span>
+          </div>
+          <div class="compare-metric-delta">
+            <div class="compare-delta-bar" style="--bar-w:${bar}%"></div>
+            <span class="compare-delta-text">${icon} ${changeSign}${diff.change} (${changeSign}${diff.percentChange}%)</span>
           </div>
         </div>
       `;
     });
     
-    return items.join('');
+    return `<div class="compare-metrics-grid">${items.join('')}</div>`;
   }
   
   /**
@@ -961,7 +775,7 @@ export class ChangeRoadmapModal {
   }
   
   /**
-   * 특정일 비교 결과 렌더링
+   * 특정일 비교 결과 렌더링 (리디자인)
    */
   renderSpecificDateComparison(baseDate, compareDate) {
     const container = this.$('#roadmap-compare-specific');
@@ -982,131 +796,88 @@ export class ChangeRoadmapModal {
 
     const differences = this.calculateDifferences(base, compare);
 
+    // ── Symptom diff ──
     const toSymptomMap = (m) => {
       const map = new Map();
       (Array.isArray(m?.symptoms) ? m.symptoms : []).forEach(s => {
-        const id = s?.id;
-        if (!id) return;
+        if (!s?.id) return;
         const sev = Number(s?.severity);
-        map.set(id, Number.isFinite(sev) ? sev : null);
+        map.set(s.id, Number.isFinite(sev) ? sev : null);
       });
       return map;
     };
 
+    const renderSymptomDiff = (baseM, compM) => {
+      const A = toSymptomMap(baseM);
+      const B = toSymptomMap(compM);
+      const allKeys = new Set([...A.keys(), ...B.keys()]);
+      if (allKeys.size === 0) return '';
+
+      const chips = [];
+      allKeys.forEach(k => {
+        const name = this.getSymptomName(k);
+        const cur = A.get(k);
+        const past = B.get(k);
+        let cls = 'chip--same';
+        let badge = '';
+        if (cur != null && past == null) { cls = 'chip--added'; badge = '+'; }
+        else if (cur == null && past != null) { cls = 'chip--removed'; badge = '−'; }
+        else if (cur !== past) { cls = 'chip--changed'; badge = `${past}→${cur}`; }
+        else { badge = cur != null ? `${cur}` : ''; }
+        chips.push(`<span class="compare-chip ${cls}">${name}${badge ? ` <em>${badge}</em>` : ''}</span>`);
+      });
+      return `
+        <div class="compare-section-card">
+          <h4 class="compare-section-title">${svgIcon('emergency', 'mi-inline', 16)} ${translate('symptoms') || '증상'}</h4>
+          <div class="compare-chip-wrap">${chips.join('')}</div>
+        </div>`;
+    };
+
+    // ── Medication diff ──
     const toMedicationMap = (m) => {
       const map = new Map();
       (Array.isArray(m?.medications) ? m.medications : []).forEach(x => {
         const id = x?.id || x?.medicationId;
         if (!id) return;
         const unit = x?.unit || '';
-        const key = `${id}__${unit}`;
         const dose = Number(x?.dose);
-        map.set(key, { dose: Number.isFinite(dose) ? dose : null, name: this.getMedicationName(id), unit });
+        map.set(`${id}__${unit}`, { dose: Number.isFinite(dose) ? dose : null, name: this.getMedicationName(id), unit });
       });
       return map;
     };
 
-    const renderDiffCard = (title, diffHTML) => {
-      return `
-        <div class="comparison-result-item comparison-result-item-wide">
-          <div class="metric-name">${title}</div>
-          ${diffHTML}
-        </div>
-      `;
-    };
-
-    const diffSymptomCard = (latestM, prevM, label) => {
-      const A = toSymptomMap(latestM);
-      const B = toSymptomMap(prevM);
+    const renderMedicationDiff = (baseM, compM) => {
+      const A = toMedicationMap(baseM);
+      const B = toMedicationMap(compM);
       const allKeys = new Set([...A.keys(), ...B.keys()]);
+      if (allKeys.size === 0) return '';
 
-      const rows = [];
-      allKeys.forEach(k => {
-        const name = this.getSymptomName(k);
-        const cur = A.get(k);
-        const past = B.get(k);
-
-        const statusIcon = (cur !== undefined && cur !== null) ? 'O' : 'X';
-        const statusClass = (cur !== undefined && cur !== null) ? 'present' : 'absent';
-
-        const curText = (cur !== undefined && cur !== null) ? `${cur}` : 'X';
-        const pastText = (past !== undefined && past !== null) ? `${past}` : 'X';
-
-        rows.push(`
-          <div class="diff-card-row">
-            <div class="diff-card-header">
-              <span class="diff-status-icon ${statusClass}">${statusIcon}</span>
-              <span class="diff-card-title">${name}${cur !== undefined && cur !== null ? `(${cur})` : ''}</span>
-            </div>
-            <div class="diff-card-values">
-              <div class="diff-value-col">
-                <span class="diff-value-label">${label}</span>
-                <span class="diff-value-data">${pastText}</span>
-              </div>
-              <div class="diff-value-col">
-                <span class="diff-value-label">${translate('roadmapCurrent') || '현재'}</span>
-                <span class="diff-value-data">${curText}</span>
-              </div>
-            </div>
-          </div>
-        `);
-      });
-
-      if (rows.length === 0) return '<div class="diff-empty">-</div>';
-      return `<div class="diff-card-list">${rows.join('')}</div>`;
-    };
-
-    const diffMedicationCard = (latestM, prevM, label) => {
-      const A = toMedicationMap(latestM);
-      const B = toMedicationMap(prevM);
-      const allKeys = new Set([...A.keys(), ...B.keys()]);
-
-      const rows = [];
+      const chips = [];
       allKeys.forEach(k => {
         const curVal = A.get(k);
         const pastVal = B.get(k);
         const name = curVal?.name || pastVal?.name || k;
         const unit = curVal?.unit || pastVal?.unit || '';
-        const curDose = curVal?.dose;
-        const pastDose = pastVal?.dose;
-
-        const statusIcon = (curDose !== undefined && curDose !== null) ? 'O' : 'X';
-        const statusClass = (curDose !== undefined && curDose !== null) ? 'present' : 'absent';
-
-        const curText = (curDose !== undefined && curDose !== null) ? `${curDose}${unit}` : 'X';
-        const pastText = (pastDose !== undefined && pastDose !== null) ? `${pastDose}${unit}` : 'X';
-
-        rows.push(`
-          <div class="diff-card-row">
-            <div class="diff-card-header">
-              <span class="diff-status-icon ${statusClass}">${statusIcon}</span>
-              <span class="diff-card-title">${name}</span>
-            </div>
-            <div class="diff-card-values">
-              <div class="diff-value-col">
-                <span class="diff-value-label">${label}</span>
-                <span class="diff-value-data">${pastText}</span>
-              </div>
-              <div class="diff-value-col">
-                <span class="diff-value-label">${translate('roadmapCurrent') || '현재'}</span>
-                <span class="diff-value-data">${curText}</span>
-              </div>
-            </div>
-          </div>
-        `);
+        let cls = 'chip--same';
+        let badge = '';
+        if (curVal && !pastVal) { cls = 'chip--added'; badge = `+${curVal.dose || ''}${unit}`; }
+        else if (!curVal && pastVal) { cls = 'chip--removed'; badge = '−'; }
+        else if (curVal?.dose !== pastVal?.dose) { cls = 'chip--changed'; badge = `${pastVal?.dose || '?'}→${curVal?.dose || '?'}${unit}`; }
+        else { badge = curVal?.dose != null ? `${curVal.dose}${unit}` : ''; }
+        chips.push(`<span class="compare-chip ${cls}">${name}${badge ? ` <em>${badge}</em>` : ''}</span>`);
       });
-
-      if (rows.length === 0) return '<div class="diff-empty">-</div>';
-      return `<div class="diff-card-list">${rows.join('')}</div>`;
+      return `
+        <div class="compare-section-card">
+          <h4 class="compare-section-title">${svgIcon('medication', 'mi-inline', 16)} ${translate('medications') || '약물'}</h4>
+          <div class="compare-chip-wrap">${chips.join('')}</div>
+        </div>`;
     };
 
-    const compareLabel = `${translate('roadmapCompareDate') || '비교'}: ${compareDate}`;
-    const listRows = `
-      ${renderDiffCard(translate('symptoms') || '증상', diffSymptomCard(base, compare, compareLabel))}
-      ${renderDiffCard(translate('medications') || '약물', diffMedicationCard(base, compare, compareLabel))}
+    container.innerHTML = `
+      ${this.renderComparisonResults(differences)}
+      ${renderSymptomDiff(base, compare)}
+      ${renderMedicationDiff(base, compare)}
     `;
-
-    container.innerHTML = this.renderComparisonResults(differences) + listRows;
   }
   
   /**
@@ -1190,7 +961,7 @@ export class ChangeRoadmapModal {
         if (!btn) return;
         const tab = btn.dataset.subtab;
         detailSwitcher.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.toggle('active', b === btn));
-        root.querySelectorAll('#roadmap-detail-graph-view, #roadmap-detail-change-view, #roadmap-detail-compare-view').forEach(v => v.classList.remove('active'));
+        root.querySelectorAll('#roadmap-detail-graph-view, #roadmap-detail-photo-view, #roadmap-detail-compare-view').forEach(v => v.classList.remove('active'));
         const targetView = root.querySelector(`#${tab}-view`);
         if (targetView) targetView.classList.add('active');
 

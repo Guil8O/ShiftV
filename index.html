@@ -18,10 +18,12 @@
     <meta name="theme-color" content="#1a1a3a">
     <link rel="apple-touch-icon" sizes="180x180" href="ios/180.png">
     
-    <!-- Google Fonts: Noto Sans KR -->
+    <!-- Google Fonts: Noto Sans KR (non-blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap"
+          media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap"></noscript>
     
     <!-- MD3 Tokens & Base Styles -->
     <link rel="stylesheet" href="src/styles/md3-tokens.css">
@@ -29,8 +31,7 @@
     <link rel="stylesheet" href="src/styles/base.css">
     <link rel="stylesheet" href="src/styles/animations.css">
     <link rel="stylesheet" href="style.css">
-    <!-- chart.js: defer keeps execution order & unblocks HTML parsing -->
-    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- chart.js: loaded on demand by script.js when charts are needed -->
     <!-- @material/material-color-utilities removed — color-generator.js is standalone -->
     <script defer src="src/utils/color-generator.js"></script>
 </head>

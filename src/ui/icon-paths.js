@@ -141,7 +141,9 @@ export function svgIcon(name, cls = '', size = 20) {
  */
 export function replaceMaterialIcons(root = document.body) {
   if (!root) return;
-  const spans = root.querySelectorAll('.material-symbols-outlined');
+  const spans = [...root.querySelectorAll('.material-symbols-outlined')];
+  // Also check root itself (MutationObserver passes addedNode directly)
+  if (root.classList && root.classList.contains('material-symbols-outlined')) spans.unshift(root);
   spans.forEach(span => {
     const name = span.textContent.trim();
     const d = ICON_PATHS[name];

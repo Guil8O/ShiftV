@@ -23,6 +23,19 @@ import { svgIcon, replaceMaterialIcons } from './src/ui/icon-paths.js';
 
 const APP_VERSION = "2.0.0a"; // 버전 업데이트
 
+// ── Lazy-load Chart.js on demand (not at page load) ──────────────────
+let _chartJsLoaded = typeof Chart !== 'undefined';
+function loadChartJS() {
+    if (_chartJsLoaded) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+        s.onload = () => { _chartJsLoaded = true; resolve(); };
+        s.onerror = () => reject(new Error('Failed to load chart.js'));
+        document.head.appendChild(s);
+    });
+}
+
 // Global Error Handler
 window.onerror = function (message, source, lineno, colno, error) {
     console.error("[Error] Global Error:", message, "\nFile:", source, `\nLine:${lineno}:${colno}`, "\nError Obj:", error);
@@ -176,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Inline SVG logo for theme tinting ─────────────────────────────
     (async () => {
         try {
-            const res = await fetch('assets/title.svg');
+            const res = await fetch('assets/title.svg', { signal: AbortSignal.timeout(3000) });
             if (!res.ok) return;
             const svgText = await res.text();
             const container = document.getElementById('app-bar-logo-svg');
@@ -1261,9 +1274,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. 상세 분석 모달 차트 그리는 함수 업데이트 (renderComparisonChart)
-    function renderComparisonChart() {
+    async function renderComparisonChart() {
         const ctx = modalContent.querySelector('#detailed-analysis-view #comparison-chart')?.getContext('2d');
         if (!ctx) return;
+        await loadChartJS();
 
         if (comparisonChartInstance) comparisonChartInstance.destroy();
 
@@ -1838,7 +1852,7 @@ document.addEventListener('DOMContentLoaded', () => {
         contentEl.scrollLeft = 0;
     }
 
-    function renderHormoneReport() {
+    async function renderHormoneReport() {
         const modalTitleEl = document.getElementById('hormone-modal-title');
         if (modalTitleEl) modalTitleEl.textContent = translate('hormoneModalTitle');
 
@@ -2639,6 +2653,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hormoneCtx.canvas.style.height = '100%';
         }
 
+        await loadChartJS();
         ensureAverageLinePluginRegistered();
         medicationChartInstance = new Chart(medicationCtx, { type: 'line', data: { labels, datasets: allDatasets }, options: chartOptions(() => medicationChartInstance) });
         hormoneChartInstance = new Chart(hormoneCtx, { type: 'line', data: { labels, datasets: hormoneDatasets }, options: chartOptions(() => hormoneChartInstance) });
@@ -4510,7 +4525,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // script.js 에서 renderChart 함수를 찾아 아래의 코드로 전체를 교체해주세요.
 
-    function renderChart() {
+    async function renderChart() {
         if (!chartCanvas) return;
         const ctx = chartCanvas.getContext('2d'); if (!ctx) return;
         const metricsToRender = selectedMetrics.filter(key => getFilteredChartKeys().includes(key));
@@ -4618,6 +4633,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.canvas.style.height = '100%';
         }
 
+        await loadChartJS();
         ensureAverageLinePluginRegistered();
         chartInstance = new Chart(ctx, {
             type: 'line',

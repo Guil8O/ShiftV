@@ -42,7 +42,7 @@ export class DoctorEngine {
     // 서브모듈 초기화
     this.healthEvaluator = new HealthEvaluator(this.measurements, this.mode, this.biologicalSex, this.language);
     this.symptomAnalyzer = new SymptomAnalyzer(measurements, this.mode, this.language);
-    this.trendPredictor = new TrendPredictor(this.measurements, this.targets);
+    this.trendPredictor = new TrendPredictor(this.measurements, this.targets, this.language);
     
     // 추천 엔진은 증상과 약물 정보도 필요
     const latestSymptoms = measurements.length > 0 ? measurements[measurements.length - 1].symptoms : [];
@@ -119,9 +119,9 @@ export class DoctorEngine {
     const hasEstrogen = medObjects.some(m => m.category === 'estrogen');
     if (hasEstrogen && this.userSettings.isSmoker) {
       warnings.push({
-        medication: '에스트로겐',
+        medication: this._t({ ko: '에스트로겐', en: 'Estrogen', ja: 'エストロゲン' }),
         level: 'critical',
-        message: '흡연은 에스트로겐 복용 중 혈전 위험을 치명적으로 높입니다. 즉시 금연하세요.'
+        message: this._t({ ko: '흡연은 에스트로겐 복용 중 혈전 위험을 치명적으로 높입니다. 즉시 금연하세요.', en: 'Smoking critically increases the risk of blood clots while taking estrogen. Stop smoking immediately.', ja: '喫煙はエストロゲン服用中の血栓リスクを致命的に高めます。直ちに禁煙してください。' })
       });
     }
 
@@ -156,7 +156,7 @@ export class DoctorEngine {
     if (this.measurements.length === 0) {
       return {
         summary: {
-          message: '측정 데이터가 없습니다. 첫 측정을 시작하세요!',
+          message: this._t({ ko: '측정 데이터가 없습니다. 첫 측정을 시작하세요!', en: 'No measurement data available. Start your first measurement!', ja: '測定データがありません。最初の測定を始めましょう！' }),
           overallStatus: 'no_data'
         },
         targetAchievement: null,
@@ -190,7 +190,7 @@ export class DoctorEngine {
       const severity = typeof latestMeasurement.menstruationPain === 'number' ? latestMeasurement.menstruationPain : 1;
       mergedAlerts.push({
         level: severity >= 4 ? 'critical' : 'warning',
-        message: `월경이 기록되었습니다. 강도: ${severity}/5`
+        message: this._t({ ko: `월경이 기록되었습니다. 강도: ${severity}/5`, en: `Menstruation recorded. Intensity: ${severity}/5`, ja: `月経が記録されました。強度：${severity}/5` })
       });
     }
 
@@ -320,17 +320,17 @@ export class DoctorEngine {
         const halfLife = med.halfLife || 120; // 기본값 5일
         
         let status = 'stable';
-        let message = '안정적인 농도입니다.';
+        let message = this._t({ ko: '안정적인 농도입니다.', en: 'Concentration is stable.', ja: '安定した濃度です。' });
         
         // 피크: 보통 주사 후 24-48시간 (에스테르에 따라 다름)
         if (diffHours <= 48) {
           status = 'peak';
-          message = '호르몬 농도가 가장 높은 시기(Peak)입니다. 기분 변화나 과민 반응이 있을 수 있습니다.';
+          message = this._t({ ko: '호르몬 농도가 가장 높은 시기(Peak)입니다. 기분 변화나 과민 반응이 있을 수 있습니다.', en: 'Hormone levels are at their highest (Peak). You may experience mood swings or hypersensitivity.', ja: 'ホルモン濃度が最も高い時期（ピーク）です。気分の変動や過敏反応が起こることがあります。' });
         } 
         // 트러프: 반감기 이후 다음 주사 직전
         else if (diffHours >= halfLife) {
           status = 'trough';
-          message = '호르몬 농도가 낮아지는 시기(Trough)입니다. 피로감이나 감정 저하가 올 수 있습니다.';
+          message = this._t({ ko: '호르몬 농도가 낮아지는 시기(Trough)입니다. 피로감이나 감정 저하가 올 수 있습니다.', en: 'Hormone levels are declining (Trough). You may experience fatigue or low mood.', ja: 'ホルモン濃度が低下する時期（トラフ）です。疲労感や気分の低下が起こることがあります。' });
         }
         
         cycleInfo.push({
@@ -659,9 +659,9 @@ export class DoctorEngine {
     // 호르몬 상태
     if (healthEval.hormones) {
       if (healthEval.hormones.status === 'optimal') {
-        messages.push(svgIcon('check_circle', 'mi-inline mi-sm mi-success') + ' 호르몬 수치가 이상적입니다.');
+        messages.push(svgIcon('check_circle', 'mi-inline mi-sm mi-success') + ' ' + this._t({ ko: '호르몬 수치가 이상적입니다.', en: 'Hormone levels are optimal.', ja: 'ホルモン値は理想的です。' }));
       } else if (healthEval.hormones.status === 'warning') {
-        messages.push(svgIcon('warning', 'mi-inline mi-sm mi-warning') + ' 호르몬 수치 조정이 필요합니다.');
+        messages.push(svgIcon('warning', 'mi-inline mi-sm mi-warning') + ' ' + this._t({ ko: '호르몬 수치 조정이 필요합니다.', en: 'Hormone levels need adjustment.', ja: 'ホルモン値の調整が必要です。' }));
       }
     }
     
@@ -691,7 +691,7 @@ export class DoctorEngine {
     if (this.measurements.length === 0) {
       return {
         summary: {
-          message: '측정 데이터가 없습니다.',
+          message: this._t({ ko: '측정 데이터가 없습니다.', en: 'No measurement data available.', ja: '測定データがありません。' }),
           overallProgress: 0,
           timeline: [],
           monthlySummaries: []
@@ -1123,7 +1123,7 @@ export class DoctorEngine {
    */
   _generateChangeComparison() {
     if (this.measurements.length < 2) {
-      return { message: '비교할 데이터가 부족합니다.' };
+      return { message: this._t({ ko: '비교할 데이터가 부족합니다.', en: 'Not enough data for comparison.', ja: '比較するデータが不足しています。' }) };
     }
     
     const latest = this.measurements[this.measurements.length - 1];
@@ -1131,8 +1131,8 @@ export class DoctorEngine {
     const first = this.measurements[0];
     
     return {
-      withPreviousWeek: this._compareTwo(latest, previous, '지난 주'),
-      withFirstMeasurement: this._compareTwo(latest, first, '처음')
+      withPreviousWeek: this._compareTwo(latest, previous, this._t({ ko: '지난 주', en: 'Last week', ja: '先週' })),
+      withFirstMeasurement: this._compareTwo(latest, first, this._t({ ko: '처음', en: 'First', ja: '最初' }))
     };
   }
   
@@ -1197,7 +1197,7 @@ export class DoctorEngine {
   _generateSpecificDateComparisonOptions() {
     return {
       availableDates: this.measurements.map(m => m.date),
-      message: '날짜를 선택하여 비교하세요.'
+      message: this._t({ ko: '날짜를 선택하여 비교하세요.', en: 'Select dates to compare.', ja: '日付を選択して比較してください。' })
     };
   }
   
@@ -1282,11 +1282,11 @@ export class DoctorEngine {
    */
   _generateWeeklyChecklist() {
     return [
-      { id: 'medication', text: '약물 규칙적으로 복용하기', completed: false },
-      { id: 'exercise', text: '주 3회 운동하기', completed: false },
-      { id: 'water', text: '하루 2-3L 물 마시기', completed: false },
-      { id: 'sleep', text: '충분한 수면 (7-8시간)', completed: false },
-      { id: 'measurement', text: '정기 측정 기록하기', completed: false }
+      { id: 'medication', text: this._t({ ko: '약물 규칙적으로 복용하기', en: 'Take medications regularly', ja: '薬を規則的に服用する' }), completed: false },
+      { id: 'exercise', text: this._t({ ko: '주 3회 운동하기', en: 'Exercise 3 times a week', ja: '週3回運動する' }), completed: false },
+      { id: 'water', text: this._t({ ko: '하루 2-3L 물 마시기', en: 'Drink 2-3L of water daily', ja: '1日2〜3Lの水を飲む' }), completed: false },
+      { id: 'sleep', text: this._t({ ko: '충분한 수면 (7-8시간)', en: 'Get enough sleep (7-8 hours)', ja: '十分な睡眠（7〜8時間）' }), completed: false },
+      { id: 'measurement', text: this._t({ ko: '정기 측정 기록하기', en: 'Log regular measurements', ja: '定期測定を記録する' }), completed: false }
     ];
   }
   
@@ -1543,11 +1543,11 @@ export class DoctorEngine {
     const healthEval = this.healthEvaluator.evaluateAll();
     
     return {
-      message: "논바이너리 분석은 개인의 목표에 따라 다릅니다.",
+      message: this._t({ ko: '논바이너리 분석은 개인의 목표에 따라 다릅니다.', en: 'Non-binary analysis varies based on individual goals.', ja: 'ノンバイナリー分析は個人の目標によって異なります。' }),
       balanceScore: healthEval.transformationScore,
       bodyRatios: healthEval.bodyRatios,
       recommendations: this.recommendationEngine.generateAllRecommendations(),
-      note: "중성적이고 균형 잡힌 체형을 목표로 합니다."
+      note: this._t({ ko: '중성적이고 균형 잡힌 체형을 목표로 합니다.', en: 'Aiming for an androgynous and balanced body shape.', ja: '中性的でバランスの取れた体型を目指します。' })
     };
   }
 }

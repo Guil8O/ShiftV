@@ -22,6 +22,15 @@ export class SymptomAnalyzer {
     this.language = language;
     this.symptomDB = SYMPTOM_DATABASE;
   }
+
+  _t(texts, params = {}) {
+    const lang = this.language || 'ko';
+    let text = (texts && (texts[lang] || texts.ko)) || '';
+    Object.keys(params).forEach(k => {
+      text = text.replaceAll(`{${k}}`, String(params[k]));
+    });
+    return text;
+  }
   
   // ========================================
   // 2. 전체 증상 분석
@@ -109,7 +118,7 @@ export class SymptomAnalyzer {
            return {
              symptomId,
              cause: 'hormone_fluctuation',
-             detail: `3-4주 전 테스토스테론 수치의 급격한 변화(${change > 0 ? '증가' : '감소'})가 원인일 수 있습니다.`,
+             detail: this._t({ko: '3-4주 전 테스토스테론 수치의 급격한 변화({direction})가 원인일 수 있습니다.', en: 'A rapid change ({direction}) in testosterone levels 3-4 weeks ago may be the cause.', ja: '3〜4週間前のテストステロン値の急激な変化（{direction}）が原因の可能性があります。'}, {direction: change > 0 ? this._t({ko: '증가', en: 'increase', ja: '増加'}) : this._t({ko: '감소', en: 'decrease', ja: '減少'})}),
              confidence: 'high'
            };
         }
@@ -122,7 +131,7 @@ export class SymptomAnalyzer {
            return {
              symptomId,
              cause: 'hormone_fluctuation',
-             detail: `3-4주 전 에스트로겐 수치의 급격한 변화가 원인일 수 있습니다.`,
+             detail: this._t({ko: '3-4주 전 에스트로겐 수치의 급격한 변화가 원인일 수 있습니다.', en: 'A rapid change in estrogen levels 3-4 weeks ago may be the cause.', ja: '3〜4週間前のエストロゲン値の急激な変化が原因の可能性があります。'}),
              confidence: 'medium'
            };
         }
@@ -150,11 +159,11 @@ export class SymptomAnalyzer {
     
     if (hasHeadache && hasEdema) {
       validations.push({
-        symptom: '두통',
+        symptom: this._t({ko: '두통', en: 'Headache', ja: '頭痛'}),
         type: 'cross_validated',
         cause: 'fluid_retention',
-        message: '두통과 부종이 동반되어 혈압 상승이나 수분 정체가 의심됩니다.',
-        action: '혈압을 측정하고 나트륨 섭취를 줄이세요.'
+        message: this._t({ko: '두통과 부종이 동반되어 혈압 상승이나 수분 정체가 의심됩니다.', en: 'Headache accompanied by edema suggests possible blood pressure elevation or fluid retention.', ja: '頭痛とむくみが併発しており、血圧上昇や水分貯留が疑われます。'}),
+        action: this._t({ko: '혈압을 측정하고 나트륨 섭취를 줄이세요.', en: 'Check your blood pressure and reduce sodium intake.', ja: '血圧を測定し、ナトリウム摂取を減らしてください。'})
       });
     }
 
@@ -164,11 +173,11 @@ export class SymptomAnalyzer {
     
     if (hasAcne && highT) {
        validations.push({
-        symptom: '여드름',
+        symptom: this._t({ko: '여드름', en: 'Acne', ja: 'ニキビ'}),
         type: 'cross_validated',
         cause: 'high_androgen',
-        message: `높은 테스토스테론 수치(${measurement.testosteroneLevel})가 여드름의 직접적인 원인으로 보입니다.`,
-        action: '호르몬 수치 조절이 필요합니다.'
+        message: this._t({ko: '높은 테스토스테론 수치({level})가 여드름의 직접적인 원인으로 보입니다.', en: 'High testosterone level ({level}) appears to be the direct cause of acne.', ja: '高いテストステロン値（{level}）がニキビの直接的な原因と考えられます。'}, {level: measurement.testosteroneLevel}),
+        action: this._t({ko: '호르몬 수치 조절이 필요합니다.', en: 'Hormone level adjustment is needed.', ja: 'ホルモン値の調整が必要です。'})
       });
     }
 
@@ -196,11 +205,11 @@ export class SymptomAnalyzer {
         level: 'critical',
         category: 'circulatory',
         icon: svgIcon('emergency', 'mi-sm mi-error'),
-        title: '심부정맥 혈전증 의심',
-        description: '종아리 또는 다리의 부기와 통증은 혈전의 징후일 수 있습니다.',
-        action: '즉시 병원 응급실을 방문하세요!',
-        risk: '생명에 위험할 수 있습니다',
-        relatedTo: ['에스트로겐 복용', '장시간 앉아있기', '흡연'],
+        title: this._t({ko: '심부정맥 혈전증 의심', en: 'Suspected deep vein thrombosis', ja: '深部静脈血栓症の疑い'}),
+        description: this._t({ko: '종아리 또는 다리의 부기와 통증은 혈전의 징후일 수 있습니다.', en: 'Swelling and pain in the calf or leg may be a sign of a blood clot.', ja: 'ふくらはぎや脚のむくみと痛みは血栓の兆候である可能性があります。'}),
+        action: this._t({ko: '즉시 병원 응급실을 방문하세요!', en: 'Visit the emergency room immediately!', ja: '直ちに病院の救急外来を受診してください！'}),
+        risk: this._t({ko: '생명에 위험할 수 있습니다', en: 'Can be life-threatening', ja: '生命に危険を及ぼす可能性があります'}),
+        relatedTo: [this._t({ko: '에스트로겐 복용', en: 'Estrogen use', ja: 'エストロゲン服用'}), this._t({ko: '장시간 앉아있기', en: 'Prolonged sitting', ja: '長時間の座位'}), this._t({ko: '흡연', en: 'Smoking', ja: '喫煙'})],
         prevention: []
       });
     }
@@ -212,11 +221,11 @@ export class SymptomAnalyzer {
         level: 'critical',
         category: 'liver',
         icon: svgIcon('warning', 'mi-sm mi-warning'),
-        title: '간 기능 이상 의심',
-        description: '황달 증상은 간 독성의 징후일 수 있습니다.',
-        action: '즉시 의사와 상담하고 혈액 검사를 받으세요',
-        risk: '간 손상 가능성',
-        relatedTo: ['경구 호르몬 복용', 'AAS 사용', '알코올'],
+        title: this._t({ko: '간 기능 이상 의심', en: 'Suspected liver dysfunction', ja: '肝機能異常の疑い'}),
+        description: this._t({ko: '황달 증상은 간 독성의 징후일 수 있습니다.', en: 'Jaundice symptoms may be a sign of liver toxicity.', ja: '黄疸症状は肝毒性の兆候である可能性があります。'}),
+        action: this._t({ko: '즉시 의사와 상담하고 혈액 검사를 받으세요', en: 'Consult a doctor immediately and get a blood test', ja: '直ちに医師に相談し、血液検査を受けてください'}),
+        risk: this._t({ko: '간 손상 가능성', en: 'Possible liver damage', ja: '肝障害の可能性'}),
+        relatedTo: [this._t({ko: '경구 호르몬 복용', en: 'Oral hormone use', ja: '経口ホルモン服用'}), this._t({ko: 'AAS 사용', en: 'AAS use', ja: 'AAS使用'}), this._t({ko: '알코올', en: 'Alcohol', ja: 'アルコール'})],
         prevention: []
       });
     }
@@ -227,11 +236,11 @@ export class SymptomAnalyzer {
         level: 'critical',
         category: 'liver',
         icon: svgIcon('warning', 'mi-sm mi-warning'),
-        title: '간 비대 의심',
-        description: '오른쪽 윗배의 통증은 간 비대의 징후일 수 있습니다.',
-        action: '의사 상담 및 간 기능 검사 필요',
-        risk: '간 손상',
-        relatedTo: ['경구 AAS', '고용량 약물'],
+        title: this._t({ko: '간 비대 의심', en: 'Suspected hepatomegaly', ja: '肝腫大の疑い'}),
+        description: this._t({ko: '오른쪽 윗배의 통증은 간 비대의 징후일 수 있습니다.', en: 'Pain in the right upper abdomen may be a sign of hepatomegaly.', ja: '右上腹部の痛みは肝腫大の兆候である可能性があります。'}),
+        action: this._t({ko: '의사 상담 및 간 기능 검사 필요', en: 'Doctor consultation and liver function test needed', ja: '医師への相談と肝機能検査が必要です'}),
+        risk: this._t({ko: '간 손상', en: 'Liver damage', ja: '肝障害'}),
+        relatedTo: [this._t({ko: '경구 AAS', en: 'Oral AAS', ja: '経口AAS'}), this._t({ko: '고용량 약물', en: 'High-dose medications', ja: '高用量薬物'})],
         prevention: []
       });
     }
@@ -246,11 +255,11 @@ export class SymptomAnalyzer {
         level: 'critical',
         category: 'cardiovascular',
         icon: svgIcon('favorite', 'mi-sm mi-error'),
-        title: '심혈관 증상 주의',
-        description: '심한 두근거림 또는 호흡 곤란은 심혈관 문제를 나타낼 수 있습니다.',
-        action: '즉시 의사 상담 필요',
-        risk: '심장 문제',
-        relatedTo: ['고용량 호르몬', '스테로이드', '클렌부테롤'],
+        title: this._t({ko: '심혈관 증상 주의', en: 'Cardiovascular symptom warning', ja: '心血管症状に注意'}),
+        description: this._t({ko: '심한 두근거림 또는 호흡 곤란은 심혈관 문제를 나타낼 수 있습니다.', en: 'Severe palpitations or difficulty breathing may indicate cardiovascular problems.', ja: '激しい動悸や呼吸困難は心血管の問題を示している可能性があります。'}),
+        action: this._t({ko: '즉시 의사 상담 필요', en: 'Immediate doctor consultation needed', ja: '直ちに医師への相談が必要です'}),
+        risk: this._t({ko: '심장 문제', en: 'Heart problems', ja: '心臓の問題'}),
+        relatedTo: [this._t({ko: '고용량 호르몬', en: 'High-dose hormones', ja: '高用量ホルモン'}), this._t({ko: '스테로이드', en: 'Steroids', ja: 'ステロイド'}), this._t({ko: '클렌부테롤', en: 'Clenbuterol', ja: 'クレンブテロール'})],
         prevention: []
       });
     }
@@ -279,19 +288,19 @@ export class SymptomAnalyzer {
         level: 'warning',
         category: 'mental_health',
         icon: svgIcon('psychology', 'mi-sm'),
-        title: '정신 건강 증상 주의',
-        description: `${mentalSymptoms.length}개의 정신 건강 관련 증상이 보고되었습니다.`,
+        title: this._t({ko: '정신 건강 증상 주의', en: 'Mental health symptom warning', ja: 'メンタルヘルス症状に注意'}),
+        description: this._t({ko: '{count}개의 정신 건강 관련 증상이 보고되었습니다.', en: '{count} mental health-related symptom(s) have been reported.', ja: '{count}件のメンタルヘルス関連症状が報告されています。'}, {count: mentalSymptoms.length}),
         symptoms: mentalSymptoms.map(s => this.getSymptomName(s.id)),
-        action: '호르몬 용량 조정 또는 전문가 상담 고려',
+        action: this._t({ko: '호르몬 용량 조정 또는 전문가 상담 고려', en: 'Consider hormone dose adjustment or specialist consultation', ja: 'ホルモン用量の調整または専門家への相談を検討してください'}),
         tips: [
-          '충분한 수면',
-          '규칙적인 운동',
-          '명상 및 스트레스 관리',
-          '필요시 심리 상담'
+          this._t({ko: '충분한 수면', en: 'Get enough sleep', ja: '十分な睡眠'}),
+          this._t({ko: '규칙적인 운동', en: 'Regular exercise', ja: '規則的な運動'}),
+          this._t({ko: '명상 및 스트레스 관리', en: 'Meditation and stress management', ja: '瞑想とストレス管理'}),
+          this._t({ko: '필요시 심리 상담', en: 'Psychological counseling if needed', ja: '必要に応じて心理カウンセリング'})
         ],
         relatedTo: this.mode === 'mtf' 
-          ? ['시프로테론 (Androcur)', '급격한 호르몬 변화']
-          : ['테스토스테론 과다 (Roid Rage)', '에스트로겐 억제']
+          ? [this._t({ko: '시프로테론 (Androcur)', en: 'Cyproterone (Androcur)', ja: 'シプロテロン（アンドロクール）'}), this._t({ko: '급격한 호르몬 변화', en: 'Rapid hormone changes', ja: '急激なホルモン変化'})]
+          : [this._t({ko: '테스토스테론 과다 (Roid Rage)', en: 'Testosterone excess (Roid Rage)', ja: 'テストステロン過多（ロイドレイジ）'}), this._t({ko: '에스트로겐 억제', en: 'Estrogen suppression', ja: 'エストロゲン抑制'})]
       });
     }
     
@@ -306,20 +315,20 @@ export class SymptomAnalyzer {
         level: 'warning',
         category: 'skin',
         icon: svgIcon('dermatology', 'mi-sm'),
-        title: '피부 트러블',
-        description: '호르몬 변화로 인한 피부 트러블이 있습니다.',
+        title: this._t({ko: '피부 트러블', en: 'Skin troubles', ja: '肌トラブル'}),
+        description: this._t({ko: '호르몬 변화로 인한 피부 트러블이 있습니다.', en: 'Skin troubles due to hormonal changes.', ja: 'ホルモン変化による肌トラブルがあります。'}),
         symptoms: skinSymptoms.map(s => this.getSymptomName(s.id)),
-        action: '피부 관리 루틴 개선',
+        action: this._t({ko: '피부 관리 루틴 개선', en: 'Improve skincare routine', ja: 'スキンケアルーティンの改善'}),
         tips: [
-          '하루 2회 클렌징',
-          '비코메도제닉 제품 사용',
-          '충분한 수분',
-          '유제품 및 설탕 줄이기',
-          '필요시 피부과 상담'
+          this._t({ko: '하루 2회 클렌징', en: 'Cleanse twice daily', ja: '1日2回クレンジング'}),
+          this._t({ko: '비코메도제닉 제품 사용', en: 'Use non-comedogenic products', ja: 'ノンコメドジェニック製品を使用'}),
+          this._t({ko: '충분한 수분', en: 'Stay hydrated', ja: '十分な水分補給'}),
+          this._t({ko: '유제품 및 설탕 줄이기', en: 'Reduce dairy and sugar', ja: '乳製品と砂糖を減らす'}),
+          this._t({ko: '필요시 피부과 상담', en: 'Consult a dermatologist if needed', ja: '必要に応じて皮膚科を受診'})
         ],
         relatedTo: this.mode === 'ftm'
-          ? ['테스토스테론 증가', '피지 분비 증가']
-          : ['초기 호르몬 변화', '호르몬 불균형']
+          ? [this._t({ko: '테스토스테론 증가', en: 'Testosterone increase', ja: 'テストステロン増加'}), this._t({ko: '피지 분비 증가', en: 'Increased sebum production', ja: '皮脂分泌の増加'})]
+          : [this._t({ko: '초기 호르몬 변화', en: 'Early hormonal changes', ja: '初期ホルモン変化'}), this._t({ko: '호르몬 불균형', en: 'Hormonal imbalance', ja: 'ホルモンバランスの乱れ'})]
       });
     }
     
@@ -334,26 +343,26 @@ export class SymptomAnalyzer {
         level: 'warning',
         category: 'sexual_health',
         icon: svgIcon('favorite', 'mi-sm'),
-        title: '성기능 변화',
-        description: '호르몬 변화로 인한 성기능 변화가 있습니다.',
+        title: this._t({ko: '성기능 변화', en: 'Sexual function changes', ja: '性機能の変化'}),
+        description: this._t({ko: '호르몬 변화로 인한 성기능 변화가 있습니다.', en: 'Sexual function changes due to hormonal changes.', ja: 'ホルモン変化による性機能の変化があります。'}),
         symptoms: sexualSymptoms.map(s => this.getSymptomName(s.id)),
-        action: '예상되는 변화이지만 심한 경우 의사 상담',
+        action: this._t({ko: '예상되는 변화이지만 심한 경우 의사 상담', en: 'Expected changes, but consult a doctor if severe', ja: '予想される変化ですが、ひどい場合は医師に相談してください'}),
         tips: this.mode === 'mtf' 
           ? [
-              '성욕 감소는 정상',
-              '윤활제 사용',
-              '꾸준한 사용으로 위축 방지',
-              '프로게스테론이 도움이 될 수 있음'
+              this._t({ko: '성욕 감소는 정상', en: 'Decreased libido is normal', ja: '性欲の減少は正常です'}),
+              this._t({ko: '윤활제 사용', en: 'Use lubricant', ja: '潤滑剤の使用'}),
+              this._t({ko: '꾸준한 사용으로 위축 방지', en: 'Prevent atrophy with regular use', ja: '定期的な使用で萎縮を防止'}),
+              this._t({ko: '프로게스테론이 도움이 될 수 있음', en: 'Progesterone may help', ja: 'プロゲステロンが助けになる場合があります'})
             ]
           : [
-              '테스토스테론 수치 확인',
-              '충분한 수분',
-              '질 윤활제',
-              '정기 검진'
+              this._t({ko: '테스토스테론 수치 확인', en: 'Check testosterone levels', ja: 'テストステロン値を確認'}),
+              this._t({ko: '충분한 수분', en: 'Stay hydrated', ja: '十分な水分補給'}),
+              this._t({ko: '질 윤활제', en: 'Vaginal lubricant', ja: '膣潤滑剤'}),
+              this._t({ko: '정기 검진', en: 'Regular check-ups', ja: '定期検診'})
             ],
         relatedTo: this.mode === 'mtf'
-          ? ['항안드로겐', '에스트로겐']
-          : ['테스토스테론', '에스트로겐 억제']
+          ? [this._t({ko: '항안드로겐', en: 'Anti-androgen', ja: '抗アンドロゲン'}), this._t({ko: '에스트로겐', en: 'Estrogen', ja: 'エストロゲン'})]
+          : [this._t({ko: '테스토스테론', en: 'Testosterone', ja: 'テストステロン'}), this._t({ko: '에스트로겐 억제', en: 'Estrogen suppression', ja: 'エストロゲン抑制'})]
       });
     }
     
@@ -368,18 +377,18 @@ export class SymptomAnalyzer {
         level: 'warning',
         category: 'fitness',
         icon: svgIcon('fitness_center', 'mi-sm'),
-        title: '근력 및 체력 저하',
-        description: '근육량 감소 또는 피로감이 있습니다.',
+        title: this._t({ko: '근력 및 체력 저하', en: 'Muscle strength and stamina decline', ja: '筋力・体力の低下'}),
+        description: this._t({ko: '근육량 감소 또는 피로감이 있습니다.', en: 'Muscle mass loss or fatigue is present.', ja: '筋肉量の減少または疲労感があります。'}),
         symptoms: muscleSymptoms.map(s => this.getSymptomName(s.id)),
-        action: '운동 및 영양 개선',
+        action: this._t({ko: '운동 및 영양 개선', en: 'Improve exercise and nutrition', ja: '運動と栄養の改善'}),
         tips: [
-          '단백질 섭취 증가 (체중 1kg당 1.5-2g)',
-          '근력 운동 추가',
-          '충분한 수면',
-          '비타민 D, B12 검사',
-          '호르몬 수치 확인'
+          this._t({ko: '단백질 섭취 증가 (체중 1kg당 1.5-2g)', en: 'Increase protein intake (1.5-2g per kg body weight)', ja: 'タンパク質摂取量の増加（体重1kgあたり1.5〜2g）'}),
+          this._t({ko: '근력 운동 추가', en: 'Add strength training', ja: '筋力トレーニングの追加'}),
+          this._t({ko: '충분한 수면', en: 'Get enough sleep', ja: '十分な睡眠'}),
+          this._t({ko: '비타민 D, B12 검사', en: 'Check vitamin D and B12', ja: 'ビタミンD、B12検査'}),
+          this._t({ko: '호르몬 수치 확인', en: 'Check hormone levels', ja: 'ホルモン値の確認'})
         ],
-        relatedTo: ['과도한 칼로리 제한', '호르몬 변화', '운동 부족']
+        relatedTo: [this._t({ko: '과도한 칼로리 제한', en: 'Excessive calorie restriction', ja: '過度なカロリー制限'}), this._t({ko: '호르몬 변화', en: 'Hormonal changes', ja: 'ホルモン変化'}), this._t({ko: '운동 부족', en: 'Lack of exercise', ja: '運動不足'})]
       });
     }
     
@@ -430,7 +439,7 @@ export class SymptomAnalyzer {
    */
   generateSummary(measurement) {
     if (!measurement.symptoms || measurement.symptoms.length === 0) {
-      return '기록된 증상이 없습니다. 건강 상태가 양호한 것으로 보입니다.';
+      return this._t({ko: '기록된 증상이 없습니다. 건강 상태가 양호한 것으로 보입니다.', en: 'No symptoms recorded. Your health appears to be in good condition.', ja: '記録された症状はありません。健康状態は良好と思われます。'});
     }
     
     const symptoms = measurement.symptoms;
@@ -439,18 +448,18 @@ export class SymptomAnalyzer {
     const mildCount = symptoms.filter(s => s.severity <= 2).length;
     
     if (severeCount > 0) {
-      return `${svgIcon('warning', 'mi-inline mi-sm mi-warning')} ${severeCount}개의 심각한 증상이 보고되었습니다. 즉시 의사와 상담하세요.`;
+      return `${svgIcon('warning', 'mi-inline mi-sm mi-warning')} ${this._t({ko: '{count}개의 심각한 증상이 보고되었습니다. 즉시 의사와 상담하세요.', en: '{count} severe symptom(s) reported. Consult a doctor immediately.', ja: '{count}件の深刻な症状が報告されています。直ちに医師に相談してください。'}, {count: severeCount})}`;
     }
     
     if (moderateCount >= 3) {
-      return `주의: ${moderateCount}개의 중간 정도 증상이 있습니다. 호르몬 조정이나 생활 습관 개선이 필요할 수 있습니다.`;
+      return this._t({ko: '주의: {count}개의 중간 정도 증상이 있습니다. 호르몬 조정이나 생활 습관 개선이 필요할 수 있습니다.', en: 'Caution: {count} moderate symptom(s) present. Hormone adjustment or lifestyle changes may be needed.', ja: '注意：{count}件の中程度の症状があります。ホルモン調整や生活習慣の改善が必要な場合があります。'}, {count: moderateCount});
     }
     
     if (moderateCount > 0 || mildCount > 0) {
-      return `${symptoms.length}개의 증상이 기록되었습니다. 대부분 관리 가능한 수준입니다.`;
+      return this._t({ko: '{count}개의 증상이 기록되었습니다. 대부분 관리 가능한 수준입니다.', en: '{count} symptom(s) recorded. Most are at manageable levels.', ja: '{count}件の症状が記録されています。ほとんどは管理可能なレベルです。'}, {count: symptoms.length});
     }
     
-    return '증상이 경미하거나 없습니다. 잘 관리하고 계시네요!';
+    return this._t({ko: '증상이 경미하거나 없습니다. 잘 관리하고 계시네요!', en: 'Symptoms are mild or absent. You are managing well!', ja: '症状は軽度またはありません。よく管理できていますね！'});
   }
   
   // ========================================
@@ -477,10 +486,10 @@ export class SymptomAnalyzer {
       insights.push({
         type: 'unexpected',
         icon: svgIcon('search', 'mi-sm'),
-        title: '예상 밖의 증상',
-        description: `${this.mode === 'mtf' ? 'MTF' : 'FTM'} 전환에서 흔하지 않은 증상이 나타났습니다.`,
+        title: this._t({ko: '예상 밖의 증상', en: 'Unexpected symptoms', ja: '予想外の症状'}),
+        description: this._t({ko: '{mode} 전환에서 흔하지 않은 증상이 나타났습니다.', en: 'Uncommon symptoms have appeared during {mode} transition.', ja: '{mode}への移行では珍しい症状が現れています。'}, {mode: this.mode === 'mtf' ? 'MTF' : 'FTM'}),
         symptoms: unexpectedSymptoms.map(s => this.getSymptomName(s.id)),
-        advice: '의사와 상담하여 원인을 파악하세요. 약물 상호작용이나 다른 건강 문제일 수 있습니다.'
+        advice: this._t({ko: '의사와 상담하여 원인을 파악하세요. 약물 상호작용이나 다른 건강 문제일 수 있습니다.', en: 'Consult a doctor to identify the cause. It could be drug interactions or other health issues.', ja: '医師に相談して原因を特定してください。薬物の相互作用や他の健康問題の可能性があります。'})
       });
     }
     
@@ -497,10 +506,10 @@ export class SymptomAnalyzer {
           insights.push({
             type: 'improvement',
             icon: svgIcon('auto_awesome', 'mi-sm mi-success'),
-            title: '증상 개선',
-            description: `${improvedSymptoms.length}개의 증상이 지난주보다 호전되었습니다!`,
+            title: this._t({ko: '증상 개선', en: 'Symptom improvement', ja: '症状の改善'}),
+            description: this._t({ko: '{count}개의 증상이 지난주보다 호전되었습니다!', en: '{count} symptom(s) have improved since last week!', ja: '{count}件の症状が先週より改善しました！'}, {count: improvedSymptoms.length}),
             symptoms: improvedSymptoms.map(s => this.getSymptomName(s.id)),
-            advice: '현재 하고 계신 관리를 계속 유지하세요!'
+            advice: this._t({ko: '현재 하고 계신 관리를 계속 유지하세요!', en: 'Keep up your current management!', ja: '現在の管理を続けてください！'})
           });
         }
       }
@@ -538,11 +547,11 @@ export class SymptomAnalyzer {
           return {
             type: 'correlation',
             icon: svgIcon('link', 'mi-sm'),
-            title: '호르몬 수치와 증상 연관성',
-            description: '낮은 에스트로겐 수치가 기분 변화와 관련이 있을 수 있습니다.',
+            title: this._t({ko: '호르몬 수치와 증상 연관성', en: 'Hormone level and symptom correlation', ja: 'ホルモン値と症状の関連性'}),
+            description: this._t({ko: '낮은 에스트로겐 수치가 기분 변화와 관련이 있을 수 있습니다.', en: 'Low estrogen levels may be related to mood changes.', ja: '低いエストロゲン値が気分の変化に関連している可能性があります。'}),
             estrogenLevel: measurement.estrogenLevel,
             targetRange: '100-200 pg/ml',
-            advice: '의사와 상담하여 에스트라디올 용량 조정을 고려하세요.'
+            advice: this._t({ko: '의사와 상담하여 에스트라디올 용량 조정을 고려하세요.', en: 'Consult a doctor to consider adjusting estradiol dosage.', ja: '医師に相談してエストラジオールの用量調整を検討してください。'})
           };
         }
       }
@@ -557,11 +566,11 @@ export class SymptomAnalyzer {
           return {
             type: 'correlation',
             icon: svgIcon('link', 'mi-sm'),
-            title: '테스토스테론 억제 부족',
-            description: '높은 테스토스테론 수치가 원치 않는 남성화 증상을 유발할 수 있습니다.',
+            title: this._t({ko: '테스토스테론 억제 부족', en: 'Insufficient testosterone suppression', ja: 'テストステロン抑制不足'}),
+            description: this._t({ko: '높은 테스토스테론 수치가 원치 않는 남성화 증상을 유발할 수 있습니다.', en: 'High testosterone levels may be causing unwanted masculinizing symptoms.', ja: '高いテストステロン値が望まない男性化症状を引き起こしている可能性があります。'}),
             testosteroneLevel: measurement.testosteroneLevel,
             targetRange: '< 50 ng/dL',
-            advice: '항안드로겐 용량 조정이 필요할 수 있습니다.'
+            advice: this._t({ko: '항안드로겐 용량 조정이 필요할 수 있습니다.', en: 'Anti-androgen dose adjustment may be needed.', ja: '抗アンドロゲンの用量調整が必要な場合があります。'})
           };
         }
       }
@@ -577,11 +586,11 @@ export class SymptomAnalyzer {
           return {
             type: 'correlation',
             icon: svgIcon('link', 'mi-sm'),
-            title: '높은 테스토스테론 부작용',
-            description: '테스토스테론 수치가 높아 부작용이 나타나고 있습니다.',
+            title: this._t({ko: '높은 테스토스테론 부작용', en: 'High testosterone side effects', ja: '高テストステロンの副作用'}),
+            description: this._t({ko: '테스토스테론 수치가 높아 부작용이 나타나고 있습니다.', en: 'High testosterone levels are causing side effects.', ja: 'テストステロン値が高く、副作用が現れています。'}),
             testosteroneLevel: measurement.testosteroneLevel,
             targetRange: '300-700 ng/dL',
-            advice: '테스토스테론 용량 감소를 고려하세요.'
+            advice: this._t({ko: '테스토스테론 용량 감소를 고려하세요.', en: 'Consider reducing testosterone dosage.', ja: 'テストステロンの用量減少を検討してください。'})
           };
         }
       }
@@ -596,11 +605,11 @@ export class SymptomAnalyzer {
           return {
             type: 'correlation',
             icon: svgIcon('link', 'mi-sm'),
-            title: '낮은 테스토스테론 증상',
-            description: '테스토스테론 수치가 낮아 관련 증상이 나타날 수 있습니다.',
+            title: this._t({ko: '낮은 테스토스테론 증상', en: 'Low testosterone symptoms', ja: '低テストステロン症状'}),
+            description: this._t({ko: '테스토스테론 수치가 낮아 관련 증상이 나타날 수 있습니다.', en: 'Low testosterone levels may be causing related symptoms.', ja: 'テストステロン値が低く、関連する症状が現れている可能性があります。'}),
             testosteroneLevel: measurement.testosteroneLevel,
             targetRange: '300-700 ng/dL',
-            advice: '테스토스테론 용량 증가 또는 투여 간격 조정이 필요할 수 있습니다.'
+            advice: this._t({ko: '테스토스테론 용량 증가 또는 투여 간격 조정이 필요할 수 있습니다.', en: 'Testosterone dose increase or dosing interval adjustment may be needed.', ja: 'テストステロンの用量増加または投与間隔の調整が必要な場合があります。'})
           };
         }
       }
@@ -625,11 +634,11 @@ export class SymptomAnalyzer {
         return {
           type: 'typical',
           icon: svgIcon('assignment', 'mi-sm'),
-          title: 'MTF 전형적인 초기 증상',
-          description: '이러한 증상은 MTF 전환 초기에 매우 흔합니다.',
+          title: this._t({ko: 'MTF 전형적인 초기 증상', en: 'Typical early MTF symptoms', ja: 'MTFの典型的な初期症状'}),
+          description: this._t({ko: '이러한 증상은 MTF 전환 초기에 매우 흔합니다.', en: 'These symptoms are very common in early MTF transition.', ja: 'これらの症状はMTFへの移行初期に非常によく見られます。'}),
           symptoms: earlyMTFSymptoms.map(s => this.getSymptomName(s.id)),
-          advice: '대부분 시간이 지나면 안정됩니다. 심한 경우 의사와 상담하세요.',
-          timeline: '3-6개월 후 대부분 안정화됩니다.'
+          advice: this._t({ko: '대부분 시간이 지나면 안정됩니다. 심한 경우 의사와 상담하세요.', en: 'Most will stabilize over time. Consult a doctor if severe.', ja: 'ほとんどは時間が経てば安定します。ひどい場合は医師に相談してください。'}),
+          timeline: this._t({ko: '3-6개월 후 대부분 안정화됩니다.', en: 'Most stabilize after 3-6 months.', ja: '3〜6ヶ月後にほとんど安定します。'})
         };
       }
       
@@ -643,11 +652,11 @@ export class SymptomAnalyzer {
         return {
           type: 'typical',
           icon: svgIcon('assignment', 'mi-sm'),
-          title: 'FTM 전형적인 초기 증상',
-          description: '이러한 증상은 FTM 전환 초기에 매우 흔합니다.',
+          title: this._t({ko: 'FTM 전형적인 초기 증상', en: 'Typical early FTM symptoms', ja: 'FTMの典型的な初期症状'}),
+          description: this._t({ko: '이러한 증상은 FTM 전환 초기에 매우 흔합니다.', en: 'These symptoms are very common in early FTM transition.', ja: 'これらの症状はFTMへの移行初期に非常によく見られます。'}),
           symptoms: earlyFTMSymptoms.map(s => this.getSymptomName(s.id)),
-          advice: '여드름은 피부과 치료로 관리 가능합니다. 목소리 변화는 정상입니다.',
-          timeline: '여드름은 1년 이내 대부분 안정화됩니다.'
+          advice: this._t({ko: '여드름은 피부과 치료로 관리 가능합니다. 목소리 변화는 정상입니다.', en: 'Acne can be managed with dermatological treatment. Voice changes are normal.', ja: 'ニキビは皮膚科の治療で管理可能です。声の変化は正常です。'}),
+          timeline: this._t({ko: '여드름은 1년 이내 대부분 안정화됩니다.', en: 'Acne mostly stabilizes within 1 year.', ja: 'ニキビはほとんどが1年以内に安定します。'})
         };
       }
     }

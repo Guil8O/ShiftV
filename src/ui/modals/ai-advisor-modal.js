@@ -494,22 +494,22 @@ Keep total response under 800 words. Be specific, not generic.`;
 
         switch (code) {
             case 401:
-                userMessage = translate('aiError401') || 'API 키가 유효하지 않거나 만료되었습니다. 설정에서 키를 확인하세요.';
+                userMessage = translate('aiError401');
                 break;
             case 403:
-                userMessage = translate('aiError403') || '이 모델에 대한 접근 권한이 없습니다.';
+                userMessage = translate('aiError403');
                 break;
             case 404:
-                userMessage = translate('aiError404') || '모델 또는 엔드포인트를 찾을 수 없습니다. 모델명을 확인하세요.';
+                userMessage = translate('aiError404');
                 break;
             case 429:
-                userMessage = translate('aiError429') || '요청 한도를 초과했습니다. 잠시 후 다시 시도하세요.';
+                userMessage = translate('aiError429');
                 break;
             case 500: case 502: case 503:
-                userMessage = translate('aiError5xx') || 'AI 서버에 문제가 발생했습니다. 잠시 후 다시 시도하세요.';
+                userMessage = translate('aiError5xx');
                 break;
             default:
-                userMessage = `${translate('aiErrorGeneric') || 'API 오류'} (${code})`;
+                userMessage = `${translate('aiErrorGeneric')} (${code})`;
         }
 
         const err = new Error(userMessage);
@@ -523,8 +523,8 @@ Keep total response under 800 words. Be specific, not generic.`;
     _render() {
         const isMed = this.mode === 'medication';
         const headerTitle = isMed
-            ? `${svgIcon('medication', 'mi-inline')} ${translate('aiMedicationTitle') || 'AI 약물 조언'}`
-            : `${svgIcon('auto_awesome', 'mi-inline')} AI ${translate('actionGuideModalTitle') || 'Action Guide'}`;
+            ? `${svgIcon('medication', 'mi-inline')} ${translate('aiMedicationTitle')}`
+            : `${svgIcon('auto_awesome', 'mi-inline')} AI ${translate('actionGuideModalTitle')}`;
 
         const overlay = this._mount('ai-advisor-overlay', `
             <div class="ai-advisor-surface">
@@ -535,7 +535,7 @@ Keep total response under 800 words. Be specific, not generic.`;
                 <div class="ai-advisor-content">
                     <div class="ai-advisor-loading">
                         <div class="ai-advisor-spinner"></div>
-                        <p>${translate('aiAnalyzing') || 'AI가 분석 중...'}</p>
+                        <p>${translate('aiAnalyzing')}</p>
                     </div>
                 </div>
             </div>
@@ -552,7 +552,7 @@ Keep total response under 800 words. Be specific, not generic.`;
                 contentEl.innerHTML = `
                     <div class="ai-advisor-loading">
                         <div class="ai-advisor-spinner"></div>
-                        <p>${translate('aiAnalyzing') || 'AI가 분석 중...'}</p>
+                        <p>${translate('aiAnalyzing')}</p>
                     </div>`;
             }
             this._loadContent();
@@ -581,8 +581,8 @@ Keep total response under 800 words. Be specific, not generic.`;
             contentEl.innerHTML = `
                 <div class="ai-advisor-error">
                     <div class="ai-advisor-error-icon">${svgIcon('vpn_key', 'mi-xl')}</div>
-                    <p>${translate('aiNoApiKey') || 'API 키가 설정되지 않았습니다'}</p>
-                    <p class="ai-advisor-error-hint">${translate('aiNoApiKeyHint') || '설정 → AI API에서 키를 입력하세요'}</p>
+                    <p>${translate('aiNoApiKey')}</p>
+                    <p class="ai-advisor-error-hint">${translate('aiNoApiKeyHint')}</p>
                 </div>
             `;
             return;
@@ -620,10 +620,10 @@ Keep total response under 800 words. Be specific, not generic.`;
             contentEl.innerHTML = `
                 <div class="ai-advisor-error">
                     <div class="ai-advisor-error-icon">${svgIcon(icon, 'mi-xl')}</div>
-                    <p>${translate('aiError') || 'AI 응답을 받을 수 없습니다'}</p>
+                    <p>${translate('aiError')}</p>
                     <p class="ai-advisor-error-hint">${this._escHtml(error.message)}</p>
                     <button class="ai-advisor-refresh btn-filled-tonal" onclick="this.closest('.ai-advisor-overlay').__refreshFn?.()">
-                        ${svgIcon('refresh', 'mi-inline mi-sm')} ${translate('aiRetry') || '다시 시도'}
+                        ${svgIcon('refresh', 'mi-inline mi-sm')} ${translate('aiRetry')}
                     </button>
                 </div>
             `;
@@ -738,13 +738,13 @@ Keep total response under 800 words. Be specific, not generic.`;
     /** Wrap formatted HTML with cache badge and refresh button */
     _wrapResponse(html, fromCache) {
         const cacheLabel = fromCache ?
-            `<div class="ai-advisor-cache-badge">${svgIcon('schedule', 'mi-inline mi-sm')} ${translate('aiCached') || '캐시됨 (24시간)'}</div>` : '';
+            `<div class="ai-advisor-cache-badge">${svgIcon('schedule', 'mi-inline mi-sm')} ${translate('aiCached')}</div>` : '';
 
         return `
             ${cacheLabel}
             <div class="ai-advisor-response">${html}</div>
             <button class="ai-advisor-refresh btn-text" onclick="this.closest('.ai-advisor-overlay').__refreshFn?.()">
-                ${svgIcon('refresh', 'mi-inline mi-sm')} ${translate('aiRefresh') || '새로 분석하기'}
+                ${svgIcon('refresh', 'mi-inline mi-sm')} ${translate('aiRefresh')}
             </button>
         `;
     }

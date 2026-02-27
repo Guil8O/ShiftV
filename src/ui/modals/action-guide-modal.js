@@ -29,7 +29,7 @@ export class ActionGuideModal {
     const closeBtn = document.getElementById('modal-close-btn');
     if (!modalOverlay || !modalSheet || !modalTitle || !modalContent) return;
 
-    modalTitle.textContent = translate('actionGuideModalTitle') || '액션 가이드';
+    modalTitle.textContent = translate('actionGuideModalTitle');
     modalContent.innerHTML = template.innerHTML;
     this._root = modalContent;
     this.applyTranslations(modalContent);
@@ -398,7 +398,7 @@ JSON ONLY.`;
     const date = next?.date || '';
     const rawMessage = next?.message || '';
 
-    let ddayText = translate('actionGuideDDayUnknown') || 'D-?';
+    let ddayText = translate('actionGuideDDayUnknown');
     if (Number.isFinite(days)) {
       if (days === 0) ddayText = 'D-Day';
       else if (days > 0) ddayText = `D-${days}`;
@@ -811,7 +811,7 @@ JSON ONLY.`;
     }).filter(Boolean);
 
     if (sections.length === 0) {
-      container.innerHTML = `<div class="action-guide-feedback">${translate('actionGuideNoRecommendations') || '추천을 만들기 위한 데이터가 부족합니다.'}</div>`;
+      container.innerHTML = `<div class="action-guide-feedback">${translate('actionGuideNoRecommendations')}</div>`;
       return;
     }
 
@@ -824,7 +824,7 @@ JSON ONLY.`;
 
     if (Array.isArray(perf)) {
       if (perf.length === 0) {
-        container.innerHTML = `<div class="action-guide-feedback">${translate('actionGuideNoPerformance') || '이번 주 성과 피드백을 만들기 위한 데이터가 부족합니다.'}</div>`;
+        container.innerHTML = `<div class="action-guide-feedback">${translate('actionGuideNoPerformance')}</div>`;
         return;
       }
 
@@ -842,7 +842,7 @@ JSON ONLY.`;
       return;
     }
 
-    const msg = perf?.message || translate('actionGuideNoPerformance') || '이번 주 성과 피드백을 만들기 위한 데이터가 부족합니다.';
+    const msg = perf?.message || translate('actionGuideNoPerformance');
     container.innerHTML = `<div class="action-guide-feedback">${msg}</div>`;
   }
 

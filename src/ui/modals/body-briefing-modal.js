@@ -887,7 +887,7 @@ export class BodyBriefingModal {
                   ${triggeredMedTags}${triggeredSymTags}
                 </div>` : ''}
               <div class="safety-not-diagnosis" style="margin-top: 4px; font-size: 11px; opacity: 0.7;">
-                ${lang === 'ko' ? '⚠ 확정 진단이 아닙니다.' : lang === 'ja' ? '⚠ 確定診断ではありません。' : '⚠ Not a confirmed diagnosis.'}
+                ${translate('safetyNotDiagnosis')}
               </div>
             </div>
           </div>
@@ -899,7 +899,7 @@ export class BodyBriefingModal {
     // ─ 권장 검사 목록 ──────────────────────────────────────
     const testsEl = this.$('#briefing-safety-tests');
     if (testsEl && recommendedTests && recommendedTests.length > 0) {
-      const testsTitle = lang === 'ko' ? '권장 검사' : lang === 'ja' ? '推奨検査' : 'Recommended Tests';
+      const testsTitle = translate('safetyRecommendedTests');
       const testItems = recommendedTests.map(test => {
         const priorityIcon = test.priority === 'critical'
           ? svgIcon('priority_high', 'mi-sm mi-error')
@@ -932,7 +932,7 @@ export class BodyBriefingModal {
     // ─ 교육 포인트 ──────────────────────────────────────────
     const eduEl = this.$('#briefing-safety-education');
     if (eduEl && educationPoints && educationPoints.length > 0) {
-      const eduTitle = lang === 'ko' ? '약물 안전 정보' : lang === 'ja' ? '薬物安全情報' : 'Drug Safety Information';
+      const eduTitle = translate('safetyDrugInfo');
       const eduItems = educationPoints.map(pt => `
         <div class="safety-edu-item">
           ${svgIcon(pt.icon || 'info', 'mi-inline mi-sm')}
@@ -1006,9 +1006,9 @@ export class BodyBriefingModal {
       const deviation = Math.abs(bf - idealMid);
       const score = Math.max(0, Math.round(100 - (deviation / idealRange) * 25));
       axes.push({
-        label: lang === 'ko' ? '체지방' : 'Body Fat',
+        label: translate('radarBodyFat'),
         score, value: `${bf}%`, unit: '',
-        detail: `${mode === 'mtf' ? '20-30%' : '10-20%'} ${lang === 'ko' ? '이상적' : 'ideal'}`
+        detail: `${mode === 'mtf' ? '20-30%' : '10-20%'} ${translate('radarIdeal')}`
       });
     }
 
@@ -1027,9 +1027,9 @@ export class BodyBriefingModal {
         score = 50;
       }
       axes.push({
-        label: lang === 'ko' ? '근육량' : 'Muscle',
+        label: translate('radarMuscle'),
         score: Math.max(0, score), value: `${mm}kg`, unit: '',
-        detail: targetMM ? `${lang === 'ko' ? '목표' : 'Target'}: ${targetMM}kg` : ''
+        detail: targetMM ? `${translate('radarTarget')}: ${targetMM}kg` : ''
       });
     }
 
@@ -1039,9 +1039,9 @@ export class BodyBriefingModal {
       const idealWHR = mode === 'mtf' ? 0.73 : 0.85;
       const score = Math.max(0, Math.round(100 - Math.abs(whr - idealWHR) * 200));
       axes.push({
-        label: lang === 'ko' ? '허리-엉덩이 비율' : 'WHR',
+        label: translate('radarWHR'),
         score, value: whr.toFixed(3), unit: '',
-        detail: `${lang === 'ko' ? '이상적' : 'Ideal'}: ${idealWHR}`
+        detail: `${translate('radarIdeal')}: ${idealWHR}`
       });
     }
 
@@ -1084,7 +1084,7 @@ export class BodyBriefingModal {
         }
       }
       axes.push({
-        label: lang === 'ko' ? '호르몬 균형' : 'Hormones',
+        label: translate('radarHormones'),
         score: Math.max(0, Math.min(100, score)), value: detail.join(', '), unit: '',
         detail: ''
       });
@@ -1094,7 +1094,7 @@ export class BodyBriefingModal {
     const overallProgress = briefing?.summary?.overallProgress;
     if (overallProgress) {
       axes.push({
-        label: lang === 'ko' ? '목표 달성' : 'Goals',
+        label: translate('radarGoals'),
         score: Math.round(overallProgress.overallPercentage || 0),
         value: `${Math.round(overallProgress.overallPercentage || 0)}%`, unit: '',
         detail: `${overallProgress.achievedCount || 0}/${overallProgress.totalTargets || 0}`
@@ -1108,7 +1108,7 @@ export class BodyBriefingModal {
         mode === 'mtf' ? bodyChange.score : (100 - bodyChange.score)
       )));
       axes.push({
-        label: lang === 'ko' ? '신체 변화' : 'Body Change',
+        label: translate('radarBodyChange'),
         score: normalizedScore, value: `${bodyChange.score}${translate('points')}`, unit: '',
         detail: bodyChange.label || ''
       });
@@ -1118,10 +1118,7 @@ export class BodyBriefingModal {
       // Need at least 3 axes for a meaningful radar chart
       const container = this.modalContent.querySelector('#briefing-radar-details');
       if (container) {
-        container.innerHTML = `<p class="radar-no-data">${
-          lang === 'ko' ? '레이더 차트를 표시하기에 데이터가 부족합니다. 더 많은 측정값을 기록하세요.' :
-          'Not enough data for radar chart. Record more measurements.'
-        }</p>`;
+        container.innerHTML = `<p class="radar-no-data">${translate('radarNotEnoughData')}</p>`;
       }
       return;
     }
@@ -1147,7 +1144,7 @@ export class BodyBriefingModal {
 
     const datasets = [
       {
-        label: lang === 'ko' ? '현재' : 'Current',
+        label: translate('radarCurrent'),
         data: axes.map(a => a.score),
         backgroundColor: `rgba(${primaryRGB}, 0.2)`,
         borderColor: `rgba(${primaryRGB}, 0.8)`,
@@ -1161,7 +1158,7 @@ export class BodyBriefingModal {
 
     if (prevScores) {
       datasets.push({
-        label: lang === 'ko' ? '이전' : 'Previous',
+        label: translate('radarPrevious'),
         data: prevScores,
         backgroundColor: `rgba(${secondaryRGB}, 0.1)`,
         borderColor: `rgba(${secondaryRGB}, 0.5)`,
@@ -1266,12 +1263,11 @@ export class BodyBriefingModal {
       const bmi = m.weight / ((m.height / 100) ** 2);
       return Math.max(0, Math.round(100 - Math.abs(bmi - 21.7) * 10));
     }
-    const lang = getCurrentLanguage();
-    if (label === (lang === 'ko' ? '체지방' : 'Body Fat') && m.bodyFatPercentage != null) {
+    if (label === translate('radarBodyFat') && m.bodyFatPercentage != null) {
       const idealMid = mode === 'mtf' ? 25 : 15;
       return Math.max(0, Math.round(100 - (Math.abs(m.bodyFatPercentage - idealMid) / 5) * 25));
     }
-    if (label === (lang === 'ko' ? '근육량' : 'Muscle') && m.muscleMass != null) {
+    if (label === translate('radarMuscle') && m.muscleMass != null) {
       const targetMM = targets.muscleMass;
       if (targetMM) return Math.min(100, Math.round((m.muscleMass / targetMM) * 100));
       if (m.weight) {
@@ -1280,7 +1276,7 @@ export class BodyBriefingModal {
       }
       return 50;
     }
-    if (label === (lang === 'ko' ? '허리-엉덩이 비율' : 'WHR') && m.waist && m.hips) {
+    if (label === translate('radarWHR') && m.waist && m.hips) {
       const whr = m.waist / m.hips;
       const idealWHR = mode === 'mtf' ? 0.73 : 0.85;
       return Math.max(0, Math.round(100 - Math.abs(whr - idealWHR) * 200));
@@ -1406,10 +1402,7 @@ export class BodyBriefingModal {
     const POINTS = BASE_POINTS.filter(p => latest[p.key] != null);
 
     if (POINTS.length === 0) {
-      const msg = lang === 'ko' ? '신체 측정 기록이 없습니다.' :
-                  lang === 'ja' ? '身体測定記録がありません。' :
-                  'No body measurement data recorded.';
-      container.innerHTML = `<p class="silhouette-no-data">${msg}</p>`;
+      container.innerHTML = `<p class="silhouette-no-data">${translate('silhouetteNoData')}</p>`;
       return;
     }
 
@@ -1470,10 +1463,8 @@ export class BodyBriefingModal {
               fill="${dotColor}" font-family="system-ui,sans-serif">${valStr}${tgtStr}</text>`;
     }).join('');
 
-    const ariaLbl = lang === 'ko' ? '신체 측정 시각화' : lang === 'ja' ? '身体測定ビジュアル' : 'Body measurement visualization';
-    const bodyTypeLabel = lang === 'ko'
-      ? { average: '표준', pear: '하체형', hourglass: '모래시계형', inverted: '역삼각형', slim: '슬림' }[bodyType]
-      : bodyType;
+    const ariaLbl = translate('silhouetteAriaLabel');
+    const bodyTypeLabel = translate('bodyType_' + bodyType);
 
     container.innerHTML = `
       <div class="silhouette-type-badge">${bodyTypeLabel}</div>
@@ -1536,7 +1527,7 @@ export class BodyBriefingModal {
     
     if (this.measurements.length < 1) return;
     
-    const labels = this.measurements.map(m => `${m.week}주차`);
+    const labels = this.measurements.map(m => translate('briefingWeekLabel', {week: m.week}));
 
     const numericCandidates = [
       'height',

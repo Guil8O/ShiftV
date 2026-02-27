@@ -66,7 +66,7 @@ export class ChangeRoadmapModal {
     }
     
     // 1. 먼저 템플릿 내용을 모달에 복사
-    modalTitle.textContent = translate('roadmapModalTitle') || '변화 로드맵';
+    modalTitle.textContent = translate('roadmapModalTitle');
     modalContent.innerHTML = template.innerHTML;
 
     this._root = modalContent;
@@ -167,20 +167,20 @@ export class ChangeRoadmapModal {
       this.renderProgressTrajectory(progress.weeklyChanges, trajectoryEl, currentWeekNum);
       if (currentMarker) currentMarker.style.left = `${clampedPct}%`;
 
-      if (currentWeek) currentWeek.textContent = translate('roadmapWeekLabel', { week: String(currentWeekNum) }) || `Week ${currentWeekNum}`;
-      if (targetWeek) targetWeek.textContent = translate('roadmapWeekLabel', { week: String(progress.estimatedTargetWeek || currentWeekNum) }) || `Week ${progress.estimatedTargetWeek || currentWeekNum}`;
+      if (currentWeek) currentWeek.textContent = translate('roadmapWeekLabel', { week: String(currentWeekNum) });
+      if (targetWeek) targetWeek.textContent = translate('roadmapWeekLabel', { week: String(progress.estimatedTargetWeek || currentWeekNum) });
       if (achievementRate) achievementRate.textContent = `${clampedPct.toFixed(0)}%`;
       if (achievementCount) {
         const achieved = overall?.achievedCount ?? 0;
         const total = overall?.totalCount ?? 0;
-        achievementCount.textContent = translate('roadmapAchievementCount', { achieved: String(achieved), total: String(total) }) || `(${achieved}/${total})`;
+        achievementCount.textContent = translate('roadmapAchievementCount', { achieved: String(achieved), total: String(total) });
       }
 
       const hasNegative = Array.isArray(progress.weeklyChanges) && progress.weeklyChanges.some(c => c && c.positive === false);
       if (noteEl) {
         if (hasNegative) {
           noteEl.style.display = 'block';
-          noteEl.textContent = translate('roadmapNegativeNote') || '목표에서 멀어지는 구간이 감지되었습니다. 빨간 틱/궤적 후퇴를 참고하세요.';
+          noteEl.textContent = translate('roadmapNegativeNote');
         } else {
           noteEl.style.display = 'none';
           noteEl.textContent = '';
@@ -276,7 +276,7 @@ export class ChangeRoadmapModal {
       if (title === '큰 변화') return translate('roadmapTimelineBigChange') || title;
       const reached = title.match(/^(\d+)%\s*도달$/);
       if (reached) return translate('roadmapTimelineReachedPercent', { percent: reached[1] }) || title;
-      return title || (translate('roadmapWeekLabel', { week: String(milestone?.week || '') }) || `Week ${milestone?.week || ''}`);
+      return title || (translate('roadmapWeekLabel', { week: String(milestone?.week || '') }));
     };
 
     const getDescription = (milestone) => {
@@ -400,7 +400,7 @@ export class ChangeRoadmapModal {
 
     if (!this.measurements || this.measurements.length < 1) return;
 
-    const labels = this.measurements.map(m => `${m.week}${translate('week') || '주차'}`);
+    const labels = this.measurements.map(m => `${m.week}${translate('week')}`);
 
     const numericCandidates = [
       'height',
@@ -593,7 +593,7 @@ export class ChangeRoadmapModal {
     }
 
     if (placeholderEl) {
-      placeholderEl.textContent = translate('graphClickPrompt') || '';
+      placeholderEl.textContent = translate('graphClickPrompt');
     }
   }
   
@@ -656,11 +656,11 @@ export class ChangeRoadmapModal {
     const rightPhotos = rightM?.photos || {};
 
     const CATEGORIES = [
-      { key: 'face', icon: 'person', label: translate('photoFace') || '얼굴' },
-      { key: 'front', icon: 'accessibility_new', label: translate('photoFront') || '정면' },
-      { key: 'side', icon: 'directions_run', label: translate('photoSide') || '측면' },
-      { key: 'back', icon: 'arrow_downward', label: translate('photoBack') || '후면' },
-      { key: 'other', icon: 'photo_camera', label: translate('photoOther') || '기타' },
+      { key: 'face', icon: 'person', label: translate('photoFace') },
+      { key: 'front', icon: 'accessibility_new', label: translate('photoFront') },
+      { key: 'side', icon: 'directions_run', label: translate('photoSide') },
+      { key: 'back', icon: 'arrow_downward', label: translate('photoBack') },
+      { key: 'other', icon: 'photo_camera', label: translate('photoOther') },
     ];
 
     const hasAnyPhoto = CATEGORIES.some(c => leftPhotos[c.key] || rightPhotos[c.key]);
@@ -669,8 +669,8 @@ export class ChangeRoadmapModal {
       container.innerHTML = `
         <div class="photo-compare-empty">
           ${svgIcon('photo_camera', '', 48)}
-          <p>${translate('photoCompareEmpty') || '비교할 사진이 없습니다.'}</p>
-          <p class="photo-compare-hint">${translate('photoCompareHint') || '기록하기 탭에서 신체 사진을 등록하면 여기서 비교할 수 있어요!'}</p>
+          <p>${translate('photoCompareEmpty')}</p>
+          <p class="photo-compare-hint">${translate('photoCompareHint')}</p>
         </div>
       `;
       return;
@@ -682,7 +682,7 @@ export class ChangeRoadmapModal {
       if (!left && !right) return '';
 
       const renderCell = (src, date) => {
-        if (!src) return `<div class="photo-compare-cell empty"><div class="photo-compare-placeholder">${svgIcon(cat.icon, '', 32)}<span>${translate('noPhoto') || '사진 없음'}</span></div></div>`;
+        if (!src) return `<div class="photo-compare-cell empty"><div class="photo-compare-placeholder">${svgIcon(cat.icon, '', 32)}<span>${translate('noPhoto')}</span></div></div>`;
         return `<div class="photo-compare-cell"><img src="${src}" alt="${cat.label} ${date}" loading="lazy"><span class="photo-compare-date-label">${date}</span></div>`;
       };
 
@@ -828,7 +828,7 @@ export class ChangeRoadmapModal {
       });
       return `
         <div class="compare-section-card">
-          <h4 class="compare-section-title">${svgIcon('emergency', 'mi-inline', 16)} ${translate('symptoms') || '증상'}</h4>
+          <h4 class="compare-section-title">${svgIcon('emergency', 'mi-inline', 16)} ${translate('symptoms')}</h4>
           <div class="compare-chip-wrap">${chips.join('')}</div>
         </div>`;
     };
@@ -868,7 +868,7 @@ export class ChangeRoadmapModal {
       });
       return `
         <div class="compare-section-card">
-          <h4 class="compare-section-title">${svgIcon('medication', 'mi-inline', 16)} ${translate('medications') || '약물'}</h4>
+          <h4 class="compare-section-title">${svgIcon('medication', 'mi-inline', 16)} ${translate('medications')}</h4>
           <div class="compare-chip-wrap">${chips.join('')}</div>
         </div>`;
     };
@@ -1279,7 +1279,7 @@ export class ChangeRoadmapModal {
     const weekData = this.measurements?.[weekIndex];
     if (!weekData) return;
 
-    titleEl.textContent = translate('selectedWeekDataTitle', { week: weekData.week }) || `${weekData.week}`;
+    titleEl.textContent = translate('selectedWeekDataTitle', { week: weekData.week });
 
     const visible = this._detailChartInstance
       ? this._detailChartInstance.data.datasets
@@ -1315,7 +1315,7 @@ export class ChangeRoadmapModal {
 
     contentEl.style.display = items.length ? 'grid' : 'none';
     placeholderEl.style.display = items.length ? 'none' : 'block';
-    if (!items.length) placeholderEl.textContent = translate('graphClickPrompt') || '';
+    if (!items.length) placeholderEl.textContent = translate('graphClickPrompt');
   }
 
   getMetricName(key) {

@@ -14,9 +14,19 @@ import { svgIcon } from '../../ui/icon-paths.js';
 // ========================================
 
 export class TrendPredictor {
-  constructor(measurements, targets = {}) {
+  constructor(measurements, targets = {}, language = 'ko') {
     this.measurements = measurements;
     this.targets = targets;
+    this.language = language;
+  }
+
+  _t(texts, params = {}) {
+    const lang = this.language || 'ko';
+    let text = (texts && (texts[lang] || texts.ko)) || '';
+    Object.keys(params).forEach(k => {
+      text = text.replaceAll(`{${k}}`, String(params[k]));
+    });
+    return text;
   }
   
   // ========================================
@@ -29,7 +39,7 @@ export class TrendPredictor {
   predictAll() {
     if (this.measurements.length < 2) {
       return {
-        message: '예측을 위해서는 최소 2회 이상의 측정 데이터가 필요합니다.',
+        message: this._t({ko: '예측을 위해서는 최소 2회 이상의 측정 데이터가 필요합니다.', en: 'At least 2 measurements are required for predictions.', ja: '予測には最低2回以上の測定データが必要です。'}),
         predictions: {},
         targetAchievement: {}
       };
@@ -406,17 +416,17 @@ export class TrendPredictor {
   getProgressMessage(status, achieved, total) {
     switch (status) {
       case 'all_achieved':
-        return `${svgIcon('celebration', 'mi-inline mi-sm mi-success')} 모든 목표 달성! (${achieved}/${total})`;
+        return `${svgIcon('celebration', 'mi-inline mi-sm mi-success')} ${this._t({ko: '모든 목표 달성!', en: 'All goals achieved!', ja: 'すべての目標達成!'})} (${achieved}/${total})`;
       case 'more_than_half':
-        return `${svgIcon('fitness_center', 'mi-inline mi-sm')} 절반 이상 달성! (${achieved}/${total})`;
+        return `${svgIcon('fitness_center', 'mi-inline mi-sm')} ${this._t({ko: '절반 이상 달성!', en: 'More than half achieved!', ja: '半分以上達成!'})} (${achieved}/${total})`;
       case 'in_progress':
-        return `${svgIcon('trending_up', 'mi-inline mi-sm')} 진행 중 (${achieved}/${total} 달성)`;
+        return `${svgIcon('trending_up', 'mi-inline mi-sm')} ${this._t({ko: '진행 중', en: 'In progress', ja: '進行中'})} (${achieved}/${total} ${this._t({ko: '달성', en: 'achieved', ja: '達成'})})`;
       case 'just_started':
-        return `${svgIcon('spa', 'mi-inline mi-sm')} 시작 단계 (${achieved}/${total} 달성)`;
+        return `${svgIcon('spa', 'mi-inline mi-sm')} ${this._t({ko: '시작 단계', en: 'Getting started', ja: '開始段階'})} (${achieved}/${total} ${this._t({ko: '달성', en: 'achieved', ja: '達成'})})`;
       case 'no_targets':
-        return '목표를 설정하지 않았습니다.';
+        return this._t({ko: '목표를 설정하지 않았습니다.', en: 'No goals have been set.', ja: '目標が設定されていません。'});
       case 'no_data':
-        return '측정 데이터가 없습니다.';
+        return this._t({ko: '측정 데이터가 없습니다.', en: 'No measurement data available.', ja: '測定データがありません。'});
       default:
         return '';
     }
@@ -482,18 +492,20 @@ export class TrendPredictor {
    * 변화 속도 메시지 생성
    */
   getChangeRateMessage(evaluation, change) {
-    const direction = change > 0 ? '증가' : '감소';
+    const direction = change > 0
+      ? this._t({ko: '증가', en: 'increasing', ja: '増加'})
+      : this._t({ko: '감소', en: 'decreasing', ja: '減少'});
     const absChange = Math.abs(change);
     
     switch (evaluation) {
       case 'minimal':
-        return `변화가 거의 없습니다. (주당 ${absChange.toFixed(2)})`;
+        return this._t({ko: '변화가 거의 없습니다. (주당 {change})', en: 'Almost no change. ({change} per week)', ja: '変化はほとんどありません。(週あたり {change})'}, { change: absChange.toFixed(2) });
       case 'slow':
-        return `천천히 ${direction}하고 있습니다. (주당 ${absChange.toFixed(2)})`;
+        return this._t({ko: '천천히 {direction}하고 있습니다. (주당 {change})', en: 'Slowly {direction}. ({change} per week)', ja: 'ゆっくり{direction}しています。(週あたり {change})'}, { direction, change: absChange.toFixed(2) });
       case 'good':
-        return `[OK] 이상적인 속도로 ${direction}하고 있습니다. (주당 ${absChange.toFixed(2)})`;
+        return this._t({ko: '[OK] 이상적인 속도로 {direction}하고 있습니다. (주당 {change})', en: '[OK] {direction} at an ideal rate. ({change} per week)', ja: '[OK] 理想的な速度で{direction}しています。(週あたり {change})'}, { direction, change: absChange.toFixed(2) });
       case 'rapid':
-        return `[WARN] 매우 빠르게 ${direction}하고 있습니다. (주당 ${absChange.toFixed(2)}) 건강에 주의하세요.`;
+        return this._t({ko: '[WARN] 매우 빠르게 {direction}하고 있습니다. (주당 {change}) 건강에 주의하세요.', en: '[WARN] {direction} very rapidly. ({change} per week) Please monitor your health.', ja: '[WARN] 非常に速く{direction}しています。(週あたり {change}) 健康に注意してください。'}, { direction, change: absChange.toFixed(2) });
       default:
         return '';
     }

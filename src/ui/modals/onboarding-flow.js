@@ -134,9 +134,9 @@ export class OnboardingFlow {
                         ).join('')}
                     </div>
                     <div class="onboarding-actions">
-                        <button class="btn-text onboarding-back" style="display: none;">${translate('onboardingBack') || '이전'}</button>
-                        <button class="btn-text onboarding-skip">${translate('onboardingSkip') || '건너뛰기'}</button>
-                        <button class="btn-filled onboarding-next">${translate('onboardingNext') || '다음'}</button>
+                        <button class="btn-text onboarding-back" style="display: none;">${translate('onboardingBack')}</button>
+                        <button class="btn-text onboarding-skip">${translate('onboardingSkip')}</button>
+                        <button class="btn-filled onboarding-next">${translate('onboardingNext')}</button>
                     </div>
                 </div>
             </div>
@@ -199,16 +199,16 @@ export class OnboardingFlow {
         // Update button text and visibility
         if (nextBtn) {
             nextBtn.textContent = this.currentStep === this.totalSteps - 1 ?
-                (translate('onboardingFinish') || '시작하기!') :
-                (translate('onboardingNext') || '다음');
+                translate('onboardingFinish') :
+                translate('onboardingNext');
         }
         if (backBtn) {
             backBtn.style.display = this.currentStep > 0 ? 'inline-flex' : 'none';
-            backBtn.textContent = translate('onboardingBack') || '이전';
+            backBtn.textContent = translate('onboardingBack');
         }
         if (skipBtn) {
             skipBtn.style.display = this.currentStep === 0 ? 'inline-flex' : 'none';
-            skipBtn.textContent = translate('onboardingSkip') || '건너뛰기';
+            skipBtn.textContent = translate('onboardingSkip');
         }
 
         const steps = [
@@ -236,8 +236,8 @@ export class OnboardingFlow {
         el.innerHTML = `
             <div class="onboarding-step-center">
                 <div class="onboarding-logo">ShiftV</div>
-                <h2>${translate('onboardingWelcome') || '환영합니다!'}</h2>
-                <p class="onboarding-sub">${translate('onboardingWelcomeSub') || '당신의 여정을 함께 기록해요'}</p>
+                <h2>${translate('onboardingWelcome')}</h2>
+                <p class="onboarding-sub">${translate('onboardingWelcomeSub')}</p>
                 <div class="onboarding-lang-chips">
                     <button class="onboarding-lang-chip ${lang === 'ko' ? 'active' : ''}" data-lang="ko">🇰🇷 한국어</button>
                     <button class="onboarding-lang-chip ${lang === 'en' ? 'active' : ''}" data-lang="en">🇺🇸 English</button>
@@ -264,18 +264,18 @@ export class OnboardingFlow {
         el.innerHTML = `
             <div class="onboarding-step-center">
                 <div class="onboarding-step-icon">${svgIcon('cloud', 'mi-xl')}</div>
-                <h2>${translate('onboardingAccountTitle') || '계정 연동'}</h2>
-                <p class="onboarding-sub">${translate('onboardingAccountSub') || '데이터를 안전하게 클라우드에 백업하세요'}</p>
+                <h2>${translate('onboardingAccountTitle')}</h2>
+                <p class="onboarding-sub">${translate('onboardingAccountSub')}</p>
                 <div class="onboarding-account-options">
                     <button class="glass-button primary onboarding-google-btn" id="onboarding-google-btn">
-                        Google로 시작하기
+                        ${translate('onboardingGoogleLogin')}
                     </button>
                     <button class="btn-text onboarding-skip-account">
-                        ${translate('onboardingLocalOnly') || '나중에 (로컬 전용 모드)'}
+                        ${translate('onboardingLocalOnly')}
                     </button>
                 </div>
                 <p class="onboarding-hint" id="onboarding-account-hint" style="display:none;">
-                    ${translate('onboardingLocalHint') || '기기 데이터만 저장돼요. 설정에서 언제든 연동할 수 있어요.'}
+                    ${translate('onboardingLocalHint')}
                 </p>
             </div>
         `;
@@ -299,31 +299,31 @@ export class OnboardingFlow {
         el.innerHTML = `
             <div class="onboarding-step-center">
                 <div class="onboarding-step-icon">${svgIcon('auto_awesome', 'mi-xl')}</div>
-                <h2>${translate('onboardingPersonaTitle') || '프로필 설정'}</h2>
+                <h2>${translate('onboardingPersonaTitle')}</h2>
                 <div class="onboarding-form">
                     <div class="quest-form-group">
-                        <label>${translate('nickname') || '닉네임'}</label>
+                        <label>${translate('nickname')}</label>
                         <input type="text" id="ob-nickname" value="${d.nickname || ''}" maxlength="20" placeholder="">
                     </div>
                     <div class="quest-form-row">
                         <div class="quest-form-group">
-                            <label>${translate('biologicalSex') || '생물학적 성별'}</label>
+                            <label>${translate('biologicalSex')}</label>
                             <select id="ob-sex">
-                                <option value="male" ${(d.sex || 'male') === 'male' ? 'selected' : ''}>Male</option>
-                                <option value="female" ${d.sex === 'female' ? 'selected' : ''}>Female</option>
+                                <option value="male" ${(d.sex || 'male') === 'male' ? 'selected' : ''}>${translate('sexMale')}</option>
+                                <option value="female" ${d.sex === 'female' ? 'selected' : ''}>${translate('sexFemale')}</option>
                             </select>
                         </div>
                         <div class="quest-form-group">
-                            <label>${translate('mode') || '모드'}</label>
+                            <label>${translate('mode')}</label>
                             <select id="ob-mode">
                                 <option value="mtf" ${(d.mode || 'mtf') === 'mtf' ? 'selected' : ''}>MTF</option>
                                 <option value="ftm" ${d.mode === 'ftm' ? 'selected' : ''}>FTM</option>
-                                <option value="nonbinary" ${d.mode === 'nonbinary' ? 'selected' : ''}>Non-binary</option>
+                                <option value="nonbinary" ${d.mode === 'nonbinary' ? 'selected' : ''}>${translate('modeNb')}</option>
                             </select>
                         </div>
                     </div>
                     <div class="quest-form-group">
-                        <label>${translate('birthdate') || '생년월일'}</label>
+                        <label>${translate('birthdate')}</label>
                         <input type="date" id="ob-birthdate" value="${d.birthdate || ''}">
                     </div>
                 </div>
@@ -335,11 +335,11 @@ export class OnboardingFlow {
         el.innerHTML = `
             <div class="onboarding-step-center">
                 <div class="onboarding-step-icon">${svgIcon('target', 'mi-xl')}</div>
-                <h2>${translate('onboardingGoalsTitle') || '나의 목표'}</h2>
-                <p class="onboarding-sub">${translate('onboardingGoalsSub') || '달성하고 싶은 목표를 간단히 적어보세요'}</p>
+                <h2>${translate('onboardingGoalsTitle')}</h2>
+                <p class="onboarding-sub">${translate('onboardingGoalsSub')}</p>
                 <div class="onboarding-form">
                     <div class="quest-form-group">
-                        <textarea id="ob-goal-text" rows="3" maxlength="100" placeholder="${translate('goalTextPlaceholder') || '목표를 적어보세요...'}">${this.tempData.goalText || ''}</textarea>
+                        <textarea id="ob-goal-text" rows="3" maxlength="100" placeholder="${translate('goalTextPlaceholder')}">${this.tempData.goalText || ''}</textarea>
                     </div>
                 </div>
             </div>
@@ -365,11 +365,11 @@ export class OnboardingFlow {
         el.innerHTML = `
             <div class="onboarding-step-center">
                 <div class="onboarding-step-icon">${svgIcon('palette', 'mi-xl')}</div>
-                <h2>${translate('onboardingThemeTitle') || '테마 선택'}</h2>
+                <h2>${translate('onboardingThemeTitle')}</h2>
                 <div class="onboarding-theme-toggle">
-                    <button class="onboarding-theme-btn ${currentTheme === 'light' ? 'active' : ''}" data-theme="light">${svgIcon('light_mode', 'mi-inline mi-sm')} Light</button>
-                    <button class="onboarding-theme-btn ${currentTheme === 'dark' ? 'active' : ''}" data-theme="dark">${svgIcon('dark_mode', 'mi-inline mi-sm')} Dark</button>
-                    <button class="onboarding-theme-btn ${currentTheme === 'system' ? 'active' : ''}" data-theme="system">${svgIcon('settings', 'mi-inline mi-sm')} System</button>
+                    <button class="onboarding-theme-btn ${currentTheme === 'light' ? 'active' : ''}" data-theme="light">${svgIcon('light_mode', 'mi-inline mi-sm')} ${translate('themeLight')}</button>
+                    <button class="onboarding-theme-btn ${currentTheme === 'dark' ? 'active' : ''}" data-theme="dark">${svgIcon('dark_mode', 'mi-inline mi-sm')} ${translate('themeDark')}</button>
+                    <button class="onboarding-theme-btn ${currentTheme === 'system' ? 'active' : ''}" data-theme="system">${svgIcon('settings', 'mi-inline mi-sm')} ${translate('themeSystem')}</button>
                 </div>
                 <div class="accent-color-grid" style="margin-top:20px;">
                     ${accentColors.map(c => `
@@ -473,20 +473,20 @@ export class OnboardingFlow {
         el.innerHTML = `
             <div class="onboarding-step-center">
                 <div class="onboarding-step-icon">${svgIcon('home', 'mi-xl')}</div>
-                <h2>${translate('onboardingTourTitle') || '준비 완료!'}</h2>
-                <p class="onboarding-sub">${translate('onboardingTourSub') || '홈 화면에서 시작해보세요'}</p>
+                <h2>${translate('onboardingTourTitle')}</h2>
+                <p class="onboarding-sub">${translate('onboardingTourSub')}</p>
                 <div class="onboarding-tour-cards">
                     <div class="onboarding-tour-card">
                         <span>${svgIcon('monitoring')}</span>
-                        <p>${translate('onboardingTourChart') || '차트에서 변화 추이를 확인하세요'}</p>
+                        <p>${translate('onboardingTourChart')}</p>
                     </div>
                     <div class="onboarding-tour-card">
                         <span>${svgIcon('target')}</span>
-                        <p>${translate('onboardingTourGuide') || '액션 가이드로 맞춤 추천을 받으세요'}</p>
+                        <p>${translate('onboardingTourGuide')}</p>
                     </div>
                     <div class="onboarding-tour-card">
                         <span>${svgIcon('menu_book')}</span>
-                        <p>${translate('onboardingTourDiary') || '다이어리로 매일을 기록하세요'}</p>
+                        <p>${translate('onboardingTourDiary')}</p>
                     </div>
                 </div>
             </div>

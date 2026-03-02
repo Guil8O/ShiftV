@@ -75,9 +75,7 @@ export class BodyBriefingModal {
   /**
    * Body Briefing 모달 열기
    */
-  open() {
-    const briefing = this.doctorEngine.generateHealthBriefing();
-    
+  async open() {
     // 모달 표시
     const template = document.getElementById('body-briefing-view');
     if (!template) {
@@ -98,22 +96,45 @@ export class BodyBriefingModal {
     // modalContent 참조 저장
     this.modalContent = modalContent;
     
-    // 1. 먼저 템플릿 내용을 모달에 복사
+    // 1. 먼저 로딩 스피너를 모달에 표시
     modalTitle.textContent = translate('comparisonModalTitle');
-    modalContent.innerHTML = template.innerHTML;
+    modalContent.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 16px;gap:16px;">
+      <div style="width:40px;height:40px;border:3px solid var(--md-sys-color-surface-variant,#444);border-top-color:var(--md-sys-color-primary,#bb86fc);border-radius:50%;animation:spin .8s linear infinite;"></div>
+      <p style="color:var(--md-sys-color-on-surface-variant,#ccc);font-size:14px;">${translate('loading') || 'Loading...'}</p>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
     
-    // 2. 모달 컨텐츠 번역 적용
-    translateUI(modalContent);
-    
-    // 3. 이제 DOM 요소들이 존재하므로 렌더링
-    this.render(briefing);
-    
-    // 4. 탭 전환 이벤트 설정
-    this.setupTabSwitching();
-    
-    // 5. 모달 표시
+    // 2. 모달을 먼저 표시 (로딩 스피너가 보이도록)
     document.body.classList.add('modal-open');
     modalOverlay.classList.add('visible');
+
+    // 3. Chart.js 로드 + 건강 브리핑 생성을 병렬로 실행
+    const [briefing] = await Promise.all([
+      new Promise(resolve => {
+        // requestAnimationFrame으로 한 프레임 양보하여 스피너가 보이게 함
+        requestAnimationFrame(() => {
+          resolve(this.doctorEngine.generateHealthBriefing());
+        });
+      }),
+      typeof window.loadChartJS === 'function'
+        ? window.loadChartJS().catch(e => console.warn('Chart.js load failed:', e))
+        : Promise.resolve()
+    ]);
+
+    // 4. 템플릿 내용을 모달에 복사
+    modalContent.innerHTML = template.innerHTML;
+    
+    // 5. 모달 컨텐츠 번역 적용
+    translateUI(modalContent);
+    
+    // 6. Chart.js 플러그인 등록
+    ensureAverageLinePluginRegistered();
+
+    // 7. 이제 DOM 요소들이 존재하므로 렌더링
+    this.render(briefing);
+    
+    // 8. 탭 전환 이벤트 설정
+    this.setupTabSwitching();
   }
   
   // ========================================
@@ -123,19 +144,9 @@ export class BodyBriefingModal {
   /**
    * 전체 렌더링
    */
-  async render(briefing) {
+  render(briefing) {
     this.renderSummary(briefing);
     this.renderBodySilhouette();
-
-    // Chart.js 로드 (아직 안 된 경우)
-    if (typeof Chart === 'undefined' && typeof window.loadChartJS === 'function') {
-      try {
-        await window.loadChartJS();
-      } catch (e) {
-        console.warn('Chart.js load failed:', e);
-      }
-    }
-
     this.renderRadarChart(briefing);
     this.renderDetail(briefing);
   }

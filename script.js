@@ -63,17 +63,33 @@ async function processAndStorePhotos(pendingPhotos) {
 
 // ── Lazy-load Chart.js on demand (not at page load) ──────────────────
 let _chartJsLoaded = typeof Chart !== 'undefined';
+let _chartJsLoadingPromise = null;
 function loadChartJS() {
     if (_chartJsLoaded) return Promise.resolve();
-    return new Promise((resolve, reject) => {
+    if (_chartJsLoadingPromise) return _chartJsLoadingPromise;
+    _chartJsLoadingPromise = new Promise((resolve, reject) => {
         const s = document.createElement('script');
         s.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-        s.onload = () => { _chartJsLoaded = true; resolve(); };
-        s.onerror = () => reject(new Error('Failed to load chart.js'));
+        s.onload = () => { _chartJsLoaded = true; _chartJsLoadingPromise = null; resolve(); };
+        s.onerror = () => { _chartJsLoadingPromise = null; reject(new Error('Failed to load chart.js')); };
         document.head.appendChild(s);
     });
+    return _chartJsLoadingPromise;
 }
 window.loadChartJS = loadChartJS;
+
+// ── Preload Chart.js & heavy modules during idle time ────────────────
+const _preloadOnIdle = () => {
+    // Preload Chart.js from CDN (will be cached by service worker)
+    loadChartJS().catch(() => {});
+    // Preload the Body Briefing modal module (triggers download of all doctor-module deps)
+    import('./src/ui/modals/body-briefing-modal.js').catch(() => {});
+};
+if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(_preloadOnIdle, { timeout: 5000 });
+} else {
+    setTimeout(_preloadOnIdle, 3000);
+}
 
 // Global Error Handler
 window.onerror = function (message, source, lineno, colno, error) {
@@ -1191,32 +1207,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // script.js (약 1080번째 줄 근처, 기존 openComparisonModal 부터 handleComparisonFilterClick 까지를 아래 코드로 교체)
 
     // --- Comparison Modal 'Flow View' Functions ---
-    function openComparisonModal() {
+    async function openComparisonModal() {
         // 새로운 Body Briefing 모달 사용
         try {
             // 동적 import로 Body Briefing 모달 로드
-            import(`./src/ui/modals/body-briefing-modal.js`).then(module => {
-                const BodyBriefingModal = module.BodyBriefingModal || module.default;
-                const userSettings = {
-                    mode: currentMode || 'mtf',
-                    biologicalSex: biologicalSex || 'male',
-                    language: currentLanguage || 'ko',
-                    targets: targets || {}
-                };
-                history.pushState({ type: 'modal-briefing' }, '', location.href);
-                const modal = new BodyBriefingModal(measurements || [], userSettings);
-                modal.open();
-            }).catch(error => {
-                console.error('Failed to load Body Briefing modal:', error);
-                // 폴백: 기존 방식 사용
-                const comparisonViewTemplate = document.getElementById('compare-flow-view');
-                if (!comparisonViewTemplate) return;
-                const contentHTML = comparisonViewTemplate.innerHTML;
-                const title = translate('comparisonModalTitle');
-                openModal(title, contentHTML);
-            });
+            const module = await import('./src/ui/modals/body-briefing-modal.js');
+            const BodyBriefingModal = module.BodyBriefingModal || module.default;
+            const userSettings = {
+                mode: currentMode || 'mtf',
+                biologicalSex: biologicalSex || 'male',
+                language: currentLanguage || 'ko',
+                targets: targets || {}
+            };
+            history.pushState({ type: 'modal-briefing' }, '', location.href);
+            const modal = new BodyBriefingModal(measurements || [], userSettings);
+            await modal.open();
         } catch (error) {
-            console.error('Error opening Body Briefing modal:', error);
+            console.error('Failed to load Body Briefing modal:', error);
             // 폴백: 기존 방식 사용
             const comparisonViewTemplate = document.getElementById('compare-flow-view');
             if (!comparisonViewTemplate) return;

@@ -123,9 +123,19 @@ export class BodyBriefingModal {
   /**
    * 전체 렌더링
    */
-  render(briefing) {
+  async render(briefing) {
     this.renderSummary(briefing);
     this.renderBodySilhouette();
+
+    // Chart.js 로드 (아직 안 된 경우)
+    if (typeof Chart === 'undefined' && typeof window.loadChartJS === 'function') {
+      try {
+        await window.loadChartJS();
+      } catch (e) {
+        console.warn('Chart.js load failed:', e);
+      }
+    }
+
     this.renderRadarChart(briefing);
     this.renderDetail(briefing);
   }

@@ -73,6 +73,7 @@ function loadChartJS() {
         document.head.appendChild(s);
     });
 }
+window.loadChartJS = loadChartJS;
 
 // Global Error Handler
 window.onerror = function (message, source, lineno, colno, error) {

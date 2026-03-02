@@ -2549,8 +2549,8 @@ export function translateUI(context = document) {
                         el.innerHTML = `<strong data-lang-key="warning">${translate('warning')}</strong> <span>${translation}</span>`;
                     } else if (el.classList.contains('warning') && key === 'resetWarning') {
                         el.innerHTML = `<strong data-lang-key="severeWarning">${translate('severeWarning')}</strong> <span>${translation}</span>`;
-                    } else if (el.childElementCount > 0) {
-                        // 아이콘 span 등 자식 요소가 있는 경우: innerHTML로 교체 + 아이콘 패턴 렌더링
+                    } else if (el.childElementCount > 0 || translation.includes('<svg') || translation.includes('<span')) {
+                        // 아이콘 span 등 자식 요소가 있거나 SVG/HTML 마크업 포함: innerHTML로 교체
                         el.innerHTML = parseIconPatterns(translation);
                     } else {
                         // 자식 없는 순수 텍스트 요소

@@ -83,6 +83,15 @@ window.onerror = function (message, source, lineno, colno, error) {
     alert(errorMessage);
 };
 
+// Unhandled Promise Rejection Handler
+window.onunhandledrejection = function (event) {
+    const reason = event.reason;
+    const message = reason?.message || String(reason);
+    console.error("[Error] Unhandled promise rejection:", reason);
+    // Prevent duplicate alerts — only log, don't show alert for async errors
+    // window.onerror already handles most synchronous errors
+};
+
 function ensureAverageLinePluginRegistered() {
     if (typeof Chart === 'undefined') return;
     const pluginId = 'shiftvAverageLines';
@@ -625,8 +634,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             el.innerHTML = `<strong data-lang-key="warning">${translate('warning')}</strong> <span>${translation}</span>`;
                         } else if (el.classList.contains('warning') && key === 'resetWarning') {
                             el.innerHTML = `<strong data-lang-key="severeWarning">${translate('severeWarning')}</strong> <span>${translation}</span>`;
-                        } else if (el.childElementCount > 0 || translation.includes('{{icon:')) {
-                            // 아이콘 자식 있는 h2/h3/h4, 또는 {{icon:...}} 패턴 포함 → innerHTML + 아이콘 렌더링
+                        } else if (el.childElementCount > 0 || translation.includes('{{icon:') || translation.includes('<svg') || translation.includes('<span')) {
+                            // 아이콘 자식 있거나 SVG/HTML 마크업 포함 → innerHTML + 아이콘 렌더링
                             el.innerHTML = parseIconPatterns(translation);
                         } else {
                             el.textContent = translation;
@@ -3458,22 +3467,6 @@ document.addEventListener('DOMContentLoaded', () => {
         historyCardsContainer.innerHTML = html;
     }
 
-    // '마이' 탭의 기록 뷰를 렌더링하는 마스터 함수
-    function renderMyHistoryView() {
-        const isMobileView = window.innerWidth < 768;
-        renderMyHistoryFilters(); // 필터는 항상 렌더링
-
-        if (isMobileView) {
-            if (myHistoryCardsContainer) myHistoryCardsContainer.style.display = 'grid';
-            if (myHistoryTableContainer) myHistoryTableContainer.style.display = 'none';
-            renderMyHistoryCards();
-        } else {
-            if (myHistoryCardsContainer) myHistoryCardsContainer.style.display = 'none';
-            if (myHistoryTableContainer) myHistoryTableContainer.style.display = 'block';
-            renderMyHistoryTable();
-        }
-    }
-
     // '마이' 탭의 필터 버튼 렌더링
     function renderMyHistoryFilters() {
         if (!myFilterControls) return;
@@ -3726,7 +3719,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 차트 색상 갱신
-        if (chartInstance) renderChart();
+        if (chartInstance) renderChart().catch(e => console.error('Chart render error (theme):', e));
         renderChartSelector();
     }
 
@@ -3962,7 +3955,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isInitialSetupDone) { // Avoid unnecessary renders during initial setup
             renderAllComparisonTables();
             renderChartSelector();
-            renderChart();
+            renderChart().catch(e => console.error('Chart render error (mode):', e));
         }
 
         updateCycleTrackerVisibility();
@@ -4549,21 +4542,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         saveSettingsToStorage();
-        renderChart();
+        renderChart().catch(e => console.error('Chart render error:', e));
     }
     function handleSelectAllCharts() {
         selectedMetrics = [...getFilteredChartKeys()];
-        renderChartSelector(); saveSettingsToStorage(); renderChart();
+        renderChartSelector(); saveSettingsToStorage(); renderChart().catch(e => console.error('Chart render error:', e));
     }
 
     function handleDeselectAllCharts() {
         selectedMetrics = [];
-        renderChartSelector(); saveSettingsToStorage(); renderChart();
+        renderChartSelector(); saveSettingsToStorage(); renderChart().catch(e => console.error('Chart render error:', e));
     }
 
     // script.js 에서 renderChart 함수를 찾아 아래의 코드로 전체를 교체해주세요.
 
     async function renderChart() {
+      try {
         if (!chartCanvas) return;
         const ctx = chartCanvas.getContext('2d'); if (!ctx) return;
         const metricsToRender = selectedMetrics.filter(key => getFilteredChartKeys().includes(key));
@@ -4751,6 +4745,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         console.log("DEBUG: Chart rendered/updated.");
+      } catch (e) {
+        console.error('renderChart error:', e);
+      }
     }
 
 
@@ -5123,7 +5120,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Initialize Form Title
             updateFormTitle();
-            if (saveUpdateBtn) saveUpdateBtn.textContent = translate('edit');
+            if (saveUpdateBtn) saveUpdateBtn.innerHTML = translate('edit');
             if (cancelEditBtn) cancelEditBtn.style.display = 'inline-block';
             activateTab('tab-record');
             setTimeout(() => {
@@ -5177,7 +5174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateFormTitle();
-        if (saveUpdateBtn) saveUpdateBtn.textContent = translate('saveRecord');
+        if (saveUpdateBtn) saveUpdateBtn.innerHTML = translate('saveRecord');
         if (cancelEditBtn) cancelEditBtn.style.display = 'none';
         updatePlaceholders();
 

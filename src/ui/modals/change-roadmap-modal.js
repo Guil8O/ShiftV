@@ -1024,7 +1024,11 @@ export class ChangeRoadmapModal {
       if (!key) return;
       const t = translate(key);
       if (!t || t === key) return;
-      if (el.childElementCount === 0) el.textContent = t;
+      if (el.childElementCount > 0 || t.includes('<svg') || t.includes('<span')) {
+        el.innerHTML = t;
+      } else {
+        el.textContent = t;
+      }
     });
   }
 

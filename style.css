@@ -1564,6 +1564,53 @@ details[open] > .accordion-title::before {
     background: var(--primary);
 }
 
+/* SV Diary Calendar Card */
+.svcard-diary-calendar { padding: 0; }
+.svcard-cal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2px 6px;
+}
+.svcard-cal-header .sv-card-label { margin: 0; }
+.svcard-cal-month {
+    font-size: 11px; color: var(--text-dim); font-weight: 500;
+}
+.svcard-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+.svcard-cal-dow {
+    text-align: center; font-size: 9px; font-weight: 600;
+    color: var(--text-dim); padding: 1px 0;
+}
+.svcard-cal-cell {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.svcard-cal-cell.empty { visibility: hidden; }
+.svcard-cal-cell.today {
+    outline: 2px solid var(--primary);
+    outline-offset: -1px;
+}
+.svcard-cal-num {
+    font-size: 9px; color: var(--text-dim); font-weight: 500;
+}
+.svcard-cal-num.today { color: var(--primary); font-weight: 700; }
+.svcard-cal-emoji {
+    width: 100%; height: 100%; object-fit: contain;
+    border-radius: 4px;
+}
+.svcard-cal-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--primary); opacity: 0.5;
+}
+.svcard-diary-calendar .sv-card-desc {
+    text-align: right; padding-top: 4px; font-size: 11px;
+}
+
 /* SV Quest Card Carousel */
 .svcard-quest-carousel {
     display: flex;

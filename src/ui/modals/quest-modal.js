@@ -1039,7 +1039,7 @@ export class QuestModal extends BaseModal {
                     </div>
                     <div class="quest-form-group">
                         <label>${this._t('questFieldDesc')}</label>
-                        <textarea id="quest-desc" rows="2" placeholder="${this._t('questDescPlaceholder')}" maxlength="300">${this._escHtml(q.description)}</textarea>
+                        <textarea id="quest-desc" rows="2" placeholder="${this._t('questDescPlaceholder')}" style="overflow:hidden;resize:none;">${this._escHtml(q.description)}</textarea>
                     </div>
 
                     <!-- Category selector (2-col grid) -->
@@ -1266,6 +1266,14 @@ export class QuestModal extends BaseModal {
 
         document.body.appendChild(dialogOverlay);
         requestAnimationFrame(() => dialogOverlay.classList.add('visible'));
+
+        // Auto-grow textarea for description
+        const descTA = dialogOverlay.querySelector('#quest-desc');
+        if (descTA) {
+            const autoGrow = () => { descTA.style.height = 'auto'; descTA.style.height = descTA.scrollHeight + 'px'; };
+            descTA.addEventListener('input', autoGrow);
+            autoGrow(); // initial fit
+        }
     }
 
     // ══════════════════════════════════════════════

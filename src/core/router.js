@@ -59,6 +59,11 @@ export function initRouter({ activateTab, closeAllModals } = {}) {
     // hashchange 이벤트 리스너 등록
     window.addEventListener('hashchange', _handleHashChange);
 
+    // popstate 이벤트 리스너 — 모달 히스토리 상태 처리
+    // 모달이 pushState로 추가한 history entry를 back()으로 제거하면
+    // hashchange 없이 popstate만 발생 → 여기서 모달을 시각적으로 닫음
+    window.addEventListener('popstate', _handlePopState);
+
     // 초기 해시 처리
     // ⚠️ 해시가 없을 때 URL을 바꾸지 않음 → PWA start_url(/ShiftV/) 일치 유지
     // 브라우저 PWA 설치 버튼은 현재 URL이 start_url과 일치해야 표시됨
@@ -164,5 +169,27 @@ function _handleHashChange() {
         window.location.hash = '#' + DEFAULT_HASH;
         _suppressHashChange = false;
         if (_activateTabFn) _activateTabFn(ROUTE_MAP[DEFAULT_HASH]);
+    }
+}
+
+/**
+ * popstate 이벤트 핸들러
+ * 모달이 history.pushState로 상태를 추가한 뒤 history.back()으로 돌아올 때,
+ * 해시는 변경되지 않으므로 hashchange가 발생하지 않음 → 여기서 모달 닫기 처리
+ */
+function _handlePopState(event) {
+    // 모달이 열려있으면 닫기
+    if (_closeAllModalsFn) {
+        const closed = _closeAllModalsFn();
+        if (closed) {
+            console.log('[Router] Modal closed via popstate');
+        }
+    }
+
+    // 현재 해시에 맞는 탭이 활성화되어 있는지 확인하고 동기화
+    const hash = _getHash();
+    const tabId = ROUTE_MAP[hash || DEFAULT_HASH];
+    if (tabId && _activateTabFn) {
+        _activateTabFn(tabId);
     }
 }

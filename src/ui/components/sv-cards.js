@@ -52,8 +52,27 @@ function _catIcon(key) {
 // _addCarouselArrows and _addDots are now provided by carousel-frame.js (imported above)
 
 
+// ── Noto Animated Emoji CDN ──────────────────────────
+const NOTO_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest';
+function notoGif(cp) { return `${NOTO_BASE}/${cp}/512.gif`; }
+
+// Evaluation → animated emoji code point (matches diary-tab.js)
+const EVAL_CP = {
+    great: '1f604', good: '1f60a', okay: '1f610', bad: '1f61e', terrible: '1f616'
+};
+// Secondary emotion → animated emoji code point
+const EMOTION_CP = {
+    sad: '1f622', dizzy: '1f635', angry: '1f621', surprised: '1f62e',
+    shocked: '1f631', bored: '1f611', excited: '1f970', love: '2764_fe0f'
+};
+// Legacy mood → evaluation
+const _LEGACY = {
+    happy: 'good', neutral: 'okay', sad: 'bad',
+    angry: 'bad', tired: 'bad', energetic: 'good', hopeful: 'good',
+};
+
 // ═══════════════════════════════════════════════════════
-// ─── Diary Card — Yesterday & Today Emojis ─────────────
+// ─── Diary Card — Mini Calendar Grid with Animated Emojis
 // ═══════════════════════════════════════════════════════
 export function renderDiaryCard(cardEl) {
     if (!cardEl) return;
@@ -62,50 +81,73 @@ export function renderDiaryCard(cardEl) {
     let diary = {};
     try { diary = JSON.parse(localStorage.getItem('shiftv_diary') || '{}'); } catch { /* */ }
 
-    // Get today & yesterday dates
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const todayDate = now.getDate();
+    const firstDow = new Date(year, month, 1).getDay(); // 0=Sun
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    const fmt = d => d.toISOString().slice(0, 10); // YYYY-MM-DD
-    const todayKey = fmt(today);
-    const yesterdayKey = fmt(yesterday);
+    const totalCount = Object.keys(diary).filter(k => {
+        const e = diary[k];
+        return e && (e.evaluation || e.mood || e.emotion);
+    }).length;
 
-    const todayEntry = diary[todayKey];
-    const yesterdayEntry = diary[yesterdayKey];
+    // Day-of-week headers
+    const lang = getCurrentLanguage?.() || 'ko';
+    const dowLabels = lang === 'en' ? ['S','M','T','W','T','F','S']
+                    : lang === 'ja' ? ['日','月','火','水','木','金','土']
+                    : ['일','월','화','수','목','금','토'];
+    const dowHTML = dowLabels.map(d => `<span class="svcard-cal-dow">${d}</span>`).join('');
 
-    const todayEmoji = todayEntry?.mood ? (MOOD_EMOJI[todayEntry.mood] || '📝') : null;
-    const yesterdayEmoji = yesterdayEntry?.mood ? (MOOD_EMOJI[yesterdayEntry.mood] || '📝') : null;
+    // Build cells
+    let cellsHTML = '';
+    // Empty padding
+    for (let i = 0; i < firstDow; i++) {
+        cellsHTML += `<span class="svcard-cal-cell empty"></span>`;
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const raw = diary[dateStr];
+        const entry = raw ? (raw.evaluation ? raw : (raw.mood && _LEGACY[raw.mood]) ? { ...raw, evaluation: _LEGACY[raw.mood] } : raw) : null;
+        const isToday = day === todayDate;
 
-    const labelYesterday = translate('svcard_diary_yesterday') || '하루 전';
-    const labelToday = translate('svcard_diary_today') || '오늘';
-
-    if (!todayEmoji && !yesterdayEmoji) {
-        // Empty state
-        cardEl.innerHTML = `
-            <div class="sv-card-content svcard-diary-empty">
-                ${svgIcon('add_circle', 'mi-2xl mi-primary', 40)}
-                <h3 class="sv-card-label">${translate('diaryTabTitle') || '다이어리'}</h3>
-                <p class="sv-card-desc">${translate('svcard_diary_add') || '감정 일기 추가'}</p>
-            </div>`;
-        return;
+        let inner = `<span class="svcard-cal-num${isToday ? ' today' : ''}">${day}</span>`;
+        if (entry) {
+            let cp = null;
+            if (entry.evaluation && EVAL_CP[entry.evaluation]) {
+                cp = EVAL_CP[entry.evaluation];
+            } else if (entry.emotion) {
+                const emo = Array.isArray(entry.emotion) ? entry.emotion[0] : entry.emotion;
+                cp = EMOTION_CP[emo];
+            }
+            if (cp) {
+                inner = `<img class="svcard-cal-emoji" src="${notoGif(cp)}" alt="" loading="lazy">`;
+            } else {
+                inner = `<span class="svcard-cal-dot"></span>`;
+            }
+        }
+        cellsHTML += `<span class="svcard-cal-cell${isToday ? ' today' : ''}${entry ? ' has-entry' : ''}">${inner}</span>`;
     }
 
-    const totalCount = Object.keys(diary).filter(k => diary[k]?.mood).length;
+    // Month label
+    const monthNames = lang === 'en'
+        ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+        : lang === 'ja'
+        ? ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+        : ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+    const monthLabel = lang === 'en' ? `${monthNames[month]} ${year}` : `${year}${lang === 'ja' ? '年' : '년'} ${monthNames[month]}`;
 
     cardEl.innerHTML = `
-        <div class="sv-card-content">
-            <div class="svcard-diary-row">
-                <div class="svcard-diary-day">
-                    <span class="svcard-diary-emoji ${yesterdayEmoji ? 'svcard-mood-small' : 'svcard-mood-empty'}">${yesterdayEmoji || '—'}</span>
-                    <span class="svcard-diary-label">${labelYesterday}</span>
-                </div>
-                <div class="svcard-diary-day svcard-diary-today">
-                    <span class="svcard-diary-emoji ${todayEmoji ? 'svcard-mood-big' : 'svcard-mood-empty'}">${todayEmoji || '—'}</span>
-                    <span class="svcard-diary-label">${labelToday}</span>
-                </div>
+        <div class="sv-card-content svcard-diary-calendar">
+            <div class="svcard-cal-header">
+                <h3 class="sv-card-label">${translate('diaryTabTitle') || '다이어리'}</h3>
+                <span class="svcard-cal-month">${monthLabel}</span>
             </div>
-            <h3 class="sv-card-label">${translate('diaryTabTitle') || '다이어리'}</h3>
+            <div class="svcard-cal-grid">
+                ${dowHTML}
+                ${cellsHTML}
+            </div>
             <p class="sv-card-desc">${translate('totalEntries') || '총'} ${totalCount}${translate('entrySuffix') || '건'}</p>
         </div>`;
 }

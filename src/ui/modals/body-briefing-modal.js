@@ -561,9 +561,13 @@ export class BodyBriefingModal {
   
   /**
    * 백분률 계산 - 상위%로 고정
+   * 각 성별의 분포 내에서 "이 값이 얼마나 해당 성별에 가까운지"를 상위%로 표현
+   * 
+   * 남성 아이콘: 남성 분포에서의 위치 (높은 WHR = 남성적 → 상위%)
+   * 여성 아이콘: 여성 분포에서의 위치 (낮은 WHR = 여성적 → 상위%)
    */
   calculatePercentile(value, type, gender) {
-    // 정확한 백분위 범위 (의학/통계 자료 기반)
+    // 각 성별 분포의 백분위 기준값 (의학/통계 자료 기반)
     const stats = {
       whr: {
         female: { 
@@ -594,26 +598,56 @@ export class BodyBriefingModal {
     const data = stats[type]?.[gender];
     if (!data) return translate('percentileRank', { value: 50 });
     
-    // 상위% 계산 (값이 낮을수록 상위%)
-    let percentile = 50; // 기본값
+    // 해당 성별 분포 내에서의 백분위 위치 계산
+    // value가 작을수록 낮은 백분위, 클수록 높은 백분위
+    let rawPercentile;
+    if (value <= data.p1)       rawPercentile = 1;
+    else if (value <= data.p5)  rawPercentile = 5;
+    else if (value <= data.p10) rawPercentile = 10;
+    else if (value <= data.p25) rawPercentile = 25;
+    else if (value <= data.p50) rawPercentile = 50;
+    else if (value <= data.p75) rawPercentile = 75;
+    else if (value <= data.p90) rawPercentile = 90;
+    else if (value <= data.p95) rawPercentile = 95;
+    else                        rawPercentile = 99;
+
+    // "상위 X%" = 100 - rawPercentile (CDF 기반)
+    // 예: rawPercentile=90이면 상위 10%
+    // 단, 각 비율 지표의 특성에 따라 해석 방향이 다름:
+    //
+    // WHR: 값이 클수록 해당 분포 내에서 높은 백분위 → 상위% = 100 - raw
+    //   남성(높은 WHR = 남성적): rawPercentile 높음 → 상위% 낮음 = 즉 "상위 10%" = 남성 상위권
+    //   여성(낮은 WHR = 여성적): rawPercentile 낮음 → 100-raw = 상위% 높음... 
+    //
+    // 결론: 중앙(p50)에 가까울수록 상위 50%,
+    // 해당 성별의 "전형적 방향"에 가까울수록 상위% 숫자가 낮아야 함
+    //
+    // 남성 아이콘: 해당 분포 상위 → 100 - rawPercentile
+    // 여성 아이콘: 해당 분포 하위가 여성적 → rawPercentile 그대로를 상위%로 표시해야 함
+    //
+    // 더 직관적인 접근: "해당 성별 인구 중 상위 몇 %에 해당하는가"
+    // = 그 성별 분포에서 자신보다 값이 높은(또는 낮은) 사람의 비율
+    //
+    // 간단히: 중앙값(p50) 대비 거리로 계산
+    const median = data.p50;
+    const p1 = data.p1;
+    const p99 = data.p99;
     
-    if (value <= data.p1) percentile = 99;
-    else if (value <= data.p5) percentile = 95;
-    else if (value <= data.p10) percentile = 90;
-    else if (value <= data.p25) percentile = 75;
-    else if (value <= data.p50) percentile = 50;
-    else if (value <= data.p75) percentile = 25;
-    else if (value <= data.p90) percentile = 10;
-    else if (value <= data.p95) percentile = 5;
-    else percentile = 1;
-    
-    // WHR의 경우 값이 낮을수록 여성형이므로 상위%로 표시
-    // Shoulder-Waist, Chest-Waist의 경우 값이 높을수록 남성형이므로 반대로 계산
-    if (type === 'shoulderWaist' || type === 'chestWaist') {
-      percentile = 100 - percentile;
+    // 정규화: 해당 성별 분포에서의 위치를 0~100으로 매핑
+    let normalized;
+    if (value <= p1) normalized = 0;
+    else if (value >= p99) normalized = 100;
+    else if (value <= median) {
+      normalized = ((value - p1) / (median - p1)) * 50;
+    } else {
+      normalized = 50 + ((value - median) / (p99 - median)) * 50;
     }
+    normalized = Math.round(Math.max(0, Math.min(100, normalized)));
     
-    return translate('percentileRank', { value: percentile });
+    // "상위 X%" = 해당 분포에서 이 값 이상인 사람의 비율
+    const topPercent = Math.max(1, Math.min(99, 100 - normalized));
+    
+    return translate('percentileRank', { value: topPercent });
   }
   
   /**

@@ -53,11 +53,13 @@ export function createModalSystem(deps) {
     function closeModal() {
         if (!modalOverlay || !modalOverlay.classList.contains('visible')) return;
 
+        // 먼저 시각적으로 닫기 (즉시 반응)
+        closeAllModalsVisually();
+
+        // history 상태가 모달이면 뒤로가기로 정리
         const state = history.state;
         if (state && typeof state.type === 'string' && state.type.startsWith('modal')) {
             history.back();
-        } else {
-            closeAllModalsVisually();
         }
     }
 
@@ -86,11 +88,13 @@ export function createModalSystem(deps) {
     function closeHormoneModal() {
         if (!hormoneModalOverlay || !hormoneModalOverlay.classList.contains('visible')) return;
 
+        // 먼저 시각적으로 닫기 (즉시 반응)
+        closeAllModalsVisually();
+
+        // history 상태가 모달이면 뒤로가기로 정리
         const state = history.state;
         if (state && state.type === 'modal-hormone') {
             history.back();
-        } else {
-            closeAllModalsVisually();
         }
     }
 

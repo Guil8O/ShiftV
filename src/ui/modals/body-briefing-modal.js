@@ -533,43 +533,36 @@ export class BodyBriefingModal {
   }
   
   /**
-   * 비율 위치 계산 (0-100%)
+   * 비율 위치 계산 (0%=♂, 100%=♀)
+   * 남성 p50 ↔ 여성 p50 사이에서의 위치 (percentile stats와 동일 데이터 사용)
    */
   calculateRatioPosition(value, type) {
-    // 기본 범위 설정 (실제로는 health-evaluator에서 계산해야 함)
-    if (type === 'whr') {
-      // WHR: 남성형(0.95) ~ 여성형(0.70)
-      const min = 0.70;
-      const max = 0.95;
-      const position = ((value - min) / (max - min)) * 100;
-      return Math.max(0, Math.min(100, 100 - position)); // 반대로 (여성=오른쪽)
-    } else if (type === 'shoulderWaist') {
-      // Shoulder-Waist: 낮을수록 여성적 (좁은 어깨/넓은 허리)
-      // 여성형 극단(≈0.8) ~ 남성형 극단(≈1.6)
-      // WHR과 동일하게 100 - position → 낮은 값 = 오른쪽(♀)
-      const min = 0.8;
-      const max = 1.6;
-      const position = ((value - min) / (max - min)) * 100;
-      return Math.max(0, Math.min(100, 100 - position)); // 낮을수록 여성=오른쪽
-    } else if (type === 'chestWaist') {
-      // Chest-Waist: 낮을수록 여성적 (가슴 좁음) — WHR·shoulderWaist와 같은 방향
-      // 100 - position → 낮은 값 = 오른쪽(♀), 높은 값 = 왼쪽(♂)
-      const min = 0.9;
-      const max = 1.6;
-      const position = ((value - min) / (max - min)) * 100;
-      return Math.max(0, Math.min(100, 100 - position));
-    }
-    return 50; // 기본값
+    const medians = {
+      whr:           { male: 0.95, female: 0.75 },
+      shoulderWaist: { male: 1.45, female: 1.25 },
+      chestWaist:    { male: 1.25, female: 1.05 },
+    };
+    const m = medians[type];
+    if (!m) return 50;
+    // 모든 비율: 높을수록 남성적, 낮을수록 여성적
+    // position = 0 at male p50, 100 at female p50
+    if (m.male === m.female) return 50;
+    const position = ((m.male - value) / (m.male - m.female)) * 100;
+    return Math.max(0, Math.min(100, Math.round(position)));
   }
   
   /**
-   * 백분률 계산 — 상위/하위 X% (숫자는 항상 1~50)
+   * 백분률 계산 — 막대 위치와 일관되게
    *
-   * CDF = 해당 성별 인구 중 이 값 이하인 비율
-   * CDF ≤ 50 → "하위 X%" (X = CDF)  ← 분포 아래쪽
-   * CDF > 50 → "상위 X%" (X = 100-CDF) ← 분포 위쪽
+   * ♂ 숫자 = CDF (남성 분포에서의 위치)
+   *   큰 숫자 → 남성적 (남성 중 상위권)
+   *   작은 숫자 → 비남성적 (남성 분포 하위)
    *
-   * 숫자가 작을수록 해당 성별에서 극단적인 위치
+   * ♀ 숫자 = 100−CDF (여성 분포에서 나보다 값이 큰 비율)
+   *   큰 숫자 → 여성적 (대부분의 여성보다 낮은 값 = 더 여성적)
+   *   작은 숫자 → 비여성적 (여성 분포 상위 = 남성적 방향)
+   *
+   * → 막대가 ♀쪽: ♂ 작고 ♀ 큼 → 항상 일치
    */
   calculatePercentile(value, type, gender) {
     const stats = {
@@ -588,46 +581,39 @@ export class BodyBriefingModal {
     };
 
     const data = stats[type]?.[gender];
-    const topKey = gender === 'male' ? 'percentileMale' : 'percentileFemale';
-    const bottomKey = gender === 'male' ? 'percentileMaleBottom' : 'percentileFemaleBottom';
-    if (!data) return translate(topKey, { value: 50 });
+    const genderKey = gender === 'male' ? 'percentileMale' : 'percentileFemale';
+    if (!data) return translate(genderKey, { value: 50 });
 
+    // CDF 계산 (선형 보간, 1-99 범위)
     const knownPcts = [
-      { pct: 1,  v: data.p1  },
-      { pct: 5,  v: data.p5  },
-      { pct: 10, v: data.p10 },
-      { pct: 25, v: data.p25 },
-      { pct: 50, v: data.p50 },
-      { pct: 75, v: data.p75 },
-      { pct: 90, v: data.p90 },
-      { pct: 95, v: data.p95 },
+      { pct: 1,  v: data.p1  }, { pct: 5,  v: data.p5  },
+      { pct: 10, v: data.p10 }, { pct: 25, v: data.p25 },
+      { pct: 50, v: data.p50 }, { pct: 75, v: data.p75 },
+      { pct: 90, v: data.p90 }, { pct: 95, v: data.p95 },
       { pct: 99, v: data.p99 },
     ];
 
-    // CDF 계산 (해당 성별에서 이 값 이하인 비율)
     let cdf;
     if (value <= knownPcts[0].v) cdf = 1;
     else if (value >= knownPcts[knownPcts.length - 1].v) cdf = 99;
     else {
       cdf = 50; // fallback
       for (let i = 0; i < knownPcts.length - 1; i++) {
-        const lo = knownPcts[i];
-        const hi = knownPcts[i + 1];
-        if (value >= lo.v && value <= hi.v) {
-          const frac = (value - lo.v) / (hi.v - lo.v);
-          cdf = lo.pct + frac * (hi.pct - lo.pct);
+        if (value >= knownPcts[i].v && value <= knownPcts[i + 1].v) {
+          const frac = (value - knownPcts[i].v) / (knownPcts[i + 1].v - knownPcts[i].v);
+          cdf = knownPcts[i].pct + frac * (knownPcts[i + 1].pct - knownPcts[i].pct);
           break;
         }
       }
     }
-    cdf = Math.round(cdf);
 
-    // CDF ≤ 50 → 하위 X%, CDF > 50 → 상위 (100-CDF)%
-    if (cdf <= 50) {
-      return translate(bottomKey, { value: Math.max(1, cdf) });
-    } else {
-      return translate(topKey, { value: Math.max(1, 100 - cdf) });
-    }
+    // ♂: CDF 그대로 (높을수록 남성적)
+    // ♀: 100-CDF (높을수록 여성적)
+    const display = gender === 'male'
+      ? Math.round(Math.max(1, Math.min(99, cdf)))
+      : Math.round(Math.max(1, Math.min(99, 100 - cdf)));
+
+    return translate(genderKey, { value: display });
   }
   
   /**

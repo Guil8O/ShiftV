@@ -563,17 +563,15 @@ export class BodyBriefingModal {
   }
   
   /**
-   * 백분률 계산 — 상위 X%로 통일
+   * 백분률 계산 — 상위/하위 X% (숫자는 항상 1~50)
    *
-   * "상위 X%" = 해당 성별 인구 중 X%가 이 값 이하 (하단 누적 CDF)
+   * CDF = 해당 성별 인구 중 이 값 이하인 비율
+   * CDF ≤ 50 → "하위 X%" (X = CDF)  ← 분포 아래쪽
+   * CDF > 50 → "상위 X%" (X = 100-CDF) ← 분포 위쪽
    *
-   * 읽는 법:
-   *   ♂ 상위 1%  = 남성 중 1%만 이 값보다 낮음 → 남성에게 매우 드문 값 (여성적)
-   *   ♀ 상위 20% = 여성 중 20%가 이 값 이하 → 여성 하위 20% (여성 중에서도 낮은 편)
-   * → 두 숫자를 같이 보면 바 위치를 설명할 수 있음
+   * 숫자가 작을수록 해당 성별에서 극단적인 위치
    */
   calculatePercentile(value, type, gender) {
-    // 각 성별 분포의 백분위 기준값 (의학/통계 자료 기반)
     const stats = {
       whr: {
         female: { p1: 0.60, p5: 0.65, p10: 0.67, p25: 0.70, p50: 0.75, p75: 0.80, p90: 0.85, p95: 0.90, p99: 0.95 },
@@ -590,9 +588,10 @@ export class BodyBriefingModal {
     };
 
     const data = stats[type]?.[gender];
-    if (!data) return translate(gender === 'male' ? 'percentileMale' : 'percentileFemale', { value: 50 });
+    const topKey = gender === 'male' ? 'percentileMale' : 'percentileFemale';
+    const bottomKey = gender === 'male' ? 'percentileMaleBottom' : 'percentileFemaleBottom';
+    if (!data) return translate(topKey, { value: 50 });
 
-    // 알려진 분위 포인트 배열 (오름차순)
     const knownPcts = [
       { pct: 1,  v: data.p1  },
       { pct: 5,  v: data.p5  },
@@ -605,27 +604,30 @@ export class BodyBriefingModal {
       { pct: 99, v: data.p99 },
     ];
 
-    const genderKey = gender === 'male' ? 'percentileMale' : 'percentileFemale';
-
-    // 범위 밖 처리
-    // value <= p1 → 99% 이상이 이 값보다 높음 → 상위 99%
-    // value >= p99 → 1%만 이 값보다 높음 → 상위 1%
-    if (value <= knownPcts[0].v) return translate(genderKey, { value: 99 });
-    if (value >= knownPcts[knownPcts.length - 1].v) return translate(genderKey, { value: 1 });
-
-    // 선형 보간으로 CDF 계산 후 상위% = 100 - CDF
-    for (let i = 0; i < knownPcts.length - 1; i++) {
-      const lo = knownPcts[i];
-      const hi = knownPcts[i + 1];
-      if (value >= lo.v && value <= hi.v) {
-        const frac = (value - lo.v) / (hi.v - lo.v);
-        const cdf = lo.pct + frac * (hi.pct - lo.pct);
-        const topPct = Math.round(100 - cdf);
-        return translate(genderKey, { value: Math.max(1, Math.min(99, topPct)) });
+    // CDF 계산 (해당 성별에서 이 값 이하인 비율)
+    let cdf;
+    if (value <= knownPcts[0].v) cdf = 1;
+    else if (value >= knownPcts[knownPcts.length - 1].v) cdf = 99;
+    else {
+      cdf = 50; // fallback
+      for (let i = 0; i < knownPcts.length - 1; i++) {
+        const lo = knownPcts[i];
+        const hi = knownPcts[i + 1];
+        if (value >= lo.v && value <= hi.v) {
+          const frac = (value - lo.v) / (hi.v - lo.v);
+          cdf = lo.pct + frac * (hi.pct - lo.pct);
+          break;
+        }
       }
     }
+    cdf = Math.round(cdf);
 
-    return translate(genderKey, { value: 50 });
+    // CDF ≤ 50 → 하위 X%, CDF > 50 → 상위 (100-CDF)%
+    if (cdf <= 50) {
+      return translate(bottomKey, { value: Math.max(1, cdf) });
+    } else {
+      return translate(topKey, { value: Math.max(1, 100 - cdf) });
+    }
   }
   
   /**

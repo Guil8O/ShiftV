@@ -367,7 +367,8 @@ document.addEventListener('DOMContentLoaded', () => {
     notifBackdrop?.addEventListener('click', closeNotifPanel);
     notifClearAll?.addEventListener('click', () => { _notifications = []; saveNotifications(); renderNotificationPanel(); });
 
-    renderNotificationPanel();
+    // NOTE: renderNotificationPanel() is deferred to after state variables
+    // because translate() requires currentLanguage (TDZ if called here).
 
     // --- State Variables ---
     // PRIMARY_DATA_KEY, SETTINGS_KEY → imported from src/constants.js
@@ -389,6 +390,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let notificationEnabled = false;
     let activeModalTab = 'detailed-analysis';
     let biologicalSex = 'male';
+
+    // Deferred from the notification section above (needs currentLanguage)
+    renderNotificationPanel();
 
     // --- DOM Element References ---
     const bodyElement = document.body;

@@ -466,30 +466,21 @@ export class BodyBriefingModal {
     if (bodyRatios.whr) {
       const ratio = bodyRatios.whr;
       const position = ratio.position !== undefined ? ratio.position : this.calculateRatioPosition(ratio.value, 'whr');
-      const malePercent = ratio.percentiles?.male?.text || this.calculatePercentile(ratio.value, 'whr', 'male');
-      const femalePercent = ratio.percentiles?.female?.text || this.calculatePercentile(ratio.value, 'whr', 'female');
-      
-      items.push(this.renderRatioBar('whr', ratio.value, position, malePercent, femalePercent, ratio.evaluation));
+      items.push(this.renderRatioBar('whr', ratio.value, position, ratio.evaluation));
     }
     
     // Shoulder-Waist Ratio
     if (bodyRatios.shoulderWaist) {
       const ratio = bodyRatios.shoulderWaist;
       const position = ratio.position !== undefined ? ratio.position : this.calculateRatioPosition(ratio.value, 'shoulderWaist');
-      const malePercent = ratio.percentiles?.male?.text || this.calculatePercentile(ratio.value, 'shoulderWaist', 'male');
-      const femalePercent = ratio.percentiles?.female?.text || this.calculatePercentile(ratio.value, 'shoulderWaist', 'female');
-      
-      items.push(this.renderRatioBar('shoulderWaist', ratio.value, position, malePercent, femalePercent, ratio.evaluation));
+      items.push(this.renderRatioBar('shoulderWaist', ratio.value, position, ratio.evaluation));
     }
     
     // Chest-Waist Ratio
     if (bodyRatios.chestWaist) {
       const ratio = bodyRatios.chestWaist;
       const position = ratio.position !== undefined ? ratio.position : this.calculateRatioPosition(ratio.value, 'chestWaist');
-      const malePercent = ratio.percentiles?.male?.text || this.calculatePercentile(ratio.value, 'chestWaist', 'male');
-      const femalePercent = ratio.percentiles?.female?.text || this.calculatePercentile(ratio.value, 'chestWaist', 'female');
-      
-      items.push(this.renderRatioBar('chestWaist', ratio.value, position, malePercent, femalePercent, ratio.evaluation));
+      items.push(this.renderRatioBar('chestWaist', ratio.value, position, ratio.evaluation));
     }
     
     container.innerHTML = items.join('');
@@ -498,7 +489,7 @@ export class BodyBriefingModal {
   /**
    * 비율 바 렌더링 (남자-여자 바 형태, 1열로 길게)
    */
-  renderRatioBar(ratioType, value, position, malePercent, femalePercent, evaluation) {
+  renderRatioBar(ratioType, value, position, evaluation) {
     const ratioName = {
       whr: translate('ratioWHR'),
       shoulderWaist: translate('ratioShoulderWaist'),
@@ -516,7 +507,6 @@ export class BodyBriefingModal {
         <div class="ratio-bar-container">
           <div class="ratio-icon-group">
             <span class="ratio-icon male">${svgIcon('male', 'mi-inline mi-sm')}</span>
-            <span class="ratio-percentile">${malePercent}</span>
           </div>
           <div class="ratio-bar">
             <div class="ratio-bar-fill" style="width: ${position}%;"></div>
@@ -524,7 +514,6 @@ export class BodyBriefingModal {
           </div>
           <div class="ratio-icon-group">
             <span class="ratio-icon female">${svgIcon('female', 'mi-inline mi-sm')}</span>
-            <span class="ratio-percentile">${femalePercent}</span>
           </div>
         </div>
         ${evaluation ? `<div class="ratio-evaluation">${evaluation}</div>` : ''}
@@ -534,21 +523,26 @@ export class BodyBriefingModal {
   
   /**
    * 비율 위치 계산 (0%=♂, 100%=♀)
-   * 남성 p50 ↔ 여성 p50 사이에서의 위치 (percentile stats와 동일 데이터 사용)
+   * male p1 ~ female p1 범위로 매핑 (진짜 극단만 0%/100%)
+   * 중앙 = male p50 ↔ female p50 사이
    */
   calculateRatioPosition(value, type) {
-    const medians = {
-      whr:           { male: 0.95, female: 0.75 },
-      shoulderWaist: { male: 1.45, female: 1.25 },
-      chestWaist:    { male: 1.25, female: 1.05 },
+    // 모든 비율: 높을수록 남성적
+    // 남성 p1 (=남성 최하위) → 0%  (bar 왼쪽 극단 ♂)
+    // 여성 p1 (=여성 최하위) → 100% (bar 오른쪽 극단 ♀)
+    const ranges = {
+      whr:           { maleHigh: 1.15, maleP50: 0.95, femaleP50: 0.75, femaleLow: 0.60 },
+      shoulderWaist: { maleHigh: 1.65, maleP50: 1.45, femaleP50: 1.25, femaleLow: 1.10 },
+      chestWaist:    { maleHigh: 1.45, maleP50: 1.25, femaleP50: 1.05, femaleLow: 0.90 },
     };
-    const m = medians[type];
-    if (!m) return 50;
-    // 모든 비율: 높을수록 남성적, 낮을수록 여성적
-    // position = 0 at male p50, 100 at female p50
-    if (m.male === m.female) return 50;
-    const position = ((m.male - value) / (m.male - m.female)) * 100;
-    return Math.max(0, Math.min(100, Math.round(position)));
+    const r = ranges[type];
+    if (!r) return 50;
+
+    // maleHigh(=p99) →0%, femaleLow(=p1) →100%
+    const span = r.maleHigh - r.femaleLow;
+    if (span === 0) return 50;
+    const position = ((r.maleHigh - value) / span) * 100;
+    return Math.max(5, Math.min(95, Math.round(position)));
   }
   
   /**

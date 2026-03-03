@@ -560,71 +560,64 @@ export class BodyBriefingModal {
   }
   
   /**
-   * 백분률 계산 - 상위%로 고정
-   * 각 성별의 분포 내에서 "이 값이 얼마나 해당 성별에 가까운지"를 상위%로 표현
-   * 
-   * 남성 아이콘: 남성 분포에서의 위치 (높은 WHR = 남성적 → 상위%)
-   * 여성 아이콘: 여성 분포에서의 위치 (낮은 WHR = 여성적 → 상위%)
+   * 백분률 계산 — 상위 X%로 통일
+   *
+   * "상위 X%" = 해당 성별 인구 중 X%가 이 값 이하 (하단 누적 CDF)
+   *
+   * 읽는 법:
+   *   ♂ 상위 1%  = 남성 중 1%만 이 값보다 낮음 → 남성에게 매우 드문 값 (여성적)
+   *   ♀ 상위 20% = 여성 중 20%가 이 값 이하 → 여성 하위 20% (여성 중에서도 낮은 편)
+   * → 두 숫자를 같이 보면 바 위치를 설명할 수 있음
    */
   calculatePercentile(value, type, gender) {
     // 각 성별 분포의 백분위 기준값 (의학/통계 자료 기반)
     const stats = {
       whr: {
-        female: { 
-          p1: 0.60, p5: 0.65, p10: 0.67, p25: 0.70, p50: 0.75, p75: 0.80, p90: 0.85, p95: 0.90, p99: 0.95 
-        },
-        male: { 
-          p1: 0.80, p5: 0.85, p10: 0.88, p25: 0.90, p50: 0.95, p75: 1.00, p90: 1.05, p95: 1.10, p99: 1.15 
-        }
+        female: { p1: 0.60, p5: 0.65, p10: 0.67, p25: 0.70, p50: 0.75, p75: 0.80, p90: 0.85, p95: 0.90, p99: 0.95 },
+        male:   { p1: 0.80, p5: 0.85, p10: 0.88, p25: 0.90, p50: 0.95, p75: 1.00, p90: 1.05, p95: 1.10, p99: 1.15 }
       },
       shoulderWaist: {
-        female: { 
-          p1: 1.10, p5: 1.15, p10: 1.18, p25: 1.20, p50: 1.25, p75: 1.30, p90: 1.35, p95: 1.40, p99: 1.45 
-        },
-        male: { 
-          p1: 1.30, p5: 1.35, p10: 1.38, p25: 1.40, p50: 1.45, p75: 1.50, p90: 1.55, p95: 1.60, p99: 1.65 
-        }
+        female: { p1: 1.10, p5: 1.15, p10: 1.18, p25: 1.20, p50: 1.25, p75: 1.30, p90: 1.35, p95: 1.40, p99: 1.45 },
+        male:   { p1: 1.30, p5: 1.35, p10: 1.38, p25: 1.40, p50: 1.45, p75: 1.50, p90: 1.55, p95: 1.60, p99: 1.65 }
       },
       chestWaist: {
-        female: { 
-          p1: 0.90, p5: 0.95, p10: 0.98, p25: 1.00, p50: 1.05, p75: 1.10, p90: 1.15, p95: 1.20, p99: 1.25 
-        },
-        male: { 
-          p1: 1.10, p5: 1.15, p10: 1.18, p25: 1.20, p50: 1.25, p75: 1.30, p90: 1.35, p95: 1.40, p99: 1.45 
-        }
+        female: { p1: 0.90, p5: 0.95, p10: 0.98, p25: 1.00, p50: 1.05, p75: 1.10, p90: 1.15, p95: 1.20, p99: 1.25 },
+        male:   { p1: 1.10, p5: 1.15, p10: 1.18, p25: 1.20, p50: 1.25, p75: 1.30, p90: 1.35, p95: 1.40, p99: 1.45 }
       }
     };
-    
+
     const data = stats[type]?.[gender];
     if (!data) return translate('percentileRank', { value: 50 });
-    
-    // 해당 성별 분포 내에서의 백분위 위치 계산
-    // value가 작을수록 낮은 백분위, 클수록 높은 백분위
-    const median = data.p50;
-    const p1 = data.p1;
-    const p99 = data.p99;
-    
-    // 정규화: 해당 성별 분포에서의 위치를 0~100으로 매핑
-    let normalized;
-    if (value <= p1) normalized = 0;
-    else if (value >= p99) normalized = 100;
-    else if (value <= median) {
-      normalized = ((value - p1) / (median - p1)) * 50;
-    } else {
-      normalized = 50 + ((value - median) / (p99 - median)) * 50;
+
+    // 알려진 분위 포인트 배열 (오름차순)
+    const knownPcts = [
+      { pct: 1,  v: data.p1  },
+      { pct: 5,  v: data.p5  },
+      { pct: 10, v: data.p10 },
+      { pct: 25, v: data.p25 },
+      { pct: 50, v: data.p50 },
+      { pct: 75, v: data.p75 },
+      { pct: 90, v: data.p90 },
+      { pct: 95, v: data.p95 },
+      { pct: 99, v: data.p99 },
+    ];
+
+    // 범위 밖 처리
+    if (value <= knownPcts[0].v) return translate('percentileRank', { value: 1 });
+    if (value >= knownPcts[knownPcts.length - 1].v) return translate('percentileRank', { value: 99 });
+
+    // 선형 보간으로 정확한 CDF 계산
+    for (let i = 0; i < knownPcts.length - 1; i++) {
+      const lo = knownPcts[i];
+      const hi = knownPcts[i + 1];
+      if (value >= lo.v && value <= hi.v) {
+        const frac = (value - lo.v) / (hi.v - lo.v);
+        const cdf = Math.round(lo.pct + frac * (hi.pct - lo.pct));
+        return translate('percentileRank', { value: Math.max(1, Math.min(99, cdf)) });
+      }
     }
-    normalized = Math.round(Math.max(0, Math.min(100, normalized)));
-    
-    // 중앙값 기준으로 하위/상위 표시
-    // below median → "하위 X%" (숫자 작을수록 극단)
-    // above median → "상위 X%" (숫자 작을수록 극단)
-    if (normalized < 50) {
-      const bottomPct = Math.max(1, normalized);
-      return translate('percentileRankBottom', { value: bottomPct });
-    } else {
-      const topPct = Math.max(1, 100 - normalized);
-      return translate('percentileRank', { value: topPct });
-    }
+
+    return translate('percentileRank', { value: 50 });
   }
   
   /**

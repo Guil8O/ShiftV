@@ -587,7 +587,7 @@ export class BodyBriefingModal {
     };
 
     const data = stats[type]?.[gender];
-    if (!data) return translate('percentileRank', { value: 50 });
+    if (!data) return translate(gender === 'male' ? 'percentileMale' : 'percentileFemale', { value: 50 });
 
     // 알려진 분위 포인트 배열 (오름차순)
     const knownPcts = [
@@ -602,9 +602,11 @@ export class BodyBriefingModal {
       { pct: 99, v: data.p99 },
     ];
 
+    const genderKey = gender === 'male' ? 'percentileMale' : 'percentileFemale';
+
     // 범위 밖 처리
-    if (value <= knownPcts[0].v) return translate('percentileRank', { value: 1 });
-    if (value >= knownPcts[knownPcts.length - 1].v) return translate('percentileRank', { value: 99 });
+    if (value <= knownPcts[0].v) return translate(genderKey, { value: 1 });
+    if (value >= knownPcts[knownPcts.length - 1].v) return translate(genderKey, { value: 99 });
 
     // 선형 보간으로 정확한 CDF 계산
     for (let i = 0; i < knownPcts.length - 1; i++) {
@@ -613,11 +615,11 @@ export class BodyBriefingModal {
       if (value >= lo.v && value <= hi.v) {
         const frac = (value - lo.v) / (hi.v - lo.v);
         const cdf = Math.round(lo.pct + frac * (hi.pct - lo.pct));
-        return translate('percentileRank', { value: Math.max(1, Math.min(99, cdf)) });
+        return translate(genderKey, { value: Math.max(1, Math.min(99, cdf)) });
       }
     }
 
-    return translate('percentileRank', { value: 50 });
+    return translate(genderKey, { value: 50 });
   }
   
   /**

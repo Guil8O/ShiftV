@@ -552,11 +552,12 @@ export class BodyBriefingModal {
       const position = ((value - min) / (max - min)) * 100;
       return Math.max(0, Math.min(100, 100 - position)); // 낮을수록 여성=오른쪽
     } else if (type === 'chestWaist') {
-      // Chest-Waist: 여성형(1.0) ~ 남성형(1.3)
-      const min = 1.0;
-      const max = 1.3;
+      // Chest-Waist: 낮을수록 여성적 (가슴 좁음) — WHR·shoulderWaist와 같은 방향
+      // 100 - position → 낮은 값 = 오른쪽(♀), 높은 값 = 왼쪽(♂)
+      const min = 0.9;
+      const max = 1.6;
       const position = ((value - min) / (max - min)) * 100;
-      return Math.max(0, Math.min(100, position)); // 남성형=오른쪽
+      return Math.max(0, Math.min(100, 100 - position));
     }
     return 50; // 기본값
   }
@@ -607,17 +608,20 @@ export class BodyBriefingModal {
     const genderKey = gender === 'male' ? 'percentileMale' : 'percentileFemale';
 
     // 범위 밖 처리
-    if (value <= knownPcts[0].v) return translate(genderKey, { value: 1 });
-    if (value >= knownPcts[knownPcts.length - 1].v) return translate(genderKey, { value: 99 });
+    // value <= p1 → 99% 이상이 이 값보다 높음 → 상위 99%
+    // value >= p99 → 1%만 이 값보다 높음 → 상위 1%
+    if (value <= knownPcts[0].v) return translate(genderKey, { value: 99 });
+    if (value >= knownPcts[knownPcts.length - 1].v) return translate(genderKey, { value: 1 });
 
-    // 선형 보간으로 정확한 CDF 계산
+    // 선형 보간으로 CDF 계산 후 상위% = 100 - CDF
     for (let i = 0; i < knownPcts.length - 1; i++) {
       const lo = knownPcts[i];
       const hi = knownPcts[i + 1];
       if (value >= lo.v && value <= hi.v) {
         const frac = (value - lo.v) / (hi.v - lo.v);
-        const cdf = Math.round(lo.pct + frac * (hi.pct - lo.pct));
-        return translate(genderKey, { value: Math.max(1, Math.min(99, cdf)) });
+        const cdf = lo.pct + frac * (hi.pct - lo.pct);
+        const topPct = Math.round(100 - cdf);
+        return translate(genderKey, { value: Math.max(1, Math.min(99, topPct)) });
       }
     }
 

@@ -544,11 +544,13 @@ export class BodyBriefingModal {
       const position = ((value - min) / (max - min)) * 100;
       return Math.max(0, Math.min(100, 100 - position)); // 반대로 (여성=오른쪽)
     } else if (type === 'shoulderWaist') {
-      // Shoulder-Waist: 여성형(1.25) ~ 남성형(1.45)
-      const min = 1.25;
-      const max = 1.45;
+      // Shoulder-Waist: 낮을수록 여성적 (좁은 어깨/넓은 허리)
+      // 여성형 극단(≈0.8) ~ 남성형 극단(≈1.6)
+      // WHR과 동일하게 100 - position → 낮은 값 = 오른쪽(♀)
+      const min = 0.8;
+      const max = 1.6;
       const position = ((value - min) / (max - min)) * 100;
-      return Math.max(0, Math.min(100, position)); // 남성형=오른쪽
+      return Math.max(0, Math.min(100, 100 - position)); // 낮을수록 여성=오른쪽
     } else if (type === 'chestWaist') {
       // Chest-Waist: 여성형(1.0) ~ 남성형(1.3)
       const min = 1.0;

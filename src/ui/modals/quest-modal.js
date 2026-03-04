@@ -595,7 +595,16 @@ export class QuestModal extends BaseModal {
         // Value delta
         const delta = quest.currentValue - quest.initialValue;
         const deltaSign = delta >= 0 ? '+' : '';
-        const remaining = quest.targetValue - quest.currentValue;
+        // Remaining: always non-negative; direction-aware
+        const range = quest.targetValue - quest.initialValue;
+        let remaining;
+        if (pct >= 100) {
+            remaining = 0;
+        } else if (range >= 0) {
+            remaining = Math.max(0, quest.targetValue - quest.currentValue);
+        } else {
+            remaining = Math.max(0, quest.currentValue - quest.targetValue);
+        }
 
         // Stats row
         const statsHtml = `

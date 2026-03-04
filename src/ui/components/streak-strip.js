@@ -132,8 +132,15 @@ export class StreakStrip {
             // Find quest with highest progress
             let best = 0;
             quests.forEach(q => {
-                if (q.targetValue && q.currentValue !== undefined) {
-                    const pct = Math.min(100, Math.round((q.currentValue / q.targetValue) * 100));
+                if (q.targetValue !== undefined && q.currentValue !== undefined) {
+                    const init = q.initialValue || 0;
+                    const range = q.targetValue - init;
+                    let pct;
+                    if (range === 0) {
+                        pct = q.currentValue === q.targetValue ? 100 : 0;
+                    } else {
+                        pct = Math.max(0, Math.min(100, Math.round(((q.currentValue - init) / range) * 100)));
+                    }
                     if (pct > best) best = pct;
                 }
             });

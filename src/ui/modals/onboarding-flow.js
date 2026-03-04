@@ -7,6 +7,7 @@
 // Import directly from shared translation module
 import { translate, getCurrentLanguage, setCurrentLanguage } from '../../translations.js';
 import { signInWithGoogle } from '../../firebase/auth.js';
+import { SyncManager } from '../../firebase/sync.js';
 import { svgIcon } from '../icon-paths.js';
 const setLanguage = (lang) => {
     setCurrentLanguage(lang);
@@ -16,6 +17,8 @@ const setLanguage = (lang) => {
 
 const ONBOARDING_KEY = 'shiftV_onboardingCompleted';
 const TEMP_DATA_KEY = 'shiftV_onboardingTemp';
+const PRIMARY_DATA_KEY = 'shiftV_Data_v1_1';
+const SETTINGS_KEY     = 'shiftV_Settings_v1_0';
 
 // 온보딩 내 라이브 프리븷용 PRESET_HEX (theme-manager.js와 동일하게 유지)
 const OB_PRESET_HEX = {
@@ -277,17 +280,76 @@ export class OnboardingFlow {
                 <p class="onboarding-hint" id="onboarding-account-hint" style="display:none;">
                     ${translate('onboardingLocalHint')}
                 </p>
+                <p class="onboarding-hint" id="onboarding-cloud-status" style="display:none;"></p>
             </div>
         `;
         el.querySelector('.onboarding-skip-account')?.addEventListener('click', () => {
             const hint = el.querySelector('#onboarding-account-hint');
             if (hint) hint.style.display = 'block';
         });
-        el.querySelector('#onboarding-google-btn')?.addEventListener('click', () => {
+        el.querySelector('#onboarding-google-btn')?.addEventListener('click', async () => {
+            const statusEl = el.querySelector('#onboarding-cloud-status');
             try {
-                Promise.resolve(signInWithGoogle()).then((user) => {
-                    if (user) this._nextStep();
-                });
+                const user = await signInWithGoogle();
+                if (!user) return;
+
+                // 로컬에 기록 데이터가 있는지 확인
+                let localHasData = false;
+                try {
+                    const raw = localStorage.getItem(PRIMARY_DATA_KEY);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        localHasData = Array.isArray(parsed.measurements) && parsed.measurements.length > 0;
+                    }
+                } catch { /* empty */ }
+
+                if (!localHasData) {
+                    // 로컬이 비어있으면 → 클라우드 데이터 확인 + 자동 pull
+                    if (statusEl) {
+                        statusEl.style.display = 'block';
+                        statusEl.textContent = translate('onboardingCloudChecking') || '클라우드 데이터 확인 중...';
+                    }
+                    try {
+                        const syncManager = new SyncManager();
+                        const hasCloud = await syncManager.hasCloudData();
+                        if (hasCloud) {
+                            if (statusEl) statusEl.textContent = translate('onboardingCloudLoading') || '클라우드 데이터 불러오는 중...';
+                            const merged = await syncManager.pullFromCloud();
+                            if (merged) {
+                                // 클라우드에서 설정값도 가져왔으면 tempData에 반영 →  persona/goals 스킵
+                                const cloudSettings = merged.settings || {};
+                                const cloudProfile = merged.profile || {};
+                                if (cloudProfile.nickname) this.tempData.nickname = cloudProfile.nickname;
+                                if (cloudProfile.birthdate) this.tempData.birthdate = cloudProfile.birthdate;
+                                if (cloudProfile.goalText) this.tempData.goalText = cloudProfile.goalText;
+                                if (cloudSettings.mode) this.tempData.mode = cloudSettings.mode;
+                                if (cloudSettings.biologicalSex) this.tempData.sex = cloudSettings.biologicalSex;
+                                if (cloudSettings.language) {
+                                    this.tempData.language = cloudSettings.language;
+                                    try { setLanguage(cloudSettings.language); } catch {}
+                                }
+                                if (cloudSettings.theme) this.tempData.theme = cloudSettings.theme;
+                                if (cloudProfile.accentColor) this.tempData.accent = cloudProfile.accentColor;
+                                this._saveTemp();
+
+                                if (statusEl) statusEl.textContent = translate('onboardingCloudDone') || '클라우드 데이터를 불러왔습니다!';
+
+                                // persona(3) & goals(4) 건너뛰기 → theme(4번 인덱스)로 이동
+                                setTimeout(() => {
+                                    this._collectStepData();
+                                    this.currentStep = 4; // step5Theme
+                                    this._renderStep();
+                                }, 800);
+                                return;
+                            }
+                        }
+                    } catch (err) {
+                        console.warn('[Onboarding] Cloud pull failed:', err);
+                    }
+                }
+
+                // 클라우드 데이터 없거나 로컬에 이미 데이터 있는 경우 → 일반 flow
+                this._nextStep();
             } catch (err) {
                 console.error('Google login during onboarding:', err);
             }

@@ -834,6 +834,49 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // 4. 신체 비율 분석 (어깨=너비, 나머지=둘레 인식)
+        // 바 위치 계산: p99(남) ↔ p1(여) 풀레인지, 5-95% 클램핑
+        const _ratioPosition = (value, type) => {
+            const ranges = {
+                whr:         { maleHigh: 1.15, femaleLow: 0.60 },
+                chestWaist:  { maleHigh: 1.45, femaleLow: 0.90 },
+                shoulderHip: { maleHigh: 1.50, femaleLow: 0.90 },
+            };
+            const r = ranges[type];
+            if (!r) return 50;
+            const span = r.maleHigh - r.femaleLow;
+            if (span === 0) return 50;
+            return Math.max(5, Math.min(95, Math.round(((r.maleHigh - value) / span) * 100)));
+        };
+        // 한줄평 생성 (바 위치 기반, 모드-인식)
+        const _ratioEvaluation = (position, type) => {
+            const mode = currentMode || 'mtf';
+            const labels = {
+                whr: {
+                    ko: ['허리-엉덩이 비율', '체형'], en: ['WHR', 'body shape'], ja: ['WHR', '体型']
+                },
+                chestWaist: {
+                    ko: ['가슴-허리 비율', '상체 비율'], en: ['Chest-waist ratio', 'upper body ratio'], ja: ['胸-ウエスト比', '上半身比率']
+                },
+                shoulderHip: {
+                    ko: ['어깨-엉덩이 비율', '어깨 비율'], en: ['Shoulder-hip ratio', 'shoulder ratio'], ja: ['肩-ヒップ比', '肩比率']
+                },
+            };
+            const L = currentLanguage || 'ko';
+            const lbl = labels[type]?.[L] || labels[type]?.ko || ['', ''];
+            // position: 0=♂ 극단, 100=♀ 극단
+            let evalText;
+            if (position >= 80) evalText = { ko: `${svgIcon('celebration', 'mi-inline mi-sm mi-success')} 매우 여성적인 ${lbl[1]}입니다!`, en: `${svgIcon('celebration', 'mi-inline mi-sm mi-success')} Very feminine ${lbl[1]}!`, ja: `${svgIcon('celebration', 'mi-inline mi-sm mi-success')} とても女性的な${lbl[1]}です！` };
+            else if (position >= 60) evalText = { ko: `${svgIcon('auto_awesome', 'mi-inline mi-sm')} 여성적인 ${lbl[1]}입니다.`, en: `${svgIcon('auto_awesome', 'mi-inline mi-sm')} Feminine ${lbl[1]}.`, ja: `${svgIcon('auto_awesome', 'mi-inline mi-sm')} 女性的な${lbl[1]}です。` };
+            else if (position >= 40) evalText = { ko: `중간 수준의 ${lbl[1]}입니다.`, en: `Neutral ${lbl[1]}.`, ja: `中間的な${lbl[1]}です。` };
+            else if (position >= 20) evalText = { ko: `남성적인 ${lbl[1]}입니다.`, en: `Masculine ${lbl[1]}.`, ja: `男性的な${lbl[1]}です。` };
+            else evalText = { ko: `매우 남성적인 ${lbl[1]}입니다.`, en: `Very masculine ${lbl[1]}.`, ja: `とても男性的な${lbl[1]}です。` };
+            // FTM: 반전 (♂ 쪽이 좋은 결과)
+            if (mode === 'ftm') {
+                if (position <= 20) evalText = { ko: `${svgIcon('celebration', 'mi-inline mi-sm mi-success')} 매우 남성적인 ${lbl[1]}입니다!`, en: `${svgIcon('celebration', 'mi-inline mi-sm mi-success')} Very masculine ${lbl[1]}!`, ja: `${svgIcon('celebration', 'mi-inline mi-sm mi-success')} とても男性的な${lbl[1]}です！` };
+                else if (position <= 40) evalText = { ko: `${svgIcon('auto_awesome', 'mi-inline mi-sm')} 남성적인 ${lbl[1]}입니다.`, en: `${svgIcon('auto_awesome', 'mi-inline mi-sm')} Masculine ${lbl[1]}.`, ja: `${svgIcon('auto_awesome', 'mi-inline mi-sm')} 男性的な${lbl[1]}です。` };
+            }
+            return evalText[L] || evalText.ko;
+        };
 
         // WHR (허리-엉덩이 비율): 둘레 / 둘레
         if (latest.waist && latest.hips) {
@@ -842,20 +885,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const whr = waistCircum / hipCircum;
 
             if (!isNaN(whr)) {
-                // WHR: 여성 0.7-0.8, 남성 0.9-1.0
-                const rawPosition = Math.min(Math.max(((whr - 0.7) / (1.0 - 0.7)) * 100, 0), 100);
-
-                // 백분위 계산
-                const femalePercentile = calculatePercentile(whr, 'whr', 'female');
-                const malePercentile = calculatePercentile(whr, 'whr', 'male');
-
+                const position = _ratioPosition(whr, 'whr');
                 analytics.bodyRatios.whr = {
                     value: whr,
-                    position: 100 - rawPosition, // 반대로 (여성=오른쪽)
-                    percentiles: {
-                        female: femalePercentile,
-                        male: malePercentile
-                    }
+                    position,
+                    evaluation: _ratioEvaluation(position, 'whr')
                 };
             }
         }
@@ -867,20 +901,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const cwr = chestCircum / waistCircum;
 
             if (!isNaN(cwr)) {
-                // Chest-Waist: 여성 1.0-1.2, 남성 1.3-1.5
-                const rawPosition = Math.min(Math.max(((cwr - 1.0) / (1.5 - 1.0)) * 100, 0), 100);
-
-                // 백분위 계산
-                const femalePercentile = calculatePercentile(cwr, 'chestWaist', 'female');
-                const malePercentile = calculatePercentile(cwr, 'chestWaist', 'male');
-
+                const position = _ratioPosition(cwr, 'chestWaist');
                 analytics.bodyRatios.chestWaist = {
                     value: cwr,
-                    position: 100 - rawPosition, // 반대로 (여성=오른쪽)
-                    percentiles: {
-                        female: femalePercentile,
-                        male: malePercentile
-                    }
+                    position,
+                    evaluation: _ratioEvaluation(position, 'chestWaist')
                 };
             }
         }
@@ -889,33 +914,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (latest.shoulder && latest.hips) {
             const shoulderWidth = parseFloat(latest.shoulder);
             const hipCircum = parseFloat(latest.hips);
-
-            // [NOTE] 중요: 어깨는 "너비"이고 엉덩이는 "둘레"
-            // 어깨 너비를 어깨 둘레로 추정 변환: 어깨 둘레 ≈ 어깨 너비 × 2.8
             const shoulderCircumEstimated = shoulderWidth * 2.8;
-
-            // Shoulder/Hip 비율 (둘레 기준)
             const shr = shoulderCircumEstimated / hipCircum;
 
             if (!isNaN(shr)) {
-                // Shoulder/Hip: 여성 1.0-1.1, 남성 1.25-1.35
-                const rawPosition = Math.min(Math.max(((shr - 1.0) / (1.35 - 1.0)) * 100, 0), 100);
-
-                // 백분위 계산
-                const femalePercentile = calculatePercentile(shr, 'shoulderHip', 'female');
-                const malePercentile = calculatePercentile(shr, 'shoulderHip', 'male');
-
+                const position = _ratioPosition(shr, 'shoulderHip');
                 analytics.bodyRatios.shoulderHip = {
                     value: shr,
-                    position: 100 - rawPosition, // 반대로 (여성=오른쪽)
-                    percentiles: {
-                        female: femalePercentile,
-                        male: malePercentile
-                    },
-                    note: `어깨 너비 ${shoulderWidth}cm → 추정 둘레 ${shoulderCircumEstimated.toFixed(1)}cm`
+                    position,
+                    evaluation: _ratioEvaluation(position, 'shoulderHip')
                 };
-
-                console.log(`Shoulder-Hip Ratio: Width ${shoulderWidth}cm → Est. Circumference ${shoulderCircumEstimated.toFixed(1)}cm / Hip ${hipCircum}cm = ${shr.toFixed(2)}`);
             }
         }
 
@@ -2408,6 +2416,28 @@ document.addEventListener('DOMContentLoaded', () => {
             // 섹션 8: 신체 비율 분석 (Body Ratio Analysis)
             // ========================================
             if (analytics.bodyRatios && (analytics.bodyRatios.whr || analytics.bodyRatios.chestWaist || analytics.bodyRatios.shoulderHip)) {
+                // 비율 카드 렌더 헬퍼 (바디 브리핑과 동일 스타일)
+                const _ratioCardHtml = (ratio, nameKey) => `
+                    <div class="body-ratio-card">
+                        <h3 class="body-ratio-name">${svgIcon('straighten', 'mi-inline mi-sm')} ${translate(nameKey)}</h3>
+                        <div class="ratio-bar-container">
+                            <div class="ratio-icon-group">
+                                <span class="ratio-icon male">${svgIcon('male', 'mi-sm')}</span>
+                            </div>
+                            <div class="ratio-bar">
+                                <div class="ratio-bar-fill" style="width: ${ratio.position}%;"></div>
+                                <div class="ratio-bar-marker" style="left: ${ratio.position}%;"></div>
+                            </div>
+                            <div class="ratio-icon-group">
+                                <span class="ratio-icon female">${svgIcon('female', 'mi-sm')}</span>
+                            </div>
+                        </div>
+                        <div class="ratio-value-display">
+                            <span class="ratio-number">${ratio.value.toFixed(2)}</span>
+                        </div>
+                        ${ratio.evaluation ? `<div class="ratio-evaluation">${ratio.evaluation}</div>` : ''}
+                    </div>`;
+
                 analysisHTML += `
                 <div class="hormone-section">
                     <div class="hormone-section-header">
@@ -2419,86 +2449,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="body-ratio-container">`;
 
-                if (analytics.bodyRatios.whr) {
-                    const malePercent = analytics.bodyRatios.whr.percentiles?.male?.text || '-';
-                    const femalePercent = analytics.bodyRatios.whr.percentiles?.female?.text || '-';
-
-                    analysisHTML += `
-                    <div class="body-ratio-card">
-                        <h3 class="body-ratio-name">${svgIcon('straighten', 'mi-inline mi-sm')} ${translate('waistHipRatio')}</h3>
-                        <div class="ratio-bar-container">
-                            <div class="ratio-icon-group">
-                                <span class="ratio-icon male">${svgIcon('male', 'mi-sm')}</span>
-                                <span class="ratio-percentile">${malePercent}</span>
-                            </div>
-                            <div class="ratio-bar">
-                                <div class="ratio-bar-fill" style="width: ${analytics.bodyRatios.whr.position}%;"></div>
-                                <div class="ratio-bar-marker" style="left: ${analytics.bodyRatios.whr.position}%;"></div>
-                            </div>
-                            <div class="ratio-icon-group">
-                                <span class="ratio-icon female">${svgIcon('female', 'mi-sm')}</span>
-                                <span class="ratio-percentile">${femalePercent}</span>
-                            </div>
-                        </div>
-                        <div class="ratio-value-display">
-                            <span class="ratio-number">${analytics.bodyRatios.whr.value.toFixed(2)}</span>
-                        </div>
-                    </div>`;
-                }
-
-                if (analytics.bodyRatios.chestWaist) {
-                    const malePercent = analytics.bodyRatios.chestWaist.percentiles?.male?.text || '-';
-                    const femalePercent = analytics.bodyRatios.chestWaist.percentiles?.female?.text || '-';
-
-                    analysisHTML += `
-                    <div class="body-ratio-card">
-                        <h3 class="body-ratio-name">${svgIcon('straighten', 'mi-inline mi-sm')} ${translate('chestWaistRatio')}</h3>
-                        <div class="ratio-bar-container">
-                            <div class="ratio-icon-group">
-                                <span class="ratio-icon male">${svgIcon('male', 'mi-sm')}</span>
-                                <span class="ratio-percentile">${malePercent}</span>
-                            </div>
-                            <div class="ratio-bar">
-                                <div class="ratio-bar-fill" style="width: ${analytics.bodyRatios.chestWaist.position}%;"></div>
-                                <div class="ratio-bar-marker" style="left: ${analytics.bodyRatios.chestWaist.position}%;"></div>
-                            </div>
-                            <div class="ratio-icon-group">
-                                <span class="ratio-icon female">${svgIcon('female', 'mi-sm')}</span>
-                                <span class="ratio-percentile">${femalePercent}</span>
-                            </div>
-                        </div>
-                        <div class="ratio-value-display">
-                            <span class="ratio-number">${analytics.bodyRatios.chestWaist.value.toFixed(2)}</span>
-                        </div>
-                    </div>`;
-                }
-
-                if (analytics.bodyRatios.shoulderHip) {
-                    const malePercent = analytics.bodyRatios.shoulderHip.percentiles?.male?.text || '-';
-                    const femalePercent = analytics.bodyRatios.shoulderHip.percentiles?.female?.text || '-';
-
-                    analysisHTML += `
-                    <div class="body-ratio-card">
-                        <h3 class="body-ratio-name">${svgIcon('straighten', 'mi-inline mi-sm')} ${translate('shoulderHipRatio')}</h3>
-                        <div class="ratio-bar-container">
-                            <div class="ratio-icon-group">
-                                <span class="ratio-icon male">${svgIcon('male', 'mi-sm')}</span>
-                                <span class="ratio-percentile">${malePercent}</span>
-                            </div>
-                            <div class="ratio-bar">
-                                <div class="ratio-bar-fill" style="width: ${analytics.bodyRatios.shoulderHip.position}%;"></div>
-                                <div class="ratio-bar-marker" style="left: ${analytics.bodyRatios.shoulderHip.position}%;"></div>
-                            </div>
-                            <div class="ratio-icon-group">
-                                <span class="ratio-icon female">${svgIcon('female', 'mi-sm')}</span>
-                                <span class="ratio-percentile">${femalePercent}</span>
-                            </div>
-                        </div>
-                        <div class="ratio-value-display">
-                            <span class="ratio-number">${analytics.bodyRatios.shoulderHip.value.toFixed(2)}</span>
-                        </div>
-                    </div>`;
-                }
+                if (analytics.bodyRatios.whr) analysisHTML += _ratioCardHtml(analytics.bodyRatios.whr, 'waistHipRatio');
+                if (analytics.bodyRatios.chestWaist) analysisHTML += _ratioCardHtml(analytics.bodyRatios.chestWaist, 'chestWaistRatio');
+                if (analytics.bodyRatios.shoulderHip) analysisHTML += _ratioCardHtml(analytics.bodyRatios.shoulderHip, 'shoulderHipRatio');
 
                 analysisHTML += `
                     </div>

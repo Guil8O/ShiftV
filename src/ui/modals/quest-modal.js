@@ -137,11 +137,18 @@ export class QuestModal extends BaseModal {
         this.quests.forEach(q => {
             if (q.trackingType === 'linked' && q.linkedMeasurementField && q.status === 'active') {
                 const val = parseFloat(latest[q.linkedMeasurementField]);
-                if (!isNaN(val) && val !== q.currentValue) {
-                    q.currentValue = val;
-                    q.history = q.history || [];
-                    q.history.push({ date: latest.date || getToday(), value: val });
-                    changed = true;
+                if (!isNaN(val)) {
+                    // Backfill initialValue for quests created before the auto-populate fix
+                    if (q.initialValue === 0 && q.currentValue === 0 && val !== 0) {
+                        q.initialValue = val;
+                        changed = true;
+                    }
+                    if (val !== q.currentValue) {
+                        q.currentValue = val;
+                        q.history = q.history || [];
+                        q.history.push({ date: latest.date || getToday(), value: val });
+                        changed = true;
+                    }
                 }
             }
         });
@@ -1233,6 +1240,15 @@ export class QuestModal extends BaseModal {
                     base.linkedMeasurementField = dialogOverlay.querySelector('#quest-linked').value || null;
                     base.targetValue = parseFloat(dialogOverlay.querySelector('#qt-linked-target').value) || 0;
                     base.unit = dialogOverlay.querySelector('#quest-unit')?.value.trim() || '';
+                    // Auto-populate initial/current from latest measurement
+                    if (base.linkedMeasurementField && this.measurements.length) {
+                        const latest = this.measurements[this.measurements.length - 1];
+                        const curVal = parseFloat(latest[base.linkedMeasurementField]);
+                        if (!isNaN(curVal)) {
+                            if (!isEdit) base.initialValue = curVal;
+                            base.currentValue = curVal;
+                        }
+                    }
                     break;
                 case 'manual':
                     base.unit = dialogOverlay.querySelector('#quest-unit')?.value.trim() || '';

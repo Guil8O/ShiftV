@@ -533,7 +533,7 @@ ${this._footer()}
             h += `<div style="${SEC}${BRK}">`;
             const gauges = [
                 { k: 'whr',           lbl: { ko: '허리-엉덩이 비율 (WHR)', en: 'Waist-Hip Ratio', ja: 'WHR' } },
-                { k: 'shoulderWaist', lbl: { ko: '어깨-허리 비율',          en: 'Shoulder-Waist',  ja: '肩-ウエスト比' } },
+                { k: 'shoulderHip', lbl: { ko: '어깨-엉덩이 비율',          en: 'Shoulder-Hip',  ja: '肩-ヒップ比' } },
                 { k: 'chestWaist',    lbl: { ko: '가슴-허리 비율',          en: 'Chest-Waist',     ja: '胸-ウエスト比' } },
             ];
 
@@ -548,7 +548,7 @@ ${this._footer()}
                 let pos = 50;
                 if (g.k === 'whr')                pos = Math.min(100, Math.max(0, ((1.0 - val) / (1.0 - 0.7)) * 100));
                 else if (g.k === 'chestWaist')    pos = Math.min(100, Math.max(0, ((val - 1.0) / (1.5 - 1.0)) * 100));
-                else if (g.k === 'shoulderWaist') pos = Math.min(100, Math.max(0, ((1.35 - val) / (1.35 - 1.0)) * 100));
+                else if (g.k === 'shoulderHip') pos = Math.min(100, Math.max(0, ((1.50 - val) / (1.50 - 0.90)) * 100));
 
                 h += `<div style="margin:14px 0;">`;
                 h += `<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">`;

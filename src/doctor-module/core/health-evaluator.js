@@ -243,6 +243,23 @@ export class HealthEvaluator {
   // ========================================
   
   /**
+   * 바 위치 계산 헬퍼 — p99(♂) ↔ p1(♀) 풀레인지, 5-95% 클램핑
+   * 0% = 남성 극단, 100% = 여성 극단
+   */
+  _ratioPosition(value, type) {
+    const ranges = {
+      whr:        { maleHigh: 1.15, femaleLow: 0.60 },
+      chestWaist: { maleHigh: 1.45, femaleLow: 0.90 },
+      shoulderHip:{ maleHigh: 1.50, femaleLow: 0.90 },
+    };
+    const r = ranges[type];
+    if (!r) return 50;
+    const span = r.maleHigh - r.femaleLow;
+    if (span === 0) return 50;
+    return Math.max(5, Math.min(95, Math.round(((r.maleHigh - value) / span) * 100)));
+  }
+
+  /**
    * 신체 비율 종합 분석
    */
   analyzeBodyRatios(measurement) {
@@ -254,9 +271,9 @@ export class HealthEvaluator {
       ratios.whr = this.calculateWHR(measurement.waist, measurement.hips);
     }
     
-    // Shoulder-Waist Ratio
-    if (measurement.shoulder && measurement.waist) {
-      ratios.shoulderWaist = this.calculateShoulderWaistRatio(measurement.shoulder, measurement.waist);
+    // Shoulder-Hip Ratio (어깨 너비 → 추정 둘레 변환 후 엉덩이 둘레와 비교)
+    if (measurement.shoulder && measurement.hips) {
+      ratios.shoulderHip = this.calculateShoulderHipRatio(measurement.shoulder, measurement.hips);
     }
     
     // Chest-Waist Ratio
@@ -327,7 +344,8 @@ export class HealthEvaluator {
     }
     
     return {
-      value: ratio.toFixed(3),
+      value: ratio,
+      position: this._ratioPosition(ratio, 'whr'),
       category,
       femininity,
       healthRisk,
@@ -389,22 +407,24 @@ export class HealthEvaluator {
   }
   
   /**
-   * Shoulder-Waist Ratio 계산
+   * Shoulder-Hip Ratio 계산
+   * shoulder = 어깨 너비(biacromial breadth) → ×2.8로 추정 둘레 변환
+   * hips = 엉덩이 둘레
    */
-  calculateShoulderWaistRatio(shoulder, waist) {
-    const ratio = shoulder / waist;
+  calculateShoulderHipRatio(shoulder, hips) {
+    const ratio = (shoulder * 2.8) / hips;
     
     let category = '';
     let masculinity = 0;
     
     if (this.mode === 'ftm') {
-      if (ratio > 1.45) {
+      if (ratio > 1.35) {
         category = 'very_masculine';
         masculinity = 100;
-      } else if (ratio > 1.35) {
+      } else if (ratio > 1.25) {
         category = 'masculine';
         masculinity = 80;
-      } else if (ratio > 1.25) {
+      } else if (ratio > 1.15) {
         category = 'neutral';
         masculinity = 50;
       } else {
@@ -412,13 +432,13 @@ export class HealthEvaluator {
         masculinity = 20;
       }
     } else if (this.mode === 'mtf') {
-      if (ratio < 1.25) {
+      if (ratio < 1.10) {
         category = 'very_feminine';
         masculinity = 0;
-      } else if (ratio < 1.35) {
+      } else if (ratio < 1.20) {
         category = 'feminine';
         masculinity = 20;
-      } else if (ratio < 1.45) {
+      } else if (ratio < 1.30) {
         category = 'neutral';
         masculinity = 50;
       } else {
@@ -431,15 +451,16 @@ export class HealthEvaluator {
     }
     
     return {
-      value: ratio.toFixed(2),
+      value: ratio,
+      position: this._ratioPosition(ratio, 'shoulderHip'),
       category,
       masculinity,
-      evaluation: this.getShoulderWaistEvaluation(category, this.mode),
-      target: this.getShoulderWaistTarget(this.mode)
+      evaluation: this.getShoulderHipEvaluation(category, this.mode),
+      target: this.getShoulderHipTarget(this.mode)
     };
   }
   
-  getShoulderWaistEvaluation(category, mode) {
+  getShoulderHipEvaluation(category, mode) {
     if (mode === 'ftm') {
       switch (category) {
         case 'very_masculine':
@@ -449,7 +470,7 @@ export class HealthEvaluator {
             ja: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' とても広い肩幅！V字体型の完成！'
           });
         case 'masculine':
-          return this._t({ ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 남성적인 어깨입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Masculine shoulders.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 男性的な肩です。' });
+          return this._t({ ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 남성적인 어깨 비율입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Masculine shoulder ratio.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 男性的な肩の比率です。' });
         case 'neutral':
           return this._t({
             ko: '진행 중 - 어깨 운동을 늘리세요.',
@@ -471,28 +492,28 @@ export class HealthEvaluator {
           return this._t({ ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 좋은 비율입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Great ratio.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 良い比率です。' });
         case 'neutral':
           return this._t({
-            ko: '진행 중 - 허리를 줄이는 데 집중하세요.',
-            en: 'In progress — focus on reducing waist size.',
-            ja: '進行中 — ウエストを細くすることに集中しましょう。'
+            ko: '진행 중 - HRT로 엉덩이 성장이 기대됩니다.',
+            en: 'In progress — hip growth with HRT is expected.',
+            ja: '進行中 — HRTによるヒップの成長が期待されます。'
           });
         case 'masculine':
           return this._t({
-            ko: '어깨가 넓습니다. 허리 감소 운동이 필요합니다.',
-            en: 'Shoulders are broad. Waist-focused training may help.',
-            ja: '肩が広いです。ウエストを絞る運動が役立ちます。'
+            ko: '아직 어깨가 넓습니다. 꾸준한 HRT가 도움됩니다.',
+            en: 'Shoulders are still broad. Consistent HRT will help.',
+            ja: '肩がまだ広いです。継続的なHRTが役立ちます。'
           });
       }
     }
     return this._t({ ko: '균형 잡힌 비율입니다.', en: 'Balanced ratio.', ja: 'バランスの取れた比率です。' });
   }
   
-  getShoulderWaistTarget(mode) {
+  getShoulderHipTarget(mode) {
     if (mode === 'ftm') {
-      return this._t({ ko: '> 1.40 (V자 체형)', en: '> 1.40 (V-shape)', ja: '> 1.40（V字体型）' });
+      return this._t({ ko: '> 1.30 (V자 체형)', en: '> 1.30 (V-shape)', ja: '> 1.30（V字体型）' });
     } else if (mode === 'mtf') {
-      return this._t({ ko: '< 1.30 (부드러운 곡선)', en: '< 1.30 (soft curve)', ja: '< 1.30（柔らかい曲線）' });
+      return this._t({ ko: '< 1.15 (부드러운 곡선)', en: '< 1.15 (soft curve)', ja: '< 1.15（柔らかい曲線）' });
     }
-    return '~1.35';
+    return '~1.20';
   }
   
   /**
@@ -514,13 +535,38 @@ export class HealthEvaluator {
     }
     
     return {
-      value: ratio.toFixed(2),
+      value: ratio,
+      position: this._ratioPosition(ratio, 'chestWaist'),
       category,
-      evaluation: this._t(
-        { ko: '가슴-허리 비율: {value}', en: 'Chest–waist ratio: {value}', ja: '胸-ウエスト比: {value}' },
-        { value: ratio.toFixed(2) }
-      )
+      evaluation: this.getChestWaistEvaluation(category, this.mode)
     };
+  }
+
+  getChestWaistEvaluation(category, mode) {
+    if (mode === 'mtf') {
+      switch (category) {
+        case 'straight':
+          return this._t({ ko: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 여성적인 상체 비율입니다!', en: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' Feminine upper body ratio!', ja: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 女性的な上半身比率です！' });
+        case 'balanced':
+          return this._t({ ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 균형 잡힌 상체입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Balanced upper body.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' バランスの取れた上半身です。' });
+        case 'athletic':
+          return this._t({ ko: '상체가 넓은 편입니다.', en: 'Upper body is somewhat broad.', ja: '上半身がやや広いです。' });
+        case 'v_shape':
+          return this._t({ ko: '남성적인 상체 비율입니다.', en: 'Masculine upper body ratio.', ja: '男性的な上半身比率です。' });
+      }
+    } else if (mode === 'ftm') {
+      switch (category) {
+        case 'v_shape':
+          return this._t({ ko: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 남성적인 상체 비율입니다!', en: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' Masculine upper body ratio!', ja: svgIcon('celebration', 'mi-inline mi-sm mi-success') + ' 男性的な上半身比率です！' });
+        case 'athletic':
+          return this._t({ ko: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 좋은 상체 비율입니다.', en: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' Great upper body ratio.', ja: svgIcon('auto_awesome', 'mi-inline mi-sm') + ' 良い上半身比率です。' });
+        case 'balanced':
+          return this._t({ ko: '진행 중 - 상체 운동을 늘리세요.', en: 'In progress — increase upper body training.', ja: '進行中 — 上半身のトレーニングを増やしましょう。' });
+        case 'straight':
+          return this._t({ ko: '아직 상체가 좁습니다.', en: 'Upper body is still narrow.', ja: 'まだ上半身が狭いです。' });
+      }
+    }
+    return this._t({ ko: '균형 잡힌 상체 비율입니다.', en: 'Balanced upper body ratio.', ja: 'バランスの取れた上半身比率です。' });
   }
   // ========================================
   // 5. 체성분 분석
@@ -867,11 +913,11 @@ export class HealthEvaluator {
       factors += 30;
     }
     
-    if (ratios.shoulderWaist) {
+    if (ratios.shoulderHip) {
       if (this.mode === 'ftm') {
-        totalScore += (ratios.shoulderWaist.masculinity * 0.1); // 10점
+        totalScore += (ratios.shoulderHip.masculinity * 0.1); // 10점
       } else {
-        totalScore += ((100 - ratios.shoulderWaist.masculinity) * 0.1); // 10점
+        totalScore += ((100 - ratios.shoulderHip.masculinity) * 0.1); // 10점
       }
       factors += 10;
     }

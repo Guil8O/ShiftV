@@ -134,23 +134,23 @@ export class MTFAnalyzer {
       }
     }
     
-    // Shoulder-Waist Ratio - 15점
-    if (measurement.shoulder && measurement.waist) {
-      const swr = measurement.shoulder / measurement.waist;
-      details.shoulderWaist = { value: swr.toFixed(2) };
+    // Shoulder-Hip Ratio - 15점 (어깨너비*2.8 → 추정둘레 / 엉덩이둘레)
+    if (measurement.shoulder && measurement.hips) {
+      const shr = (measurement.shoulder * 2.8) / measurement.hips;
+      details.shoulderHip = { value: shr.toFixed(2) };
       
-      if (swr < 1.25) {
+      if (shr < 1.10) {
         score += 15;
-        details.shoulderWaist.evaluation = this._t({ko: '매우 부드러운 비율 (< 1.25)', en: 'Very soft ratio (< 1.25)', ja: '非常に柔らかい比率 (< 1.25)'});
-      } else if (swr < 1.35) {
+        details.shoulderHip.evaluation = this._t({ko: '매우 여성적인 비율 (< 1.10)', en: 'Very feminine ratio (< 1.10)', ja: '非常に女性的な比率 (< 1.10)'});
+      } else if (shr < 1.20) {
         score += 12;
-        details.shoulderWaist.evaluation = this._t({ko: '여성적 비율 (< 1.35)', en: 'Feminine ratio (< 1.35)', ja: '女性的な比率 (< 1.35)'});
-      } else if (swr < 1.45) {
+        details.shoulderHip.evaluation = this._t({ko: '여성적 비율 (< 1.20)', en: 'Feminine ratio (< 1.20)', ja: '女性的な比率 (< 1.20)'});
+      } else if (shr < 1.30) {
         score += 8;
-        details.shoulderWaist.evaluation = this._t({ko: '진행 중 (< 1.45)', en: 'In progress (< 1.45)', ja: '進行中 (< 1.45)'});
+        details.shoulderHip.evaluation = this._t({ko: '진행 중 (< 1.30)', en: 'In progress (< 1.30)', ja: '進行中 (< 1.30)'});
       } else {
         score += 4;
-        details.shoulderWaist.evaluation = this._t({ko: '아직 넓은 어깨 (>= 1.45)', en: 'Still broad shoulders (>= 1.45)', ja: 'まだ広い肩 (>= 1.45)'});
+        details.shoulderHip.evaluation = this._t({ko: '아직 넓은 어깨 (>= 1.30)', en: 'Still broad shoulders (>= 1.30)', ja: 'まだ広い肩 (>= 1.30)'});
       }
     }
     

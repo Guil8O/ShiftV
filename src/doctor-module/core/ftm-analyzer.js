@@ -135,23 +135,23 @@ export class FTMAnalyzer {
       }
     }
     
-    // Shoulder-Waist Ratio - 높을수록 좋음 (15점)
-    if (measurement.shoulder && measurement.waist) {
-      const swr = measurement.shoulder / measurement.waist;
-      details.shoulderWaist = { value: swr.toFixed(2) };
+    // Shoulder-Hip Ratio - 높을수록 좋음 (15점) (어깨너비*2.8 → 추정둘레 / 엉덩이둘레)
+    if (measurement.shoulder && measurement.hips) {
+      const shr = (measurement.shoulder * 2.8) / measurement.hips;
+      details.shoulderHip = { value: shr.toFixed(2) };
       
-      if (swr > 1.50) {
+      if (shr > 1.35) {
         score += 15;
-        details.shoulderWaist.evaluation = this._t({ko: '매우 넓은 어깨 (> 1.50) - V자 체형!', en: 'Very broad shoulders (> 1.50) - V-shaped body!', ja: '非常に広い肩 (> 1.50) - V字体型!'});
-      } else if (swr > 1.40) {
+        details.shoulderHip.evaluation = this._t({ko: '매우 넓은 어깨 (> 1.35) - V자 체형!', en: 'Very broad shoulders (> 1.35) - V-shaped body!', ja: '非常に広い肩 (> 1.35) - V字体型!'});
+      } else if (shr > 1.25) {
         score += 12;
-        details.shoulderWaist.evaluation = this._t({ko: '남성적 어깨 (> 1.40)', en: 'Masculine shoulders (> 1.40)', ja: '男性的な肩 (> 1.40)'});
-      } else if (swr > 1.30) {
+        details.shoulderHip.evaluation = this._t({ko: '남성적 어깨 (> 1.25)', en: 'Masculine shoulders (> 1.25)', ja: '男性的な肩 (> 1.25)'});
+      } else if (shr > 1.15) {
         score += 8;
-        details.shoulderWaist.evaluation = this._t({ko: '진행 중 (> 1.30)', en: 'In progress (> 1.30)', ja: '進行中 (> 1.30)'});
+        details.shoulderHip.evaluation = this._t({ko: '진행 중 (> 1.15)', en: 'In progress (> 1.15)', ja: '進行中 (> 1.15)'});
       } else {
         score += 4;
-        details.shoulderWaist.evaluation = this._t({ko: '어깨 발달 필요 (<= 1.30)', en: 'Shoulder development needed (<= 1.30)', ja: '肩の発達が必要 (<= 1.30)'});
+        details.shoulderHip.evaluation = this._t({ko: '어깨 발달 필요 (<= 1.15)', en: 'Shoulder development needed (<= 1.15)', ja: '肩の発達が必要 (<= 1.15)'});
       }
     }
     

@@ -469,11 +469,11 @@ export class BodyBriefingModal {
       items.push(this.renderRatioBar('whr', ratio.value, position, ratio.evaluation));
     }
     
-    // Shoulder-Waist Ratio
-    if (bodyRatios.shoulderWaist) {
-      const ratio = bodyRatios.shoulderWaist;
-      const position = ratio.position !== undefined ? ratio.position : this.calculateRatioPosition(ratio.value, 'shoulderWaist');
-      items.push(this.renderRatioBar('shoulderWaist', ratio.value, position, ratio.evaluation));
+    // Shoulder-Hip Ratio
+    if (bodyRatios.shoulderHip) {
+      const ratio = bodyRatios.shoulderHip;
+      const position = ratio.position !== undefined ? ratio.position : this.calculateRatioPosition(ratio.value, 'shoulderHip');
+      items.push(this.renderRatioBar('shoulderHip', ratio.value, position, ratio.evaluation));
     }
     
     // Chest-Waist Ratio
@@ -492,16 +492,18 @@ export class BodyBriefingModal {
   renderRatioBar(ratioType, value, position, evaluation) {
     const ratioName = {
       whr: translate('ratioWHR'),
-      shoulderWaist: translate('ratioShoulderWaist'),
+      shoulderHip: translate('shoulderHipRatio'),
       chestWaist: translate('ratioChestWaist')
     }[ratioType] || ratioType;
+
+    const displayValue = typeof value === 'number' ? value.toFixed(2) : value;
     
     return `
       <div class="body-ratio-item body-ratio-item-fullwidth">
         <div class="ratio-header">
           <div class="ratio-name">${ratioName}</div>
           <div class="ratio-value-display">
-            <span class="ratio-number">${value}</span>
+            <span class="ratio-number">${displayValue}</span>
           </div>
         </div>
         <div class="ratio-bar-container">
@@ -532,7 +534,7 @@ export class BodyBriefingModal {
     // 여성 p1 (=여성 최하위) → 100% (bar 오른쪽 극단 ♀)
     const ranges = {
       whr:           { maleHigh: 1.15, maleP50: 0.95, femaleP50: 0.75, femaleLow: 0.60 },
-      shoulderWaist: { maleHigh: 1.65, maleP50: 1.45, femaleP50: 1.25, femaleLow: 1.10 },
+      shoulderHip:   { maleHigh: 1.50, maleP50: 1.30, femaleP50: 1.10, femaleLow: 0.90 },
       chestWaist:    { maleHigh: 1.45, maleP50: 1.25, femaleP50: 1.05, femaleLow: 0.90 },
     };
     const r = ranges[type];
@@ -564,9 +566,9 @@ export class BodyBriefingModal {
         female: { p1: 0.60, p5: 0.65, p10: 0.67, p25: 0.70, p50: 0.75, p75: 0.80, p90: 0.85, p95: 0.90, p99: 0.95 },
         male:   { p1: 0.80, p5: 0.85, p10: 0.88, p25: 0.90, p50: 0.95, p75: 1.00, p90: 1.05, p95: 1.10, p99: 1.15 }
       },
-      shoulderWaist: {
-        female: { p1: 1.10, p5: 1.15, p10: 1.18, p25: 1.20, p50: 1.25, p75: 1.30, p90: 1.35, p95: 1.40, p99: 1.45 },
-        male:   { p1: 1.30, p5: 1.35, p10: 1.38, p25: 1.40, p50: 1.45, p75: 1.50, p90: 1.55, p95: 1.60, p99: 1.65 }
+      shoulderHip: {
+        female: { p1: 0.90, p5: 0.95, p10: 0.98, p25: 1.02, p50: 1.10, p75: 1.18, p90: 1.25, p95: 1.30, p99: 1.35 },
+        male:   { p1: 1.10, p5: 1.15, p10: 1.18, p25: 1.22, p50: 1.30, p75: 1.38, p90: 1.42, p95: 1.46, p99: 1.50 }
       },
       chestWaist: {
         female: { p1: 0.90, p5: 0.95, p10: 0.98, p25: 1.00, p50: 1.05, p75: 1.10, p90: 1.15, p95: 1.20, p99: 1.25 },

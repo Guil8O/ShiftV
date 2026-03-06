@@ -12,7 +12,6 @@ const urlsToCache = [
   '/ShiftV/src/constants.js',
   '/ShiftV/src/utils.js',
   '/ShiftV/src/translations.js',
-  '/ShiftV/src/data-manager.js',
   '/ShiftV/android/android-launchericon-512-512.png',
   '/ShiftV/android/android-launchericon-192-192.png'
 ];

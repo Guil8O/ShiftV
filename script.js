@@ -521,7 +521,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetDataButton = document.getElementById('reset-data-button');
     const checkForUpdatesButton = document.getElementById('check-for-updates-button');
 
-    console.log("DEBUG: DOM elements fetched.");
     // --- Constants for Measurement Keys (Using camelCase) ---
     // bodySizeKeys → imported from src/constants.js (BODY_SIZE_KEYS as bodySizeKeys)
     // healthKeys (사용되지 않아 제거됨)
@@ -555,7 +554,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'weight', 'muscleMass', 'bodyFatPercentage',
         'shoulder', 'neck', 'chest', 'underBustCircumference', 'waist', 'hips', 'thigh', 'calf', 'arm'
     ];
-    console.log("DEBUG: Measurement keys defined (camelCase).");
 
     // UNIT_CONVERSIONS, convertToStandard, convertFromStandard imported from src/utils/unit-conversion.js
 
@@ -726,7 +724,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // Re-render components that depend on language
-        console.log("DEBUG: Re-rendering components after translation...");
         renderChartSelector();
         renderAllComparisonTables();
         renderNextMeasurementInfo();
@@ -735,10 +732,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 chartInstance.options.scales.x.title.text = translate('chartAxisLabel');
             }
             chartInstance.update();
-            console.log("DEBUG: Chart updated for language change.");
         }
 
-        console.log("DEBUG: UI Translation complete.");
     }
 
     function calculateAdvancedHormoneAnalytics() {
@@ -1738,7 +1733,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try { settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { console.warn('[saveThemeSetting] Corrupt settings in localStorage, resetting:', e); }
         settings.theme = currentTheme;
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-        console.log("DEBUG: Theme setting saved:", currentTheme);
     }
 
     function loadThemeSetting() {
@@ -1757,7 +1751,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (themeSelect) {
             themeSelect.value = currentTheme;
         }
-        console.log("DEBUG: Theme setting loaded:", currentTheme);
     }
 
     // ** NEW ** Debounce function for performance on resize events
@@ -3343,7 +3336,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderSvTab() {
         if (!svGrid) return; // SV 탭이 아니면 실행 안 함
 
-        console.log("DEBUG: Rendering SV Tab Cards...");
         renderShortcutCard();
         renderHighlightsCard();
         renderGuideCard();
@@ -3749,7 +3741,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleThemeChange(event) {
         currentTheme = event.target.value;
-        console.log("DEBUG: Theme changed to", currentTheme);
         saveThemeSetting();
         applyTheme();
         showPopup('popupSettingsSaved');
@@ -3781,7 +3772,6 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedMetrics = Array.isArray(settings.selectedMetrics) ? settings.selectedMetrics : ['weight'];
         notificationEnabled = settings.notificationEnabled;
         biologicalSex = settings.biologicalSex;
-        console.log("DEBUG: Settings loaded", isDefault ? '(defaults)' : '', settings);
 
         // Update UI elements after loading settings
         if (languageSelect) languageSelect.value = currentLanguage;
@@ -3877,7 +3867,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!note.timestamp) { note.timestamp = note.createdAt || note.id || Date.now(); needsSave = true; }
                 });
                 if (needsSave) {
-                    console.log("DEBUG: Data migration applied (week numbers/timestamps/note IDs). Saving updated data.");
                     savePrimaryDataToStorage();
                 }
 
@@ -3889,9 +3878,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         console.error('Error applying last medications after load:', error);
                     }
                 }
-                console.log("DEBUG: Primary data loaded.", { measurements: measurements.length, targets: Object.keys(targets).length, notes: notes.length });
             } else {
-                console.log("DEBUG: No primary data found in storage.");
                 measurements = []; targets = {}; notes = [];
             }
         } catch (e) {
@@ -3914,7 +3901,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         navigator.serviceWorker.ready.then(registration => {
-            console.log("DEBUG: Checking for service worker update...");
 
             let updateFound = false;
             // Listen for the update event
@@ -3960,13 +3946,12 @@ document.addEventListener('DOMContentLoaded', () => {
         measurements.forEach((m, index) => {
             if (m.week !== index) { m.week = index; weeksChanged = true; }
         });
-        if (weeksChanged) { console.log("DEBUG: Recalculated week numbers based on entry index."); }
+        if (weeksChanged) { }
         return weeksChanged;
     }
 
 
     function applyModeToUI() {
-        console.log("DEBUG: Applying mode to UI:", currentMode);
         bodyElement.classList.remove('mode-mtf', 'mode-ftm');
         bodyElement.classList.add(`mode-${currentMode}`);
 
@@ -4163,7 +4148,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- History Tab Rendering ---
     function renderHistoryTable() {
-        console.log("DEBUG: -> renderHistoryTable");
         if (!myHistoryTableContainer) return;
         if (!measurements || measurements.length === 0) {
             clearElement(myHistoryTableContainer, "noDataYet"); return;
@@ -4222,7 +4206,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             tableHTML += '</tbody></table>';
             myHistoryTableContainer.innerHTML = tableHTML;
-            console.log("DEBUG: <- renderHistoryTable complete");
         } catch (e) {
             console.error(" Error rendering history table:", e);
             myHistoryTableContainer.innerHTML = `<p style="color: red;">${translate('alertGenericError')}</p>`;
@@ -4768,7 +4751,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 interaction: { mode: 'nearest', axis: 'x', intersect: false }
             }
         });
-        console.log("DEBUG: Chart rendered/updated.");
       } catch (e) {
         console.error('renderChart error:', e);
       }
@@ -5084,7 +5066,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const weekNum = entry.week ?? index;
             if (confirm(translate('confirmDeleteRecord', { week: weekNum, date: formatTimestamp(entry.timestamp || entry.date, false) }))) { // Use updated confirm key
                 measurements.splice(index, 1);
-                console.log("DEBUG: Measurement deleted at index", index);
                 savePrimaryDataToStorage();
                 renderAll();
                 showPopup('popupDeleteSuccess');
@@ -5096,7 +5077,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleEditClick(index) {
         if (index >= 0 && index < measurements.length) {
             const measurementToEdit = measurements[index];
-            console.log("DEBUG: Editing measurement at index", index, measurementToEdit);
 
             [...baseNumericKeys, ...textKeys, 'date'].forEach(key => { // Add date key
                 const input = form.querySelector(`[name="${key}"]`); // Find by camelCase name
@@ -5146,7 +5126,11 @@ document.addEventListener('DOMContentLoaded', () => {
             updateFormTitle();
             if (saveUpdateBtn) saveUpdateBtn.innerHTML = translate('edit');
             if (cancelEditBtn) cancelEditBtn.style.display = 'inline-block';
-            navigateToTab('tab-record');
+            // Navigate to SV first to prevent accidental form submit, then to record
+            navigateToTab('tab-sv');
+            requestAnimationFrame(() => {
+                navigateToTab('tab-record');
+            });
             setTimeout(() => {
                 form.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 const firstVisibleInput = form.querySelector('fieldset:not([style*="display: none"]) input, fieldset:not([style*="display: none"]) textarea');
@@ -5156,7 +5140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Cancel Edit
-    function cancelEdit() { resetFormState(); console.log("DEBUG: Edit cancelled."); }
+    function cancelEdit() { resetFormState(); }
 
     // Reset form
     function resetFormState() {
@@ -5286,7 +5270,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         Object.keys(updatedTargets).forEach(key => { if (updatedTargets[key] === null) delete updatedTargets[key]; }); // Clean nulls
         targets = updatedTargets;
-        console.log("DEBUG: Targets saved", targets);
         savePrimaryDataToStorage();
         showPopup('popupTargetSaveSuccess');
         navigateToTab('tab-sv');
@@ -5296,7 +5279,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle Language Change
     function handleLanguageChange(event) {
-        currentLanguage = event.target.value; console.log("DEBUG: Language changed to", currentLanguage);
+        currentLanguage = event.target.value;
 
         syncModuleLanguage(currentLanguage);
 
@@ -5336,7 +5319,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle Mode Change
     function handleModeChange(event) {
-        currentMode = event.target.value; console.log("DEBUG: Mode changed to", currentMode);
+        currentMode = event.target.value;
 
         // 증상 선택기 모드 업데이트
         if (window.symptomSelector) {
@@ -5361,7 +5344,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Reset All Data
     function handleResetData() {
         if (confirm(translate('confirmReset'))) {
-            console.log("DEBUG: Resetting all data.");
 
             localStorage.removeItem(PRIMARY_DATA_KEY);
 
@@ -5393,7 +5375,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const a = document.createElement('a'); const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             a.href = url; a.download = `ShiftV_Backup_${timestamp}.json`;
             document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-            console.log("DEBUG: Data exported."); showPopup('popupDataExportSuccess');
+            showPopup('popupDataExportSuccess');
         } catch (e) { console.error("Error exporting data:", e); showPopup('alertExportError'); }
     }
 
@@ -5482,7 +5464,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (!note.timestamp) note.timestamp = note.createdAt || note.id || Date.now();
                     });
                     savePrimaryDataToStorage(); saveSettingsToStorage();
-                    console.log("DEBUG: Data imported successfully."); showPopup('popupDataImportSuccess');
                     applyModeToUI(); applyLanguageToUI(); applyTheme();
                     if (sexSelect) sexSelect.value = biologicalSex;
                     updateCycleTrackerVisibility();
@@ -5500,7 +5481,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Tab Activation ---
     function activateTab(targetTabId) {
         if (!tabBar) return;
-        console.log("DEBUG: Activating tab:", targetTabId);
 
         const targetButton = tabBar.querySelector(`[data-tab="${targetTabId}"]`);
         if (!targetButton) {
@@ -5552,7 +5532,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Global Render Function ---
     function renderAll() {
-        console.log("DEBUG: === renderAll triggered ===");
 
         // 개별 렌더링 함수들을 각각 try-catch로 감싸서, 하나가 실패해도 나머지는 그리도록 합니다.
 
@@ -5574,13 +5553,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try { renderSvTab(); } catch (e) { console.error("SV Tab Error", e); }
         }
 
-        console.log("DEBUG: === renderAll complete ===");
     }
 
     // ===============================================
     // Initialization
     // ===============================================
-    console.log("DEBUG: App Initialization Start");
     try {
         try {
             if (history && typeof history.pushState === 'function') {
@@ -5599,9 +5576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isIOS()) { bodyElement.classList.add('ios-device'); }
 
         if (!isInitialSetupDone) {
-            console.log("DEBUG: Initial setup required.");
         } else {
-            console.log("DEBUG: Initial setup already done.");
             applyModeToUI();
             applyLanguageToUI();
             loadPrimaryDataFromStorage();
@@ -5627,7 +5602,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn("DEBUG: matchMedia listener setup failed", e);
         }
 
-        console.log("DEBUG: App Initialization Sequence Complete");
 
         // Onboarding check — show on first run
         try {
@@ -5707,14 +5681,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
-                    console.log("DEBUG: Notification permission granted.");
                     notificationEnabled = true;
                     saveSettingsToStorage();
                     showPopup('popupSettingsSaved');
                     // ▼▼▼▼▼ 아래 함수 호출을 추가합니다. ▼▼▼▼▼
                     showConfirmationNotification(); // 설정 완료 확인 알림 표시
                 } else {
-                    console.log("DEBUG: Notification permission denied.");
                     notificationEnabled = false;
                     notificationToggle.checked = false;
                     saveSettingsToStorage();
@@ -5723,14 +5695,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             notificationEnabled = false;
             saveSettingsToStorage();
-            console.log("DEBUG: Notifications disabled by user.");
             showPopup('popupSettingsSaved');
         }
     }
     // ===============================================
     // Event Listener Setup
     // ===============================================
-    console.log("DEBUG: Setting up event listeners...");
     try {
         // Tab Bar - 해시 라우팅을 통한 탭 전환
         tabBar.addEventListener('click', (e) => {
@@ -5770,7 +5740,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         if (editBtn) {
                             handleEditClick(index);
-                            navigateToTab('tab-record');
                         } else if (deleteBtn) {
                             handleDeleteMeasurement(index);
                         }
@@ -6037,7 +6006,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (editBtn) {
                     handleEditClick(index);
-                    navigateToTab('tab-record');
                 } else if (deleteBtn) {
                     handleDeleteMeasurement(index);
                 }
@@ -6807,7 +6775,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sexSelect) {
             sexSelect.addEventListener('change', (event) => {
                 biologicalSex = event.target.value;
-                console.log("DEBUG: Biological sex changed to", biologicalSex);
                 saveSettingsToStorage();
                 showPopup('popupSettingsSaved');
                 renderAll(); // 계산식에 영향을 주므로 다시 렌더링
@@ -6939,7 +6906,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setupCarouselSwipeGuard('sv-card-hormones');
 
 
-        console.log("DEBUG: Event listeners setup complete.");
     } catch (listenerError) {
         console.error(" Event listener setup error:", listenerError);
         alert(translate('alertListenerError') || `Event Listener Error: ${listenerError.message}`);

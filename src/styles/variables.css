@@ -92,6 +92,8 @@
     --z-index-modal: 1050;
     --z-index-popover: 1060;
     --z-index-tooltip: 1070;
+    --z-index-notif-panel: 1080;
+    --z-index-overlay-top: 1090;
 
     /* ==================== */
     /* Breakpoints (M3 Adaptive Layout) */

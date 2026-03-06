@@ -1,77 +1,270 @@
-# ShiftV 최적화 및 라우팅 도입 작업 계획서 (Phase-by-Phase To-Do)
+# ShiftV 마스터 To-Do — Phase별 실행 계획
 
-본 문서는 `script.js`(전체 약 7300줄)의 방대한 컨텍스트와 기존 UI의 안전성을 최우선으로 고려하여 작성된 **점진적(Phase) 리팩토링 및 기능 수정 로드맵**입니다. 
-각 Phase는 한 번에 처리 가능한 코드 수정량(컨텍스트 크기)과 연관성(모듈/기능)을 기준으로 분할되었습니다.
-
----
-
-## 🚦 Phase 1: 기반 마련 및 긴급 이슈 해결 (Low Risk / High Priority) ✅ 완료
-- **목표**: 앱의 구동에 직접적인 영향을 주지 않는 유틸리티성 코드들을 먼저 분리하고, 가장 시급한 로그인 라우팅(리다이렉트 후처리) 문제를 최우선으로 해결합니다.
-
-1. **상수 및 유틸리티 추출 (`src/constants.js`, `src/utils.js`)**
-   - [x] `PRIMARY_DATA_KEY`, `SETTINGS_KEY`, `bodySizeKeys` 등 데이터 키 관련 상수 `src/constants.js`로 분리 → `script.js`에서 import
-   - [x] `isIOS()`, `normalizeSymptomsArray()`, `symptomsSignature()`, `getCssVar()` 등 독립적인 순수 함수 `src/utils.js`로 이동 → `script.js`에서 import
-   - [x] `healthKeys`는 미사용(dead code)으로 확인되어 제거
-2. **구글 리다이렉트 로그인 이슈 핫픽스 (`src/firebase/auth.js`)**
-   - [x] 파이어베이스 인증 로직(`signInWithPopup`, `signInWithRedirect`, `handleRedirectResult`, `onAuthStateChanged` 등)을 `auth.js`로 추출 완료.
-   - [x] 🚨 앱 진입 직후(DOMContentLoaded 최상단) `handleRedirectResult()`를 호출하여 리다이렉트 성공 시 메인 대시보드(`#sv`)로 이동하도록 구현.
-3. **Phase 1 통합 테스트**
-   - [x] `vite build` 성공 확인 (빌드 에러 없음)
-   - [ ] 모바일/PWA에서 구글 로그인 시 리다이렉트가 초기화면 루프에 빠지지 않고 정상 접속되는지 확인 (수동 테스트 필요)
+**작성일:** 2026-03-06  
+**기준 커밋:** `10d4839`  
+**총 추정:** 6 Phase, 순차 진행  
 
 ---
 
-## 🚄 Phase 2: 해시 라우팅 시스템 도입 및 탭 제어 분리 (Medium Risk / Core Change)
-- **목표**: SPA(Single Page Application)로서의 뼈대인 라우팅을 구축하여 뒤로가기 문제를 해결하고, 전역에 산재된 탭 전환 로직을 하나로 통합합니다. 
+## 🔴 Phase 1: 긴급 버그 수정 & 안정화 (1~2일)
+> **목표:** 사용자가 바로 체감하는 크래시/이상동작 제거
 
-1. **라우터 생성 (`src/core/router.js`)**
-   - [ ] `window.addEventListener('hashchange')`를 기반으로 한 중앙 라우터 함수 구현
-   - [ ] URI 해시(`/#sv`, `/#record`, `/#settings` 등)에 따라 적절한 탭/화면을 렌더링하도록 매핑 로직 작성
-2. **기존 탭 전환 로직 치환 (`script.js` 일부 수정)**
-   - [ ] 현재 바닐라 JS로 `tab.addEventListener('click', ... display:block;)` 파트를 거둬내고, 단순히 `window.location.hash`를 변경하도록 버튼 이벤트 치환
-3. **모달(Modal) 상태의 라우팅 연동 (선택사항, 필요시)**
-   - [ ] 특정 모달 창이 열릴 때 라우터에 파라미터를 추가(`/#sv/hormone-modal` 형태)하여 뒤로가기 시 앱이 꺼지지 않고 모달만 닫히도록 개선
-4. **Phase 2 통합 테스트**
-   - [ ] 안드로이드 기기에서 여러 탭과 모달을 이동한 후 '뒤로 가기' 버튼을 눌렀을 때 앱이 종료되지 않고 정상적인 화면 전환이 이루어지는지 집중 테스트
+### 1-1. 중복 이벤트 리스너 제거
+- [ ] `svCardTargets` — L5949의 빈 핸들러(`// 기존 코드 생략`) 삭제, L6008의 모달 핸들러만 유지
+- [ ] `svCardShortcut` — L6068의 `activateTab('tab-record')` 중복 핸들러 삭제 (L6000의 `navigateToTab` 유지)
 
----
+### 1-2. 라우터 완전 적용 (activateTab → navigateToTab)
+- [ ] L5050 — 측정 저장 후 SV 탭 이동
+- [ ] L5143 — 측정 편집 클릭 후 Record 탭 이동
+- [ ] L5286 — 목표 저장 후 SV 탭 이동
+- [ ] L5483 — 데이터 가져오기 후 My 탭 이동
+- [ ] L5605 — 앱 초기화 시 SV 탭 활성화
+- [ ] L5657 — 온보딩 완료 후 SV 탭 이동
+- [ ] L5767 — 히스토리 모달 편집 버튼 → Record 탭
+- [ ] L6039 — My탭 편집 버튼 → Record 탭
+- [ ] L6172 — FAB 다이어리 버튼 → Diary 탭
 
-## 🏗️ Phase 3: 핵심 뷰(View) 렌더링 로직 분리 (High Context / Medium Risk)
-- **목표**: 가장 코드량이 길고 DOM 변화가 많은 '측정 기록 화면'과 '보고서(SV) 화면'의 HTML 주입(`.innerHTML`) 및 이벤트 리스너 로직을 밖으로 뺍니다.
+### 1-3. 무방어 JSON.parse 보호
+- [ ] L1737, L1744 — `saveThemeSetting/loadThemeSetting` try-catch 래핑
+- [ ] L6414, L6415 — PDF 보고서 내 diary/quests 파싱 보호
+- [ ] L6551 — 알림 체크 내 PRIMARY_DATA_KEY 파싱 보호
 
-1. **측정 기록 탭 로직 추출 (`src/ui/tabs/record-tab.js`)**
-   - [ ] `measurement-form` DOM 요소에 붙은 온갖 입력 필드 검증 로직, 증상 추가/수정, 약물 컨테이너 동적 생성 코드 등을 이 파일로 이동
-2. **메인 리포트 탭 렌더링 로직 추출 (`src/ui/tabs/sv-tab.js`)**
-   - [ ] `renderPersonaCard`, `renderQuestCard`, `calculateAdvancedHormoneAnalytics()` 기반의 호르몬 카드, 건강 분석 카드 등 복잡한 HTML 스트링 생성 코드 일괄 분리
-3. **Phase 3 코드 정리 (`script.js` 다이어트)**
-   - [ ] 위 두 개의 뷰 파일이 분리되면 `script.js` 컨텍스트가 40~50% 정도로 크게 줄어듦. 분리된 함수들의 `import` 구문 점검
-
----
-
-## 🎯 Phase 4: 모듈성 강화 및 차트/테이블 컴포넌트화 (Medium Context / Medium Risk)
-- **목표**: 여러 탭에서 재사용되는 UI 컴포넌트(차트, 표 렌더링, 페이지네이션)를 클래스(Class)나 모듈 패턴으로 리팩토링합니다.
-
-1. **차트 엔진 캡슐화 (`src/ui/charts/chart-manager.js`)**
-   - [ ] `Chart.js` 인스턴스의 생성(`new Chart(...)`) 및 파기(`destroy()`), 줌 플러그인 설정 등을 담당하는 객체/클래스 작성.
-2. **테이블 및 리스트 생성기 분리 (`src/ui/components/table-renderer.js`)**
-   - [ ] '마이(My) 탭'의 거대한 테이블 생성 코드(`document.createElement('table')` 루프 도는 부분) 캡슐화.
-3. **데이터 매니저 생성 (`src/core/data-manager.js`)**
-   - [ ] `measurements`, `targets` 배열과 이 데이터를 localStorage/IndexedDB 등에 저장/불러오기(Sync) 하는 로직 분리 (수정 및 읽기는 모두 DataManager를 통하도록 변경)
+### 1-4. 빈 catch 블록 → 최소 console.warn 추가
+- [ ] **High 우선순위** 5개: L2494(호르몬 리포트), L4089(히스토리 테이블), L4090(My 히스토리), L4117, L4118
+- [ ] **Medium** 2개: L2366(약물 이름 맵), L6687(AI 키 atob)
+  
+### 1-5. 빌드 + 테스트 + 커밋
+- [ ] `npm run build` 확인
+- [ ] 모바일/데스크탑 수동 테스트 (탭 전환, 뒤로가기, 모달 열기/닫기)
+- [ ] Git 커밋 + upstream push
 
 ---
 
-## 🛠️ Phase 5: 최종 최적화 및 번들링 (Low Risk / Polish)
-- **목표**: 앱의 구동 성능 및 다이얼로그 시스템 구조 등, 사용자 경험(UX) 최적화
+## 🟡 Phase 2: 코드 품질 & 기술 부채 정리 (2~3일)
+> **목표:** 프로덕션 품질 확보, 데드코드 제거, 성능 개선 기반 마련
 
-1. **팝업/다이얼로그 컨트롤러 통합 (`src/ui/components/modal-system.js`)**
-   - [ ] 곳곳에 흩어진 `openModal()`, `closeModal()`, "배경 누르면 다이얼로그 닫기" 로직 등 중앙 집중화
-   - [ ] `<dialog>` 태그를 활용한 네이티브 다이얼로그 방식으로 업그레이드 검토
-2. **Chart.js 및 외부 라이브러리 Lazy Loading 적용 (Performance 향상)**
-   - [ ] `index.html` 상의 차트 라이브러리 스크립트 삭제 후, SV 탭 등 실제로 차트를 그릴 때만 `import(...)` 형태로 동적 로딩하여 앱의 첫 화면 렌더링(TTI) 속도 파격적 개선
-3. **안 쓰는 레거시 코드 및 하드코딩된 HTML/CSS 찌꺼기 제거**
+### 2-1. DEBUG 콘솔로그 제거
+- [ ] script.js 내 48개 `console.log("DEBUG: ...")` 제거 또는 `if(DEBUG)` 플래그 뒤로 이동
+- [ ] vite.config.js에 `esbuild.drop: ['console']` 옵션 검토 (프로덕션 빌드에서 자동 제거)
+
+### 2-2. 데드코드 정리
+- [ ] `src/data-manager.js` (루트, 529줄) 삭제 — 아무데서도 import 안 됨
+- [ ] `service-worker.js` 캐시 목록에서 `src/data-manager.js` 제거
+- [ ] script.js 내 이미지 압축 인라인 코드(L27-63) 삭제 → `src/data/image-compress.js` 사용으로 통일
+
+### 2-3. z-index 체계 정리
+- [ ] `z-index: 9999` 2곳(style.css L8588, L8988) → 적절한 토큰 사용으로 변경
+- [ ] `calc(var(--z-index-fixed) + 50)` → 전용 토큰 `--z-index-notif-panel` 신설
+- [ ] `--z-index-modal-backdrop` 미사용 → 실제 모달에 적용하거나 제거
+- [ ] `calc(var(--z-index-modal) + 10)` → `--z-index-popover` 사용으로 변경
+
+### 2-4. 이벤트 리스너 정리
+- [ ] 모달 콘텐츠에 붙는 리스너 → 모달 close 시 cleanup 추가 (filterContainer, tabSwitcher 등)
+- [ ] 차트 레전드 핸들러 중복 등록 방지 (렌더 함수 내 → 초기화 1회로)
+
+### 2-5. i18n 하드코딩 정리 (1차)
+- [ ] index.html의 주요 하드코딩 한국어 → `data-lang-key` 변환 (상위 50개)
+- [ ] script.js의 UI 문자열 중 한국어 → translate() 호출로 변환
+
+### 2-6. 빌드 + 테스트 + 커밋
 
 ---
 
-> **💡 진행 가이드**
-> *   각 Phase의 작업이 끝날 때마다 정상 작동 여부를 앱에서 바로 테스트하고, 이상이 없으면 Git Commit(또는 백업)을 남긴 후 다음 Phase로 이동하는 것을 추천합니다. 
-> *   가장 먼저 **Phase 1** 진행을 시작할까요?
+## 🟢 Phase 3: script.js 분할 & 아키텍처 개선 (3~5일)
+> **목표:** 모놀리스를 관리 가능한 크기로 분할, 유지보수성 대폭 향상
+
+### 3-1. SV 탭 분리 (`src/ui/tabs/sv-tab.js`)
+- [ ] `renderSvTab()` 및 관련 카드 렌더링/이벤트 로직 추출 (~500줄)
+- [ ] 위젯 클릭 핸들러 전부 이동
+- [ ] script.js에서 import + 호출로 대체
+
+### 3-2. My 탭 분리 (`src/ui/tabs/my-tab.js`)
+- [ ] `renderMyHistoryView()`, 히스토리 테이블, 목표 입력 UI 추출 (~800줄)
+- [ ] 테이블 페이지네이션 로직 포함
+
+### 3-3. Settings 탭 분리 (`src/ui/tabs/settings-tab.js`)
+- [ ] 설정 폼 이벤트, 테마/언어/동기화 설정 추출 (~400줄)
+
+### 3-4. Record 탭 완전 분리 (`src/ui/tabs/record-tab.js`)  
+- [ ] `record-tab-helpers.js`와 합병하여 완전한 탭 모듈로 만들기
+- [ ] 측정 폼 검증, 약물/증상 컨테이너 동적 생성 코드 이동 (~600줄)
+
+### 3-5. 차트 매니저 캡슐화 (`src/ui/charts/chart-manager.js`)
+- [ ] Chart.js 인스턴스 생성/파기/줌 설정 통합
+- [ ] 호르몬 차트, 비교 차트, 메인 차트 → 통합 클래스
+
+### 3-6. script.js 다이어트 목표
+- [ ] 분리 후 script.js → **3,000줄 이하** 목표 (초기화, 글로벌 이벤트, import 연결만)
+
+### 3-7. 빌드 + 전체 탭 수동 테스트 + 커밋
+
+---
+
+## 🔵 Phase 4: 프리미엄 & 결제 시스템 (5~7일)
+> **목표:** 수익화 기반 구축, 구독 관리, 기능 게이팅
+
+### 4-1. Firebase Functions 백엔드 구축
+- [ ] Firebase Functions 프로젝트 초기화
+- [ ] Stripe/Paddle webhook 엔드포인트 구현
+- [ ] `users/{uid}/subscription` Firestore 스키마 설계
+
+### 4-2. PremiumManager 클라이언트 모듈
+- [ ] `src/premium/premium-manager.js` 생성
+  - 구독 상태 캐싱 (localStorage + Firestore)
+  - `isPremium()`, `canUseFeature(featureName)` API
+  - 구독 만료/갱신 자동 체크
+- [ ] `src/premium/paywall-modal.js` — 프리미엄 기능 클릭 시 결제 유도 모달
+
+### 4-3. 기능 게이팅 적용
+- [ ] AI 분석 → 프리미엄 전용
+- [ ] PDF 보고서 → 무료 월1회, 프리미엄 무제한
+- [ ] 고급 건강 분석 (약물안전, 트렌드예측) → 프리미엄
+- [ ] 데이터 내보내기 → 프리미엄
+- [ ] 프리미엄 테마 컬러팩
+- [ ] 목표 개수 제한 (무료 3개)
+
+### 4-4. 구독 관리 UI
+- [ ] Settings 탭에 "구독 관리" 섹션 추가
+- [ ] 플랜 비교 화면
+- [ ] 영수증/구독 이력 표시
+- [ ] 구독 취소 플로우
+
+### 4-5. 웹 결제 (Stripe/Paddle)
+- [ ] 결제 페이지/모달 구현
+- [ ] 성공/실패 핸들링
+- [ ] 서버리스 구독 상태 동기화
+
+### 4-6. 광고 시스템 (무료 사용자)
+- [ ] 비침입 배너 위치 선정 (Settings 탭 하단, 로드맵 하단 등)
+- [ ] 광고 SDK 연동 (AdMob 웹 or 대체)
+- [ ] 프리미엄 사용자 광고 제거 로직
+
+### 4-7. 테스트 + 커밋
+
+---
+
+## 🟣 Phase 5: 네이티브 앱 패키징 & 스토어 배포 (5~7일)
+> **목표:** Capacitor로 네이티브 래핑, Android/iOS 스토어 출시
+
+### 5-1. Capacitor 초기 설정
+- [ ] `npm install @capacitor/core @capacitor/cli`
+- [ ] `npx cap init ShiftV com.shiftv.app`
+- [ ] `vite build` → `npx cap sync` 파이프라인 구축
+- [ ] npm scripts에 `build:android`, `build:ios` 추가
+
+### 5-2. Android 앱
+- [ ] `npx cap add android`
+- [ ] Android Studio에서 빌드 확인
+- [ ] 앱 아이콘 설정 (기존 android/ 에셋 활용)
+- [ ] 스플래시 스크린 설정
+- [ ] APK/AAB 서명 설정
+
+### 5-3. iOS 앱
+- [ ] `npx cap add ios`
+- [ ] Xcode에서 빌드 확인
+- [ ] 앱 아이콘 + 런치 스크린 설정
+- [ ] Provisioning Profile / Certificate 설정
+
+### 5-4. 네이티브 기능 추가
+- [ ] 푸시 알림 (`@capacitor/push-notifications`)
+- [ ] 로컬 알림 (`@capacitor/local-notifications`) — 측정 리마인더
+- [ ] 생체 인증 (`capacitor-native-biometric`) — 앱 잠금
+- [ ] 상태바/내비게이션바 스타일링 (`@capacitor/status-bar`)
+
+### 5-5. 앱 내 결제 (IAP)
+- [ ] `capacitor-purchases` (RevenueCat) 또는 직접 IAP 플러그인
+- [ ] PremiumManager와 연동 (웹 Stripe와 통합 구독 상태)
+
+### 5-6. Google Play 스토어 출시
+- [ ] Google Play Console 개발자 계정 ($25)
+- [ ] 스토어 리스팅 (설명, 스크린샷, 분류)
+- [ ] 개인정보정책 페이지 URL
+- [ ] 건강 앱 면책조항
+- [ ] IARC 연령등급 설문
+- [ ] 내부 테스트 → 오픈 테스트 → 프로덕션 출시
+
+### 5-7. Apple App Store 출시
+- [ ] Apple Developer Program 등록 ($99/년)
+- [ ] App Store Connect 앱 생성
+- [ ] 스크린샷 (6.7", 6.5", 5.5")
+- [ ] App Privacy Labels (건강 데이터 카테고리)
+- [ ] 심사 제출 (Health 카테고리 주의)
+
+### 5-8. 개인정보정책 & 이용약관
+- [ ] 한국어/영어/일본어 개인정보정책 페이지 작성
+- [ ] 이용약관 페이지 작성
+- [ ] 건강 데이터 수집/처리 관련 동의 플로우 구현
+- [ ] "의료 조언이 아닙니다" 면책조항 앱 내 표시
+
+---
+
+## ⚪ Phase 6: 최종 안정화 & 폴리시 (지속)
+> **목표:** 프로덕션 품질 확보, 사용자 경험 극대화
+
+### 6-1. 성능 최적화
+- [ ] Chart.js CDN → 동적 import(`import()`)로 Lazy Loading 전환 → 초기 로딩 50%+ 개선
+- [ ] service-worker.js 이중화 해소 (VitePWA만 사용하도록 정리)
+- [ ] 이미지 lazy loading 전면 적용 (`loading="lazy"`)
+- [ ] CSS 코드분할 검토 (컴포넌트별 CSS 분리)
+- [ ] Lighthouse 성능 점수 90+ 목표
+
+### 6-2. 접근성 (Accessibility)
+- [ ] 전체 이미지 `alt` 속성 확인
+- [ ] 폼 입력 → `<label>` 연결 확인
+- [ ] ARIA 속성 점검 (모달, 탭, 알림)
+- [ ] 키보드 네비게이션 지원 확인
+- [ ] 색상 대비 비율 WCAG AA 확인
+
+### 6-3. PWA 강화
+- [ ] manifest.json에 `screenshots` 추가 → Chrome 리치 설치 UI
+- [ ] 전용 maskable 아이콘 제작 (safe-zone 적용)
+- [ ] `dir: "ltr"` 추가
+- [ ] 오프라인 페이지 개선 (현재 캐시 미스 시 빈 화면)
+
+### 6-4. 보안 강화
+- [ ] CSP(Content Security Policy) 헤더 설정
+- [ ] localStorage 데이터 무결성 검증 로직 추가
+- [ ] Firebase Security Rules 강화 검토
+
+### 6-5. 추가 언어 지원
+- [ ] 중국어(간체/번체) 추가 검토
+- [ ] 스페인어/포르투갈어 추가 검토
+- [ ] i18n:translate 자동번역 파이프라인 활용
+
+### 6-6. 사용자 피드백 시스템
+- [ ] 앱 내 피드백/버그 리포트 기능
+- [ ] 앱 평점 요청 (네이티브 앱용 in-app review)
+- [ ] 변경 로그 (What's New) 표시
+
+### 6-7. 모니터링 & 분석
+- [ ] Firebase Analytics 연동 (사용 패턴 추적)
+- [ ] Firebase Crashlytics 연동 (크래시 리포팅)
+- [ ] 구독 전환율, DAU/MAU 대시보드
+
+---
+
+## 📅 타임라인 요약
+
+```
+2026년 3월
+├── Week 1: Phase 1 (긴급 버그 수정) ← 최우선
+├── Week 2: Phase 2 (코드 품질 정리)
+└── Week 3-4: Phase 3 (script.js 분할)
+
+2026년 4월
+├── Week 1-2: Phase 4 (프리미엄 & 결제)
+└── Week 3-4: Phase 5 (네이티브 앱 & 스토어 배포)
+
+2026년 5월~
+└── Phase 6 (지속적 안정화 & 폴리시)
+```
+
+---
+
+## 🎯 우선순위 원칙
+
+1. **안정성 > 기능** — 기존 버그를 먼저 잡고, 새 기능은 그 다음
+2. **점진적 변경** — 한 번에 하나의 모듈. 매 Phase 끝에 빌드+테스트+커밋
+3. **사용자 영향도** — 크래시/데이터 손실 > UI 깨짐 > 성능 > 코드 품질
+4. **수익화 병행** — Phase 4(결제)는 Phase 3(분할)과 병행 가능
+5. **테스트 필수** — 탭 전환, 뒤로가기, 모달, 데이터 저장/불러오기는 매번 확인

@@ -1734,7 +1734,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 테마 설정 함수 ---
     function saveThemeSetting() {
-        const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+        let settings = {};
+        try { settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { console.warn('[saveThemeSetting] Corrupt settings in localStorage, resetting:', e); }
         settings.theme = currentTheme;
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
         console.log("DEBUG: Theme setting saved:", currentTheme);
@@ -1743,8 +1744,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadThemeSetting() {
         const storedSettings = localStorage.getItem(SETTINGS_KEY);
         if (storedSettings) {
-            const settings = JSON.parse(storedSettings);
-            currentTheme = settings.theme || 'system';
+            try {
+                const settings = JSON.parse(storedSettings);
+                currentTheme = settings.theme || 'system';
+            } catch (e) {
+                console.warn('[loadThemeSetting] Corrupt settings in localStorage:', e);
+                currentTheme = 'system';
+            }
         } else {
             currentTheme = 'system'; // 기본값
         }
@@ -2363,7 +2369,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         <div class="drug-grid">`;
 
-                    try { ensureMedicationNameMap(); } catch { }
+                    try { ensureMedicationNameMap(); } catch (e) { console.warn('[Analysis] Medication name map load failed:', e); }
 
                     const translateIfExists = (key) => {
                         const t = translate(key);
@@ -2491,12 +2497,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 ensureMedicationNameMap().then(map => {
                     if (!map) return;
                     if (!hormoneModalOverlay?.classList?.contains('visible')) return;
-                    try { renderHormoneReport(); } catch { }
+                    try { renderHormoneReport(); } catch (e) { console.warn('[HormoneReport] Re-render after medication map failed:', e); }
                 });
             } else {
                 ensureMedicationNameMap();
             }
-        } catch { }
+        } catch (e) { console.warn('[HormoneReport] Medication name map init failed:', e); }
         const translateIfExists = (key) => {
             const t = translate(key);
             return t && t !== key ? t : null;
@@ -4086,8 +4092,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
         symptomLabelMapPromise.then(() => {
-            try { renderHistoryTable(); } catch { }
-            try { renderMyHistoryView(); } catch { }
+            try { renderHistoryTable(); } catch (e) { console.warn('[History] renderHistoryTable failed after symptom map load:', e); }
+            try { renderMyHistoryView(); } catch (e) { console.warn('[History] renderMyHistoryView failed after symptom map load:', e); }
         });
 
         return symptomLabelMapPromise;
@@ -4114,8 +4120,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
         medicationNameMapPromise.then(() => {
-            try { renderHistoryTable(); } catch { }
-            try { renderMyHistoryView(); } catch { }
+            try { renderHistoryTable(); } catch (e) { console.warn('[History] renderHistoryTable failed after medication map load:', e); }
+            try { renderMyHistoryView(); } catch (e) { console.warn('[History] renderMyHistoryView failed after medication map load:', e); }
         });
 
         return medicationNameMapPromise;
@@ -5047,7 +5053,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 measurements.push(fullMeasurementData);
                 showPopup('popupSaveSuccess');
             }
-            activateTab('tab-sv');
+            navigateToTab('tab-sv');
             measurements.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
             calculateAndAddWeekNumbers();
         }
@@ -5140,7 +5146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateFormTitle();
             if (saveUpdateBtn) saveUpdateBtn.innerHTML = translate('edit');
             if (cancelEditBtn) cancelEditBtn.style.display = 'inline-block';
-            activateTab('tab-record');
+            navigateToTab('tab-record');
             setTimeout(() => {
                 form.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 const firstVisibleInput = form.querySelector('fieldset:not([style*="display: none"]) input, fieldset:not([style*="display: none"]) textarea');
@@ -5283,7 +5289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("DEBUG: Targets saved", targets);
         savePrimaryDataToStorage();
         showPopup('popupTargetSaveSuccess');
-        activateTab('tab-sv');
+        navigateToTab('tab-sv');
         renderAllComparisonTables();
     }
 
@@ -5480,7 +5486,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     applyModeToUI(); applyLanguageToUI(); applyTheme();
                     if (sexSelect) sexSelect.value = biologicalSex;
                     updateCycleTrackerVisibility();
-                    setupTargetInputs(); renderAll(); activateTab('tab-my');
+                    setupTargetInputs(); renderAll(); navigateToTab('tab-my');
                 } else { console.error("Import failed: Invalid file structure."); showPopup('alertImportInvalidFile', 4000); }
             } catch (err) { console.error("Error parsing imported file:", err); showPopup('alertImportReadError', 4000); }
             finally { if (importFileInput) importFileInput.value = ''; }
@@ -5602,7 +5608,7 @@ document.addEventListener('DOMContentLoaded', () => {
             checkAndRequestNotification();
             applyTheme();
             renderAll();
-            activateTab('tab-sv');
+            navigateToTab('tab-sv');
         }
 
         try {
@@ -5654,7 +5660,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             applyModeToUI();
                             applyLanguageToUI();
                             renderAll();
-                            activateTab('tab-sv');
+                            navigateToTab('tab-sv');
 
                             // 다이어리 탭이 이미 초기화됐으면 데이터 새로고침
                             if (window.diaryTab) {
@@ -5764,7 +5770,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         if (editBtn) {
                             handleEditClick(index);
-                            activateTab('tab-record');
+                            navigateToTab('tab-record');
                         } else if (deleteBtn) {
                             handleDeleteMeasurement(index);
                         }
@@ -5945,9 +5951,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (svCardTargets) {
-            svCardTargets.classList.add('sv-card--clickable'); // 이 줄을 추가하세요
+            svCardTargets.classList.add('sv-card--clickable');
             svCardTargets.addEventListener('click', () => {
-                // ... (기존 코드 생략)
+                try {
+                    import(`./src/ui/modals/change-roadmap-modal.js`).then(module => {
+                        const ChangeRoadmapModal = module.ChangeRoadmapModal || module.default;
+                        const userSettings = {
+                            mode: currentMode || 'mtf',
+                            biologicalSex: biologicalSex || 'male',
+                            language: currentLanguage || 'ko',
+                            targets: targets || {}
+                        };
+                        const modal = new ChangeRoadmapModal(measurements || [], userSettings);
+                        modal.open();
+                    }).catch(error => {
+                        console.error('Failed to load Change Roadmap modal:', error);
+                    });
+                } catch (error) {
+                    console.error('Error opening Change Roadmap modal:', error);
+                }
             });
         }
 
@@ -6003,28 +6025,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        // --- Clickable Main Cards Events ---
-        if (svCardTargets) {
-            svCardTargets.addEventListener('click', () => {
-                try {
-                    import(`./src/ui/modals/change-roadmap-modal.js`).then(module => {
-                        const ChangeRoadmapModal = module.ChangeRoadmapModal || module.default;
-                        const userSettings = {
-                            mode: currentMode || 'mtf',
-                            biologicalSex: biologicalSex || 'male',
-                            language: currentLanguage || 'ko',
-                            targets: targets || {}
-                        };
-                        const modal = new ChangeRoadmapModal(measurements || [], userSettings);
-                        modal.open();
-                    }).catch(error => {
-                        console.error('Failed to load Change Roadmap modal:', error);
-                    });
-                } catch (error) {
-                    console.error('Error opening Change Roadmap modal:', error);
-                }
-            });
-        }
+        // --- Clickable Main Cards Events (duplicates removed — see first block) ---
 
 
         if (myHistoryViewContainer) {
@@ -6036,7 +6037,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (editBtn) {
                     handleEditClick(index);
-                    activateTab('tab-record');
+                    navigateToTab('tab-record');
                 } else if (deleteBtn) {
                     handleDeleteMeasurement(index);
                 }
@@ -6064,11 +6065,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        if (svCardShortcut) {
-            svCardShortcut.addEventListener('click', () => {
-                activateTab('tab-record');
-            });
-        }
+        // (svCardShortcut duplicate removed — see first block)
 
         // Forms
         if (form) form.addEventListener('submit', handleFormSubmit);
@@ -6169,7 +6166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const fabAddQuest = document.getElementById('fab-add-quest');
         if (fabAddDiary) {
             fabAddDiary.addEventListener('click', () => {
-                activateTab('tab-diary');
+                navigateToTab('tab-diary');
                 // TODO: Open diary entry bottom sheet
                 console.log('[Diary] FAB: Add diary entry');
             });
@@ -6411,8 +6408,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const now = new Date();
                     const generator = new PDFReportGenerator({
                         measurements,
-                        diary: JSON.parse(localStorage.getItem('shiftv_diary') || '{}'),
-                        quests: JSON.parse(localStorage.getItem('shiftv_quests') || '[]'),
+                        diary: (() => { try { return JSON.parse(localStorage.getItem('shiftv_diary') || '{}'); } catch (e) { console.warn('[PDF] Corrupt diary data:', e); return {}; } })(),
+                        quests: (() => { try { return JSON.parse(localStorage.getItem('shiftv_quests') || '[]'); } catch (e) { console.warn('[PDF] Corrupt quests data:', e); return []; } })(),
                         targets,
                         translate,
                         language: currentLanguage,
@@ -6548,7 +6545,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const now = Date.now();
                 if (lastKey && (now - parseInt(lastKey)) < checkMs) return false;
                 // Check last record date
-                const data = JSON.parse(localStorage.getItem('shiftV_Data_v1_1') || '[]');
+                let data = [];
+                try { data = JSON.parse(localStorage.getItem('shiftV_Data_v1_1') || '[]'); } catch (e) { console.warn('[Reminder] Corrupt measurement data:', e); return true; }
                 if (!data.length) return true;
                 const lastDate = new Date(data[data.length - 1].date || data[data.length - 1].recordDate);
                 const daysSince = (now - lastDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -6684,7 +6682,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (aiCustomModel) aiCustomModel.value = localStorage.getItem('shiftV_aiCustomModel') || '';
             // Restore saved API key
             const savedKey = localStorage.getItem('shiftV_aiApiKey');
-            if (savedKey && aiKeyInput) { try { aiKeyInput.value = atob(savedKey); } catch { } }
+            if (savedKey && aiKeyInput) { try { aiKeyInput.value = atob(savedKey); } catch (e) { console.warn('[AI] Failed to decode saved API key:', e); } }
 
             aiProviderSelect.addEventListener('change', () => {
                 updateAiProviderUI(aiProviderSelect.value);

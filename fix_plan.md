@@ -1,147 +1,238 @@
-# ShiftV 개선 및 최적화 보고서 (Fix Plan)
+# ShiftV 종합 개발 로드맵 — 현황 분석 & 마스터 플랜
 
-본 보고서는 기능과 UI의 파손 없이 안전하게 코드를 최적화하고 라우팅을 붙이는 구체적인 단계와 기술적 가이드라인을 제공합니다.
-
----
-
-## 1. 아키텍처 리팩토링 - 점진적 모듈 분리 전략 (UI 파손 방지)
-
-`script.js`(약 7천 줄)을 한 번에 분리하면 UI 연결이 깨질 위험이 매우 큽니다. 따라서 **기능별로 하나씩 ES Module로 옮기되, 기존 `script.js`에서는 해당 모듈을 `import`해서 연결만 해두는 방식**으로 진행해야 합니다.
-
-### 점진적 분리 로드맵
-
-1. **상수 및 유틸리티 분리 (가장 안전함)**
-   - `constants.js` 생성: `PRIMARY_DATA_KEY`, `SETTINGS_KEY`, `bodySizeKeys` 등 이동.
-   - `utils.js` 생성: `isIOS()`, `normalizeSymptomsArray()`, `getCssVar()` 등 독립적인 함수 이동.
-2. **파이어베이스 & 인증 분리 (`auth.js`)**
-   - 구글 로그인, 이메일 로그인, `onAuthStateChanged` 관련 로직을 `src/firebase/auth.js`로 추출.
-   - 글로벌 객체 대신 초기화 함수 `initAuth()`를 만들어 `script.js`의 맨 위에서 실행.
-3. **UI 매니저 분리 (`ui-manager.js`)**
-   - 모달 열기/닫기(`openModal`, `closeModal` 등)와 알림 패널 관련 함수 이동.
-4. **차트 및 데이터 시각화 분리 (`chart-manager.js`)**
-   - `Chart.js`를 다루는 `renderMainChart`, `updateChart` 변수/함수 이동.
-5. **각 탭별 로직 분리 (`tabs/`)**
-   - `tab-sv.js`, `tab-record.js`, `tab-settings.js`, `tab-my.js` 등으로 분리하여 각 탭 요소의 이벤트 리스너 이동.
+**작성일:** 2026-03-06  
+**버전:** 2.0.0a  
+**라이선스:** MIT  
 
 ---
 
-## 2. 구글 로그인 "리다이렉트 무반응" 완벽 해결
+## 📊 현재 코드베이스 현황 분석
 
-초기화면으로 돌아오는 이유는 앱 진입 시 `getRedirectResult`를 처리하지 않기 때문입니다.
-`import { getRedirectResult, getAuth } from "firebase/auth";` 를 최상단에 추가하고 앱 초기화 로직에 바로 끼워넣어야 합니다.
+### 아키텍처 스코어카드
 
-### 수정할 코드 (script.js 최상단 DOMContentLoaded 직후)
+| 영역 | 현재 상태 | 등급 |
+|------|----------|:----:|
+| 모듈 분리 | 50개 모듈, 28K줄 추출 완료 | **B** |
+| script.js 모놀리스 | 7,263줄, 155개 함수 — 여전히 핵심 | **D** |
+| 라우터 | 구현 완료, 14개 중 10개가 우회 | **C-** |
+| Firebase/Auth | 깔끔, 환경변수 기반, 오프라인 대응 | **A** |
+| 의사 모듈 | 완성, 잘 분리됨 (10,847줄, 11개 파일) | **A** |
+| UI 모달 | 8개 모달 추출, base-modal 상속 | **A-** |
+| 탭 분리 | 5개 중 2개만 분리 (diary, record 일부) | **D+** |
+| 번역 | 3개 언어(ko/en/ja), 좋은 툴체인 | **B+** |
+| i18n 완성도 | HTML 343줄+, script.js 428줄 한국어 하드코딩 잔존 | **C** |
+| 빌드 시스템 | Vite 5 + PWA, 청킹, CDN | **A** |
+| 네이티브 앱 | 아이콘만 존재, 래퍼 없음 | **F** |
+| 보안 | 시크릿 누출 없음, 적절한 env 관리 | **A** |
+| 코드 중복 | data-manager 2개, image-compress 2개 | **C** |
+| 프리미엄/결제 | 미구현 | **F** |
 
-```javascript
-import { getAuth, getRedirectResult } from "firebase/auth";
+### 파일 규모 현황
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const auth = getAuth();
-    
-    // 1. 리다이렉트 로그인 결과 낚아채기
-    try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-            console.log("리다이렉트 로그인 성공:", result.user);
-            // 로그인 모달 숨기기 & 메인 탭(SV)으로 강제 라우팅
-            document.getElementById('auth-modal').style.display = 'none';
-            document.querySelector('.app-wrapper').style.display = 'block';
-            window.location.hash = '#sv'; 
-            return; // 로그인 처리가 끝났으므로 아래 로직 생략
-        }
-    } catch (error) {
-        console.error("리다이렉트 로그인 실패:", error);
-    }
-    
-    // ... 기존 초기화 로직 (initializeApp 등) ...
-});
+| 파일 | 줄 수 | 역할 |
+|------|------:|------|
+| script.js | 7,263 | 앱 오케스트레이터 (모놀리스) |
+| style.css | 9,383 | 단일 CSS |
+| index.html | 1,406 | SPA 셸 |
+| src/ 모듈 (50개 JS, 4개 CSS) | ~28,000 | 추출된 모듈들 |
+| **총계** | **~46,000** | |
+
+### 디렉토리별 모듈 현황
+
+| 디렉토리 | 파일 수 | 총 줄 수 | 목적 |
+|-----------|-------:|--------:|------|
+| src/doctor-module/ | 11 | 10,847 | 의료 분석 엔진 |
+| src/ui/ | 18 | ~7,500 | 모달, 컴포넌트, 탭, 유틸 |
+| src/firebase/ | 5 | 936 | Auth, Firestore, Storage, Sync |
+| src/data/ | 3 | 1,020 | 스키마, 이미지압축, PDF |
+| src/core/ | 2 | 317 | 라우터, 데이터매니저 |
+| src/ (루트) | 5 | ~4,000 | 번역, 상수, 유틸, 브릿지 |
+| src/styles/ | 4 CSS | — | MD3 토큰, 변수, 베이스, 애니메이션 |
+
+---
+
+## 🐛 발견된 버그 및 취약점 목록
+
+### 🔴 Critical (즉시 수정 필요)
+
+| # | 이슈 | 위치 |
+|---|------|------|
+| C1 | **중복 이벤트 리스너** — `svCardTargets`(L5949+L6008)와 `svCardShortcut`(L6000+L6068)에 클릭 핸들러 2개씩 중복 등록됨. 클릭 시 2번 실행 | script.js |
+| C2 | **19개 빈 catch 블록** — 렌더 함수(L4089/4090/4117/4118)와 호르몬 리포트(L2494) 등에서 에러 무시 → UI 깨져도 원인 추적 불가 | script.js |
+| C3 | **5개 무방어 JSON.parse(localStorage)** — 손상 데이터로 앱 크래시 (L1737, L1744, L6414, L6415, L6551) | script.js |
+
+### 🟡 High (조속한 수정 권장)
+
+| # | 이슈 | 위치 |
+|---|------|------|
+| H1 | **라우터 70% 우회** — 14개 탭 네비게이션 중 10개가 `activateTab()` 직접 호출 → URL 미동기화, 뒤로가기 불가 | script.js |
+| H2 | **z-index 체계 파괴** — `z-index: 9999`×2개, `calc(fixed+50)` = 1080이 tooltip(1070) 초과 | style.css |
+| H3 | **DEBUG 콘솔로그 48개** — 프로덕션에서 내부 상태 노출 | script.js |
+| H4 | **데드코드 529줄** — `src/data-manager.js`(루트) 아무데서도 import 되지 않음 | src/data-manager.js |
+| H5 | **이벤트 리스너 미정리** — 93개 중 89개 cleanup 없음. 모달 콘텐츠 리스너 누수 위험 | script.js |
+
+### 🟠 Medium
+
+| # | 이슈 | 위치 |
+|---|------|------|
+| M1 | `--z-index-modal-backdrop` 토큰 정의했으나 미사용 | variables.css |
+| M2 | PWA manifest에 `screenshots` 누락 → Chrome 리치 설치 UI 미지원 | manifest.json |
+| M3 | maskable 아이콘에 일반 아이콘 동일 사용 (safe-zone 미적용) | manifest.json |
+| M4 | HTML 343줄+ 한국어 하드코딩 잔존 | index.html |
+| M5 | AI API 키 `btoa()` 약한 난독화 (클라이언트 키이므로 수용 가능) | script.js |
+
+---
+
+## 🔧 기술 부채 목록
+
+| 항목 | 상세 |
+|------|------|
+| **script.js 모놀리스** | 7,263줄, 155개 함수 — SV탭/My탭/Settings탭 렌더링 로직 미분리 |
+| **이미지 압축 중복** | script.js(L27-63) + src/data/image-compress.js(96줄) |
+| **data-manager 중복** | src/data-manager.js(529줄, 미사용) + src/core/data-manager.js(121줄, 사용중) |
+| **CSS 단일 파일** | style.css 9,383줄 — 컴포넌트별 분리 미실시 |
+| **Chart.js CDN 로딩** | `<script>` 태그로 전역 로드 — Lazy loading 미적용 |
+| **ServiceWorker 이중화** | VitePWA 자동 생성 SW + 커스텀 service-worker.js(227줄) 공존 |
+| **타입 안전성 없음** | TypeScript 미사용, JSDoc 부분 적용 |
+
+---
+
+## ✅ 현재까지 완료된 주요 작업
+
+### 아키텍처
+- [x] 상수 및 유틸리티 분리 (`src/constants.js`, `src/utils.js`)
+- [x] Firebase 인증/저장소/동기화 모듈화 (`src/firebase/` 5개 파일)
+- [x] 해시 기반 라우터 구현 (`src/core/router.js`) — 탭바 클릭은 라우터 경유
+- [x] 데이터 매니저 분리 (`src/core/data-manager.js`)
+- [x] 의사 모듈 전체 구현 (8개 엔진 + 3개 데이터, 10,847줄)
+- [x] 모달 시스템 구축 (`base-modal.js` + 8개 전용 모달)
+- [x] 다이어리 탭 분리 (`diary-tab.js`)
+- [x] 기록 탭 헬퍼 분리 (`record-tab-helpers.js`)
+- [x] SVG 아이콘 시스템 (`icon-paths.js`)
+- [x] MD3 머티리얼 디자인 토큰 시스템
+- [x] 3개 언어 번역 + i18n 자동화 스크립트 8개
+- [x] PWA 서비스워커 + Workbox 캐싱
+- [x] Vite 번들링 + 매뉴얼 청킹 + 소스맵
+
+### 기능
+- [x] MTF/FTM/NB 모드별 분석
+- [x] 호르몬/신체 측정 기록 & 추적
+- [x] 건강 분석 & 증상 원인분석
+- [x] 바디 브리핑 (목표 달성률, 비율 분석, 예측)
+- [x] 액션 가이드 & 추천
+- [x] 약물 안전 평가
+- [x] AI 어드바이저 (외부 API 연동)
+- [x] 퀘스트 시스템
+- [x] 다이어리 (일기)
+- [x] 변화 로드맵 모달
+- [x] 비교 분석 모달 (차트)
+- [x] 호르몬 상세 모달
+- [x] PDF 보고서 생성
+- [x] 구글 로그인 + 클라우드 동기화
+- [x] 온보딩 플로우 (6단계 위저드)
+- [x] 알림 시스템
+- [x] 연속 기록 스트립 (streak)
+- [x] 테마/악센트 컬러 커스터마이징
+- [x] 데이터 가져오기/내보내기
+
+---
+
+## 💰 프리미엄 모델 설계
+
+### 수익화 전략 — Freemium 모델
+
+| 기능 | Free | Plus | AI Plus |
+|------|:----:|:-------:|
+| 기본 기록 & 추적 | ✅ 무제한 |  ✅ 무제한 | ✅ 무제한 |
+| 사진 기록 & 추적 | ❌ 로컬 저장만 가능 |  ✅ 무제한 | ✅ 무제한 |
+| 기본 차트 (체중, 호르몬) | ✅ | ✅ | ✅ |
+| 3개 언어 지원 | ✅ | ✅ | ✅ |
+| 테마 커스터마이징 | ✅ 기본 테마 | (Plus, AI Plus 는 계정 오른쪽에 뱃지 추가)
+| 클라우드 동기화 | ✅ 1기기(사진 데이터 동기화X) | ✅ 3기기 | ✅ 멀티기기 실시간 |
+| AI 분석 | ❌(개인 api사용) | ❌(개인 api사용) | ✅ 하루 20회 분 토큰 제공 (Deepseek-reasoner: sk-702d6d8af82f466182e3c0709f48b058(코드 노출등 보안중시)) |
+| PDF 보고서 | 하루 1회 | ✅ 무제한 | ✅ 무제한 |
+| 고급 건강 분석 | ✅ 약물안전, 트렌드예측 |
+| 목표 설정 | ✅ 무제한 |
+| 데이터 내보내기 (CSV/JSON) | ✅ |
+| 광고 | 배너 (비침입) | 광고 없음 | 광고 없음 |
+| 커뮤니티 뱃지/프로필 | ✅ | (Plus, AI Plus 는 계정 오른쪽에 뱃지 추가) |
+| 우선 고객지원 | ✅ |
+
+### 가격 제안
+
+
+| 구간 | 월간 | 연간 (20% 할인) |
+|------|:----:|:--------------:|
+| 무료 | 무료 | 무료 |
+| Plus | ₩4,900(구독제X, 구매시 적용) |
+| AI Plus | ₩4,900 | ₩46,800 (₩3,900/월) |
++ 안드로이드, IOS에서는 스토어 수수료에 따라 추가요금 추가(예: 수수료가 800원정도라면 1000원 올려 5,900원에 등록)
+
+
+* 설정에 프로모트 코드 (코드 노출등 보안중시)
+ - Plus 모델로 변경(개발용): promo0306DIPDOGplusC0DE2O26
+ - AI Plus 모델로 변경(개발용): promo0306DIPDOGaiplusC0DE2O26
+ - AI Plus 모델 체험판(1개월): thankshiftv2026
+ + 추가로 나중에 추가 가능한 구조로 만듦
+
+
+### 결제 시스템 구현
+
+| 플랫폼 | 결제 수단 | 구현 방식 |
+|--------|----------|----------|
+| **웹 PWA** | Stripe / Paddle | JS SDK, Firebase Functions webhook |
+| **Android** | Google Play Billing | Capacitor IAP 플러그인 |
+| **iOS** | Apple IAP | Capacitor IAP 플러그인 |
+
+### 필요 백엔드
+- Firebase Functions: 구독 상태 관리, webhook 처리
+- Firestore: `users/{uid}/subscription` 문서 (플랜, 만료일, 영수증)
+- 클라이언트: `PremiumManager` 모듈 (구독 확인, 기능 게이팅)
+
+---
+
+## 📱 네이티브 앱 전환 계획
+
+### 현재 상태
+| 플랫폼 | 폴더 내용 | 네이티브 래퍼 |
+|--------|----------|-------------|
+| Android | PNG 아이콘 6개만 | ❌ 없음 |
+| iOS | PNG 아이콘 26개만 | ❌ 없음 |
+| Windows 11 | PNG 타일 ~80개만 | ❌ 없음 |
+
+### Capacitor 도입 계획
+
+```
+PWA (현재) → Capacitor 래핑 → 네이티브 기능 추가 → 스토어 배포
 ```
 
----
+### 스토어 등록 요구사항
 
-## 3. PWA 및 모바일 대응을 위한 해시 기반 라우팅 (Hash Routing)
-
-History API보다 **Hash(`#`) 라우팅을 추천**합니다. Vanilla JS와 Github Pages/Vercel 등 정적 호스팅 환경에서 서버 설정 없이 가장 안정적으로 모바일 "뒤로 가기" 버튼을 지원할 수 있습니다.
-
-### 핵심 동작 원리
-모달을 열거나 탭을 바꿀 때, 직접 `display: none`을 하는 대신 **URL의 Hash를 바꿉니다 (`window.location.hash = '#record'`)**. 그리고 Hash가 바뀔 때 이벤트를 수신해서 화면을 그립니다.
-
-### 라우팅 구현 코드 (router.js 생성 추천)
-
-```javascript
-// src/core/router.js
-export function initRouter() {
-    // 1. URL 해시 변경 감지
-    window.addEventListener('hashchange', handleRoute);
-    
-    // 2. 초기 로드 시 현재 해시에 맞는 화면 표시
-    if (!window.location.hash) {
-        window.location.hash = '#sv'; // 기본 탭
-    } else {
-        handleRoute();
-    }
-}
-
-function handleRoute() {
-    const hash = window.location.hash.replace('#', '');
-    const [path, param] = hash.split('/'); 
-    
-    // 예: #record, #my, #diary, #settings
-    switch (path) {
-        case 'sv':
-            switchTab('tab-sv');
-            closeAllModals();
-            break;
-        case 'record':
-            switchTab('tab-record');
-            closeAllModals();
-            break;
-        case 'settings':
-            switchTab('tab-settings');
-            closeAllModals();
-            break;
-        // 특정 기능 모달 예시 (#import-data)
-        case 'import-data':
-            openModal('import-modal-id');
-            break;
-        default:
-            switchTab('tab-sv');
-    }
-}
-
-// 기존 탭 전환 함수 연동
-function switchTab(tabId) {
-    // 기존의 탭 버튼 active 클래스 토글 로직을 여기에 넣습니다.
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    
-    document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
-    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-}
-
-// 기존 앱 코드에서 탭을 클릭할 때
-document.querySelectorAll('.tab-button').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        // 직접 클래스를 바꾸지 않고 URL만 바꿈 (router가 처리하게 함)
-        const target = btn.getAttribute('data-tab').replace('tab-', '');
-        window.location.hash = `#${target}`;
-    });
-});
-```
+| 항목 | Google Play | App Store |
+|------|-------------|-----------|
+| 개발자 계정 | $25 (일회성) | $99/년 |
+| 앱 서명 | Keystore | Provisioning Profile |
+| 스크린샷 | 최소 2장(폰) + 태블릿 | 6.7", 6.5", 5.5" 각 추가 |
+| 개인정보정책 | URL 필수 | URL 필수 + 앱 내 |
+| 건강 앱 규제 | 의료기기 면책조항 | Health 카테고리 엄격 심사 |
+| 심사 기간 | 1~7일 | 1~14일 |
 
 ---
 
-## 4. UI 렌더링 최적화 (성능 개선)
+## 🔐 보안 & 규정 준수
 
-현재 `script.js`에는 매우 긴 HTML 문자열을 `innerHTML`로 넣는 카드를 렌더링하는 함수들이 있습니다. (`renderPersonaCard` 등).
+### 현재 보안 상태
+- ✅ Firebase API 키: 환경변수(`import.meta.env`) 사용
+- ✅ `.env.local`: `.gitignore`에 포함
+- ✅ Firebase offline 그레이스풀 폴백
+- ⚠️ CSP(Content Security Policy) 헤더 미설정
+- ⚠️ AI API 키: `btoa()` 약한 난독화
 
-1. **DocumentFragment 사용**: 여러 요소를 루프로 생성할 때 DOM에 직접 `appendChild` 하지 않고 `DocumentFragment`에 모았다가 한 번에 추가하여 리플로우(Reflow)를 최소화합니다.
-2. **Lazy Loading (지연 로딩)**: `index.html` 하단에 있는 `<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>`를, 사용자가 **차트가 있는 탭(SV 탭)에 접속했을 때만 동적으로 동적으로 로드**하도록 변경합니다. 이러면 초기 앱 실행 속도(PWA)가 50% 이상 빨라집니다.
-3. **이벤트 위임(Event Delegation)**: 탭 안의 수많은 리스트나 버튼에 각각 `addEventListener`를 다는 대신, 부모 컨테이너에 하나만 달아서 `e.target`을 판별하도록 수정합니다. (현재 일부 적용되어 있으나 전체로 확대 권장)
+### 건강 데이터 규정
 
----
-
-## 🚀 실행 즉시 가이드
-1. 가장 먼저 **2번 항목(구글 리다이렉트 로그인 후처리)**을 `script.js` 최상단에 끼워넣어 인증 문제를 최우선으로 막으세요.
-2. 두 번째로 **3번 항목(해시 라우터)** 코드를 도입하여 모든 탭 버튼 클릭 이벤트를 `window.location.hash` 변경으로 치환하세요. 모바일 뒤로가기 문제가 완벽히 고쳐집니다.
-3. 이후 시간 날 때마다 `script.js`의 독립성 높은 함수부터 `src/` 로 분리(`export`/`import`)해 나가시면 기존 UI 파손 없이 앱이 가벼워집니다.
+| 규정 | 적용 대상 | 필요 조치 |
+|------|----------|----------|
+| GDPR (EU) | 유럽 사용자 | 동의 배너, 데이터 삭제, 개인정보정책 |
+| HIPAA (미국) | 의료기기가 아니면 비적용 | "의료 조언 아님" 면책조항 |
+| 개인정보보호법 (한국) | 한국 사용자 | 수집/이용 동의, 처리방침 |
+| App Store 5.1.3 | 건강 앱 | 데이터 정확성, 면책조항, 개인정보 라벨 |

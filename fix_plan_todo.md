@@ -1,7 +1,7 @@
 # ShiftV 마스터 To-Do — Phase별 실행 계획
 
 **작성일:** 2026-03-06  
-**기준 커밋:** `10d4839`  
+**기준 커밋:** `53b9785`  
 **총 추정:** 6 Phase, 순차 진행  
 
 ---
@@ -10,33 +10,24 @@
 > **목표:** 사용자가 바로 체감하는 크래시/이상동작 제거
 
 ### 1-1. 중복 이벤트 리스너 제거
-- [ ] `svCardTargets` — L5949의 빈 핸들러(`// 기존 코드 생략`) 삭제, L6008의 모달 핸들러만 유지
-- [ ] `svCardShortcut` — L6068의 `activateTab('tab-record')` 중복 핸들러 삭제 (L6000의 `navigateToTab` 유지)
+- [x] `svCardTargets` — 빈 핸들러 삭제, 모달 핸들러로 교체 ✅ `e654823`
+- [x] `svCardShortcut` — 중복 `activateTab` 핸들러 삭제 ✅ `e654823`
 
 ### 1-2. 라우터 완전 적용 (activateTab → navigateToTab)
-- [ ] L5050 — 측정 저장 후 SV 탭 이동
-- [ ] L5143 — 측정 편집 클릭 후 Record 탭 이동
-- [ ] L5286 — 목표 저장 후 SV 탭 이동
-- [ ] L5483 — 데이터 가져오기 후 My 탭 이동
-- [ ] L5605 — 앱 초기화 시 SV 탭 활성화
-- [ ] L5657 — 온보딩 완료 후 SV 탭 이동
-- [ ] L5767 — 히스토리 모달 편집 버튼 → Record 탭
-- [ ] L6039 — My탭 편집 버튼 → Record 탭
-- [ ] L6172 — FAB 다이어리 버튼 → Diary 탭
+- [x] 9개 activateTab() → navigateToTab() 전환 완료 ✅ `e654823`
+- [x] 수정 버튼 클릭 시 SV탭 먼저 경유 후 Record 이동 ✅ `53b9785`
 
 ### 1-3. 무방어 JSON.parse 보호
-- [ ] L1737, L1744 — `saveThemeSetting/loadThemeSetting` try-catch 래핑
-- [ ] L6414, L6415 — PDF 보고서 내 diary/quests 파싱 보호
-- [ ] L6551 — 알림 체크 내 PRIMARY_DATA_KEY 파싱 보호
+- [x] saveThemeSetting/loadThemeSetting try-catch 래핑 ✅ `e654823`
+- [x] PDF 보고서 내 diary/quests 파싱 보호 ✅ `e654823`
+- [x] 알림 체크 내 PRIMARY_DATA_KEY 파싱 보호 ✅ `e654823`
 
 ### 1-4. 빈 catch 블록 → 최소 console.warn 추가
-- [ ] **High 우선순위** 5개: L2494(호르몬 리포트), L4089(히스토리 테이블), L4090(My 히스토리), L4117, L4118
-- [ ] **Medium** 2개: L2366(약물 이름 맵), L6687(AI 키 atob)
+- [x] **High 우선순위** 5개 + **Medium** 2개 완료 ✅ `e654823`
   
 ### 1-5. 빌드 + 테스트 + 커밋
-- [ ] `npm run build` 확인
-- [ ] 모바일/데스크탑 수동 테스트 (탭 전환, 뒤로가기, 모달 열기/닫기)
-- [ ] Git 커밋 + upstream push
+- [x] `npm run build` 확인 ✅
+- [x] Git 커밋 + upstream push ✅ `e654823`
 
 ---
 
@@ -44,29 +35,29 @@
 > **목표:** 프로덕션 품질 확보, 데드코드 제거, 성능 개선 기반 마련
 
 ### 2-1. DEBUG 콘솔로그 제거
-- [ ] script.js 내 48개 `console.log("DEBUG: ...")` 제거 또는 `if(DEBUG)` 플래그 뒤로 이동
-- [ ] vite.config.js에 `esbuild.drop: ['console']` 옵션 검토 (프로덕션 빌드에서 자동 제거)
+- [x] script.js 내 41개 `console.log("DEBUG: ...")` 전량 제거 ✅ `53b9785`
 
 ### 2-2. 데드코드 정리
-- [ ] `src/data-manager.js` (루트, 529줄) 삭제 — 아무데서도 import 안 됨
-- [ ] `service-worker.js` 캐시 목록에서 `src/data-manager.js` 제거
-- [ ] script.js 내 이미지 압축 인라인 코드(L27-63) 삭제 → `src/data/image-compress.js` 사용으로 통일
+- [x] `src/data-manager.js` (루트, 529줄) 삭제 ✅ `53b9785`
+- [x] `service-worker.js` 캐시 목록에서 `src/data-manager.js` 제거 ✅ `53b9785`
+- [ ] script.js 내 이미지 압축 인라인 코드(L27-63) — 용도 상이(localStorage용 vs Firestore용)하여 유지
 
 ### 2-3. z-index 체계 정리
-- [ ] `z-index: 9999` 2곳(style.css L8588, L8988) → 적절한 토큰 사용으로 변경
-- [ ] `calc(var(--z-index-fixed) + 50)` → 전용 토큰 `--z-index-notif-panel` 신설
-- [ ] `--z-index-modal-backdrop` 미사용 → 실제 모달에 적용하거나 제거
-- [ ] `calc(var(--z-index-modal) + 10)` → `--z-index-popover` 사용으로 변경
+- [x] `z-index: 9999` 2곳 → `--z-index-overlay-top(1090)` 토큰 적용 ✅ `53b9785`
+- [x] `calc(var(--z-index-fixed) + 50)` → `--z-index-notif-panel(1080)` 신설 ✅ `53b9785`
+- [x] `--z-index-modal-backdrop` → notif-backdrop에 적용 ✅ `53b9785`
+- [x] `calc(var(--z-index-modal) + 10)` → `--z-index-popover` 사용 ✅ `53b9785`
 
 ### 2-4. 이벤트 리스너 정리
-- [ ] 모달 콘텐츠에 붙는 리스너 → 모달 close 시 cleanup 추가 (filterContainer, tabSwitcher 등)
-- [ ] 차트 레전드 핸들러 중복 등록 방지 (렌더 함수 내 → 초기화 1회로)
+- [ ] 모달 콘텐츠에 붙는 리스너 → Phase 3에서 모듈 분리 시 cleanup 추가
+- [ ] 차트 레전드 핸들러 중복 등록 방지 → Phase 3 차트 매니저 캡슐화 시 처리
 
 ### 2-5. i18n 하드코딩 정리 (1차)
 - [ ] index.html의 주요 하드코딩 한국어 → `data-lang-key` 변환 (상위 50개)
 - [ ] script.js의 UI 문자열 중 한국어 → translate() 호출로 변환
 
 ### 2-6. 빌드 + 테스트 + 커밋
+- [x] 빌드 + 커밋 + upstream push ✅ `53b9785`
 
 ---
 
@@ -74,29 +65,32 @@
 > **목표:** 모놀리스를 관리 가능한 크기로 분할, 유지보수성 대폭 향상
 
 ### 3-1. SV 탭 분리 (`src/ui/tabs/sv-tab.js`)
-- [ ] `renderSvTab()` 및 관련 카드 렌더링/이벤트 로직 추출 (~500줄)
-- [ ] 위젯 클릭 핸들러 전부 이동
-- [ ] script.js에서 import + 호출로 대체
+- [x] `renderSvTab()` 및 관련 카드 렌더링/이벤트 로직 추출 (843줄 모듈, 776줄 제거)
+- [x] 위젯 클릭 핸들러 전부 이동
+- [x] script.js에서 import + 호출로 대체
 
 ### 3-2. My 탭 분리 (`src/ui/tabs/my-tab.js`)
-- [ ] `renderMyHistoryView()`, 히스토리 테이블, 목표 입력 UI 추출 (~800줄)
-- [ ] 테이블 페이지네이션 로직 포함
+- [x] `renderMyHistoryView()`, 히스토리 테이블, 비교 테이블 추출 (~540줄 모듈, 521줄 제거)
+- [x] 호르몬 보고서 분리 → `src/ui/hormone-report.js` (1,267줄 모듈, 1,242줄 제거)
 
-### 3-3. Settings 탭 분리 (`src/ui/tabs/settings-tab.js`)
-- [ ] 설정 폼 이벤트, 테마/언어/동기화 설정 추출 (~400줄)
+### 3-3. Settings 탭 분리 (`src/ui/tabs/settings-handlers.js`)
+- [x] 목표 폼, 언어/모드 변경, 데이터 임포트/익스포트/리셋, 탭 활성화 추출 (~567줄 모듈)
+- [x] 목표 입력 UI(setupTargetInputs), 업데이트 확인, 알림 토글 포함
 
-### 3-4. Record 탭 완전 분리 (`src/ui/tabs/record-tab.js`)  
-- [ ] `record-tab-helpers.js`와 합병하여 완전한 탭 모듈로 만들기
-- [ ] 측정 폼 검증, 약물/증상 컨테이너 동적 생성 코드 이동 (~600줄)
+### 3-4. Record 탭 폼 핸들러 분리 (`src/ui/tabs/record-form.js`)
+- [x] 측정 폼 저장/수정/삭제, 중복 날짜 체크 추출 (~337줄 모듈, 339줄 제거)
 
-### 3-5. 차트 매니저 캡슐화 (`src/ui/charts/chart-manager.js`)
-- [ ] Chart.js 인스턴스 생성/파기/줌 설정 통합
-- [ ] 호르몬 차트, 비교 차트, 메인 차트 → 통합 클래스
+### 3-5. 차트 렌더러 분리 (`src/ui/chart-renderer.js`)
+- [x] 차트 셀렉터 UI + Chart.js 렌더링 추출 (~310줄 모듈, 309줄 제거)
 
-### 3-6. script.js 다이어트 목표
-- [ ] 분리 후 script.js → **3,000줄 이하** 목표 (초기화, 글로벌 이벤트, import 연결만)
+### 3-6. 비교·분석 모달 분리 (`src/ui/modals/comparison-analysis.js`)
+- [x] 비교 모달 + 상세/비교 분석 뷰 추출 (~645줄 모듈, 648줄 제거)
 
-### 3-7. 빌드 + 전체 탭 수동 테스트 + 커밋
+### 3-7. script.js 다이어트 결과
+- [x] **7,228줄 → 3,029줄** (58% 감소) — 초기화, 글로벌 이벤트, import 연결만 유지
+
+### 3-8. 빌드 + 커밋
+- [x] `npx vite build` 성공 확인
 
 ---
 

@@ -180,7 +180,7 @@
 
 | 플랫폼 | 결제 수단 | 구현 방식 |
 |--------|----------|----------|
-| **웹 PWA** | Stripe / Paddle | JS SDK, Firebase Functions webhook |
+| **웹 PWA** | Stripe | JS SDK, Firebase Functions webhook |
 | **Android** | Google Play Billing | Capacitor IAP 플러그인 |
 | **iOS** | Apple IAP | Capacitor IAP 플러그인 |
 

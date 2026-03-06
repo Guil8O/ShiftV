@@ -169,6 +169,73 @@ export class OnboardingFlow {
         }, { passive: true });
     }
 
+    /**
+     * Show a confirm dialog with cloud data timestamp before loading.
+     * Returns a promise that resolves to true (OK) or false (Cancel).
+     */
+    _showCloudConfirmDialog(cloudInfo) {
+        return new Promise(resolve => {
+            // Build timestamp string
+            let dateStr = '';
+            if (cloudInfo.lastModified) {
+                const d = new Date(cloudInfo.lastModified);
+                const lang = getCurrentLanguage() || 'ko';
+                const year = d.getFullYear();
+                const month = d.getMonth() + 1;
+                const day = d.getDate();
+                const hour = d.getHours();
+                const min = d.getMinutes();
+
+                if (lang === 'en') {
+                    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    dateStr = `${months[month - 1]} ${day}, ${year} ${hour}:${String(min).padStart(2, '0')}`;
+                } else if (lang === 'ja') {
+                    dateStr = `${year}年${month}月${day}日 ${hour}時${String(min).padStart(2, '0')}分`;
+                } else {
+                    dateStr = `${year}년 ${month}월 ${day}일 ${hour}시 ${String(min).padStart(2, '0')}분`;
+                }
+            }
+
+            const message = (translate('onboardingCloudConfirmMsg') || '{date} 데이터가 있습니다. 불러오겠습니까?')
+                .replace('{date}', dateStr);
+
+            // Create dialog overlay
+            const dialog = document.createElement('div');
+            dialog.className = 'onboarding-cloud-confirm-overlay';
+            dialog.innerHTML = `
+                <div class="onboarding-cloud-confirm-dialog">
+                    <div class="onboarding-cloud-confirm-icon">
+                        ${svgIcon('cloud_download', 'mi-xl')}
+                    </div>
+                    <p class="onboarding-cloud-confirm-msg">${message}</p>
+                    <div class="onboarding-cloud-confirm-actions">
+                        <button class="glass-button" id="cloud-confirm-cancel">${translate('cancel') || '취소'}</button>
+                        <button class="glass-button primary" id="cloud-confirm-ok">${translate('confirm') || '확인'}</button>
+                    </div>
+                </div>
+            `;
+
+            // Style inline (scoped to this dialog)
+            dialog.style.cssText = 'position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);';
+            const inner = dialog.querySelector('.onboarding-cloud-confirm-dialog');
+            inner.style.cssText = 'background:var(--glass-bg,#1e1e2e);border:1px solid var(--glass-border,rgba(255,255,255,0.1));border-radius:16px;padding:24px;max-width:320px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.4);';
+            dialog.querySelector('.onboarding-cloud-confirm-icon').style.cssText = 'margin-bottom:12px;color:var(--primary);';
+            dialog.querySelector('.onboarding-cloud-confirm-msg').style.cssText = 'font-size:15px;line-height:1.5;margin:0 0 20px;color:var(--text-main);';
+            dialog.querySelector('.onboarding-cloud-confirm-actions').style.cssText = 'display:flex;gap:12px;justify-content:center;';
+
+            document.body.appendChild(dialog);
+
+            dialog.querySelector('#cloud-confirm-ok').addEventListener('click', () => {
+                dialog.remove();
+                resolve(true);
+            });
+            dialog.querySelector('#cloud-confirm-cancel').addEventListener('click', () => {
+                dialog.remove();
+                resolve(false);
+            });
+        });
+    }
+
     _nextStep() {
         this._collectStepData();
         if (this.currentStep >= this.totalSteps - 1) {
@@ -304,15 +371,22 @@ export class OnboardingFlow {
                 } catch { /* empty */ }
 
                 if (!localHasData) {
-                    // 로컬이 비어있으면 → 클라우드 데이터 확인 + 자동 pull
+                    // 로컬이 비어있으면 → 클라우드 데이터 확인 + 확인 팝업 후 pull
                     if (statusEl) {
                         statusEl.style.display = 'block';
                         statusEl.textContent = translate('onboardingCloudChecking') || '클라우드 데이터 확인 중...';
                     }
                     try {
                         const syncManager = new SyncManager();
-                        const hasCloud = await syncManager.hasCloudData();
-                        if (hasCloud) {
+                        const cloudInfo = await syncManager.getCloudDataInfo();
+                        if (cloudInfo.exists) {
+                            // 클라우드 데이터 타임스탬프로 확인 메시지 생성
+                            const confirmed = await this._showCloudConfirmDialog(cloudInfo);
+                            if (!confirmed) {
+                                // 사용자가 취소 → 일반 flow
+                                this._nextStep();
+                                return;
+                            }
                             if (statusEl) statusEl.textContent = translate('onboardingCloudLoading') || '클라우드 데이터 불러오는 중...';
                             const merged = await syncManager.pullFromCloud();
                             if (merged) {

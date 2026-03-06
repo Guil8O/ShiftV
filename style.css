@@ -597,6 +597,14 @@
     pointer-events: auto;
 }
 
+/* Hide tab bar when notification panel is open */
+body.notif-panel-open .tab-bar {
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, z-index 0s 0.2s;
+}
+
 /* MD3 Filled Button */
 .btn-filled {
     display: inline-flex;
@@ -8002,12 +8010,14 @@ tbody tr:hover {
 
 /* Cause Analysis Cards */
 .cause-analysis-card {
-    background: var(--state-hover);
-    border-radius: var(--radius-md, 12px);
-    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--md-sys-color-surface-container, var(--glass-bg));
+    border: 1px solid var(--glass-border, rgba(255,255,255,0.08));
+    border-radius: var(--md-sys-shape-corner-large, 16px);
+    padding: var(--spacing-md);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
 }
 .cause-header {
     display: flex;
@@ -8079,12 +8089,15 @@ tbody tr:hover {
 .resolution-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-sm);
 }
 .resolution-category {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xxs);
+    background: rgba(var(--primary-rgb, 147, 143, 255), 0.06);
+    border-radius: var(--radius-md, 12px);
+    padding: var(--spacing-sm);
 }
 .resolution-cat-label {
     display: flex;

@@ -169,12 +169,6 @@ export class BodyBriefingModal {
     
     // 미래 예측
     this.renderPredictions(briefing.predictions);
-    
-    // 건강 경고 알림
-    this.renderAlerts(briefing.alerts);
-
-    // 안전 평가 (SafetyEngine)
-    this.renderSafetyAssessment(briefing.safetyAssessment);
   }
   
   /**

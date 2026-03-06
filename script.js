@@ -346,6 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         notifPanel?.classList.add('open');
         notifBackdrop?.classList.add('visible');
         notifPanel?.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('notif-panel-open');
         // Mark all as read after 1s
         setTimeout(() => {
             _notifications.forEach(n => n.read = true);
@@ -357,6 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
         notifPanel?.classList.remove('open');
         notifBackdrop?.classList.remove('visible');
         notifPanel?.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('notif-panel-open');
     }
 
     btnNotif?.addEventListener('click', () => {
@@ -5938,7 +5940,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (svCardPersona) {
             svCardPersona.classList.add('sv-card--clickable');
             svCardPersona.addEventListener('click', () => {
-                activateTab('tab-my');
+                navigateToTab('tab-my');
             });
         }
 
@@ -5952,7 +5954,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (svCardDiary) {
             svCardDiary.classList.add('sv-card--clickable');
             svCardDiary.addEventListener('click', () => {
-                activateTab('tab-diary');
+                navigateToTab('tab-diary');
             });
         }
 
@@ -5994,9 +5996,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // ... (다른 리스너들) ...
 
         if (svCardShortcut) {
-            svCardShortcut.classList.add('sv-card--clickable'); // 이 줄을 추가하세요
+            svCardShortcut.classList.add('sv-card--clickable');
             svCardShortcut.addEventListener('click', () => {
-                activateTab('tab-record');
+                navigateToTab('tab-record');
             });
         }
 

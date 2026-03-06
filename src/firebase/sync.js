@@ -366,6 +366,30 @@ export class SyncManager {
         const snap = await getDoc(userDocRef);
         return snap.exists() && (snap.data().measurements?.length > 0 || Object.keys(snap.data().settings || {}).length > 0);
     }
+
+    /**
+     * Get cloud data info (timestamp, measurement count) for confirm dialog.
+     * @returns {Promise<{exists: boolean, lastModified: number, measurementCount: number}>}
+     */
+    async getCloudDataInfo() {
+        await authReady;
+        const user = auth.currentUser;
+        if (!user) return { exists: false, lastModified: 0, measurementCount: 0 };
+
+        const userDocRef = doc(db, USERS_COL, user.uid);
+        const snap = await getDoc(userDocRef);
+        if (!snap.exists()) return { exists: false, lastModified: 0, measurementCount: 0 };
+
+        const d = snap.data();
+        const hasData = (d.measurements?.length > 0 || Object.keys(d.settings || {}).length > 0);
+        if (!hasData) return { exists: false, lastModified: 0, measurementCount: 0 };
+
+        return {
+            exists: true,
+            lastModified: d._lastModified?.toMillis?.() || d._lastModified || 0,
+            measurementCount: d.measurements?.length || 0
+        };
+    }
 }
 
 /* Export individual functions for use elsewhere */

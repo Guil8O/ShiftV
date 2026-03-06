@@ -7,7 +7,7 @@
  */
 
 import { DoctorEngine } from '../../doctor-module/core/doctor-engine.js';
-import { translate } from '../../translations.js';
+import { translate, getCurrentLanguage } from '../../translations.js';
 import { svgIcon } from '../icon-paths.js';
 
 export class HealthModal {
@@ -79,6 +79,8 @@ export class HealthModal {
                     ${this._renderHormoneRanges(briefing?.hormoneRanges)}
 
                     ${this._renderHRTInfoSection()}
+
+                    ${this._renderSafetyAssessment(briefing?.safetyAssessment)}
                 </div>
             </div>
         `;
@@ -347,6 +349,137 @@ export class HealthModal {
                     ${translate('hormoneRangeTitle')}
                 </h3>
                 ${items.join('')}
+            </div>
+        `;
+    }
+
+    _renderSafetyAssessment(safetyAssessment) {
+        if (!safetyAssessment) return '';
+
+        const { alerts, domainScores, recommendedTests, educationPoints, disclaimer } = safetyAssessment;
+
+        // Check if there's meaningful data
+        const hasData = (alerts && alerts.length > 0) || Object.values(domainScores || {}).some(s => s > 0);
+        if (!hasData) return '';
+
+        const lang = getCurrentLanguage() || 'ko';
+
+        // Domain score labels
+        const DOMAIN_LABELS = {
+            vte:            { ko: '혈전/색전', en: 'VTE', ja: '血栓' },
+            hyperkalemia:   { ko: '고칼륨혈증', en: 'High K⁺', ja: '高K⁺' },
+            polycythemia:   { ko: '적혈구증가증', en: 'Polycythemia', ja: '赤血球増多' },
+            hepatotoxicity: { ko: '간독성', en: 'Liver', ja: '肝毒性' },
+            metabolic:      { ko: '대사 위험', en: 'Metabolic', ja: '代謝' },
+            psychiatric:    { ko: '정신건강', en: 'Mental', ja: 'メンタル' },
+            meningioma:     { ko: '수막종(CPA)', en: 'Meningioma', ja: '髄膜腫' },
+            sleep_apnea:    { ko: '수면무호흡', en: 'Sleep Apnea', ja: '睡眠無呼吸' },
+        };
+
+        // Domain score bars
+        const scoreBars = Object.entries(domainScores || {})
+            .filter(([, score]) => score > 0)
+            .sort(([, a], [, b]) => b - a)
+            .map(([domain, score]) => {
+                const label = DOMAIN_LABELS[domain]?.[lang] || DOMAIN_LABELS[domain]?.ko || domain;
+                const colorClass = score >= 65 ? 'safety-bar-critical' : score >= 30 ? 'safety-bar-warning' : 'safety-bar-info';
+                return `
+                    <div class="safety-score-row">
+                        <span class="safety-score-label">${label}</span>
+                        <div class="safety-score-track">
+                            <div class="safety-score-fill ${colorClass}" style="width: ${Math.min(score, 100)}%"></div>
+                        </div>
+                        <span class="safety-score-number">${score}</span>
+                    </div>
+                `;
+            }).join('');
+
+        // Alert items
+        const alertItems = (alerts || []).map(alert => {
+            const levelIcon = alert.level === 'critical'
+                ? svgIcon('emergency', 'mi-sm mi-error')
+                : alert.level === 'warning'
+                ? svgIcon('warning', 'mi-sm mi-warning')
+                : svgIcon('info', 'mi-sm mi-on-surface');
+
+            const triggeredMedTags = (alert.triggeredMeds || [])
+                .map(m => `<span class="cause-chip">${m.replace(/_/g, ' ')}</span>`)
+                .join('');
+            const triggeredSymTags = (alert.triggeredSymptoms || [])
+                .map(s => `<span class="cause-chip">${s.replace(/_/g, ' ')}</span>`)
+                .join('');
+
+            return `
+                <div class="alert-item ${alert.level} safety-alert-item">
+                    <div class="alert-icon">${levelIcon}</div>
+                    <div class="alert-content">
+                        <div class="alert-title">${alert.title || ''}</div>
+                        <div class="alert-description">${alert.message || ''}</div>
+                        ${triggeredMedTags || triggeredSymTags ? `
+                            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">
+                                ${triggeredMedTags}${triggeredSymTags}
+                            </div>` : ''}
+                        <div style="margin-top:4px;font-size:11px;opacity:0.7;">
+                            ${translate('safetyNotDiagnosis') || ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Recommended tests
+        const testItems = (recommendedTests || []).map(test => {
+            const priorityIcon = test.priority === 'critical'
+                ? svgIcon('priority_high', 'mi-sm mi-error')
+                : test.priority === 'warning'
+                ? svgIcon('report', 'mi-sm mi-warning')
+                : svgIcon('check_circle', 'mi-sm');
+            return `
+                <div class="safety-test-item safety-test-${test.priority}">
+                    <div class="safety-test-priority">${priorityIcon}</div>
+                    <div class="safety-test-content">
+                        <div class="safety-test-name">${test.name}</div>
+                        <div class="safety-test-reason">${test.reason}</div>
+                        ${test.urgency ? `<div class="safety-test-urgency">🕐 ${test.urgency}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Education points
+        const eduItems = (educationPoints || []).map(pt =>
+            `<div class="safety-edu-item">
+                ${svgIcon(pt.icon || 'info', 'mi-inline mi-sm')}
+                <span class="safety-edu-text">${pt.text}</span>
+            </div>`
+        ).join('');
+
+        return `
+            <div class="health-safety-section">
+                <h3 class="health-section-title">
+                    ${svgIcon('shield', 'mi-inline')}
+                    ${translate('briefingSafetyAssessment') || '약물 안전 평가'}
+                </h3>
+                <p style="font-size:12px;color:var(--text-secondary);margin:-8px 0 12px;">
+                    ${translate('briefingSafetySubtitle') || '약물·증상 기반 위험 도메인 분석 (확정 진단 아님 — 의료진 확인 필수)'}
+                </p>
+                ${scoreBars ? `<div class="safety-scores-grid">${scoreBars}</div>` : ''}
+                ${alertItems ? `<div class="safety-alerts-list">${alertItems}</div>` : ''}
+                ${testItems ? `
+                    <h4 style="margin:12px 0 8px;font-size:14px;font-weight:600;">
+                        ${svgIcon('labs', 'mi-inline mi-sm')}
+                        ${translate('safetyRecommendedTests') || ''}
+                    </h4>
+                    ${testItems}
+                ` : ''}
+                ${eduItems ? `
+                    <h4 style="margin:12px 0 8px;font-size:14px;font-weight:600;">
+                        ${svgIcon('menu_book', 'mi-inline mi-sm')}
+                        ${translate('safetyDrugInfo') || ''}
+                    </h4>
+                    ${eduItems}
+                ` : ''}
+                ${disclaimer ? `<p class="safety-disclaimer">${disclaimer}</p>` : ''}
             </div>
         `;
     }

@@ -1077,41 +1077,7 @@
                     </div>
                 </div>
 
-                <!-- 건강 경고 알림 -->
-                <div class="briefing-section hormone-section">
-                    <div class="hormone-section-header">
-                        <h2 class="hormone-section-title">
-                            <span class="section-number">6</span>
-                            <span data-lang-key="briefingHealthAlerts">건강 경고 알림</span>
-                        </h2>
-                    </div>
-                    <div id="briefing-alerts-container" class="alerts-container">
-                        <!-- JS에서 동적 생성 -->
-                    </div>
-                </div>
-
-                <!-- 안전 평가 (SafetyEngine) -->
-                <div class="briefing-section hormone-section" id="briefing-safety-section">
-                    <div class="hormone-section-header">
-                        <h2 class="hormone-section-title">
-                            <span class="section-number">7</span>
-                            <span data-lang-key="briefingSafetyAssessment">약물 안전 평가</span>
-                        </h2>
-                        <p class="section-subtitle" data-lang-key="briefingSafetySubtitle" style="font-size:12px; color:var(--text-secondary); margin: 2px 0 8px 0;">
-                            약물·증상 기반 위험 도메인 분석 (확정 진단 아님 — 의료진 확인 필수)
-                        </p>
-                    </div>
-                    <!-- 도메인 점수 바 -->
-                    <div id="briefing-safety-scores" class="safety-scores-grid"></div>
-                    <!-- 안전 알림 목록 -->
-                    <div id="briefing-safety-alerts" class="safety-alerts-list"></div>
-                    <!-- 권장 검사 목록 -->
-                    <div id="briefing-safety-tests" class="safety-tests-list"></div>
-                    <!-- 교육 포인트 -->
-                    <div id="briefing-safety-education" class="safety-education-list"></div>
-                    <!-- 면책조항 -->
-                    <p id="briefing-safety-disclaimer" class="safety-disclaimer"></p>
-                </div>
+                <!-- 건강 경고 알림 + 약물 안전 평가는 건강 분석 모달로 이동 -->
                 </div>
             </div>
 
@@ -1331,11 +1297,6 @@
                 <div class="action-guide-section">
                     <div class="action-guide-section-title" data-lang-key="actionGuideRecommendations">추천 액션</div>
                     <div id="action-guide-recommendations" class="action-guide-recommendations"></div>
-                </div>
-
-                <div class="action-guide-section">
-                    <div class="action-guide-section-title" data-lang-key="actionGuidePerformance">최근 성과 피드백</div>
-                    <div id="action-guide-performance" class="action-guide-performance"></div>
                 </div>
 
                 <div class="action-guide-section action-guide-med-ai-card" id="action-guide-medication-ai-section" style="display:none;">

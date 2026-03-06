@@ -53,7 +53,6 @@ export class ActionGuideModal {
     this._setupTabs();
     this.renderHero(guide?.nextMeasurementDate);
     this.renderRecommendations(guide?.recommendations);
-    this.renderPerformance(guide?.performanceFeedback);
     this.renderMedicationAI();
     this._setupAITab();
   }

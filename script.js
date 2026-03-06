@@ -5632,6 +5632,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             const obTheme = localStorage.getItem('shiftV_Theme');
                             const obAccent = localStorage.getItem('shiftV_accentColor');
                             if (obTheme) currentTheme = obTheme;
+
+                            // 클라우드에서 가져온 설정값을 인메모리에 반영
+                            loadSettingsFromStorage();
+                            // 클라우드에서 불러온 경우 + 개별 키 우선
+                            const obLang = localStorage.getItem('shiftV_Language');
+                            const obMode = localStorage.getItem('shiftV_Mode');
+                            const obSex  = localStorage.getItem('shiftV_BiologicalSex');
+                            if (obLang) { currentLanguage = obLang; setCurrentLanguage(obLang); }
+                            if (obMode) currentMode = obMode;
+                            if (obSex)  biologicalSex = obSex;
+                            if (obTheme) currentTheme = obTheme;
+
+                            // 초기 설정 완료 표시 — 새로고침 시 데이터 로드/렌더를 위해 필수
+                            isInitialSetupDone = true;
                             saveSettingsToStorage();
                             applyTheme();
                             loadPrimaryDataFromStorage();
@@ -5639,6 +5653,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             applyLanguageToUI();
                             renderAll();
                             activateTab('tab-sv');
+
+                            // 다이어리 탭이 이미 초기화됐으면 데이터 새로고침
+                            if (window.diaryTab) {
+                                window.diaryTab.diaryData = window.diaryTab._loadFromStorage();
+                                window.diaryTab.render();
+                            }
                             console.log('[OK] Onboarding completed');
                         }
                     });

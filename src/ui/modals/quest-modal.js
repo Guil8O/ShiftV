@@ -139,7 +139,7 @@ export class QuestModal extends BaseModal {
                 const val = parseFloat(latest[q.linkedMeasurementField]);
                 if (!isNaN(val)) {
                     // Backfill initialValue for quests created before the auto-populate fix
-                    if (q.initialValue === 0 && q.currentValue === 0 && val !== 0) {
+                    if (q.initialValue === 0 && val !== 0) {
                         q.initialValue = val;
                         changed = true;
                     }

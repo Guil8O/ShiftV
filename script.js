@@ -647,7 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
         get activeModalTab() { return activeModalTab; },
         set activeModalTab(v) { activeModalTab = v; },
         get modalContent() { return modalContent; },
-        modalSystem,
+        get modalSystem() { return modalSystem; },
         openModal,
         formatValue,
         formatTimestamp,

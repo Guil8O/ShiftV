@@ -112,10 +112,13 @@ window.onerror = function (message, source, lineno, colno, error) {
 // Unhandled Promise Rejection Handler
 window.onunhandledrejection = function (event) {
     const reason = event.reason;
+    // Suppress known Firebase SDK internal assertion after popup close
+    if (reason?.message?.includes('INTERNAL ASSERTION FAILED')) {
+        event.preventDefault();
+        return;
+    }
     const message = reason?.message || String(reason);
     console.error("[Error] Unhandled promise rejection:", reason);
-    // Prevent duplicate alerts — only log, don't show alert for async errors
-    // window.onerror already handles most synchronous errors
 };
 
 function ensureAverageLinePluginRegistered() {
@@ -2412,8 +2415,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     try {
                         await authMod.signInWithGoogle();
                     } catch (err) {
-                        console.error('Login error:', err);
-                        alert(translate('loginError') || '로그인 중 오류가 발생했습니다.');
+                        if (err?.code !== 'auth/popup-closed-by-user' &&
+                            err?.code !== 'auth/cancelled-popup-request') {
+                            console.error('Login error:', err);
+                            alert(translate('loginError') || '로그인 중 오류가 발생했습니다.');
+                        }
                     }
                 });
 

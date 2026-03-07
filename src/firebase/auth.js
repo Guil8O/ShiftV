@@ -36,8 +36,16 @@ export async function handleRedirectResult() {
  */
 export async function signInWithGoogle() {
     if (!auth) throw new Error('Firebase not configured');
-    const result = await signInWithPopup(auth, googleProvider);
-    return result.user;
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        return result.user;
+    } catch (error) {
+        if (error?.code === 'auth/popup-closed-by-user' ||
+            error?.code === 'auth/cancelled-popup-request') {
+            return null; // User cancelled — not an error
+        }
+        throw error;
+    }
 }
 
 export async function signInWithEmail(email, password) {

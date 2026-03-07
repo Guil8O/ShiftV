@@ -425,7 +425,10 @@ export class OnboardingFlow {
                 // 클라우드 데이터 없거나 로컬에 이미 데이터 있는 경우 → 일반 flow
                 this._nextStep();
             } catch (err) {
-                console.error('Google login during onboarding:', err);
+                if (err?.code !== 'auth/popup-closed-by-user' &&
+                    err?.code !== 'auth/cancelled-popup-request') {
+                    console.error('Google login during onboarding:', err);
+                }
             }
         });
     }

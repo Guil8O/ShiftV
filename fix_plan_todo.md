@@ -103,23 +103,25 @@
 - [ ] `users/{uid}/subscription` Firestore 스키마 설계
 
 ### 4-2. PremiumManager 클라이언트 모듈
-- [ ] `src/premium/premium-manager.js` 생성
+- [x] `src/premium/premium-manager.js` 생성
   - 구독 상태 캐싱 (localStorage + Firestore)
   - `isPremium()`, `canUseFeature(featureName)` API
   - 구독 만료/갱신 자동 체크
-- [ ] `src/premium/paywall-modal.js` — 프리미엄 기능 클릭 시 결제 유도 모달
+- [x] `src/premium/paywall-modal.js` — 프리미엄 기능 클릭 시 결제 유도 모달
+- [x] `src/styles/paywall.css` — 페이월 & 구독 UI 스타일
+- [x] 번역 키 추가 (ko, en, ja)
 
 ### 4-3. 기능 게이팅 적용
-- [ ] AI 분석 → 프리미엄 전용
-- [ ] PDF 보고서 → 무료 월1회, 프리미엄 무제한
+- [x] AI 분석 → AI Plus 일일 20회 제한 (free/plus는 개인 API 사용)
+- [x] PDF 보고서 → 무료 일1회, Plus/AI Plus 무제한
 - [ ] 고급 건강 분석 (약물안전, 트렌드예측) → 프리미엄
 - [ ] 데이터 내보내기 → 프리미엄
 - [ ] 프리미엄 테마 컬러팩
 - [ ] 목표 개수 제한 (무료 3개)
 
 ### 4-4. 구독 관리 UI
-- [ ] Settings 탭에 "구독 관리" 섹션 추가
-- [ ] 플랜 비교 화면
+- [x] Settings 탭에 "구독 관리" 섹션 추가 (플랜 배지, 만료일, 프로모 코드)
+- [x] 플랜 비교 화면 (paywall-modal 바텀시트)
 - [ ] 영수증/구독 이력 표시
 - [ ] 구독 취소 플로우
 

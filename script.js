@@ -22,8 +22,10 @@ import { initMyTab, renderMyHistoryView, renderHistoryTable, renderAllComparison
 import { initChartRenderer, renderChartSelector, renderChart, handleChartSelectorClick, handleSelectAllCharts, handleDeselectAllCharts, metricButtonColors } from './src/ui/chart-renderer.js';
 import { initComparisonAnalysis, openComparisonModal, handleComparisonFilterClick, renderComparisonFilters, renderComparisonChart, renderDetailedAnalysisView, renderComparativeAnalysisView, handleModalTabSwitch, handleTargetModalTabSwitch, closeAllModalsVisually } from './src/ui/modals/comparison-analysis.js';
 import { initRecordForm, handleFormSubmit, handleDeleteMeasurement, handleEditClick, cancelEdit, resetFormState } from './src/ui/tabs/record-form.js';
-import { initSettingsHandlers, handleTargetFormSubmit, handleLanguageChange, handleModeChange, handleResetData, exportMeasurementData, exportCSV, importMeasurementData, activateTab, setupTargetInputs, handleCheckForUpdates, handleNotificationToggle } from './src/ui/tabs/settings-handlers.js';
+import { initSettingsHandlers, handleTargetFormSubmit, handleLanguageChange, handleModeChange, handleResetData, exportMeasurementData, exportCSV, importMeasurementData, activateTab, setupTargetInputs, handleCheckForUpdates, handleNotificationToggle, setupSubscriptionHandlers } from './src/ui/tabs/settings-handlers.js';
 import * as dataManager from './src/core/data-manager.js';
+import { initPremium, canUseFeature, recordFeatureUse, getPlan, isPremium } from './src/premium/premium-manager.js';
+import { showPaywall } from './src/premium/paywall-modal.js';
 import { PRIMARY_DATA_KEY, SETTINGS_KEY, BODY_SIZE_KEYS as bodySizeKeys } from './src/constants.js';
 import { isIOS, getCSSVar as getCssVar, normalizeSymptomsArray, symptomsSignature } from './src/utils.js';
 import { svgIcon, replaceMaterialIcons } from './src/ui/icon-paths.js';
@@ -1715,6 +1717,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateAppVersionDisplay();
         loadSettingsFromStorage();
+        initPremium();
         // 첫 실행 포함, 항상 테마 기본값 적용
         if (!localStorage.getItem('shiftV_accentColor')) {
             localStorage.setItem('shiftV_accentColor', 'violet');
@@ -1817,6 +1820,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (notificationToggle) {
             notificationToggle.addEventListener('change', handleNotificationToggle);
         }
+        // --- Subscription management ---
+        setupSubscriptionHandlers();
         // --- Modal Bottom Sheet Events ---
         if (modalCloseBtn) { // <--- 이 부분을 추가하세요
             modalCloseBtn.addEventListener('click', closeModal);
@@ -2472,6 +2477,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const pdfReportBtn = document.getElementById('pdf-report-button');
         if (pdfReportBtn) {
             pdfReportBtn.addEventListener('click', async () => {
+                // ── Feature gating: PDF report ──
+                const pdfCheck = canUseFeature('pdf_report');
+                if (!pdfCheck.allowed) {
+                    showPaywall(pdfCheck.reason, { feature: 'pdf_report', limit: pdfCheck.limit, used: pdfCheck.used });
+                    return;
+                }
                 try {
                     pdfReportBtn.disabled = true;
                     pdfReportBtn.innerHTML = svgIcon('hourglass_top', 'mi-inline mi-sm') + ' ' + (translate('pdfGenerating') || '생성 중...');
@@ -2490,6 +2501,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     const fileName = await generator.generate(now.getFullYear(), now.getMonth());
                     pdfReportBtn.innerHTML = svgIcon('check_circle', 'mi-inline mi-sm mi-success') + ' ' + (translate('pdfSaved') || '저장 완료!');
+                    recordFeatureUse('pdf_report');
                     showPopup((translate('pdfSavedAs') || '저장됨: ') + fileName, 3000);
                     setTimeout(() => {
                         pdfReportBtn.innerHTML = svgIcon('description', 'mi-inline mi-sm') + ' ' + (translate('pdfReport') || '이번 달 리포트 저장');
@@ -2841,6 +2853,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const resultContent = document.getElementById('ai-goal-result-content');
                 if (!resultContainer || !resultContent) return;
 
+                // ── Feature gating: AI analysis ──
+                const aiCheck = canUseFeature('ai_analysis');
+                if (!aiCheck.allowed) {
+                    showPaywall(aiCheck.reason, { feature: 'ai_analysis', limit: aiCheck.limit, used: aiCheck.used });
+                    return;
+                }
+
                 resultContainer.style.display = 'block';
                 resultContent.innerHTML = `<div class="ai-advisor-loading"><div class="ai-advisor-spinner"></div><p>${translate('aiAnalyzing')}</p></div>`;
 
@@ -2868,6 +2887,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         .replace(/\n\n/g, '</p><p>')
                         .replace(/\n/g, '<br>');
                     resultContent.innerHTML = `<p>${html}</p>`;
+                    recordFeatureUse('ai_analysis');
                 } catch (err) {
                     console.error('AI Goal analysis error:', err);
                     resultContent.innerHTML = `<p>${svgIcon('warning', 'mi-inline mi-sm mi-error')} ${translate('aiError')}</p><p class="ai-advisor-error-hint">${err.message}</p>`;

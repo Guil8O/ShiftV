@@ -1,0 +1,345 @@
+/* ─── Paywall Modal Styles ─────────────────────────────────────────── */
+
+.paywall-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-index-modal, 1060);
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.paywall-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.paywall-sheet {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--surface-container, #1c1c1e);
+    border-radius: 28px 28px 0 0;
+    padding: 24px 20px 32px;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.paywall-overlay.visible .paywall-sheet {
+    transform: translateY(0);
+}
+
+.paywall-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: var(--text-dim, #888);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+}
+
+.paywall-close:hover {
+    background: var(--surface-variant, #333);
+}
+
+/* ─── Header ──────────────────────────────────────────────────────── */
+
+.paywall-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.paywall-icon {
+    color: var(--accent, #bb86fc);
+    margin-bottom: 8px;
+}
+
+.paywall-icon .mi-lg {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+}
+
+.paywall-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-high, #fff);
+    margin: 0 0 6px;
+}
+
+.paywall-desc {
+    font-size: 0.875rem;
+    color: var(--text-dim, #aaa);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* ─── Plan Cards ──────────────────────────────────────────────────── */
+
+.paywall-plans {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.paywall-plan {
+    flex: 1;
+    position: relative;
+    background: var(--surface-variant, #2c2c2e);
+    border: 2px solid transparent;
+    border-radius: 16px;
+    padding: 16px 12px;
+    text-align: center;
+    transition: border-color 0.2s;
+}
+
+.paywall-plan.recommended {
+    border-color: var(--accent, #bb86fc);
+}
+
+.paywall-plan.current {
+    opacity: 0.6;
+}
+
+.paywall-plan-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent, #bb86fc);
+    color: #000;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+.paywall-plan-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-high, #fff);
+    margin: 4px 0;
+}
+
+.paywall-plan-price {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--accent, #bb86fc);
+    margin: 4px 0;
+}
+
+.paywall-plan-billing {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-dim, #888);
+    margin-bottom: 8px;
+}
+
+.paywall-plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 12px;
+    text-align: left;
+    font-size: 0.75rem;
+    color: var(--text-medium, #ccc);
+}
+
+.paywall-plan-features li {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 0;
+    line-height: 1.3;
+}
+
+.paywall-plan-features .mi-inline {
+    color: var(--accent, #bb86fc);
+    flex-shrink: 0;
+}
+
+.paywall-plan-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--accent, #bb86fc);
+    color: #000;
+    transition: opacity 0.2s;
+}
+
+.paywall-plan-btn:hover:not(.disabled) {
+    opacity: 0.85;
+}
+
+.paywall-plan-btn.disabled {
+    background: var(--surface-variant, #333);
+    color: var(--text-dim, #888);
+    cursor: default;
+}
+
+/* ─── Promo Code ──────────────────────────────────────────────────── */
+
+.paywall-promo {
+    margin-bottom: 16px;
+}
+
+.paywall-promo summary {
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--text-dim, #888);
+    text-align: center;
+    user-select: none;
+}
+
+.paywall-promo-form {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.paywall-promo-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--outline, #444);
+    border-radius: 8px;
+    background: var(--surface, #1c1c1e);
+    color: var(--text-high, #fff);
+    font-size: 0.85rem;
+}
+
+.paywall-promo-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent, #bb86fc);
+    color: #000;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.paywall-promo-result {
+    font-size: 0.8rem;
+    text-align: center;
+    margin-top: 8px;
+}
+
+.paywall-promo-result.success {
+    color: var(--success, #4caf50);
+}
+
+.paywall-promo-result.error {
+    color: var(--error, #f44336);
+}
+
+/* ─── Later Button ────────────────────────────────────────────────── */
+
+.paywall-later {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: none;
+    color: var(--text-dim, #888);
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: center;
+}
+
+.paywall-later:hover {
+    color: var(--text-medium, #bbb);
+}
+
+/* ─── Premium Badge ───────────────────────────────────────────────── */
+
+.premium-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: linear-gradient(135deg, var(--accent, #bb86fc), #e040fb);
+    color: #000;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+}
+
+.premium-badge.plus {
+    background: linear-gradient(135deg, #ffd54f, #ffab40);
+}
+
+.premium-badge.ai-plus {
+    background: linear-gradient(135deg, #bb86fc, #e040fb);
+}
+
+/* ─── Settings Subscription Section ───────────────────────────────── */
+
+.subscription-status {
+    padding: 12px 0 4px;
+}
+
+.subscription-plan-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.subscription-plan-label {
+    font-size: 0.9rem;
+    color: var(--text-dim, #888);
+}
+
+.subscription-expiry {
+    font-size: 0.8rem;
+    color: var(--text-dim, #888);
+    margin-top: 4px;
+}
+
+.promo-code-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.promo-code-row .glass-input {
+    min-width: 0;
+}
+
+.promo-result {
+    font-size: 0.8rem;
+    margin-top: 6px;
+    padding: 4px 0;
+}
+
+.promo-result.success {
+    color: var(--success, #4caf50);
+}
+
+.promo-result.error {
+    color: var(--error, #ef4444);
+}
+
+.glass-button.accent {
+    background: var(--accent, #b02f5b);
+    color: #fff;
+    border: none;
+}

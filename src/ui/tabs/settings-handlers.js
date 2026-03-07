@@ -10,6 +10,8 @@ import { translate, setCurrentLanguage } from '../../translations.js';
 import { normalizeSymptomsArray, symptomsSignature } from '../../utils.js';
 import { convertFromStandard } from '../../utils/unit-conversion.js';
 import { PRIMARY_DATA_KEY } from '../../constants.js';
+import { getPlan, getExpiry, isPremium, applyPromoCode, onPlanChange } from '../../premium/premium-manager.js';
+import { showPaywall } from '../../premium/paywall-modal.js';
 
 let _d; // dependency container
 
@@ -563,4 +565,79 @@ export function handleNotificationToggle() {
         saveSettingsToStorage();
         showPopup('popupSettingsSaved');
     }
+}
+
+/* ─── Subscription Management ──────────────────────────────────────── */
+
+const PLAN_LABELS = { free: 'Free', plus: 'Plus', ai_plus: 'AI Plus' };
+const PLAN_CLASSES = { free: '', plus: 'plus', ai_plus: 'ai-plus' };
+
+/** Update the subscription UI to reflect current plan */
+export function updateSubscriptionUI() {
+    const badge = document.getElementById('current-plan-badge');
+    const expiryEl = document.getElementById('subscription-expiry');
+    const upgradeBtn = document.getElementById('upgrade-plan-btn');
+    if (!badge) return;
+
+    const plan = getPlan();
+    const expiry = getExpiry();
+
+    badge.textContent = PLAN_LABELS[plan] || 'Free';
+    badge.className = 'premium-badge ' + (PLAN_CLASSES[plan] || '');
+
+    if (expiryEl) {
+        if (expiry && plan !== 'free') {
+            const d = new Date(expiry);
+            expiryEl.textContent = (translate('planExpiry') || '만료일: ') + d.toLocaleDateString();
+            expiryEl.style.display = '';
+        } else if (plan === 'plus') {
+            expiryEl.textContent = translate('planPermanent') || '영구 이용권';
+            expiryEl.style.display = '';
+        } else {
+            expiryEl.style.display = 'none';
+        }
+    }
+
+    if (upgradeBtn) {
+        upgradeBtn.style.display = (plan === 'ai_plus' && !expiry) ? 'none' : '';
+    }
+}
+
+/** Wire up subscription section event listeners */
+export function setupSubscriptionHandlers() {
+    const upgradeBtn = document.getElementById('upgrade-plan-btn');
+    const promoInput = document.getElementById('settings-promo-input');
+    const promoApply = document.getElementById('settings-promo-apply');
+    const promoResult = document.getElementById('settings-promo-result');
+
+    if (upgradeBtn) {
+        upgradeBtn.addEventListener('click', () => showPaywall('upgrade'));
+    }
+
+    if (promoApply && promoInput) {
+        promoApply.addEventListener('click', () => {
+            const code = promoInput.value.trim();
+            if (!code) return;
+            const result = applyPromoCode(code);
+            if (promoResult) {
+                promoResult.style.display = '';
+                if (result.success) {
+                    promoResult.className = 'promo-result success';
+                    promoResult.textContent = translate('promoSuccess') || '프로모 코드가 적용되었습니다!';
+                    promoInput.value = '';
+                    updateSubscriptionUI();
+                } else {
+                    promoResult.className = 'promo-result error';
+                    promoResult.textContent = translate('promoInvalid') || '유효하지 않은 프로모 코드입니다.';
+                }
+                setTimeout(() => { promoResult.style.display = 'none'; }, 3000);
+            }
+        });
+    }
+
+    // Listen for plan changes (from paywall modal promo, etc.)
+    onPlanChange(() => updateSubscriptionUI());
+
+    // Initial render
+    updateSubscriptionUI();
 }
